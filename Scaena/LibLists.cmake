@@ -1,0 +1,12 @@
+# Qt
+FIND_PACKAGE(Qt4 REQUIRED)
+SET(QT_USE_QTOPENGL TRUE)
+INCLUDE(${QT_USE_FILE})
+
+
+# Global
+SET(SCAENA_LIBRARIES
+    ${QT_LIBRARIES}
+    CellarWorkbench
+    PropRoom2D
+    PropRoom3D)

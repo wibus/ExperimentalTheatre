@@ -1,0 +1,13 @@
+#ifndef SCAENA_LIBSCAENA_GLOBAL_H
+#define SCAENA_LIBSCAENA_GLOBAL_H
+
+#include <QtCore/qglobal.h>
+
+#if defined(LIBSCAENA_LIBRARY)
+#  define SCAENA_EXPORT Q_DECL_EXPORT
+#else
+#  define SCAENA_EXPORT Q_DECL_IMPORT
+#endif
+
+
+#endif // SCAENA_LIBSCAENA_GLOBAL_H
