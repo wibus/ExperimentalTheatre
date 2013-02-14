@@ -3,7 +3,7 @@
 
 #include <QtCore/qglobal.h>
 
-#if defined(LIBCELLARWORKBENCH_LIBRARY)
+#if defined(CELLARWORKBENCH_LIBRARY)
 #  define CELLAR_EXPORT Q_DECL_EXPORT
 #else
 #  define CELLAR_EXPORT Q_DECL_IMPORT

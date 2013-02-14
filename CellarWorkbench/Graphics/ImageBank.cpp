@@ -66,7 +66,7 @@ namespace cellar
     bool ImageBank::deleteImage(
             const std::string& imgName)
     {        
-        int nbRemoved = _images.erase(imgName);
+        size_t nbRemoved = _images.erase(imgName);
 
         if(0 < nbRemoved)
         {

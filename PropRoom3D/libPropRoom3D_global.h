@@ -3,7 +3,7 @@
 
 #include <QtCore/qglobal.h>
 
-#if defined(LIBPROPROOM3D_LIBRARY)
+#if defined(PROPROOM3D_LIBRARY)
 #  define PROP3D_EXPORT Q_DECL_EXPORT
 #else
 #  define PROP3D_EXPORT Q_DECL_IMPORT

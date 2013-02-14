@@ -3,7 +3,7 @@
 
 #include <QtCore/qglobal.h>
 
-#if defined(LIBSCAENA_LIBRARY)
+#if defined(SCAENA_LIBRARY)
 #  define SCAENA_EXPORT Q_DECL_EXPORT
 #else
 #  define SCAENA_EXPORT Q_DECL_IMPORT

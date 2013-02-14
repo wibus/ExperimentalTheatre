@@ -249,7 +249,7 @@ namespace prop2
 
         glBindTexture(GL_TEXTURE_2D, GlToolkit::genTextureId(
             getImageBank().getImage(polygon->costume()->textureName())));
-        glDrawArrays(GL_TRIANGLE_FAN, 0, polygon->relVertices().size());
+        glDrawArrays(GL_TRIANGLE_FAN, 0, (int)polygon->relVertices().size());
 
         _polygonVao.unbind();
         _polygonShader.popProgram();
@@ -329,7 +329,7 @@ namespace prop2
         _textHudShader.setVec2f("Anchor", anchorPos);
         _textHudShader.setVec4f("ColorFilter", text->color());
 
-        glDrawArrays(GL_QUADS, 0, positions.size());
+        glDrawArrays(GL_QUADS, 0, (int)positions.size());
 
         _imageHudVao.unbind();
         _imageHudShader.popProgram();
@@ -447,22 +447,18 @@ namespace prop2
 
         GlVbo2Df positionBuff;
         positionBuff.attribLocation = _circleShader.getAttributeLocation("position");
-        std::vector<Vec2r> positions = {
-            Vec2r(-1.0f, -1.0f),
-            Vec2r( 1.0f, -1.0f),
-            Vec2r( 1.0f,  1.0f),
-            Vec2r(-1.0f,  1.0f)};
-        positionBuff.dataArray = positions;
+		positionBuff.dataArray.push_back(Vec2r(-1.0f, -1.0f));
+        positionBuff.dataArray.push_back(Vec2r( 1.0f, -1.0f));
+        positionBuff.dataArray.push_back(Vec2r( 1.0f,  1.0f));
+		positionBuff.dataArray.push_back(Vec2r(-1.0f,  1.0f));
         _circleVao.createBuffer("position", positionBuff);
 
         GlVbo2Df texCoordBuff;
         texCoordBuff.attribLocation = _circleShader.getAttributeLocation("texCoord");
-        std::vector<Vec2r> texCoords = {
-            Vec2r(-0.5f, -0.5f),
-            Vec2r( 0.5f, -0.5f),
-            Vec2r( 0.5f,  0.5f),
-            Vec2r(-0.5f,  0.5f)};
-        texCoordBuff.dataArray = texCoords;
+        texCoordBuff.dataArray.push_back(Vec2r(-0.5f, -0.5f));
+        texCoordBuff.dataArray.push_back(Vec2r( 0.5f, -0.5f));
+        texCoordBuff.dataArray.push_back(Vec2r( 0.5f,  0.5f));
+        texCoordBuff.dataArray.push_back(Vec2r(-0.5f,  0.5f));
         _circleVao.createBuffer("texCoord", texCoordBuff);
     }
 
@@ -596,8 +592,8 @@ namespace prop2
             else
             {
                 for(int i=0; i<96; i++)
-                        _charsWidth[i] = 0.05;
-                _charsHeight = 0.1;
+                        _charsWidth[i] = 0.05f;
+                _charsHeight = 0.1f;
 
                 getLog().postMessage(new
                     Message('W', false, fileFullName + ".flw : Absent", "Text"));

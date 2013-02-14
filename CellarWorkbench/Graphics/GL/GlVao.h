@@ -19,8 +19,8 @@ namespace cellar
         GlVbo();
 
         typedef ELEM_T  ElementType;
-        const int    NB_COMPONENTS  = NB_COMP;
-        const GLenum COMPONENT_TYPE = COMP_T;
+        static const int    NB_COMPONENTS  = NB_COMP;
+        static const GLenum COMPONENT_TYPE = COMP_T;
 
         GLenum target;
         GLenum usage;
@@ -88,7 +88,7 @@ namespace cellar
 
     inline int GlVao::nbBuffers() const
     {
-        return _bufferIds.size();
+        return static_cast<int>(_bufferIds.size());
     }
 
     template <typename ELEM_T, int NB_COMP, GLenum COMP_T>

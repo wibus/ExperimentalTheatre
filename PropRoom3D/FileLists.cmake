@@ -18,11 +18,15 @@ SET(PROP3_SRC_FILES
 
 SET(PROP2_CONFIG_FILES
     ${PROP3_SRC_DIR}/CMakeLists.txt
-    ${PROP3_SRC_DIR}/FileLists.txt
-    ${PROP3_SRC_DIR}/LibLists.txt)
+    ${PROP3_SRC_DIR}/FileLists.cmake
+    ${PROP3_SRC_DIR}/LibLists.cmake)
 
 SET(PROP3_INCLUDE_DIR
     ${PROP3_SRC_DIR})
 SET(PROP3_INCLUDE_DIR
     ${PROP3_INCLUDE_DIR}
     PARENT_SCOPE)
+
+
+## Source groups ##
+SOURCE_GROUP("Config" FILES PROP3_CONFIG_FILES)

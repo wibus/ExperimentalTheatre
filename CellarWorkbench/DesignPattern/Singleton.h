@@ -63,7 +63,7 @@ namespace cellar
 
     template < typename T >
     Singleton<T>& Singleton<T>::operator=(const Singleton&)
-        {}
+        {return *this;}
 }
 
 #endif // CELLARWORKBENCH_SINGLETON_H_

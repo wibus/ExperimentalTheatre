@@ -69,7 +69,7 @@ class PolygonCostume;
 
     inline int Polygon::nbVertices() const
     {
-        return _relVertices.size();
+        return static_cast<int>(_relVertices.size());
     }
 
     inline const std::vector<Vec2r>& Polygon::relVertices() const

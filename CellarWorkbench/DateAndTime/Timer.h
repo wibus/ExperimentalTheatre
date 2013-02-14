@@ -28,7 +28,8 @@ namespace cellar
     inline Timer::Timer() :
         _counter(clock()),
         _isCounterActive(false)
-        {}
+    {
+    }
 
     inline void Timer::start()
     {

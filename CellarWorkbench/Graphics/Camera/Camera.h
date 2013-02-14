@@ -8,7 +8,7 @@
 
 namespace cellar
 {
-    class CameraMsg;
+    struct CameraMsg;
 
     class CELLAR_EXPORT Camera : public SpecificSubject<CameraMsg>
     {

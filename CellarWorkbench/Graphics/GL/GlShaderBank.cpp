@@ -94,7 +94,7 @@ namespace cellar
             const std::string& shaderName,
             GLenum)
     {
-        int nbRemoved = _shaders.erase(shaderName);
+		size_t nbRemoved = _shaders.erase(shaderName);
 
         if(nbRemoved)
         {

@@ -153,7 +153,7 @@ namespace prop2
     {
         _mass = _density * _area;
 
-        real meanR;
+        real meanR = real(0);
         for(int i=0; i<nbVertices(); ++i) meanR += _relVertices[i].length();
         meanR /= nbVertices();
 

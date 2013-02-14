@@ -2,7 +2,7 @@
 
 namespace prop2
 {
-const std::string COMMON_VERTEX_SHADER = {
+const std::string COMMON_VERTEX_SHADER = 
     "#version 120\n"
     "uniform mat4 Projection;\n"
     "uniform mat3 ModelView;\n"
@@ -23,10 +23,9 @@ const std::string COMMON_VERTEX_SHADER = {
     "   relpos = position;\n"
     "   abspos = vec3((ModelView * vec3(relpos, 1.0)).xy, -Depth);\n"
     "   gl_Position = Projection * vec4(abspos, 1.0);\n"
-    "}"
-};
+    "}";
 
-const std::string CIRCLE_FRAGMENT_SHADER = {
+const std::string CIRCLE_FRAGMENT_SHADER =
     "#version 120\n"
     "uniform sampler2D Texture;\n"
     "uniform vec4 ColorFilter;\n"
@@ -39,10 +38,9 @@ const std::string CIRCLE_FRAGMENT_SHADER = {
     "   if(length(relpos) > 1.0)\n"
     "       discard;\n"
     "   gl_FragColor = ColorFilter * texture2D(Texture, tex);\n"
-    "}"
-};
+    "}";
 
-const std::string POLYGON_FRAGMENT_SHADER = {
+const std::string POLYGON_FRAGMENT_SHADER =
     "#version 120\n"
     "uniform sampler2D Texture;\n"
     "uniform vec4 ColorFilter;\n"
@@ -53,11 +51,10 @@ const std::string POLYGON_FRAGMENT_SHADER = {
     "void main()\n"
     "{"
     "   gl_FragColor = ColorFilter * col * texture2D(Texture, tex);\n"
-    "}"
-};
+    "}";
 
 
-const std::string HUD_VERTEX_SHADER = {
+const std::string HUD_VERTEX_SHADER =
     "#version 120\n"
     "uniform mat4 Projection;\n"
     "uniform vec2 Anchor;\n"
@@ -68,10 +65,9 @@ const std::string HUD_VERTEX_SHADER = {
     "{\n"
     "   tex = texCoord;\n"
     "   gl_Position = Projection * vec4(Anchor + position, 0.0, 1.0);\n"
-    "}\n"
-};
+    "}\n";
 
-const std::string HUD_FRAGMENT_SHADER = {
+const std::string HUD_FRAGMENT_SHADER =
     "#version 120\n"
     "uniform sampler2D Texture;\n"
     "uniform vec4 ColorFilter;\n"
@@ -79,7 +75,5 @@ const std::string HUD_FRAGMENT_SHADER = {
     "void main()\n"
     "{\n"
     "   gl_FragColor = ColorFilter * texture2D(Texture, tex);\n"
-    "}\n"
-};
-
+    "}\n";
 }
