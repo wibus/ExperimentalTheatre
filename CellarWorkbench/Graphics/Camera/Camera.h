@@ -98,10 +98,6 @@ namespace cellar
     public:
         enum Mode {EXPAND, FRAME, STRETCH};
 
-        // Inner classes
-        class Lens;
-        class Tripod;
-
         Camera();
         Camera(Mode mode, const Frame &frame,
                const Lens &lens, const Tripod &tripod,
