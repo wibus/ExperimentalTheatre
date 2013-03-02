@@ -2,7 +2,7 @@
 #define CELLARWORKBENCH_VECTORSPACE_H
 
 #include "libCellarWorkbench_global.h"
-#include "Vector3D.h"
+#include "Vector.h"
 
 namespace cellar
 {
@@ -10,42 +10,42 @@ namespace cellar
     class VectorSpace
     {
     public:
-        inline VectorSpace(const Vector3D<T>& origin=Vector3D<T>(),
-                           const Vector3D<T>& u=Vector3D<T>(1.0, 0.0, 0.0),
-                           const Vector3D<T>& v=Vector3D<T>(0.0, 1.0, 0.0),
-                           const Vector3D<T>& w=Vector3D<T>(0.0, 0.0, 1.0));
+        inline VectorSpace(const Vector<3, T>& origin=Vector<3, T>(),
+                           const Vector<3, T>& u=Vector<3, T>(1.0, 0.0, 0.0),
+                           const Vector<3, T>& v=Vector<3, T>(0.0, 1.0, 0.0),
+                           const Vector<3, T>& w=Vector<3, T>(0.0, 0.0, 1.0));
 
         inline void makeNormalized();
         inline void makeOrthogonal();
         inline void makeOrthonormal();
-        inline void rotate(const Vector3D<T>& axis, const T& angle);
+        inline void rotate(const Vector<3, T>& axis, const T& angle);
 
         //Seters
-        inline void setOrigin(const Vector3D<T>& origin);
-        inline void setU(const Vector3D<T>& u);
-        inline void setV(const Vector3D<T>& v);
-        inline void setW(const Vector3D<T>& w);
+        inline void setOrigin(const Vector<3, T>& origin);
+        inline void setU(const Vector<3, T>& u);
+        inline void setV(const Vector<3, T>& v);
+        inline void setW(const Vector<3, T>& w);
 
         //Geters
-        inline Vector3D<T> getOrigin() const;
-        inline Vector3D<T> getU() const;
-        inline Vector3D<T> getV() const;
-        inline Vector3D<T> getW() const;
+        inline Vector<3, T> getOrigin() const;
+        inline Vector<3, T> getU() const;
+        inline Vector<3, T> getV() const;
+        inline Vector<3, T> getW() const;
 
     private :
-        Vector3D<T> _origin;
-        Vector3D<T> _u;
-        Vector3D<T> _v;
-        Vector3D<T> _w;
+        Vector<3, T> _origin;
+        Vector<3, T> _u;
+        Vector<3, T> _v;
+        Vector<3, T> _w;
     };
 
 
         // IMPLEMENTATION //
     template <typename T>
-    VectorSpace<T>::VectorSpace(const Vector3D<T>& origin,
-                                const Vector3D<T>& u,
-                                const Vector3D<T>& v,
-                                const Vector3D<T>& w)
+    VectorSpace<T>::VectorSpace(const Vector<3, T>& origin,
+                                const Vector<3, T>& u,
+                                const Vector<3, T>& v,
+                                const Vector<3, T>& w)
         : _origin(origin),
           _u(u),
           _v(v),
@@ -76,7 +76,7 @@ namespace cellar
     }
 
     template <typename T>
-    void VectorSpace<T>::rotate(const Vector3D<T>& axis, const T& angle)
+    void VectorSpace<T>::rotate(const Vector<3, T>& axis, const T& angle)
     {
         _u.rotate(axis, angle);
         _v.rotate(axis, angle);
@@ -86,25 +86,25 @@ namespace cellar
 
     //Seters
     template <typename T>
-    void VectorSpace<T>::setOrigin(const Vector3D<T>& origin)
+    void VectorSpace<T>::setOrigin(const Vector<3, T>& origin)
     {
         _origin = origin;
     }
 
     template <typename T>
-    void VectorSpace<T>::setU(const Vector3D<T>& u)
+    void VectorSpace<T>::setU(const Vector<3, T>& u)
     {
         _u = u;
     }
 
     template <typename T>
-    void VectorSpace<T>::setV(const Vector3D<T>& v)
+    void VectorSpace<T>::setV(const Vector<3, T>& v)
     {
         _v = v;
     }
 
     template <typename T>
-    void VectorSpace<T>::setW(const Vector3D<T>& w)
+    void VectorSpace<T>::setW(const Vector<3, T>& w)
     {
         _w = w;
     }
@@ -112,25 +112,25 @@ namespace cellar
 
     //Geters
     template <typename T>
-    Vector3D<T> VectorSpace<T>::getOrigin() const
+    Vector<3, T> VectorSpace<T>::getOrigin() const
     {
         return _origin;
     }
 
     template <typename T>
-    Vector3D<T> VectorSpace<T>::getU() const
+    Vector<3, T> VectorSpace<T>::getU() const
     {
         return _u;
     }
 
     template <typename T>
-    Vector3D<T> VectorSpace<T>::getV() const
+    Vector<3, T> VectorSpace<T>::getV() const
     {
         return _v;
     }
 
     template <typename T>
-    Vector3D<T> VectorSpace<T>::getW() const
+    Vector<3, T> VectorSpace<T>::getW() const
     {
         return _w;
     }

@@ -1,7 +1,7 @@
 #ifndef CELLARWORKBENCH_MATRIX3X3_H
 #define CELLARWORKBENCH_MATRIX3X3_H
 
-#include "Vector3D.h"
+#include "Vector.h"
 
 
 namespace cellar
@@ -26,7 +26,7 @@ namespace cellar
         T* operator[](unsigned int j);
         const T* operator[](unsigned int j) const;
 
-        Vector3D<T> operator* (const Vector3D<T>& vec) const;
+        Vector<3, T> operator* (const Vector<3, T>& vec) const;
         Matrix3x3<T>& operator*=(const Matrix3x3<T>& mat);
         Matrix3x3<T>  operator* (const Matrix3x3<T>& mat) const;
         Matrix3x3<T>& operator+=(const Matrix3x3<T>& mat);
@@ -35,8 +35,8 @@ namespace cellar
         Matrix3x3<T>  operator- (const Matrix3x3<T>& mat) const;
         Matrix3x3<T>& operator- ();
 
-        Matrix3x3<T>& translate(const Vector3D<T>& displacement);
-        Matrix3x3<T>  translated(const Vector3D<T>& displacement) const;
+        Matrix3x3<T>& translate(const Vector<3, T>& displacement);
+        Matrix3x3<T>  translated(const Vector<3, T>& displacement) const;
         Matrix3x3<T>& scale(const T& factor);
         Matrix3x3<T>  scaled(const T& factor) const;
         Matrix3x3<T>& rotate(const T& angle);
@@ -137,12 +137,12 @@ namespace cellar
     }
 
     template<typename T>
-    Vector3D<T> Matrix3x3<T>::operator* (const Vector3D<T>& vec) const
+    Vector<3, T> Matrix3x3<T>::operator* (const Vector<3, T>& vec) const
     {
-        return Vector3D<T>(
-            Vector3D<T>(_m[0]) * vec,
-            Vector3D<T>(_m[1]) * vec,
-            Vector3D<T>(_m[2]) * vec
+        return Vector<3, T>(
+            dot(Vector<3, T>(_m[0]), vec),
+            dot(Vector<3, T>(_m[1]), vec),
+            dot(Vector<3, T>(_m[2]), vec)
         );
     }
 
@@ -234,7 +234,7 @@ namespace cellar
     }
 
     template<typename T>
-    inline Matrix3x3<T>& Matrix3x3<T>::translate(const Vector3D<T>& displacement)
+    inline Matrix3x3<T>& Matrix3x3<T>::translate(const Vector<3, T>& displacement)
     {
         _m[0][2] += displacement.x();
         _m[1][2] += displacement.y();
@@ -244,7 +244,7 @@ namespace cellar
     }
 
     template<typename T>
-    inline Matrix3x3<T>  Matrix3x3<T>::translated(const Vector3D<T>& displacement) const
+    inline Matrix3x3<T>  Matrix3x3<T>::translated(const Vector<3, T>& displacement) const
     {
         return Matrix3x3<T>(*this).translate(displacement);
     }

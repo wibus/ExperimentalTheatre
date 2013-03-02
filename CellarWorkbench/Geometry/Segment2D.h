@@ -2,7 +2,9 @@
 #define CELLARWORKBENCH_LINE2D_H
 
 #include "libCellarWorkbench_global.h"
-#include "DataStructure/Vector2D.h"
+#include "DataStructure/Vector.h"
+#include "Misc/CellarUtils.h"
+
 
 namespace cellar
 {
@@ -13,39 +15,39 @@ namespace cellar
         Segment2D();
         template<typename T2> Segment2D(const Segment2D<T2>& line);
         Segment2D(T xbegin, T ybegin, T xend, T yend);
-        Segment2D(const Vector2D<T>& begin, const Vector2D<T>& end);
+        Segment2D(const Vector<2, T>& begin, const Vector<2, T>& end);
 
         T xbegin() const;
         T ybegin() const;
         T xend() const;
         T yend() const;
-        Vector2D<T> begin() const;
-        Vector2D<T> end() const;
-        Vector2D<T> unitDirector() const;
-        Vector2D<T> unitNormal() const;
+        Vector<2, T> begin() const;
+        Vector<2, T> end() const;
+        Vector<2, T> unitDirector() const;
+        Vector<2, T> unitNormal() const;
         T length() const;
 
         void setBegin(T x, T y);
-        void setBegin(const Vector2D<T>& pos);
+        void setBegin(const Vector<2, T>& pos);
         void setEnd(T x, T y);
-        void setEnd(const Vector2D<T>& pos);
-        void moveBy(const Vector2D<T>& ds);
+        void setEnd(const Vector<2, T>& pos);
+        void moveBy(const Vector<2, T>& ds);
 
 
         enum Lateral     {LEFT,     RIGHT,          NB_LATERALS};
         enum Transversal {IN_FRONT, BESIDE, BEHIND, NB_TRANSVERSALS};
 
-        Lateral     pointLateralPosition(const Vector2D<T>& point) const;
-        Transversal pointTransversalPosition(const Vector2D<T>& point) const;
-        T           pointMinimalDistance(const Vector2D<T>& point) const;
-        Vector2D<T> pointMinimalDirection(const Vector2D<T>& point) const;
+        Lateral     pointLateralPosition(const Vector<2, T>& point) const;
+        Transversal pointTransversalPosition(const Vector<2, T>& point) const;
+        T           pointMinimalDistance(const Vector<2, T>& point) const;
+        Vector<2, T> pointMinimalDirection(const Vector<2, T>& point) const;
         bool        intersects(const Segment2D<T>& line) const;
-        Vector2D<T> intersectionPoint(const Segment2D<T> &line) const; // Vec(0, 0) if not intersecting
+        Vector<2, T> intersectionPoint(const Segment2D<T> &line) const; // Vec(0, 0) if not intersecting
 
 
     private:
-        Vector2D<T> _begin;
-        Vector2D<T> _end;
+        Vector<2, T> _begin;
+        Vector<2, T> _end;
     };
 
     typedef Segment2D<int>    Line2Di;
@@ -81,7 +83,7 @@ namespace cellar
 
 
     template<typename T>
-    Segment2D<T>::Segment2D(const Vector2D<T>& begin, const Vector2D<T>& end) :
+    Segment2D<T>::Segment2D(const Vector<2, T>& begin, const Vector<2, T>& end) :
         _begin(begin),
         _end(end)
     {
@@ -114,25 +116,25 @@ namespace cellar
     }
 
     template<typename T>
-    inline Vector2D<T> Segment2D<T>::begin() const
+    inline Vector<2, T> Segment2D<T>::begin() const
     {
         return _begin;
     }
 
     template<typename T>
-    inline Vector2D<T> Segment2D<T>::end() const
+    inline Vector<2, T> Segment2D<T>::end() const
     {
         return _end;
     }
 
     template<typename T>
-    inline Vector2D<T> Segment2D<T>::unitDirector() const
+    inline Vector<2, T> Segment2D<T>::unitDirector() const
     {
         return (_end - _begin).normalize();
     }
 
     template<typename T>
-    inline Vector2D<T> Segment2D<T>::unitNormal() const
+    inline Vector<2, T> Segment2D<T>::unitNormal() const
     {
         return unitDirector().rotateQuarterCCW();
     }
@@ -150,7 +152,7 @@ namespace cellar
     }
 
     template<typename T>
-    inline void Segment2D<T>::setBegin(const Vector2D<T>& pos)
+    inline void Segment2D<T>::setBegin(const Vector<2, T>& pos)
     {
         _begin = pos;
     }
@@ -162,13 +164,13 @@ namespace cellar
     }
 
     template<typename T>
-    inline void Segment2D<T>::setEnd(const Vector2D<T>& pos)
+    inline void Segment2D<T>::setEnd(const Vector<2, T>& pos)
     {
         _end = pos;
     }
 
     template<typename T>
-    inline void Segment2D<T>::moveBy(const Vector2D<T>& ds)
+    inline void Segment2D<T>::moveBy(const Vector<2, T>& ds)
     {
         _begin += ds;
         _end   += ds;
@@ -176,7 +178,7 @@ namespace cellar
 
 
     template<typename T>
-    typename Segment2D<T>::Lateral Segment2D<T>::pointLateralPosition(const Vector2D<T>& point) const
+    typename Segment2D<T>::Lateral Segment2D<T>::pointLateralPosition(const Vector<2, T>& point) const
     {
         T pointLineDist = (point-_begin) ^ (_end-_begin);
 
@@ -188,9 +190,9 @@ namespace cellar
 
 
     template<typename T>
-    typename Segment2D<T>::Transversal Segment2D<T>::pointTransversalPosition(const Vector2D<T>& point) const
+    typename Segment2D<T>::Transversal Segment2D<T>::pointTransversalPosition(const Vector<2, T>& point) const
     {
-        Vector2D<T> l = (_end-_begin);
+        Vector<2, T> l = (_end-_begin);
         T len = l.length();
 
         T pointProjection = (point - _begin) * l.normalize();
@@ -205,23 +207,23 @@ namespace cellar
 
 
     template<typename T>
-    T Segment2D<T>::pointMinimalDistance(const Vector2D<T>& point) const
+    T Segment2D<T>::pointMinimalDistance(const Vector<2, T>& point) const
     {
-        Vector2D<T> begToPoint = point - _begin;
+        Vector<2, T> begToPoint = point - _begin;
         T begDist = begToPoint.length();
         T endDist = (point - _end).length();
-        T orthDist = absolute(begToPoint ^ unitDirector());
+        T orthDist= absolute(cross(begToPoint, unitDirector()));
 
         return minVal(minVal(begDist, endDist), orthDist);
     }
 
 
     template<typename T>
-    Vector2D<T> Segment2D<T>::pointMinimalDirection(const Vector2D<T>& point) const
+    Vector<2, T> Segment2D<T>::pointMinimalDirection(const Vector<2, T>& point) const
     {
-        Vector2D<T> begToPoint = point - _begin;
-        Vector2D<T> endToPoint = point - _end;
-        Vector2D<T> orthToPoint = (begToPoint ^ unitDirector()) * unitNormal();
+        Vector<2, T> begToPoint = point - _begin;
+        Vector<2, T> endToPoint = point - _end;
+        Vector<2, T> orthToPoint = (begToPoint ^ unitDirector()) * unitNormal();
 
         if(begToPoint.length() < endToPoint.length())
         {
@@ -245,20 +247,20 @@ namespace cellar
     template<typename T>
     bool Segment2D<T>::intersects(const Segment2D<T>& line) const
     {
-        Vector2D<T> vec1 = _end - _begin;
-        Vector2D<T> vec2 = line._end - line._begin;
+        Vector<2, T> vec1 = _end - _begin;
+        Vector<2, T> vec2 = line._end - line._begin;
 
-        float denum = vec1 ^ vec2;
+        float denum = cross(vec1, vec2);
         if(denum == 0.0f)
             return false;
 
-        Vector2D<T> origDist = this->_begin - line._begin;
+        Vector<2, T> origDist = this->_begin - line._begin;
 
-        float A = (vec2 ^ origDist) / denum;
+        float A = cross(vec2, origDist) / denum;
         if(!(0.0f <= A && A <= 1.0f))
             return false;
 
-        float B = (vec1 ^ origDist) / denum; // origDist and denum minus simplification
+        float B = cross(vec1, origDist) / denum; // origDist and denum minus simplification
         if(!(0.0f <= B && B <= 1.0f))
             return false;
 
@@ -267,13 +269,13 @@ namespace cellar
 
 
     template<typename T>
-    Vector2D<T> Segment2D<T>::intersectionPoint(const Segment2D<T>& line) const
+    Vector<2, T> Segment2D<T>::intersectionPoint(const Segment2D<T>& line) const
     {
-        Vector2D<T> vec1 = _end      - _begin;
-        Vector2D<T> vec2 = line._end - line._begin;
-        float denum = vec1 ^ vec2;
+        Vector<2, T> vec1 = _end      - _begin;
+        Vector<2, T> vec2 = line._end - line._begin;
+        float denum = cross(vec1, vec2);
 
-        Vector2D<T> origDist = this->_begin - line._end;
+        Vector<2, T> origDist = this->_begin - line._end;
 
         float A = (vec2 ^ origDist) / denum;
         return _begin + A*vec1;

@@ -53,7 +53,7 @@ namespace prop2
     {
         _tranformMatrix.loadIdentity();
         _tranformMatrix.scale(_radius);
-        _tranformMatrix.translate(vec3(_centroid, real(0)));
+        _tranformMatrix.translate(Vec3r(_centroid, real(0)));
         _tranformMatrix.rotate(_angle);
     }
 

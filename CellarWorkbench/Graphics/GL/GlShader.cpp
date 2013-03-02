@@ -51,7 +51,13 @@ namespace cellar
         default: break;
         }
 
-        infoName = "(file = " + _fileName + ") " + infoName;
+        string shaderSrc;
+        if(_fileName.empty())
+            shaderSrc = "in-source";
+        else
+            shaderSrc = _fileName;
+
+        infoName = "(file = " + shaderSrc + ") " + infoName;
 
         if(source.empty())
         {

@@ -6,8 +6,7 @@
 #include <algorithm>
 #include <ostream>
 
-#include "Vector3D.h"
-#include "Vector4D.h"
+#include "Vector.h"
 #include "Matrix3x3.h"
 
 
@@ -41,8 +40,8 @@ namespace cellar
 
         Matrix4x4<T>& rowOperation(int row1, T times1, int row2, T times2, int destRow);
         Matrix4x4<T>& multRow(int row, T val);
-        Matrix4x4<T>& setRow(int row, const Vector4D<T> val);
-        Matrix4x4<T>& setColomn(int col, const Vector4D<T> val);
+        Matrix4x4<T>& setRow(int row, const Vector<4, T>& val);
+        Matrix4x4<T>& setColomn(int col, const Vector<4, T>& val);
 
         Matrix4x4<T>& ortho(T left,     T right,
                             T bottom,   T top,
@@ -52,11 +51,11 @@ namespace cellar
                                T zNear,     T zFar);
         Matrix4x4<T>& perspective(T fovyRadians, T aspect,
                                   T zNear,       T zFar);
-        Matrix4x4<T>& lookAt(const Vector3D<T>& from,
-                             const Vector3D<T>& to,
-                             const Vector3D<T>& up);
+        Matrix4x4<T>& lookAt(const Vector<3, T>& from,
+                             const Vector<3, T>& to,
+                             const Vector<3, T>& up);
 
-        Vector4D<T>   operator *(const Vector4D<T>& vec) const;
+        Vector<4, T>  operator *(const Vector<4, T>& vec) const;
         Matrix4x4<T>  operator *(const Matrix4x4<T>& mat) const;
         Matrix4x4<T>& operator*=(const Matrix4x4<T>& mat);
         Matrix4x4<T>  operator *(T val) const;
@@ -235,8 +234,8 @@ namespace cellar
     Matrix4x4<T>& Matrix4x4<T>::rowOperation(int row1, T times1, int row2, T times2, int destRow)
     {
         return setRow(destRow,
-               Vector4D<T>(_m[row1]) * times1 +
-               Vector4D<T>(_m[row2]) * times2);
+               Vector<4, T>(_m[row1]) * times1 +
+               Vector<4, T>(_m[row2]) * times2);
     }
 
     template <typename T>
@@ -247,14 +246,14 @@ namespace cellar
     }
 
     template <typename T>
-    inline Matrix4x4<T>& Matrix4x4<T>::setRow(int row, const Vector4D<T> val)
+    inline Matrix4x4<T>& Matrix4x4<T>::setRow(int row, const Vector<4, T>& val)
     {
         _m[row][0] = val[0]; _m[row][1] = val[1]; _m[row][2] = val[2]; _m[row][3] = val[3];
         return *this;
     }
 
     template <typename T>
-    inline Matrix4x4<T>& Matrix4x4<T>::setColomn(int col, const Vector4D<T> val)
+    inline Matrix4x4<T>& Matrix4x4<T>::setColomn(int col, const Vector<4, T>& val)
     {
         _m[0][col] = val[0]; _m[1][col] = val[1]; _m[2][col] = val[2]; _m[3][col] = val[3];
         return *this;
@@ -310,31 +309,31 @@ namespace cellar
     }
 
     template <typename T>
-    Matrix4x4<T>& Matrix4x4<T>::lookAt(const Vector3D<T>& from,
-                                       const Vector3D<T>& to,
-                                       const Vector3D<T>& up)
+    Matrix4x4<T>& Matrix4x4<T>::lookAt(const Vector<3, T>& from,
+                                       const Vector<3, T>& to,
+                                       const Vector<3, T>& up)
     {
-        Vector3D<T> z = (from - to).normalize();
-        Vector3D<T> x = (up ^ z).normalize();
-        Vector3D<T> y = (z ^ x).normalize();
+        Vector<3, T> z = (from - to).normalize();
+        Vector<3, T> x = cross(up, z).normalize();
+        Vector<3, T> y = cross(z, x).normalize();
 
         Matrix4x4<T> m;
-        m._m[0][0] = x[0]; m._m[0][1] = x[1]; m._m[0][2] = x[2]; m._m[0][3] = -(x * from);
-        m._m[1][0] = y[0]; m._m[1][1] = y[1]; m._m[1][2] = y[2]; m._m[1][3] = -(y * from);
-        m._m[2][0] = z[0]; m._m[2][1] = z[1]; m._m[2][2] = z[2]; m._m[2][3] = -(z * from);
+        m._m[0][0] = x[0]; m._m[0][1] = x[1]; m._m[0][2] = x[2]; m._m[0][3] = -dot(x, from);
+        m._m[1][0] = y[0]; m._m[1][1] = y[1]; m._m[1][2] = y[2]; m._m[1][3] = -dot(y, from);
+        m._m[2][0] = z[0]; m._m[2][1] = z[1]; m._m[2][2] = z[2]; m._m[2][3] = -dot(z, from);
         m._m[3][0] = 0;    m._m[3][1] = 0;    m._m[3][2] = 0;    m._m[3][3] = 1;
 
         return *this *= m;
     }
 
     template <typename T>
-    Vector4D<T>  Matrix4x4<T>::operator *(const Vector4D<T>& vec) const
+    Vector<4, T>  Matrix4x4<T>::operator *(const Vector<4, T>& vec) const
     {
-        return Vector4D<T>(
-            Vector4D<T>(_m[0]) * vec,
-            Vector4D<T>(_m[1]) * vec,
-            Vector4D<T>(_m[2]) * vec,
-            Vector4D<T>(_m[3]) * vec
+        return Vector<4, T>(
+            dot(Vector<4, T>(_m[0]), vec),
+            dot(Vector<4, T>(_m[1]), vec),
+            dot(Vector<4, T>(_m[2]), vec),
+            dot(Vector<4, T>(_m[3]), vec)
         );
     }
 
@@ -347,37 +346,37 @@ namespace cellar
     template <typename T>
     Matrix4x4<T>& Matrix4x4<T>::operator*=(const Matrix4x4<T>& mat)
     {
-        Vector4D<T> rows[4];
-        rows[0] = Vector4D<T>(_m[0]);
-        rows[1] = Vector4D<T>(_m[1]);
-        rows[2] = Vector4D<T>(_m[2]);
-        rows[3] = Vector4D<T>(_m[3]);
+        Vector<4, T> rows[4];
+        rows[0] = Vector<4, T>(_m[0]);
+        rows[1] = Vector<4, T>(_m[1]);
+        rows[2] = Vector<4, T>(_m[2]);
+        rows[3] = Vector<4, T>(_m[3]);
 
-        Vector4D<T> colomns[4];
-        colomns[0] = Vector4D<T>(mat._m[0][0], mat._m[1][0], mat._m[2][0], mat._m[3][0]);
-        colomns[1] = Vector4D<T>(mat._m[0][1], mat._m[1][1], mat._m[2][1], mat._m[3][1]);
-        colomns[2] = Vector4D<T>(mat._m[0][2], mat._m[1][2], mat._m[2][2], mat._m[3][2]);
-        colomns[3] = Vector4D<T>(mat._m[0][3], mat._m[1][3], mat._m[2][3], mat._m[3][3]);
+        Vector<4, T> colomns[4];
+        colomns[0] = Vector<4, T>(mat._m[0][0], mat._m[1][0], mat._m[2][0], mat._m[3][0]);
+        colomns[1] = Vector<4, T>(mat._m[0][1], mat._m[1][1], mat._m[2][1], mat._m[3][1]);
+        colomns[2] = Vector<4, T>(mat._m[0][2], mat._m[1][2], mat._m[2][2], mat._m[3][2]);
+        colomns[3] = Vector<4, T>(mat._m[0][3], mat._m[1][3], mat._m[2][3], mat._m[3][3]);
 
-        _m[0][0] = rows[0] * colomns[0];
-        _m[0][1] = rows[0] * colomns[1];
-        _m[0][2] = rows[0] * colomns[2];
-        _m[0][3] = rows[0] * colomns[3];
+        _m[0][0] = dot(rows[0], colomns[0]);
+        _m[0][1] = dot(rows[0], colomns[1]);
+        _m[0][2] = dot(rows[0], colomns[2]);
+        _m[0][3] = dot(rows[0], colomns[3]);
 
-        _m[1][0] = rows[1] * colomns[0];
-        _m[1][1] = rows[1] * colomns[1];
-        _m[1][2] = rows[1] * colomns[2];
-        _m[1][3] = rows[1] * colomns[3];
+        _m[1][0] = dot(rows[1], colomns[0]);
+        _m[1][1] = dot(rows[1], colomns[1]);
+        _m[1][2] = dot(rows[1], colomns[2]);
+        _m[1][3] = dot(rows[1], colomns[3]);
 
-        _m[2][0] = rows[2] * colomns[0];
-        _m[2][1] = rows[2] * colomns[1];
-        _m[2][2] = rows[2] * colomns[2];
-        _m[2][3] = rows[2] * colomns[3];
+        _m[2][0] = dot(rows[2], colomns[0]);
+        _m[2][1] = dot(rows[2], colomns[1]);
+        _m[2][2] = dot(rows[2], colomns[2]);
+        _m[2][3] = dot(rows[2], colomns[3]);
 
-        _m[3][0] = rows[3] * colomns[0];
-        _m[3][1] = rows[3] * colomns[1];
-        _m[3][2] = rows[3] * colomns[2];
-        _m[3][3] = rows[3] * colomns[3];
+        _m[3][0] = dot(rows[3], colomns[0]);
+        _m[3][1] = dot(rows[3], colomns[1]);
+        _m[3][2] = dot(rows[3], colomns[2]);
+        _m[3][3] = dot(rows[3], colomns[3]);
 
         return *this;
     }

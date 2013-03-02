@@ -317,8 +317,8 @@ namespace scaena
 
     MouseEvent QGLStage::convertMouseEvent(QMouseEvent* event)
     {
-        Vector2D<int> pos(event->x(), event->y());
-        Vector2D<int> globalPos(event->globalX(), event->globalY());
+        Vec2i pos(event->x(), event->y());
+        Vec2i globalPos(event->globalX(), event->globalY());
 
         Mouse::Button button = Mouse::NO_BUTTON;
 

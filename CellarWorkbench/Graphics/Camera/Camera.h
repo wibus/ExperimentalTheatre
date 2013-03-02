@@ -2,7 +2,7 @@
 #define CELLARWORKBENCH_CAMERA_H
 
 #include "DesignPattern/SpecificSubject.h"
-#include "DataStructure/Vector3D.h"
+#include "DataStructure/Vector.h"
 #include "DataStructure/Matrix4x4.h"
 
 
@@ -76,23 +76,23 @@ namespace cellar
 
         public:
             Tripod();
-            Tripod(const Vector3D<float>& from,
-                   const Vector3D<float>& to,
-                   const Vector3D<float>& up);
+            Tripod(const Vec3f& from,
+                   const Vec3f& to,
+                   const Vec3f& up);
 
-            const Vector3D<float>& from() const;
-            const Vector3D<float>& to() const;
-            const Vector3D<float>& up() const;
+            const Vec3f& from() const;
+            const Vec3f& to() const;
+            const Vec3f& up() const;
 
         private :
-            void set(const Vector3D<float>& from,
-                     const Vector3D<float>& to,
-                     const Vector3D<float>& up);
-            void moveBy(const Vector3D<float>& dist);
+            void set(const Vec3f& from,
+                     const Vec3f& to,
+                     const Vec3f& up);
+            void moveBy(const Vec3f& dist);
 
-            Vector3D<float> _from;
-            Vector3D<float> _to;
-            Vector3D<float> _up;
+            Vec3f _from;
+            Vec3f _to;
+            Vec3f _up;
         };
 
     public:
@@ -119,10 +119,10 @@ namespace cellar
                      double left,         double right,
                      double bottom,       double top,
                      double nearPlane,    double farPlane);
-        void setTripod(const Vector3D<float>& from,
-                       const Vector3D<float>& to,
-                       const Vector3D<float>& up);
-        void moveBy(const Vector3D<float>& dist);
+        void setTripod(const Vec3f& from,
+                       const Vec3f& to,
+                       const Vec3f& up);
+        void moveBy(const Vec3f& dist);
         void refresh();
 
 
@@ -196,18 +196,18 @@ namespace cellar
 
 
     // CAMERA::TRIPOD //
-    inline const Vector3D<float>& Camera::Tripod::from() const {return _from;}
-    inline const Vector3D<float>& Camera::Tripod::to() const {return _to;}
-    inline const Vector3D<float>& Camera::Tripod::up() const {return _up;}
+    inline const Vec3f& Camera::Tripod::from() const {return _from;}
+    inline const Vec3f& Camera::Tripod::to() const {return _to;}
+    inline const Vec3f& Camera::Tripod::up() const {return _up;}
 
-    inline void Camera::Tripod::set(const Vector3D<float>& from,
-                                    const Vector3D<float>& to,
-                                    const Vector3D<float>& up)
+    inline void Camera::Tripod::set(const Vec3f& from,
+                                    const Vec3f& to,
+                                    const Vec3f& up)
     {
         _from = from; _to = to; _up = up;
     }
 
-    inline void Camera::Tripod::moveBy(const Vector3D<float>& dist)
+    inline void Camera::Tripod::moveBy(const Vec3f& dist)
         {_from += dist; _to += dist;}
 }
 

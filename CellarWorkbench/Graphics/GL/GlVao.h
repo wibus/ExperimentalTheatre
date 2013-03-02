@@ -28,12 +28,12 @@ namespace cellar
         std::vector<ELEM_T> dataArray;
     };
 
-    typedef GlVbo<Vector2D<int>,   2, GL_INT>   GlVbo2Di;
-    typedef GlVbo<Vector2D<float>, 2, GL_FLOAT> GlVbo2Df;
-    typedef GlVbo<Vector3D<int>,   3, GL_INT>   GlVbo3Di;
-    typedef GlVbo<Vector3D<float>, 3, GL_FLOAT> GlVbo3Df;
-    typedef GlVbo<Vector4D<int>,   4, GL_INT>   GlVbo4Di;
-    typedef GlVbo<Vector4D<float>, 4, GL_FLOAT> GlVbo4Df;
+    typedef GlVbo<Vec2i, 2, GL_INT>   GlVbo2Di;
+    typedef GlVbo<Vec2f, 2, GL_FLOAT> GlVbo2Df;
+    typedef GlVbo<Vec3i, 3, GL_INT>   GlVbo3Di;
+    typedef GlVbo<Vec3f, 3, GL_FLOAT> GlVbo3Df;
+    typedef GlVbo<Vec4i, 4, GL_INT>   GlVbo4Di;
+    typedef GlVbo<Vec4f, 4, GL_FLOAT> GlVbo4Df;
 
 
     class CELLAR_EXPORT GlVao

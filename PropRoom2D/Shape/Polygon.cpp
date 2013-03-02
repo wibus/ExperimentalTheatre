@@ -106,8 +106,7 @@ namespace prop2
         size_t nbVertices = _relVertices.size();
         for(size_t i=0; i < nbVertices; ++i)
         {
-            _absVertices[i] = vec2(_tranformMatrix *
-                                    vec3(_relVertices[i], real(1.0)));
+            _absVertices[i] = Vec2r(_tranformMatrix * Vec3r(_relVertices[i],real(1)));
         }
 
         _outline = evaluateOutline(_absVertices);
@@ -116,7 +115,7 @@ namespace prop2
     void Polygon::updateTranformMatrix()
     {
         _tranformMatrix.loadIdentity();
-        _tranformMatrix.translate(vec3(_centroid, real(0)));
+        _tranformMatrix.translate(Vec3r(_centroid, real(0)));
         _tranformMatrix.rotate(_angle);
     }
 

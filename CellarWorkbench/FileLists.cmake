@@ -16,9 +16,6 @@ SET(CELLAR_DATA_STRUCTURE_HEADERS
     ${CELLAR_SRC_DIR}/DataStructure/ObservableMatrixStack.h
     ${CELLAR_SRC_DIR}/DataStructure/PGrid2D.h
     ${CELLAR_SRC_DIR}/DataStructure/PGrid3D.h
-    ${CELLAR_SRC_DIR}/DataStructure/Vector2D.h
-    ${CELLAR_SRC_DIR}/DataStructure/Vector3D.h
-    ${CELLAR_SRC_DIR}/DataStructure/Vector4D.h
     ${CELLAR_SRC_DIR}/DataStructure/Vector.h
     ${CELLAR_SRC_DIR}/DataStructure/VectorSpace.h)
 
@@ -62,9 +59,13 @@ SET(CELLAR_GRAPHICS_GL_HEADERS
     ${CELLAR_SRC_DIR}/Graphics/GL/GlToolkit.h
     ${CELLAR_SRC_DIR}/Graphics/GL/GlVao.h)
 
+SET(CELLAR_GRAPHICS_LIGHT_HEADERS
+    ${CELLAR_SRC_DIR}/Graphics/Light/Light3D.h)
+
 SET(CELLAR_GRAPHICS_HEADERS
     ${CELLAR_GRAPHICS_CAMERA_HEADERS}
     ${CELLAR_GRAPHICS_GL_HEADERS}
+    ${CELLAR_GRAPHICS_LIGHT_HEADERS}
     ${CELLAR_SRC_DIR}/Graphics/Image.h
     ${CELLAR_SRC_DIR}/Graphics/ImageBank.h)
 

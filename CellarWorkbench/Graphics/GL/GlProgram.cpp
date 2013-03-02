@@ -87,11 +87,13 @@ namespace cellar
         }
 
         // Attach provided shaders
+        string logSupInfo = " (using shaders ids={";
         for (auto s=_shaders.begin(); s != _shaders.end(); ++s)
         {
             glAttachShader( _id, (*s)->id() );
+            logSupInfo += toString((*s)->id()) + ' ';
         }
-
+        logSupInfo += "}";
 
         GlInputsOutputs::IOit inIt = _inAndOutLocations.inputs().begin();
         for(;inIt != _inAndOutLocations.inputs().end(); ++inIt)
@@ -126,7 +128,7 @@ namespace cellar
         }
 
         getLog().postMessage(new Message('I', false,
-            "Shader program succefully linked", "GlProgram"));
+            "Shader program succefully linked" + logSupInfo, "GlProgram"));
 
         return true;
     }
@@ -279,7 +281,7 @@ namespace cellar
         return true;
     }
 
-    bool GlProgram::setVec2i(const std::string& var, const Vector2D<int>& vec)
+    bool GlProgram::setVec2i(const std::string& var, const Vec2i& vec)
     {
         if( !isCurrentProgram() )
             return false;
@@ -293,7 +295,7 @@ namespace cellar
         return true;
     }
 
-    bool GlProgram::setVec3i(const std::string& var, const Vector3D<int>& vec)
+    bool GlProgram::setVec3i(const std::string& var, const Vec3i& vec)
     {
         if( !isCurrentProgram() )
             return false;
@@ -307,7 +309,7 @@ namespace cellar
         return true;
     }
 
-    bool GlProgram::setVec4i(const std::string& var, const Vector4D<int>& vec)
+    bool GlProgram::setVec4i(const std::string& var, const Vec4i& vec)
     {
         if( !isCurrentProgram() )
             return false;
@@ -335,7 +337,7 @@ namespace cellar
         return true;
     }
 
-    bool GlProgram::setVec2f(const std::string& var, const Vector2D<float>& vec)
+    bool GlProgram::setVec2f(const std::string& var, const Vec2f& vec)
     {
         if( !isCurrentProgram() )
             return false;
@@ -349,7 +351,7 @@ namespace cellar
         return true;
     }
 
-    bool GlProgram::setVec3f(const std::string& var, const Vector3D<float>& vec)
+    bool GlProgram::setVec3f(const std::string& var, const Vec3f& vec)
     {
         if( !isCurrentProgram() )
             return false;
@@ -363,7 +365,7 @@ namespace cellar
         return true;
     }
 
-    bool GlProgram::setVec4f(const std::string& var, const Vector4D<float>& vec)
+    bool GlProgram::setVec4f(const std::string& var, const Vec4f& vec)
     {
         if( !isCurrentProgram() )
             return false;

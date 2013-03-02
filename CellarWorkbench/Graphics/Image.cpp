@@ -1,16 +1,11 @@
 #include "Image.h"
 #include "Misc/Log.h"
-#include "GL/GlToolkit.h"
 
 #include <cassert>
-#include <cstring>
 
-#include <iostream>
 using namespace std;
 
 #include <QImage>
-#include <QColor>
-#include <QGLWidget>
 
 
 namespace cellar
@@ -153,13 +148,25 @@ namespace cellar
         QImage img;
         if(img.load(fileName.c_str()))
         {
+            img.convertToFormat(QImage::Format_ARGB32);
             _width = img.width();
             _height = img.height();
 
             int size = dataSize();
             _pixels = new unsigned char[size];
-            memcpy(_pixels, QGLWidget::convertToGLFormat(img).bits(), size);
-
+            const uchar* bits =  img.bits();
+            for(int j=0; j<_height; ++j)
+            {
+                for(int i=0; i<_width; ++i)
+                {
+                    int tp = (j*_width + i)*4;
+                    int op = ((_height-j-1)*_width+i)*4;
+                    _pixels[tp]   = bits[op+2];
+                    _pixels[tp+1] = bits[op+1];
+                    _pixels[tp+2] = bits[op];
+                    _pixels[tp+3] = bits[op+3];
+                }
+            }
             return true;
         }
 

@@ -2,7 +2,7 @@
 #define CELLARWORKBENCH_LINE3D_H
 
 #include "libCellarWorkbench_global.h"
-#include "DataStructure/Vector3D.h"
+#include "DataStructure/Vector.h"
 
 namespace cellar
 {

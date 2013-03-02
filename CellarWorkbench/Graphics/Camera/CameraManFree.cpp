@@ -36,14 +36,12 @@ namespace cellar
                          -halfScreen / aspectRatio, halfScreen / aspectRatio,
                          nearPlane,                 farPlane);
 
-        _camera->setTripod(Vector3D<float>(0, 0, 0),
-                           Vector3D<float>(0, 1, 0),
-                           Vector3D<float>(0, 0, 1));
+        _camera->setTripod(Vec3f(0, 0, 0), Vec3f(0, 1, 0), Vec3f(0, 0, 1));
     }
 
     void CameraManFree::forward(float dist)
     {
-        Vector3D<float> dir =
+        Vec3f dir =
             (_camera->tripod().to() - _camera->tripod().from()).normalized();
 
         _camera->moveBy( dir * dist );
@@ -51,20 +49,20 @@ namespace cellar
 
     void CameraManFree::sideward(float dist)
     {
-        Vector3D<float> dir =
+        Vec3f dir =
             (_camera->tripod().to() - _camera->tripod().from()).normalized();
-        Vector3D<float> side = (dir ^ _camera->tripod().up()).normalized();
+        Vec3f side = cross(dir, _camera->tripod().up()).normalized();
 
         _camera->moveBy( side * dist );
     }
 
     void CameraManFree::turnHorizontaly(float radians)
     {
-        Vector3D<float> dir =
+        Vec3f dir =
             (_camera->tripod().to() - _camera->tripod().from()).normalized();
-        Vector3D<float> side = -(dir ^ _camera->tripod().up()).normalized();
+        Vec3f side = -cross(dir, _camera->tripod().up()).normalized();
 
-        Vector3D<float> newDir =  cos(radians) * dir +  sin(radians) * side;
+        Vec3f newDir =  dir * cos(radians) +  side * sin(radians);
 
         _camera->setTripod(_camera->tripod().from(),
                            _camera->tripod().from() + newDir,
@@ -73,9 +71,9 @@ namespace cellar
 
     void CameraManFree::turnVerticaly(float radians)
     {
-        Vector3D<float> dir =
+        Vec3f dir =
             (_camera->tripod().to() - _camera->tripod().from()).normalized();
-        Vector3D<float> newDir =  dir * cos(radians) +
+        Vec3f newDir =  dir * cos(radians) +
                                   _camera->tripod().up() * sin(radians);
 
         _camera->setTripod(_camera->tripod().from(),

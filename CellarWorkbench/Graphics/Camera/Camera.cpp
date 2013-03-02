@@ -55,15 +55,15 @@ namespace cellar
         updateProjectionMatrix();
     }
 
-    void Camera::setTripod(const Vector3D<float>& from,
-                           const Vector3D<float>& to,
-                           const Vector3D<float>& up)
+    void Camera::setTripod(const Vec3f& from,
+                           const Vec3f& to,
+                           const Vec3f& up)
     {
         _tripod.set(from, to, up);
         updateViewMatrix();
     }
 
-    void Camera::moveBy(const Vector3D<float>& dist)
+    void Camera::moveBy(const Vec3f& dist)
     {
         _tripod.moveBy( dist );
         updateViewMatrix();
@@ -226,9 +226,9 @@ namespace cellar
     {
     }
 
-    Camera::Tripod::Tripod(const Vector3D<float>& from,
-                           const Vector3D<float>& to,
-                           const Vector3D<float>& up) :
+    Camera::Tripod::Tripod(const Vec3f& from,
+                           const Vec3f& to,
+                           const Vec3f& up) :
         _from(from),
         _to(to),
         _up(up)

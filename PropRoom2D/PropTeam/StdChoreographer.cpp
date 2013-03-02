@@ -142,7 +142,7 @@ namespace prop2
         // Collision normal points out circle1 (local y axis)
         Vec2r uNormal = centersDist.normalize();
         // Collision tangent points right to normal (local x axis)
-        Vec2r uTangent = uNormal; uTangent.rotateQuarterCCW();
+        Vec2r uTangent = perpCCW(uNormal);
 
         real bounce = ((circle1->bounciness() *
                         circle2->bounciness()) + 1) / 2;
@@ -150,10 +150,10 @@ namespace prop2
         if(circle1->bodyType() == BodyType::DYNAMIC &&
            circle2->bodyType() == BodyType::DYNAMIC)
         {
-            Vec2r c1vn = (circle1->linearVelocity() * uNormal) * uNormal;
+            Vec2r c1vn = proj(circle1->linearVelocity(), uNormal);
             real  c1mass = circle1->mass();
 
-            Vec2r c2vn = (circle2->linearVelocity() * uNormal) * uNormal;
+            Vec2r c2vn = proj(circle2->linearVelocity(), uNormal);
             real c2mass = circle2->mass();
 
             real massSum = c1mass + c2mass;
@@ -167,8 +167,8 @@ namespace prop2
             circle2->addLinearAcceleration(bounce * (c2vtFinal - c2vn) / _dt);
 
             // Rotation
-            Vec2r Vr = (circle2->linearVelocity() -
-                        circle1->linearVelocity()).projectionOn(uTangent);
+            Vec2r Vr = proj(circle2->linearVelocity() - circle1->linearVelocity(),
+                            uTangent);
             Vec2r Wr = (circle1->angularVelocity() * circle1->radius() +
                         circle2->angularVelocity() * circle2->radius()) * (-uTangent);
             Vec2r impulse = (Vr + Wr) * sqrt(circle1->momentOfInertia() * circle2->momentOfInertia()) /
@@ -187,8 +187,8 @@ namespace prop2
         else if(circle1->bodyType() == BodyType::DYNAMIC)
         {
             // Normal
-            Vec2r Vn = circle1->linearVelocity().projectionOn(uNormal);
-            circle1->addLinearAcceleration(bounce * (-2*Vn) / _dt);
+            Vec2r Vn = proj(circle1->linearVelocity(), uNormal);
+            circle1->addLinearAcceleration(bounce * (-2.0f*Vn) / _dt);
 
             // Tangent
             real radius = circle1->radius();
@@ -196,11 +196,11 @@ namespace prop2
             real  I  = circle1->momentOfInertia();
             Vec2r R  = uNormal * circle1->radius();
             real  Wi = circle1->angularVelocity();
-            Vec2r Vi = (circle1->linearVelocity() - circle2->linearVelocity() +
-                        uTangent * circle2->radius() * circle2->angularVelocity()
-                        ).projectionOn(uTangent);
+            Vec2r Vi = proj(circle1->linearVelocity() - circle2->linearVelocity() +
+                        uTangent * circle2->radius() * circle2->angularVelocity(),
+                        uTangent);
 
-            real Wf = (I*Wi - M*(R ^ Vi)) / (I + M*radius*radius);
+            real Wf = (I*Wi - M*cross(R, Vi)) / (I + M*radius*radius);
 
             circle1->addForceAt(uTangent * (Wf - Wi) * I / (radius * _dt),
                                 circle1->centroid() + R);
@@ -211,8 +211,8 @@ namespace prop2
         else if(circle2->bodyType() == BodyType::DYNAMIC)
         {
             // Normal
-            Vec2r Vn = circle2->linearVelocity().projectionOn(uNormal);
-            circle2->addLinearAcceleration(bounce * (-2*Vn) / _dt);
+            Vec2r Vn = proj(circle2->linearVelocity(), uNormal);
+            circle2->addLinearAcceleration(bounce * (-2.0f*Vn) / _dt);
 
             // Tangent
             real  radius = circle2->radius();
@@ -220,11 +220,11 @@ namespace prop2
             real  I  = circle2->momentOfInertia();
             Vec2r R  = -uNormal * circle2->radius();
             real  Wi = circle2->angularVelocity();
-            Vec2r Vi = (circle2->linearVelocity() - circle1->linearVelocity() -
-                        uTangent * circle1->radius() * circle1->angularVelocity()
-                        ).projectionOn(uTangent);
+            Vec2r Vi = proj(circle2->linearVelocity() - circle1->linearVelocity() -
+                            uTangent * circle1->radius() * circle1->angularVelocity(),
+                            uTangent);
 
-            real Wf = (I*Wi - M*(R ^ Vi)) / (I + M*radius*radius);
+            real Wf = (I*Wi - M*cross(R, Vi)) / (I + M*radius*radius);
 
             circle2->addForceAt(-uTangent * (Wf - Wi) * I / (radius * _dt),
                                 circle2->centroid() + R);

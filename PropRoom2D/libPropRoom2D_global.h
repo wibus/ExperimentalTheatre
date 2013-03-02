@@ -54,9 +54,9 @@ namespace prop2
 
 
     // Vectors and matrices
-    typedef cellar::Vector2D<real> Vec2r;
-    typedef cellar::Vector3D<real> Vec3r;
-    typedef cellar::Vector4D<real> Vec4r;
+    typedef cellar::Vector<2, real> Vec2r;
+    typedef cellar::Vector<3, real> Vec3r;
+    typedef cellar::Vector<4, real> Vec4r;
     typedef cellar::Matrix3x3<real> Mat3r;
     typedef cellar::Matrix4x4<real> Mat4r;
 

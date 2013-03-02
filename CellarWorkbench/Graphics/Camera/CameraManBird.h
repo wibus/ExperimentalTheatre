@@ -2,8 +2,7 @@
 #define CELLARWORKBENCH_CAMERAMANBIRD_H
 
 #include "libCellarWorkbench_global.h"
-#include "DataStructure/Vector2D.h"
-#include "DataStructure/Vector3D.h"
+#include "DataStructure/Vector.h"
 
 
 namespace cellar
@@ -19,8 +18,8 @@ namespace cellar
 
         void setCamera(Camera& camera);
 
-        void moveTo(const Vector3D<float>& destination);
-        void moveBy(const Vector2D<float>& displacement);
+        void moveTo(const Vec3f& destination);
+        void moveBy(const Vec2f& displacement);
         void rotate(float radians);
 
     private:

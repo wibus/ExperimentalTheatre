@@ -1,5 +1,5 @@
-#ifndef CELLARWORKBENCH_QTCLOCK_H
-#define CELLARWORKBENCH_QTCLOCK_H
+#ifndef QTCLOCK_H
+#define QTCLOCK_H
 
 #include "AbstractClock.h"
 
@@ -31,4 +31,4 @@ namespace cellar
     };
 }
 
-#endif // CELLARWORKBENCH_QTCLOCK_H
+#endif // QTCLOCK_H

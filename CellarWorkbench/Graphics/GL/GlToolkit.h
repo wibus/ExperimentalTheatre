@@ -4,13 +4,10 @@
 #include <map>
 
 #include "libCellarWorkbench_global.h"
-#include "DataStructure/Vector3D.h"
 
 
 namespace cellar
 {
-    template <typename T>
-    class VectorSpace;
     class Image;
 
     class CELLAR_EXPORT GlToolkit

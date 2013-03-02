@@ -2,7 +2,7 @@
 #define CELLARWORKBENCH_GRID3D_H
 
 #include "Grid2D.h"
-#include "Vector3D.h"
+#include "Vector.h"
 
 namespace cellar
 {
@@ -25,10 +25,10 @@ namespace cellar
         const Grid2D<T>& operator [](int z) const;
         T&       get(int x, int y, int z);
         const T& get(int x, int y, int z) const;
-        T&       get(const Vector3D<int>& pos);
-        const T& get(const Vector3D<int>& pos) const;
+        T&       get(const Vec3i& pos);
+        const T& get(const Vec3i& pos) const;
         void     set(int x, int y, int z, const T& value);
-        void     set(const Vector3D<int>& pos, const T& value);
+        void     set(const Vec3i& pos, const T& value);
 
 
     protected:
@@ -156,13 +156,13 @@ namespace cellar
     }
 
     template<typename T>
-    T& Grid3D<T>::get(const Vector3D<int>& pos)
+    T& Grid3D<T>::get(const Vec3i& pos)
     {
         return _grids[pos.z()][pos.x()][pos.y()];
     }
 
     template<typename T>
-    const T& Grid3D<T>::get(const Vector3D<int>& pos) const
+    const T& Grid3D<T>::get(const Vec3i& pos) const
     {
         return _grids[pos.z()][pos.x()][pos.y()];
     }
@@ -174,7 +174,7 @@ namespace cellar
     }
 
     template<typename T>
-    void Grid3D<T>::set(const Vector3D<int>& pos, const T& value)
+    void Grid3D<T>::set(const Vec3i& pos, const T& value)
     {
         _grids[pos.z()][pos.x()][pos.y()] = value;
     }

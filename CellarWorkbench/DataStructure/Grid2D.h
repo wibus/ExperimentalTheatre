@@ -3,7 +3,7 @@
 
 #include <cassert>
 #include "libCellarWorkbench_global.h"
-#include "DataStructure/Vector2D.h"
+#include "Vector.h"
 
 namespace cellar
 {
@@ -25,10 +25,10 @@ namespace cellar
         const T* operator [](int y) const;
         T&       get(int x, int y);
         const T& get(int x, int y) const;
-        T&       get(const Vector2D<int>& pos);
-        const T& get(const Vector2D<int>& pos) const;
+        T&       get(const Vec2i& pos);
+        const T& get(const Vec2i& pos) const;
         void     set(int x, int y, const T& value);
-        void     set(const Vector2D<int>& pos, const T& value);
+        void     set(const Vec2i& pos, const T& value);
 
 
     protected:
@@ -167,13 +167,13 @@ namespace cellar
     }
 
     template <typename T>
-    inline T& Grid2D<T>::get(const Vector2D<int> &pos)
+    inline T& Grid2D<T>::get(const Vec2i &pos)
     {
         return get(pos.x(), pos.y());
     }
 
     template <typename T>
-    inline const T& Grid2D<T>::get(const Vector2D<int> &pos) const
+    inline const T& Grid2D<T>::get(const Vec2i &pos) const
     {
         return get(pos.x(), pos.y());
     }
@@ -186,7 +186,7 @@ namespace cellar
     }
 
     template <typename T>
-    inline void Grid2D<T>::set(const Vector2D<int> &pos, const T &value)
+    inline void Grid2D<T>::set(const Vec2i &pos, const T &value)
     {
         set(pos.x(), pos.y(), value);
     }

@@ -16,8 +16,8 @@ namespace cellar
             fresnel(0.05)
         {}
 
-        Vector4D<float> diffuse;
-        Vector4D<float> specular;
+        Vec4f diffuse;
+        Vec4f specular;
         float shininess;
         float fresnel;
     };
@@ -30,9 +30,9 @@ namespace cellar
             specular(0.4, 0.4, 0.4, 1.0)
         {}
 
-        Vector4D<float> ambient;
-        Vector4D<float> diffuse;
-        Vector4D<float> specular;
+        Vec4f ambient;
+        Vec4f diffuse;
+        Vec4f specular;
     };
 
     struct CELLAR_EXPORT DirectionnalLight3D : public Light3D
@@ -41,7 +41,7 @@ namespace cellar
             direction(0.0, 0.0, -1.0, 0.0)
         {}
 
-        Vector4D<float> direction;
+        Vec4f direction;
     };
 
     struct CELLAR_EXPORT PointLight3D : public Light3D
@@ -51,8 +51,8 @@ namespace cellar
             attenuationCoefs(1.0, 0.0, 0.0)
         {}
 
-        Vector4D<float> position;
-        Vector4D<float> attenuationCoefs;
+        Vec4f position;
+        Vec4f attenuationCoefs;
     };
 
     struct CELLAR_EXPORT SpotLight3D : public PointLight3D
@@ -63,7 +63,7 @@ namespace cellar
         {
         }
 
-        Vector4D<float> direction;
+        Vec4f direction;
         float cutoff;
     };
 }

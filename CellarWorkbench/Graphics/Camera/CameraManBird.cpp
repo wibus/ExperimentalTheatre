@@ -22,27 +22,27 @@ namespace cellar
         setupCamera();
     }
 
-    void CameraManBird::moveTo(const Vector3D<float>& destination)
+    void CameraManBird::moveTo(const Vec3f& destination)
     {
         if(_camera == nullptr)
             return;
 
-        Vector3D<float> displacement = destination - _camera->tripod().from();
+        Vec3f displacement = destination - _camera->tripod().from();
         _camera->setTripod(destination,
                            _camera->tripod().to() + displacement,
                            _camera->tripod().up());
     }
 
-    void CameraManBird::moveBy(const Vector2D<float>& displacement)
+    void CameraManBird::moveBy(const Vec2f& displacement)
     {
         if(_camera == nullptr)
             return;
 
-        Vector3D<float> front = _camera->tripod().to() - _camera->tripod().from();
-        Vector3D<float> up = _camera->tripod().up();
-        Vector3D<float> side = front ^ up;
+        Vec3f front = _camera->tripod().to() - _camera->tripod().from();
+        Vec3f up = _camera->tripod().up();
+        Vec3f side = cross(front, up);
 
-        Vector3D<float> move = displacement.x()*side + displacement.y()*up;
+        Vec3f move = displacement.x()*side + displacement.y()*up;
 
         _camera->setTripod(_camera->tripod().from() + move,
                            _camera->tripod().to() + move,
@@ -54,10 +54,12 @@ namespace cellar
         if(_camera == nullptr)
             return;
 
-        Vector3D<float> front = (_camera->tripod().to() - _camera->tripod().from()).normalized();
+        Matrix4x4<float> rot;
+        Vec3f front = (_camera->tripod().to() - _camera->tripod().from()).normalized();
+        Vec3f nUp = rot.rotate(front.x(), front.y(), front.z(), radians) * _camera->tripod().up();
         _camera->setTripod(_camera->tripod().from(),
                            _camera->tripod().to(),
-                           Vector3D<float>(_camera->tripod().up()).rotate(front, radians));
+                           nUp);
     }
 
     void CameraManBird::setupCamera()
@@ -75,12 +77,12 @@ namespace cellar
                          -_camera->knowWindowHeight() / 2.0, _camera->knowWindowHeight() / 2.0,
                          -1.0, 1.0);
 
-        _camera->setTripod(Vector3D<float>(_camera->knowWindowWidth() / 2.0f,
+        _camera->setTripod(Vec3f(_camera->knowWindowWidth() / 2.0f,
                                            _camera->knowWindowHeight() / 2.0f,
                                            0.0f),
-                           Vector3D<float>(_camera->knowWindowWidth() / 2.0f,
+                           Vec3f(_camera->knowWindowWidth() / 2.0f,
                                            _camera->knowWindowHeight() / 2.0f,
                                            -1.0f),
-                           Vector3D<float>(0.0f, 1.0f, 0.0f));
+                           Vec3f(0.0f, 1.0f, 0.0f));
     }
 }

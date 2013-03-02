@@ -4,8 +4,8 @@
 namespace scaena
 {
     MouseEvent::MouseEvent(Mouse::Button button,
-                           const cellar::Vector2D<int>& pos,
-                           const cellar::Vector2D<int>& globalPos) :
+                           const cellar::Vec2i& pos,
+                           const cellar::Vec2i& globalPos) :
         _button(button),
         _position(pos),
         _globalPosition(globalPos)

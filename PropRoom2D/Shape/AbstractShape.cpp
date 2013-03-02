@@ -135,7 +135,7 @@ namespace prop2
     void AbstractShape::addForceAt(const Vec2r& force, const Vec2r& at)
     {
         Vec2r radius = at - _centroid;
-        addAngularForce(radius ^ force);
+        addAngularForce(cross(radius, force));
         addLinearForce(force);
     }
 }

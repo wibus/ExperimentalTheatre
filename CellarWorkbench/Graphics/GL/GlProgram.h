@@ -9,19 +9,13 @@
 
 #include <GL/glew.h>
 
+#include <DataStructure/Vector.h>
 #include "GlInputsOutputs.h"
 #include "GlShader.h"
 
 
 namespace cellar
 {
-    template <typename T>
-    class Vector2D;
-    template <typename T>
-    class Vector3D;
-    template <typename T>
-    class Vector4D;
-
     template <typename T>
     class Matrix3x3;
     template <typename T>
@@ -72,14 +66,14 @@ namespace cellar
         int getUniformLocation(const std::string& name) const;
 
         bool setInt(const std::string& var, int val);
-        bool setVec2i(const std::string& var, const Vector2D<int>& vec);
-        bool setVec3i(const std::string& var, const Vector3D<int>& vec);
-        bool setVec4i(const std::string& var, const Vector4D<int>& vec);
+        bool setVec2i(const std::string& var, const Vec2i& vec);
+        bool setVec3i(const std::string& var, const Vec3i& vec);
+        bool setVec4i(const std::string& var, const Vec4i& vec);
 
         bool setFloat(const std::string& var, float val);
-        bool setVec2f(const std::string& var, const Vector2D<float>& vec);
-        bool setVec3f(const std::string& var, const Vector3D<float>& vec);
-        bool setVec4f(const std::string& var, const Vector4D<float>& vec);
+        bool setVec2f(const std::string& var, const Vec2f& vec);
+        bool setVec3f(const std::string& var, const Vec3f& vec);
+        bool setVec4f(const std::string& var, const Vec4f& vec);
 
         bool setMatrix3x3(const std::string& var, const Matrix3x3<float>& mat);
         bool setMatrix4x4(const std::string& var, const Matrix4x4<float>& mat);
