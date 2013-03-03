@@ -3,7 +3,7 @@
 
 #include "DesignPattern/SpecificSubject.h"
 #include "DataStructure/Vector.h"
-#include "DataStructure/Matrix4x4.h"
+#include "DataStructure/Matrix.h"
 
 
 namespace cellar
@@ -133,8 +133,8 @@ namespace cellar
 
         void zoom(float ratio);
 
-        Matrix4x4<float>& projectionMatrix();
-        Matrix4x4<float>& viewMatrix();
+        Mat4f& projectionMatrix();
+        Mat4f& viewMatrix();
 
     private:
         void updateMatrices();
@@ -147,8 +147,8 @@ namespace cellar
         Tripod _tripod;        
         int _windowWidth;
         int _windowHeight;
-        Matrix4x4<float> _projMatrix;
-        Matrix4x4<float> _viewMatrix;
+        Mat4f _projMatrix;
+        Mat4f _viewMatrix;
     };
 
     struct CameraMsg
@@ -175,8 +175,8 @@ namespace cellar
     inline const Camera::Tripod &Camera::tripod() {return _tripod;}
     inline int Camera::knowWindowWidth() const {return _windowWidth;}
     inline int Camera::knowWindowHeight() const {return _windowHeight;}
-    inline Matrix4x4<float>& Camera::projectionMatrix() {return _projMatrix;}
-    inline Matrix4x4<float>& Camera::viewMatrix() {return _viewMatrix;}
+    inline Mat4f& Camera::projectionMatrix() {return _projMatrix;}
+    inline Mat4f& Camera::viewMatrix() {return _viewMatrix;}
 
     // FRAME //
     inline float Camera::Frame::width() const {return _width;}

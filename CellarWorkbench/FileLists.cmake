@@ -9,8 +9,6 @@ SET(CELLAR_DATA_STRUCTURE_HEADERS
     ${CELLAR_SRC_DIR}/DataStructure/Barycenter.h
     ${CELLAR_SRC_DIR}/DataStructure/Grid2D.h
     ${CELLAR_SRC_DIR}/DataStructure/Grid3D.h
-    ${CELLAR_SRC_DIR}/DataStructure/Matrix3x3.h
-    ${CELLAR_SRC_DIR}/DataStructure/Matrix4x4.h
     ${CELLAR_SRC_DIR}/DataStructure/Matrix.h
     ${CELLAR_SRC_DIR}/DataStructure/MatrixStack.h
     ${CELLAR_SRC_DIR}/DataStructure/ObservableMatrixStack.h

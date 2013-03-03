@@ -52,9 +52,9 @@ namespace prop2
     void Circle::updateTranformMatrix()
     {
         _tranformMatrix.loadIdentity();
-        _tranformMatrix.scale(_radius);
-        _tranformMatrix.translate(Vec3r(_centroid, real(0)));
-        _tranformMatrix.rotate(_angle);
+        _tranformMatrix *= cellar::scale(_radius, _radius, real(1));
+        _tranformMatrix *= cellar::translate(_centroid.x(), _centroid.y());
+        _tranformMatrix *= cellar::rotate(_angle);
     }
 
     void Circle::updatePerimeter()

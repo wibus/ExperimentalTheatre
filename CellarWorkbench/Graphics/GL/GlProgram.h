@@ -9,19 +9,14 @@
 
 #include <GL/glew.h>
 
-#include <DataStructure/Vector.h>
+#include "DataStructure/Vector.h"
+#include "DataStructure/Matrix.h"
 #include "GlInputsOutputs.h"
 #include "GlShader.h"
 
 
 namespace cellar
 {
-    template <typename T>
-    class Matrix3x3;
-    template <typename T>
-    class Matrix4x4;
-
-
     class CELLAR_EXPORT GlProgram
     {
     public:
@@ -75,8 +70,8 @@ namespace cellar
         bool setVec3f(const std::string& var, const Vec3f& vec);
         bool setVec4f(const std::string& var, const Vec4f& vec);
 
-        bool setMatrix3x3(const std::string& var, const Matrix3x3<float>& mat);
-        bool setMatrix4x4(const std::string& var, const Matrix4x4<float>& mat);
+        bool setMat3f(const std::string& var, const Mat3f& mat);
+        bool setMat4f(const std::string& var, const Mat4f& mat);
 
     private:
         void applyState();

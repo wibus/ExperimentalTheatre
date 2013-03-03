@@ -54,9 +54,8 @@ namespace cellar
         if(_camera == nullptr)
             return;
 
-        Matrix4x4<float> rot;
         Vec3f front = (_camera->tripod().to() - _camera->tripod().from()).normalized();
-        Vec3f nUp = rot.rotate(front.x(), front.y(), front.z(), radians) * _camera->tripod().up();
+        Vec3f nUp = cellar::rotate(front.x(), front.y(), front.z(), radians) * _camera->tripod().up();
         _camera->setTripod(_camera->tripod().from(),
                            _camera->tripod().to(),
                            nUp);

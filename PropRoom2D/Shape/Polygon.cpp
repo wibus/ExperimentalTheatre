@@ -115,8 +115,8 @@ namespace prop2
     void Polygon::updateTranformMatrix()
     {
         _tranformMatrix.loadIdentity();
-        _tranformMatrix.translate(Vec3r(_centroid, real(0)));
-        _tranformMatrix.rotate(_angle);
+        _tranformMatrix *= cellar::translate(_centroid.x(), _centroid.y());
+        _tranformMatrix *= cellar::rotate(_angle);
     }
 
     void Polygon::updatePerimeter()

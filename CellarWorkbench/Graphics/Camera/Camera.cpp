@@ -140,14 +140,14 @@ namespace cellar
         _projMatrix.loadIdentity();
 
         if(_lens.type() == Lens::ORTHOGRAPHIC)
-            _projMatrix.ortho(_lens.left(),       _lens.right(),
-                              _lens.bottom(),     _lens.top(),
-                              _lens.nearPlane(),  _lens.farPlane());
+            _projMatrix *= ortho(_lens.left(),       _lens.right(),
+                                 _lens.bottom(),     _lens.top(),
+                                 _lens.nearPlane(),  _lens.farPlane());
 
         else if(_lens.type() == Lens::PERSPECTIVE)
-            _projMatrix.frustrum(_lens.left(),      _lens.right(),
-                                 _lens.bottom(),    _lens.top(),
-                                 _lens.nearPlane(), _lens.farPlane());
+            _projMatrix *= frustrum(_lens.left(),      _lens.right(),
+                                    _lens.bottom(),    _lens.top(),
+                                    _lens.nearPlane(), _lens.farPlane());
 
         setIsChanged( true );
         CameraMsg msg(*this, CameraMsg::PROJECTION);
@@ -156,10 +156,7 @@ namespace cellar
 
     void Camera::updateViewMatrix()
     {
-        _viewMatrix.loadIdentity();
-        _viewMatrix.lookAt(_tripod.from(),
-                          _tripod.to(),
-                          _tripod.up());
+        _viewMatrix = lookAt(_tripod.from(), _tripod.to(), _tripod.up());
 
         setIsChanged( true );
         CameraMsg msg(*this, CameraMsg::VIEW);

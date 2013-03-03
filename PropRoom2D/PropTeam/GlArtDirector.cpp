@@ -87,23 +87,22 @@ namespace prop2
     void GlArtDirector::updateViewportSize(int width, int height)
     {
         _viewportSize(width, height);
-        Mat4r projection;
-        projection.ortho(0, width, 0, height, -1.0, 1.0);
+        Mat4r projection = ortho<real>(0, width, 0, height, -1.0, 1.0);
 
         _circleShader.pushProgram();
-        _circleShader.setMatrix4x4("Projection", projection);
+        _circleShader.setMat4f("Projection", projection);
         _circleShader.popProgram();
 
         _polygonShader.pushProgram();
-        _polygonShader.setMatrix4x4("Projection", projection);
+        _polygonShader.setMat4f("Projection", projection);
         _polygonShader.popProgram();
 
         _textHudShader.pushProgram();
-        _textHudShader.setMatrix4x4("Projection", projection);
+        _textHudShader.setMat4f("Projection", projection);
         _textHudShader.popProgram();
 
         _imageHudShader.pushProgram();
-        _imageHudShader.setMatrix4x4("Projection", projection);
+        _imageHudShader.setMat4f("Projection", projection);
         _imageHudShader.popProgram();
     }
 
@@ -206,7 +205,7 @@ namespace prop2
     {
         _circleShader.pushProgram();
         _circleVao.bind();
-        _circleShader.setMatrix3x3("ModelView", circle->transformMatrix());
+        _circleShader.setMat3f("ModelView", circle->transformMatrix());
         _circleShader.setFloat("Depth",         circle->costume()->depth());
         _circleShader.setVec4f("ColorFilter",   circle->costume()->colorFilter());
         _circleShader.setVec2f("TexOffset",     circle->costume()->textureCenter());
@@ -241,7 +240,7 @@ namespace prop2
                      polygon->costume()->verticesTexCoords().data(),
                      GL_DYNAMIC_DRAW);
 
-        _polygonShader.setMatrix3x3("ModelView", polygon->transformMatrix());
+        _polygonShader.setMat3f("ModelView", polygon->transformMatrix());
         _polygonShader.setFloat("Depth",         polygon->costume()->depth());
         _polygonShader.setVec4f("ColorFilter",   polygon->costume()->colorFilter());
         _polygonShader.setVec2f("TexOffset",     Vec2f(real(0.0), real(0.0)));

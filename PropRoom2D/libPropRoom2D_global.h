@@ -57,8 +57,8 @@ namespace prop2
     typedef cellar::Vector<2, real> Vec2r;
     typedef cellar::Vector<3, real> Vec3r;
     typedef cellar::Vector<4, real> Vec4r;
-    typedef cellar::Matrix3x3<real> Mat3r;
-    typedef cellar::Matrix4x4<real> Mat4r;
+    typedef cellar::Matrix<3, real> Mat3r;
+    typedef cellar::Matrix<4, real> Mat4r;
 
     // Line
     typedef cellar::Segment2D<real> Segment2Dr;

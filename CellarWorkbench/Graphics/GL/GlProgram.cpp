@@ -379,7 +379,7 @@ namespace cellar
         return true;
     }
 
-    bool GlProgram::setMatrix3x3(const std::string& var, const Matrix3x3<float>& mat)
+    bool GlProgram::setMat3f(const std::string& var, const Mat3f& mat)
     {
         if( !isCurrentProgram() )
             return false;
@@ -393,7 +393,7 @@ namespace cellar
         return true;
     }
 
-    bool GlProgram::setMatrix4x4(const std::string& var, const Matrix4x4<float>& mat)
+    bool GlProgram::setMat4f(const std::string& var, const Mat4f& mat)
     {
         if( !isCurrentProgram() )
             return false;
