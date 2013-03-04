@@ -31,6 +31,10 @@ namespace cellar
         Matrix<N, T>& operator-=(const Matrix<N, T>& rhs);
         Matrix<N, T>  operator- (const Matrix<N, T>& rhs) const;
         Matrix<N, T>& operator- ();
+        Matrix<N, T>& operator*=(const T& coef);
+        Matrix<N, T>  operator* (const T& coef) const;
+        Matrix<N, T>& operator/=(const T& coef);
+        Matrix<N, T>  operator/ (const T& coef) const;
 
 
         Matrix<N, T>& loadIdentity();
@@ -281,6 +285,55 @@ namespace cellar
         return *this;
     }
 
+    template <int N, typename T>
+    Matrix<N, T>& Matrix<N,T>::operator*=(const T& coef)
+    {
+        for(int i=0; i<N; ++i)
+        {
+            for(int j=0; j<N; ++j)
+            {
+                _m[i][j] *= coef;
+            }
+        }
+        return *this;
+    }
+
+    template <int N, typename T>
+    inline Matrix<N, T> Matrix<N,T>::operator* (const T& coef) const
+    {
+        return Matrix<N, T>(&_m[0][0]) *= coef;
+    }
+
+    template <int N, typename T>
+    inline Matrix<N, T> operator* (const T& coef, const Matrix<N, T>& mat)
+    {
+        return mat * coef;
+    }
+
+    template <int N, typename T>
+    Matrix<N, T>& Matrix<N,T>::operator/=(const T& coef)
+    {
+        for(int i=0; i<N; ++i)
+        {
+            for(int j=0; j<N; ++j)
+            {
+                _m[i][j] /= coef;
+            }
+        }
+        return *this;
+    }
+
+    template <int N, typename T>
+    inline Matrix<N, T> Matrix<N,T>::operator/ (const T& coef) const
+    {
+        return Matrix<N, T>(&_m[0][0]) /= coef;
+    }
+
+    template <int N, typename T>
+    inline Matrix<N, T> operator/ (const T& coef, const Matrix<N, T>& mat)
+    {
+        return mat / coef;
+    }
 
     template <int N, typename T>
     Matrix<N,T>& Matrix<N,T>::loadIdentity()

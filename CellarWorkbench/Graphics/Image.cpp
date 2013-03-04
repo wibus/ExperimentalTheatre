@@ -148,7 +148,7 @@ namespace cellar
         QImage img;
         if(img.load(fileName.c_str()))
         {
-            img.convertToFormat(QImage::Format_ARGB32);
+            img = img.convertToFormat(QImage::Format_ARGB32);
             _width = img.width();
             _height = img.height();
 
