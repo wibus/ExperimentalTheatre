@@ -528,7 +528,7 @@ namespace cellar
     }
 
     template <typename T>
-    inline Matrix<2,T> scale(const T& sx, const T& sy=T(1))
+    inline Matrix<2,T> scale(const T& sx, const T& sy)
     {
         T values[] = {
             sx, T(0),
@@ -538,7 +538,7 @@ namespace cellar
     }
 
     template <typename T>
-    Matrix<3,T> scale(const T& sx, const T& sy, const T& sz=T(1))
+    Matrix<3,T> scale(const T& sx, const T& sy, const T& sz)
     {
         T values[] = {
             sx,   T(0), T(0),
@@ -549,7 +549,7 @@ namespace cellar
     }
 
     template <typename T>
-    Matrix<4,T> scale(const T& sx, const T& sy, const T& sz, const T& sw=T(1))
+    Matrix<4,T> scale(const T& sx, const T& sy, const T& sz, const T& sw)
     {
         T values[] = {
             sx,   T(0), T(0), T(0),
