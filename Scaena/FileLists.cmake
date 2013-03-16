@@ -16,6 +16,7 @@ SET(SCAENA_PLAY_HEADERS
 # Application
 SET(SCAENA_SCAENA_APPLICATION_HEADERS
     ${SCAENA_SRC_DIR}/ScaenaApplication/Application.h
+    ${SCAENA_SRC_DIR}/ScaenaApplication/GlMainWindow.h
     ${SCAENA_SRC_DIR}/ScaenaApplication/StageChooserDialog.h)
 
 # Exceptions
@@ -84,6 +85,7 @@ SET(SCAENA_PLAY_SOURCES
 # Scaena application
 SET(SCAENA_SCAENA_APPLICATION_SOURCES
     ${SCAENA_SRC_DIR}/ScaenaApplication/Application.cpp
+    ${SCAENA_SRC_DIR}/ScaenaApplication/GlMainWindow.cpp
     ${SCAENA_SRC_DIR}/ScaenaApplication/StageChooserDialog.cpp)
 
 # Exceptions
@@ -132,6 +134,7 @@ SET(SCAENA_SOURCES
 ## Mocking ##
 SET(SCAEN_MOC_H_FILES
     ${SCAENA_SRC_DIR}/ScaenaApplication/Application.h
+    ${SCAENA_SRC_DIR}/ScaenaApplication/GlMainWindow.h
     ${SCAENA_SRC_DIR}/ScaenaApplication/StageChooserDialog.h
     ${SCAENA_SRC_DIR}/Stage/QGLStage.h)
 QT_WRAP_CPP(Scaena SCAENA_MOC_CPP_FILES ${SCAEN_MOC_H_FILES})
