@@ -204,12 +204,12 @@ namespace prop2
     void GlArtDirector::drawCircle(Circle* circle)
     {
         _circleShader.pushProgram();
+        _circleShader.setMat3f("ModelView",   circle->transformMatrix());
+        _circleShader.setFloat("Depth",       circle->costume()->depth());
+        _circleShader.setVec4f("ColorFilter", circle->costume()->colorFilter());
+        _circleShader.setVec2f("TexOffset",   circle->costume()->textureCenter());
+        _circleShader.setFloat("TexStretch",  circle->costume()->textureRadius());
         _circleVao.bind();
-        _circleShader.setMat3f("ModelView", circle->transformMatrix());
-        _circleShader.setFloat("Depth",         circle->costume()->depth());
-        _circleShader.setVec4f("ColorFilter",   circle->costume()->colorFilter());
-        _circleShader.setVec2f("TexOffset",     circle->costume()->textureCenter());
-        _circleShader.setFloat("TexStretch",    circle->costume()->textureRadius());
         glBindTexture(GL_TEXTURE_2D, GlToolkit::genTextureId(
             getImageBank().getImage(circle->costume()->textureName())));
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
@@ -220,8 +220,13 @@ namespace prop2
     void GlArtDirector::drawPolygon(Polygon* polygon)
     {
         _polygonShader.pushProgram();
-        _polygonVao.bind();
+        _polygonShader.setMat3f("ModelView", polygon->transformMatrix());
+        _polygonShader.setFloat("Depth",         polygon->costume()->depth());
+        _polygonShader.setVec4f("ColorFilter",   polygon->costume()->colorFilter());
+        _polygonShader.setVec2f("TexOffset",     Vec2f(real(0.0), real(0.0)));
+        _polygonShader.setFloat("TexStretch",    real(1.0));
 
+        _polygonVao.bind();
         glBindBuffer(GL_ARRAY_BUFFER, _polygonVao.bufferId("position"));
         glBufferData(GL_ARRAY_BUFFER,
                      2*4*polygon->relVertices().size(),
@@ -239,12 +244,6 @@ namespace prop2
                      2*4*polygon->costume()->verticesTexCoords().size(),
                      polygon->costume()->verticesTexCoords().data(),
                      GL_DYNAMIC_DRAW);
-
-        _polygonShader.setMat3f("ModelView", polygon->transformMatrix());
-        _polygonShader.setFloat("Depth",         polygon->costume()->depth());
-        _polygonShader.setVec4f("ColorFilter",   polygon->costume()->colorFilter());
-        _polygonShader.setVec2f("TexOffset",     Vec2f(real(0.0), real(0.0)));
-        _polygonShader.setFloat("TexStretch",    real(1.0));
 
         glBindTexture(GL_TEXTURE_2D, GlToolkit::genTextureId(
             getImageBank().getImage(polygon->costume()->textureName())));
