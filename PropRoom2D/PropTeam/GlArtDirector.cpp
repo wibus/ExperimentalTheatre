@@ -1,5 +1,4 @@
 #include "GlArtDirector.h"
-#include "GlArtDirectorShaders.h"
 
 #include "Shape/Circle.h"
 #include "Costume/CircleCostume.h"
@@ -10,11 +9,11 @@
 #include "Hud/ImageHud.h"
 
 #include <cassert>
-
-#include <fstream>
 using namespace std;
 
 #include <GL/glew.h>
+
+#include <QFile>
 
 #include <Graphics/Image.h>
 #include <Graphics/ImageBank.h>
@@ -39,8 +38,6 @@ namespace prop2
         _texts(),
         _images(),
         _fonts(),
-        _propVertexShader(new GlShader(GL_VERTEX_SHADER)),
-        _hudVertexShader(new GlShader(GL_VERTEX_SHADER)),
         _circleShader(),
         _polygonShader(),
         _textHudShader(),
@@ -64,9 +61,6 @@ namespace prop2
             locations.setInput(0, "position");
             locations.setInput(1, "texCoord");
             locations.setInput(2, "color");
-
-            _propVertexShader->loadFromString(COMMON_VERTEX_SHADER);
-            _hudVertexShader->loadFromString(HUD_VERTEX_SHADER);
 
             setupCircleShader(locations);
             setupPolygonShader(locations);
@@ -432,12 +426,9 @@ namespace prop2
 
     void GlArtDirector::setupCircleShader(const GlInputsOutputs& loc)
     {
-        shared_ptr<GlShader> circleFrag(new GlShader(GL_FRAGMENT_SHADER));
-        circleFrag->loadFromString(CIRCLE_FRAGMENT_SHADER);
-
         _circleShader.setInAndOutLocations(loc);
-        _circleShader.addShader(_propVertexShader);
-        _circleShader.addShader(circleFrag);
+        _circleShader.addShader(GL_VERTEX_SHADER, ":/shaders/ShapeVertex.vert");
+        _circleShader.addShader(GL_FRAGMENT_SHADER, ":/shaders/CircleFragment.frag");
         _circleShader.link();
         _circleShader.pushProgram();
         _circleShader.setInt("Texture", 0);
@@ -462,12 +453,9 @@ namespace prop2
 
     void GlArtDirector::setupPolygonShader(const GlInputsOutputs& loc)
     {
-        shared_ptr<GlShader> polygonFrag(new GlShader(GL_FRAGMENT_SHADER));
-        polygonFrag->loadFromString(POLYGON_FRAGMENT_SHADER);
-
         _polygonShader.setInAndOutLocations(loc);
-        _polygonShader.addShader(_propVertexShader);
-        _polygonShader.addShader(polygonFrag);
+        _polygonShader.addShader(GL_VERTEX_SHADER, ":/shaders/ShapeVertex.vert");
+        _polygonShader.addShader(GL_FRAGMENT_SHADER, ":/shaders/PolygonFragment.frag");
         _polygonShader.link();
         _polygonShader.pushProgram();
         _polygonShader.setInt("Texture", 0);
@@ -488,12 +476,9 @@ namespace prop2
 
     void GlArtDirector::setupTextHudShader(const GlInputsOutputs& loc)
     {
-        shared_ptr<GlShader> hudFrag(new GlShader(GL_FRAGMENT_SHADER));
-        hudFrag->loadFromString(HUD_FRAGMENT_SHADER);
-
         _textHudShader.setInAndOutLocations(loc);
-        _textHudShader.addShader(_hudVertexShader);
-        _textHudShader.addShader(hudFrag);
+        _textHudShader.addShader(GL_VERTEX_SHADER, ":/shaders/HudVertex.vert");
+        _textHudShader.addShader(GL_FRAGMENT_SHADER, ":/shaders/HudFragment.frag");
         _textHudShader.link();
         _textHudShader.pushProgram();
         _textHudShader.setInt("Texture", 0);
@@ -510,12 +495,9 @@ namespace prop2
 
     void GlArtDirector::setupImageHudShader(const GlInputsOutputs& loc)
     {
-        shared_ptr<GlShader> hudFrag(new GlShader(GL_FRAGMENT_SHADER));
-        hudFrag->loadFromString(HUD_FRAGMENT_SHADER);
-
         _imageHudShader.setInAndOutLocations(loc);
-        _imageHudShader.addShader(_hudVertexShader);
-        _imageHudShader.addShader(hudFrag);
+        _imageHudShader.addShader(GL_VERTEX_SHADER, ":/shaders/HudVertex.vert");
+        _imageHudShader.addShader(GL_FRAGMENT_SHADER, ":/shaders/HudFragment.frag");
         _imageHudShader.link();
         _imageHudShader.pushProgram();
         _imageHudShader.setInt("Texture", 0);
@@ -538,63 +520,62 @@ namespace prop2
     }
 
     GlFont::GlFont(const string& name) :
-            _name(name),
-            _id(0)
+        _name(name),
+        _id(0)
+    {
+        loadFont();
+    }
+
+    void GlFont::loadFont()
+    {
+        //Load font texture
+        string fileFullName = ":/fonts/" + _name;
+
+        Image image = Image(fileFullName+ ".png");
+        int size = image.dataSize();
+        unsigned char * pixels = image.pixels();
+        for(int i=0; i < size; i+=4)
         {
-            loadFont();
+            pixels[i] = 255;
+            pixels[i+1] = 255;
+            pixels[i+2] = 255;
         }
 
-        void GlFont::loadFont()
+        // Make font part of the image bank
+        getImageBank().addImage("font-"+_name, image);
+        _id =  GlToolkit::genTextureId(getImageBank().getImage("font-"+_name));
+
+
+        //Load font format
+        QFile flwFile((fileFullName+".flw").c_str());
+        if(false/*flwFile.open(QIODevice::ReadOnly | QIODevice::Text)*/)
         {
-            //Load font texture
-            string fileFullName = "resources/fonts/" + _name;
+            char lw[96];
+            char lh;
+            char dimensions;
 
-            Image image = Image(fileFullName+ ".png");
-            int size = image.dataSize();
-            unsigned char * pixels = image.pixels();
-            for(int i=0; i < size; i+=4)
-            {
-                pixels[i] = 255;
-                pixels[i+1] = 255;
-                pixels[i+2] = 255;
-            }
+            //Extracting data
+            flwFile.read(&dimensions,1);
+            flwFile.read(&lh,1);
+            flwFile.read(lw,96);
+            flwFile.close();
 
-            // Make font part of the image bank
-            getImageBank().addImage("font-"+_name, image);
-            _id =  GlToolkit::genTextureId(getImageBank().getImage("font-"+_name));
+            //Converting into rigth format
+            _charsHeight = lh/pow((double)2,dimensions);
+            for(int i=0; i<96; i++)
+                    _charsWidth[i] = lw[i]/pow((double)2,dimensions);
 
-
-            //Load font format
-            fstream flwFile;
-            flwFile.open((fileFullName+".flw").c_str(), ios::binary|ios::in);
-            if(!flwFile.fail())
-            {
-                char lw[96];
-                char lh;
-                char dimensions;
-
-                //Extracting data
-                flwFile.read(&dimensions,1);
-                flwFile.read(&lh,1);
-                flwFile.read(lw,96);
-                flwFile.close();
-
-                //Converting into rigth format
-                _charsHeight = lh/pow((double)2,dimensions);
-                for(int i=0; i<96; i++)
-                        _charsWidth[i] = lw[i]/pow((double)2,dimensions);
-
-                getLog().postMessage(new
-                    Message('I', false, fileFullName + ".flw : OK", "Text"));
-            }
-            else
-            {
-                for(int i=0; i<96; i++)
-                        _charsWidth[i] = 0.05f;
-                _charsHeight = 0.1f;
-
-                getLog().postMessage(new
-                    Message('W', false, fileFullName + ".flw : Absent", "Text"));
-            }
+            getLog().postMessage(new
+                Message('I', false, "\t"+fileFullName + ".flw : OK", "Text"));
         }
+        else
+        {
+            for(int i=0; i<96; i++)
+                    _charsWidth[i] = 0.05f;
+            _charsHeight = 0.1f;
+
+            getLog().postMessage(new
+                Message('W', false, "\t"+fileFullName + ".flw : Absent", "Text"));
+        }
+    }
 }

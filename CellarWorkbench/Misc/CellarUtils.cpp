@@ -1,6 +1,7 @@
 #include "CellarUtils.h"
 
-#include <fstream>
+#include <QFile>
+#include <QTextStream>
 #include <sstream>
 using namespace std;
 
@@ -18,19 +19,18 @@ namespace cellar
 
     string fileToString(const string& fileName, bool* ok)
     {
-        ifstream file;
-        file.open(fileName.c_str(), ifstream::in);
-        if(!file.is_open())
+        QFile file(fileName.c_str());
+        if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
         {
             if(ok != nullptr) *ok = false;
             return string();
         }
 
-        stringstream text;
-        text << file.rdbuf();
+        QTextStream stream(&file);
+        string text = stream.readAll().toStdString();
         file.close();
 
         if(ok != nullptr) *ok = true;
-        return text.str();
+        return text;
     }
 }

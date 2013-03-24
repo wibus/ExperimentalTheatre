@@ -131,13 +131,15 @@ SET(SCAENA_SOURCES
     ${SCAENA_STAGE_MANAGER_SOURCES}
     ${SCAENA_STAGE_SOURCES})
 
+
 ## Mocking ##
-SET(SCAEN_MOC_H_FILES
+SET(SCAENA_MOC_H_FILES
     ${SCAENA_SRC_DIR}/ScaenaApplication/Application.h
     ${SCAENA_SRC_DIR}/ScaenaApplication/GlMainWindow.h
     ${SCAENA_SRC_DIR}/ScaenaApplication/StageChooserDialog.h
     ${SCAENA_SRC_DIR}/Stage/QGLStage.h)
-QT_WRAP_CPP(Scaena SCAENA_MOC_CPP_FILES ${SCAEN_MOC_H_FILES})
+QT_WRAP_CPP(Scaena SCAENA_MOC_CPP_FILES ${SCAENA_MOC_H_FILES})
+
 
 ## Global ##
 SET(SCAENA_SRC_FILES
