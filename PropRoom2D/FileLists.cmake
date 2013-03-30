@@ -19,7 +19,6 @@ SET(PROP2_PROP_TEAM_HEADERS
     ${PROP2_SRC_DIR}/PropTeam/AbstractPropTeam.h
     ${PROP2_SRC_DIR}/PropTeam/AbstractTeamMember.h
     ${PROP2_SRC_DIR}/PropTeam/GlArtDirector.h
-    ${PROP2_SRC_DIR}/PropTeam/GlArtDirectorShaders.h
     ${PROP2_SRC_DIR}/PropTeam/StdChoreographer.h
     ${PROP2_SRC_DIR}/PropTeam/StdGlPropTeam.h
     ${PROP2_SRC_DIR}/PropTeam/StdPropDesigner.h)
@@ -57,7 +56,6 @@ SET(PROP2_HUD_SOURCES
 SET(PROP2_PROP_TEAM_SOURCES
     ${PROP2_SRC_DIR}/PropTeam/AbstractPropTeam.cpp
     ${PROP2_SRC_DIR}/PropTeam/GlArtDirector.cpp
-    ${PROP2_SRC_DIR}/PropTeam/GlArtDirectorShaders.cpp
     ${PROP2_SRC_DIR}/PropTeam/StdChoreographer.cpp
     ${PROP2_SRC_DIR}/PropTeam/StdGlPropTeam.cpp
     ${PROP2_SRC_DIR}/PropTeam/StdPropDesigner.cpp)
@@ -77,10 +75,31 @@ SET(PROP2_SOURCES
     ${PROP2_SRC_DIR}/AbstractProp.cpp)
     
 
+## Resources
+SET(PROP2_FONT_FILES
+    ${PROP2_SRC_DIR}/resources/fonts/Arial.png
+    ${PROP2_SRC_DIR}/resources/fonts/Arial.flw)
+SET(PROP2_SHADER_FILES
+    ${PROP2_SRC_DIR}/resources/shaders/ShapeVertex.vert
+    ${PROP2_SRC_DIR}/resources/shaders/CircleFragment.frag
+    ${PROP2_SRC_DIR}/resources/shaders/PolygonFragment.frag
+    ${PROP2_SRC_DIR}/resources/shaders/HudVertex.vert
+    ${PROP2_SRC_DIR}/resources/shaders/HudFragment.frag)
+SET(PROP2_RESOURCE_FILES
+    ${PROP2_FONT_FILES}
+    ${PROP2_SHADER_FILES})
+SET(PROP2_RCC_FILES
+    ${PROP2_SRC_DIR}/resources/PropRoom2D_Resources.qrc)
+QT4_ADD_RESOURCES(PROP2_RCC_SRCS ${PROP2_RCC_FILES})
+
+
 ## Global ##
 SET(PROP2_SRC_FILES
     ${PROP2_HEADERS}
-    ${PROP2_SOURCES})
+    ${PROP2_SOURCES}
+    ${PROP2_RESOURCE_FILES}
+    ${PROP2_RCC_FILES}
+    ${PROP2_RCC_SRCS})
 
 SET(PROP2_CONFIG_FILES
     ${PROP2_SRC_DIR}/CMakeLists.txt

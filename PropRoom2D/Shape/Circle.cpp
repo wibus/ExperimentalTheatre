@@ -52,8 +52,8 @@ namespace prop2
     void Circle::updateTranformMatrix()
     {
         _tranformMatrix.loadIdentity();
-        _tranformMatrix *= cellar::scale(_radius, _radius, real(1));
         _tranformMatrix *= cellar::translate(_centroid.x(), _centroid.y());
+        _tranformMatrix *= cellar::scale(_radius, _radius, real(1));        
         _tranformMatrix *= cellar::rotate(_angle);
     }
 

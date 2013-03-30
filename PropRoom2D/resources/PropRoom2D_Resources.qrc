@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>shaders/CircleFragment.frag</file>
+        <file>shaders/HudFragment.frag</file>
+        <file>shaders/HudVertex.vert</file>
+        <file>shaders/PolygonFragment.frag</file>
+        <file>shaders/ShapeVertex.vert</file>
+        <file>fonts/Arial.flw</file>
+        <file>fonts/Arial.png</file>
+    </qresource>
+</RCC>

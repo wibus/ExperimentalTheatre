@@ -92,8 +92,6 @@ class AbstractShape;
                              std::vector<AbstractShape*>,
                              ShapeOrderer > _tranparentShapes;
 
-        std::shared_ptr<cellar::GlShader> _propVertexShader;
-        std::shared_ptr<cellar::GlShader> _hudVertexShader;
         cellar::GlProgram _circleShader;
         cellar::GlProgram _polygonShader;
         cellar::GlProgram _textHudShader;
