@@ -15,8 +15,8 @@ using namespace std;
 
 #include <QFile>
 
-#include <Graphics/Image.h>
-#include <Graphics/ImageBank.h>
+#include <Graphics/Image/Image.h>
+#include <Graphics/Image/ImageBank.h>
 #include <Graphics/GL/GlToolkit.h>
 #include <Misc/Log.h>
 using namespace cellar;

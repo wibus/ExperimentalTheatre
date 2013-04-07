@@ -2,7 +2,7 @@
 #include "DataStructure/VectorSpace.h"
 #include "Misc/CellarUtils.h"
 #include "Misc/Log.h"
-#include "../Image.h"
+#include "Graphics/Image/Image.h"
 
 #include <GL/glew.h>
 
