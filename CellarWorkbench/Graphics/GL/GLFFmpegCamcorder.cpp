@@ -2,7 +2,7 @@
 
 #include "GLFFmpegCamcorder.h"
 
-#include <GL/glew.h>
+#include <GL3/gl3w.h>
 
 extern "C" {
 #include <libavutil/opt.h>

@@ -1,7 +1,7 @@
 #ifndef SCAENA_QGLSTAGE_H
 #define SCAENA_QGLSTAGE_H
 
-#include <GL/glew.h>
+#include <GL3/gl3w.h>
 
 #include <QGLWidget>
 #include <QTimer>

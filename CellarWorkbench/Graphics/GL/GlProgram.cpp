@@ -11,7 +11,7 @@
 #include <cassert>
 using namespace std;
 
-#include <GL/glew.h>
+#include <GL3/gl3w.h>
 
 
 namespace cellar

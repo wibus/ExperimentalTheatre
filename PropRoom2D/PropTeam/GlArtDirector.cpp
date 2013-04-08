@@ -11,7 +11,7 @@
 #include <cassert>
 using namespace std;
 
-#include <GL/glew.h>
+#include <GL3/gl3w.h>
 
 #include <QFile>
 
@@ -290,7 +290,9 @@ namespace prop2
             texCoords.push_back(Vec2r(s,  1-t));
             texCoords.push_back(Vec2r(s,  1-nt));
             texCoords.push_back(Vec2r(ns, 1-nt));
+            texCoords.push_back(Vec2r(ns, 1-nt));
             texCoords.push_back(Vec2r(ns, 1-t));
+            texCoords.push_back(Vec2r(s,  1-t));
 
 
             // Positions
@@ -300,7 +302,9 @@ namespace prop2
             positions.push_back(Vec2r(left,  top));
             positions.push_back(Vec2r(left,  bottom));
             positions.push_back(Vec2r(right, bottom));
+            positions.push_back(Vec2r(right, bottom));
             positions.push_back(Vec2r(right, top));
+            positions.push_back(Vec2r(left,  top));
 
             // Move forward to next character's left
             left = right;
@@ -321,7 +325,7 @@ namespace prop2
         _textHudShader.setVec2f("Anchor", anchorPos);
         _textHudShader.setVec4f("ColorFilter", text->color());
 
-        glDrawArrays(GL_QUADS, 0, (int)positions.size());
+        glDrawArrays(GL_TRIANGLES, 0, (int)positions.size());
 
         _imageHudVao.unbind();
         _imageHudShader.popProgram();

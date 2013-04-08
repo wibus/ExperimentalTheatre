@@ -5,7 +5,7 @@
 #include <vector>
 #include <map>
 
-#include <GL/glew.h>
+#include <GL3/gl3w.h>
 
 #include "libCellarWorkbench_global.h"
 #include "DataStructure/Vector.h"

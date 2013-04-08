@@ -186,7 +186,7 @@ namespace scaena
     // QGLWidget interface
     void QGLStage::initializeGL()
     {
-        glewInit();
+        gl3wInit();
 
         ostringstream oss;
         oss << "OpenGL version: " << glGetString(GL_VERSION);
@@ -213,7 +213,6 @@ namespace scaena
     void QGLStage::paintGL()
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glColor3f(1.0f, 1.0f, 1.0f);
 
         draw();
     }

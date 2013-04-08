@@ -4,7 +4,7 @@
 #include "Misc/Log.h"
 #include "Graphics/Image/Image.h"
 
-#include <GL/glew.h>
+#include <GL3/gl3w.h>
 
 using namespace std;
 
