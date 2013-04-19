@@ -41,33 +41,33 @@ namespace cellar
 
             Lens();
             Lens(Type type,
-                 double left,       double right,
-                 double bottom,     double top,
-                 double nearPlane,  double farPlane);
+                 float left,       float right,
+                 float bottom,     float top,
+                 float nearPlane,  float farPlane);
 
             Type   type() const;
-            double left() const;
-            double right() const;
-            double bottom() const;
-            double top() const;
-            double nearPlane() const;
-            double farPlane() const;
-            double width() const;
-            double height() const;
+            float left() const;
+            float right() const;
+            float bottom() const;
+            float top() const;
+            float nearPlane() const;
+            float farPlane() const;
+            float width() const;
+            float height() const;
 
         private:
             void set(Type type,
-                     double left,         double right,
-                     double bottom,       double top,
-                     double nearPlane,    double farPlane);
+                     float left,         float right,
+                     float bottom,       float top,
+                     float nearPlane,    float farPlane);
 
             Type _type;
-            double _left;
-            double _right;
-            double _bottom;
-            double _top;
-            double _nearPlane;
-            double _farPlane;
+            float _left;
+            float _right;
+            float _bottom;
+            float _top;
+            float _nearPlane;
+            float _farPlane;
         };
 
         class CELLAR_EXPORT Tripod
@@ -113,12 +113,12 @@ namespace cellar
 
         // Modifiers
         void setFrame(float width, float height);
-        void setLens(double left,         double right,
-                     double bottom,       double top);
+        void setLens(float left,         float right,
+                     float bottom,       float top);
         void setLens(Lens::Type type,
-                     double left,         double right,
-                     double bottom,       double top,
-                     double nearPlane,    double farPlane);
+                     float left,         float right,
+                     float bottom,       float top,
+                     float nearPlane,    float farPlane);
         void setTripod(const Vec3f& from,
                        const Vec3f& to,
                        const Vec3f& up);
@@ -185,14 +185,14 @@ namespace cellar
 
     // CAMERA::LENS //
     inline Camera::Lens::Type Camera::Lens::type() const {return _type;}
-    inline double Camera::Lens::left() const {return _left;}
-    inline double Camera::Lens::right() const {return _right;}
-    inline double Camera::Lens::bottom() const {return _bottom;}
-    inline double Camera::Lens::top() const {return _top;}
-    inline double Camera::Lens::nearPlane() const {return _nearPlane;}
-    inline double Camera::Lens::farPlane() const {return _farPlane;}
-    inline double Camera::Lens::width() const {return _right - _left;}
-    inline double Camera::Lens::height() const {return _top - _bottom;}
+    inline float Camera::Lens::left() const {return _left;}
+    inline float Camera::Lens::right() const {return _right;}
+    inline float Camera::Lens::bottom() const {return _bottom;}
+    inline float Camera::Lens::top() const {return _top;}
+    inline float Camera::Lens::nearPlane() const {return _nearPlane;}
+    inline float Camera::Lens::farPlane() const {return _farPlane;}
+    inline float Camera::Lens::width() const {return _right - _left;}
+    inline float Camera::Lens::height() const {return _top - _bottom;}
 
 
     // CAMERA::TRIPOD //

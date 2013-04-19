@@ -126,7 +126,7 @@ namespace prop2
         size_t nbvert = _outline.size();
         for(size_t i=0; i < nbvert; ++i)
         {
-            _perimeter += (_outline[i].end() - _outline[i].begin()).length();
+            _perimeter += static_cast<real>((_outline[i].end() - _outline[i].begin()).length());
         }
     }
 
@@ -153,7 +153,7 @@ namespace prop2
         _mass = _density * _area;
 
         real meanR = real(0);
-        for(int i=0; i<nbVertices(); ++i) meanR += _relVertices[i].length();
+        for(int i=0; i<nbVertices(); ++i) meanR += static_cast<real>(_relVertices[i].length());
         meanR /= nbVertices();
 
         _momentOfInertia = real(0.5) * _mass * meanR * meanR;

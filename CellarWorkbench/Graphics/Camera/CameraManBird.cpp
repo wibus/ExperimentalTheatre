@@ -68,13 +68,13 @@ namespace cellar
 
         _camera->setMode(Camera::FRAME);
 
-        _camera->setFrame(_camera->knowWindowWidth(),
-                          _camera->knowWindowHeight());
+        _camera->setFrame((float)_camera->knowWindowWidth(),
+                          (float)_camera->knowWindowHeight());
 
         _camera->setLens(Camera::Lens::ORTHOGRAPHIC,
-                         -_camera->knowWindowWidth() / 2.0, _camera->knowWindowWidth() / 2.0,
-                         -_camera->knowWindowHeight() / 2.0, _camera->knowWindowHeight() / 2.0,
-                         -1.0, 1.0);
+                         -_camera->knowWindowWidth() / 2.0f,  _camera->knowWindowWidth() / 2.0f,
+                         -_camera->knowWindowHeight() / 2.0f, _camera->knowWindowHeight() / 2.0f,
+                         -1.0f, 1.0f);
 
         _camera->setTripod(Vec3f(_camera->knowWindowWidth() / 2.0f,
                                            _camera->knowWindowHeight() / 2.0f,

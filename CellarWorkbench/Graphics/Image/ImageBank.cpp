@@ -79,7 +79,7 @@ namespace cellar
                 "Image not found so not deleted : " + imgName, "ImageBank"));
         }
 
-        return nbRemoved;
+        return nbRemoved != size_t(0);
     }
 
     Image& ImageBank::getImage(

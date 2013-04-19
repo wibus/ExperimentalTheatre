@@ -1,17 +1,17 @@
 #ifndef PROPROOM2D_LIBPROPROOM2D_GLOBAL_H
 #define PROPROOM2D_LIBPROPROOM2D_GLOBAL_H
 
-#include <QtCore/qglobal.h>
 #include <DataStructure/Vector.h>
 #include <DataStructure/Matrix.h>
 #include <Geometry/Segment2D.h>
 
-#if defined(PROPROOM2D_LIBRARY)
-#  define PROP2D_EXPORT Q_DECL_EXPORT
-#else
-#  define PROP2D_EXPORT Q_DECL_IMPORT
+#ifdef _WINDOWS
+#   if defined(PROPROOM2D_LIBRARY)
+#       define PROP2D_EXPORT __declspec(dllexport)
+#   else
+#       define PROP2D_EXPORT __declspec(dllimport)
+#   endif
 #endif
-
 
 namespace prop2
 {

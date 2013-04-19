@@ -37,8 +37,8 @@ namespace cellar
         _frame.set(width, height);
     }
 
-    void Camera::setLens(double left,         double right,
-                         double bottom,       double top)
+    void Camera::setLens(float left,         float right,
+                         float bottom,       float top)
     {
         setLens(_lens.type(),
                 left,              right,
@@ -47,9 +47,9 @@ namespace cellar
     }
 
     void Camera::setLens(Lens::Type type,
-                         double left,         double right,
-                         double bottom,       double top,
-                         double nearPlane,    double farPlane)
+                         float left,         float right,
+                         float bottom,       float top,
+                         float nearPlane,    float farPlane)
     {
         _lens.set(type, left, right, bottom, top, nearPlane, farPlane);
         updateProjectionMatrix();
@@ -190,9 +190,9 @@ namespace cellar
     }
 
     Camera::Lens::Lens(Type type,
-         double left,       double right,
-         double bottom,     double top,
-         double nearPlane,  double farPlane) :
+         float left,       float right,
+         float bottom,     float top,
+         float nearPlane,  float farPlane) :
         _type(type),
         _left(left),
         _right(right),
@@ -204,9 +204,9 @@ namespace cellar
     }
 
     void Camera::Lens::set(Type type,
-                           double left,      double right,
-                           double bottom,    double top,
-                           double nearPlane, double farPlane)
+                           float left,      float right,
+                           float bottom,    float top,
+                           float nearPlane, float farPlane)
     {
         _type = type;
         _left = left;           _right = right;

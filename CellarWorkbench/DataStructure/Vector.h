@@ -232,7 +232,7 @@ namespace cellar
     template <int N, typename T>
     Vector<N, T>& Vector<N, T>::normalize()
     {
-        T n = length();
+        T n = static_cast<T>(length());
         if(n > FLT_EPSILON)
         {
             for(int i=0; i<N; ++i)
@@ -363,7 +363,7 @@ namespace cellar
     inline bool Vector<N, T>::operator==(const Vector<N, T>& vec) const
     {
         for(int i=0; i<N; ++i)
-            if(fabs(_v[i] - vec._v[i]) > FLT_EPSILON)
+            if(std::abs(_v[i] - vec._v[i]) > FLT_EPSILON)
                 return false;
         return true;
     }

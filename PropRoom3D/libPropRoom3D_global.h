@@ -1,14 +1,13 @@
 #ifndef LIBPROPROOM3D_GLOBAL_H
 #define LIBPROPROOM3D_GLOBAL_H
 
-#include <QtCore/qglobal.h>
-
-#if defined(PROPROOM3D_LIBRARY)
-#  define PROP3D_EXPORT Q_DECL_EXPORT
-#else
-#  define PROP3D_EXPORT Q_DECL_IMPORT
+#ifdef _WINDOWS
+#   if defined(PROPROOM3D_LIBRARY)
+#       define PROP3D_EXPORT __declspec(dllexport)
+#   else
+#       define PROP3D_EXPORT __declspec(dllimport)
+#   endif
 #endif
-
 
 namespace prop3
 {

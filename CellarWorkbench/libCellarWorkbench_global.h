@@ -1,12 +1,12 @@
 #ifndef CELLARWORKBENCH_LIBCELLARWORKBENCH_GLOBAL_H
 #define CELLARWORKBENCH_LIBCELLARWORKBENCH_GLOBAL_H
 
-#include <QtCore/qglobal.h>
-
-#if defined(CELLARWORKBENCH_LIBRARY)
-#  define CELLAR_EXPORT Q_DECL_EXPORT
-#else
-#  define CELLAR_EXPORT Q_DECL_IMPORT
+#ifdef _WINDOWS
+#   if defined(CELLARWORKBENCH_LIBRARY)
+#       define CELLAR_EXPORT __declspec(dllexport)
+#   else
+#       define CELLAR_EXPORT __declspec(dllimport)
+#   endif
 #endif
 
 #endif // CELLARWORKBENCH_LIBCELLARWORKBENCH_GLOBAL_H

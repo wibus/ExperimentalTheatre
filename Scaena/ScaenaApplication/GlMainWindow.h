@@ -11,7 +11,7 @@ class QAction;
 
 namespace scaena
 {
-    class GlMainWindow : public QWidget
+    class SCAENA_EXPORT GlMainWindow : public QWidget
     {
         Q_OBJECT
 

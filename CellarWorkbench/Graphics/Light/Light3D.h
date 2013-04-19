@@ -9,12 +9,7 @@ namespace cellar
 {
     struct CELLAR_EXPORT Material
     {
-        Material() :
-            diffuse(0.5f, 0.5f, 0.5f, 1.0f),
-            specular(0.1f, 0.1f, 0.1f, 1.0f),
-            shininess(64),
-            fresnel(0.05)
-        {}
+        Material();
 
         Vec4f diffuse;
         Vec4f specular;
@@ -24,11 +19,7 @@ namespace cellar
 
     struct CELLAR_EXPORT Light3D
     {
-        Light3D() :
-            ambient( 0.2, 0.2, 0.2, 1.0),
-            diffuse( 0.8, 0.8, 0.8, 1.0),
-            specular(0.4, 0.4, 0.4, 1.0)
-        {}
+        Light3D();
 
         Vec4f ambient;
         Vec4f diffuse;
@@ -37,19 +28,14 @@ namespace cellar
 
     struct CELLAR_EXPORT DirectionnalLight3D : public Light3D
     {
-        DirectionnalLight3D() :
-            direction(0.0, 0.0, -1.0, 0.0)
-        {}
+        DirectionnalLight3D();
 
         Vec4f direction;
     };
 
     struct CELLAR_EXPORT PointLight3D : public Light3D
     {
-        PointLight3D() :
-            position(0.0, 0.0, 0.0, 1.0),
-            attenuationCoefs(1.0, 0.0, 0.0)
-        {}
+        PointLight3D();
 
         Vec4f position;
         Vec4f attenuationCoefs;
@@ -57,11 +43,7 @@ namespace cellar
 
     struct CELLAR_EXPORT SpotLight3D : public PointLight3D
     {
-        SpotLight3D() :
-            direction(1, 0, 0),
-            cutoff(1.0f)
-        {
-        }
+        SpotLight3D();
 
         Vec4f direction;
         float cutoff;

@@ -59,12 +59,12 @@ namespace prop2
 
     void Circle::updatePerimeter()
     {
-        _perimeter = 2 * PI * _radius;
+        _perimeter = 2 * static_cast<real>(PI) * _radius;
     }
 
     void Circle::updateArea()
     {
-        _area = PI * _radius * _radius;
+        _area = static_cast<real>(PI) * _radius * _radius;
     }
 
     void Circle::updateInertia()

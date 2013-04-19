@@ -135,7 +135,7 @@ namespace prop2
         Vec2r centersDist = circle2->centroid() - circle1->centroid();
 
         // Test for collision
-        real overlappindDist = circle1->radius() + circle2->radius() - centersDist.length();
+        real overlappindDist = circle1->radius() + circle2->radius() - (real)centersDist.length();
         if(overlappindDist < real(0.0) )
             return;
 

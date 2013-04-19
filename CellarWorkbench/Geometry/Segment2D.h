@@ -210,8 +210,8 @@ namespace cellar
     T Segment2D<T>::pointMinimalDistance(const Vector<2, T>& point) const
     {
         Vector<2, T> begToPoint = point - _begin;
-        T begDist = begToPoint.length();
-        T endDist = (point - _end).length();
+        T begDist = static_cast<T>(begToPoint.length());
+        T endDist = static_cast<T>((point - _end).length());
         T orthDist= absolute(cross(begToPoint, unitDirector()));
 
         return minVal(minVal(begDist, endDist), orthDist);
