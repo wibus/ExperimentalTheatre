@@ -10,8 +10,10 @@
 using namespace std;
 
 #include <DateAndTime/CClock.h>
-#include <Graphics/Camera/Camera.h>
 using namespace cellar;
+
+#include <Camera/Camera.h>
+using namespace media;
 
 #include <PropTeam/AbstractPropTeam.h>
 using namespace prop2;

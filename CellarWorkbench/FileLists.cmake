@@ -41,35 +41,6 @@ SET(CELLAR_GEOMETRY_HEADERS
     ${CELLAR_SRC_DIR}/Geometry/Segment2D.h
     ${CELLAR_SRC_DIR}/Geometry/Segment3D.h)
 
-# GL3W
-SET(CELLAR_GL3W_HEADERS
-    ${CELLAR_SRC_DIR}/GL3/gl3.h
-    ${CELLAR_SRC_DIR}/GL3/gl3w.h)
-
-# Graphics
-SET(CELLAR_GRAPHICS_CAMERA_HEADERS
-    ${CELLAR_SRC_DIR}/Graphics/Camera/Camera.h
-    ${CELLAR_SRC_DIR}/Graphics/Camera/CameraManBird.h
-    ${CELLAR_SRC_DIR}/Graphics/Camera/CameraManFree.h)
-    
-SET(CELLAR_GRAPHICS_GL_HEADERS
-    ${CELLAR_SRC_DIR}/Graphics/GL/GLFFmpegCamcorder.h
-    ${CELLAR_SRC_DIR}/Graphics/GL/GlInputsOutputs.h
-    ${CELLAR_SRC_DIR}/Graphics/GL/GlProgram.h
-    ${CELLAR_SRC_DIR}/Graphics/GL/GlShaderBank.h
-    ${CELLAR_SRC_DIR}/Graphics/GL/GlShader.h
-    ${CELLAR_SRC_DIR}/Graphics/GL/GlToolkit.h
-    ${CELLAR_SRC_DIR}/Graphics/GL/GlVao.h)
-
-SET(CELLAR_GRAPHICS_IMAGE_HEADERS
-    ${CELLAR_SRC_DIR}/Graphics/Image/Image.h
-    ${CELLAR_SRC_DIR}/Graphics/Image/ImageBank.h)
-
-SET(CELLAR_GRAPHICS_LIGHT_HEADERS
-    ${CELLAR_SRC_DIR}/Graphics/Light/Light3D.h)
-
-SET(CELLAR_GRAPHICS_HEADERS)
-
     
 #Misc
 SET(CELLAR_MISC_HEADERS
@@ -121,36 +92,6 @@ SET(CELLAR_DESIGN_PATTERN_SOURCES)
 # Geometry
 SET(CELLAR_GEOMETRY_SOURCES)
 
-
-# GL3W
-SET(CELLAR_GL3W_SOURCES
-    ${CELLAR_SRC_DIR}/GL3/gl3w.c)
-
-
-# Graphics
-SET(CELLAR_GRAPHICS_CAMERA_SOURCES
-    ${CELLAR_SRC_DIR}/Graphics/Camera/Camera.cpp
-    ${CELLAR_SRC_DIR}/Graphics/Camera/CameraManBird.cpp
-    ${CELLAR_SRC_DIR}/Graphics/Camera/CameraManFree.cpp)
-    
-SET(CELLAR_GRAPHICS_GL_SOURCES
-    ${CELLAR_SRC_DIR}/Graphics/GL/GLFFmpegCamcorder.cpp
-    ${CELLAR_SRC_DIR}/Graphics/GL/GlInputsOutputs.cpp
-    ${CELLAR_SRC_DIR}/Graphics/GL/GlProgram.cpp
-    ${CELLAR_SRC_DIR}/Graphics/GL/GlShaderBank.cpp
-    ${CELLAR_SRC_DIR}/Graphics/GL/GlShader.cpp
-    ${CELLAR_SRC_DIR}/Graphics/GL/GlToolkit.cpp
-    ${CELLAR_SRC_DIR}/Graphics/GL/GlVao.cpp)
-
-SET(CELLAR_GRAPHICS_IMAGE_SOURCES
-    ${CELLAR_SRC_DIR}/Graphics/Image/Image.cpp
-    ${CELLAR_SRC_DIR}/Graphics/Image/ImageBank.cpp)
-
-SET(CELLAR_GRAPHICS_LIGHT_SOURCES
-    ${CELLAR_SRC_DIR}/Graphics/Light/Light3D.cc)
-
-SET(CELLAR_GRAPHICS_SOURCES)
-
     
 #Misc
 SET(CELLAR_MISC_SOURCES
@@ -201,12 +142,6 @@ SOURCE_GROUP("Header Files\\Data Structure" FILES ${CELLAR_DATA_STRUCTURE_HEADER
 SOURCE_GROUP("Header Files\\Date And Time" FILES ${CELLAR_DATE_AND_TIME_HEADERS})
 SOURCE_GROUP("Header Files\\Design Pattern" FILES ${CELLAR_DESIGN_PATTERN_HEADERS})
 SOURCE_GROUP("Header Files\\Geometry" FILES ${CELLAR_GEOMETRY_HEADERS})
-SOURCE_GROUP("Header Files\\GL3" FILES ${CELLAR_GL3W_HEADERS})
-SOURCE_GROUP("Header Files\\Graphics" FILES ${CELLAR_GRAPHICS_HEADERS})
-SOURCE_GROUP("Header Files\\Graphics\\Camera" FILES ${CELLAR_GRAPHICS_CAMERA_HEADERS})
-SOURCE_GROUP("Header Files\\Graphics\\GL" FILES ${CELLAR_GRAPHICS_GL_HEADERS})
-SOURCE_GROUP("Header Files\\Graphics\\Image" FILES ${CELLAR_GRAPHICS_IMAGE_HEADERS})
-SOURCE_GROUP("Header Files\\Graphics\\Light" FILES ${CELLAR_GRAPHICS_LIGHT_HEADERS})
 SOURCE_GROUP("Header Files\\Misc" FILES ${CELLAR_MISC_HEADERS})
 
 SOURCE_GROUP("Source Files" FILES ${CELLAR_SOURCES_FILTER})
@@ -215,12 +150,6 @@ SOURCE_GROUP("Source Files\\Data Structure" FILES ${CELLAR_DATA_STRUCTURE_SOURCE
 SOURCE_GROUP("Source Files\\Date And Time" FILES ${CELLAR_DATE_AND_TIME_SOURCES})
 SOURCE_GROUP("Source Files\\Design Pattern" FILES ${CELLAR_DESIGN_PATTERN_SOURCES})
 SOURCE_GROUP("Source Files\\Geometry" FILES ${CELLAR_GEOMETRY_SOURCES})
-SOURCE_GROUP("Source Files\\GL3" FILES ${CELLAR_GL3W_SOURCES})
-SOURCE_GROUP("Source Files\\Graphics" FILES ${CELLAR_GRAPHICS_SOURCES})
-SOURCE_GROUP("Source Files\\Graphics\\Camera" FILES ${CELLAR_GRAPHICS_CAMERA_SOURCES})
-SOURCE_GROUP("Source Files\\Graphics\\GL" FILES ${CELLAR_GRAPHICS_GL_SOURCES})
-SOURCE_GROUP("Source Files\\Graphics\\Image" FILES ${CELLAR_GRAPHICS_IMAGE_SOURCES})
-SOURCE_GROUP("Source Files\\Graphics\\Light" FILES ${CELLAR_GRAPHICS_LIGHT_SOURCES})
 SOURCE_GROUP("Source Files\\Misc" FILES ${CELLAR_MISC_SOURCES})
 
 SOURCE_GROUP("Config" FILES ${CELLAR_CONFIG_FILES})

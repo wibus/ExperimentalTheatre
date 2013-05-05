@@ -1,5 +1,5 @@
 MESSAGE(STATUS "Building Cellar Workbench library")
-PROJECT(CellarWorkbench)
+PROJECT(CellarWorkbench CXX)
 
 SET(CELLAR_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 MESSAGE(STATUS "Cellar Workbench src dir: " ${CELLAR_SRC_DIR})

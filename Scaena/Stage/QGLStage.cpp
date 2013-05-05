@@ -14,8 +14,8 @@
 #include <sstream>
 using namespace std;
 
-#include <Graphics/Camera/Camera.h>
-#include <Graphics/GL/GlToolkit.h>
+#include <Camera/Camera.h>
+#include <GL/GlToolkit.h>
 #include <DateAndTime/QtClock.h>
 #include <Misc/Log.h>
 using namespace cellar;
