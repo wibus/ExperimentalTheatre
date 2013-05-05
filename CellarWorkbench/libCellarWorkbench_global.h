@@ -7,6 +7,8 @@
 #   else
 #       define CELLAR_EXPORT __declspec(dllimport)
 #   endif
+#else
+#   define CELLAR_EXPORT
 #endif
 
 #endif // CELLARWORKBENCH_LIBCELLARWORKBENCH_GLOBAL_H

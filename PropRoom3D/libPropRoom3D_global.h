@@ -7,6 +7,8 @@
 #   else
 #       define PROP3D_EXPORT __declspec(dllimport)
 #   endif
+#else
+#   define PROP3D_EXPORT
 #endif
 
 namespace prop3

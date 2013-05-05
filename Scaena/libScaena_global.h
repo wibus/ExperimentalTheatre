@@ -7,6 +7,8 @@
 #   else
 #       define SCAENA_EXPORT __declspec(dllimport)
 #   endif
+#else
+#   define SCAENA_EXPORT
 #endif
 
 #endif // SCAENA_LIBSCAENA_GLOBAL_H

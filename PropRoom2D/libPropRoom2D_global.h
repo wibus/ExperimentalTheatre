@@ -11,6 +11,8 @@
 #   else
 #       define PROP2D_EXPORT __declspec(dllimport)
 #   endif
+#else
+#   define PROP2D_EXPORT
 #endif
 
 namespace prop2
