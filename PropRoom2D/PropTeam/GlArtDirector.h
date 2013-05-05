@@ -8,8 +8,8 @@
 #include <queue>
 #include <map>
 
-#include <Graphics/GL/GlProgram.h>
-#include <Graphics/GL/GlVao.h>
+#include <GL/GlProgram.h>
+#include <GL/GlVao.h>
 
 
 namespace prop2
@@ -71,10 +71,10 @@ class AbstractShape;
         virtual void drawTextHud(TextHud* text);
         virtual void drawImageHud(ImageHud* image);
 
-        virtual void setupCircleShader(const cellar::GlInputsOutputs& loc);
-        virtual void setupPolygonShader(const cellar::GlInputsOutputs& loc);
-        virtual void setupTextHudShader(const cellar::GlInputsOutputs& loc);
-        virtual void setupImageHudShader(const cellar::GlInputsOutputs& loc);
+        virtual void setupCircleShader(const media::GlInputsOutputs& loc);
+        virtual void setupPolygonShader(const media::GlInputsOutputs& loc);
+        virtual void setupTextHudShader(const media::GlInputsOutputs& loc);
+        virtual void setupImageHudShader(const media::GlInputsOutputs& loc);
 
         virtual Vec2r getAnchor(const HorizontalAnchor::Enum& h,
                                const VerticalAnchor::Enum&   v);
@@ -92,15 +92,15 @@ class AbstractShape;
                              std::vector<AbstractShape*>,
                              ShapeOrderer > _tranparentShapes;
 
-        cellar::GlProgram _circleShader;
-        cellar::GlProgram _polygonShader;
-        cellar::GlProgram _textHudShader;
-        cellar::GlProgram _imageHudShader;
+        media::GlProgram _circleShader;
+        media::GlProgram _polygonShader;
+        media::GlProgram _textHudShader;
+        media::GlProgram _imageHudShader;
 
-        cellar::GlVao _circleVao;
-        cellar::GlVao _polygonVao;
-        cellar::GlVao _textHudVao;
-        cellar::GlVao _imageHudVao;
+        media::GlVao _circleVao;
+        media::GlVao _polygonVao;
+        media::GlVao _textHudVao;
+        media::GlVao _imageHudVao;
     };
 
 

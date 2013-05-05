@@ -9,17 +9,20 @@
 #include "Hud/ImageHud.h"
 
 #include <cassert>
-using namespace std;
 
 #include <GL3/gl3w.h>
 
 #include <QFile>
 
-#include <Graphics/Image/Image.h>
-#include <Graphics/Image/ImageBank.h>
-#include <Graphics/GL/GlToolkit.h>
 #include <Misc/Log.h>
+
+#include <Image/Image.h>
+#include <Image/ImageBank.h>
+#include <GL/GlToolkit.h>
+
+using namespace std;
 using namespace cellar;
+using namespace media;
 
 
 namespace prop2

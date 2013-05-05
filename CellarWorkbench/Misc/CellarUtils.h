@@ -6,6 +6,8 @@
 #include <cmath>
 #include <tuple>
 
+#include "libCellarWorkbench_global.h"
+
 
 namespace cellar
 {
@@ -41,14 +43,14 @@ namespace cellar
     signed char sign(T x);
 
     // Modulate    
-    int modulateInt(int& value, int minVal, int maxVal);
+    CELLAR_EXPORT int modulateInt(int& value, int minVal, int maxVal);
 
     // Convert anytype that ostream << accepts
     template <typename T>
     std::string toString(const T& donnee);
 
     // Convert a file into a single string
-    std::string fileToString(const std::string& fileName, bool* ok = nullptr);
+    CELLAR_EXPORT std::string fileToString(const std::string& fileName, bool* ok = nullptr);
 
     // Quadratic resolution
     template <typename T>
