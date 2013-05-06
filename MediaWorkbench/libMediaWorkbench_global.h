@@ -7,6 +7,8 @@
 #   else
 #       define MEDIA_EXPORT __declspec(dllimport)
 #   endif
+#else
+#   define MEDIA_EXPORT
 #endif
 
 #endif // MEDIAWORKBENCH_LIBMEDIAWORKBENCH_GLOBAL_H

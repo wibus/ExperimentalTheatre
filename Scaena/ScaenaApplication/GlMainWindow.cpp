@@ -33,7 +33,7 @@ namespace scaena
 
 
         // Tweak layout
-        _menuBar->setFixedHeight(24);
+        _menuBar->setFixedHeight(26);
         layout->addWidget(_menuBar);
         layout->addWidget(_stage);
         setLayout(layout);
