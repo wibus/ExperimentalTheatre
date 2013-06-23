@@ -20,6 +20,7 @@ class AbstractShape;
         virtual void setGravity(real yMeterPerSeconds2);
 
         virtual void setup();
+        virtual void reset();
         virtual void update(real dt);
 
         virtual void manageCircle(const std::shared_ptr<Circle>& circle);

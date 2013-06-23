@@ -23,6 +23,10 @@ namespace prop2
 
     void StdChoreographer::setup()
     {
+    }
+
+    void StdChoreographer::reset()
+    {
         _circles.clear();
         _polygons.clear();
     }
@@ -246,37 +250,61 @@ namespace prop2
         if(pOultine.empty())
             return;
 
-        vector<Segment2Dr> collidingSides;
+        Vec2r minimalVect;
+        real minimalDist2(0);
+        real radius2 = circle->radius() * circle->radius();
         size_t nbSides = pOultine.size();
         for(size_t i=0; i < nbSides; ++i)
         {
             const Segment2Dr& line = pOultine[i];
-            if(circle->intersects(line))
-                collidingSides.push_back(line);
-        }
-
-        if(collidingSides.empty())
-            return;
-/*
-        Line2Dr line;
-        Vec2r minimalVect;
-        for(auto it = pOultine.begin()+1; it != pOultine.end(); ++it)
-        {
-            Vec2r dir = it->pointMinimalDirection(cCenter);
-            if(dir.length() < minimalVect.length())
+            Vec2r distVect = line.pointMinimalDirection(circle->centroid());
+            real distLength2 = distVect.length2();
+            if(distLength2 < radius2)
             {
-                line = *it;
-                minimalVect = dir;
+                Vec2r distVect = line.pointMinimalDirection(circle->centroid());
+                if(!minimalDist2 || distLength2 < minimalVect.length2())
+                    minimalVect = distVect;
+                    minimalDist2 = distLength2;
             }
         }
-*/
+
+        // If there isn't any collision, exit
+        if(!minimalDist2)
+            return;
+
         if(circle->bodyType() == BodyType::DYNAMIC &&
            polygon->bodyType() == BodyType::DYNAMIC)
         {
-            // TODO wibus 2012-10-28: resolve circle for circle-polygon
+            // TODO wibus 2012-10-28: resolve circle and polygon for circle-polygon
         }
         else if(circle->bodyType() == BodyType::DYNAMIC)
         {
+            Vec2r n = minimalVect.normalized();
+            Vec2r t = perpCW( n );
+
+            real M = circle->mass();
+            real R = circle->radius();
+            real I = circle->momentOfInertia();
+            real e = circle->bounciness() * polygon->bounciness();
+            Vec2r vi = circle->linearVelocity();
+
+            real j = -(1 + e)proj(vi, n) / ();
+
+/*
+            Vec2r vNi = proj(circle->linearVelocity(), n);
+            Vec2r vNf = - vNi * circle->bounciness()*polygon->bounciness();
+            circle->addLinearForce((vNf - vNi)*M / _dt);
+
+
+            real VdotT = dot(circle->linearVelocity(), t);
+            real WdotT = circle->angularVelocity();
+            real j = (VdotT - WdotT*R) / (R*R/I + 1.0/M);
+            Vec2r vTi = proj(circle->linearVelocity(), t);
+            Vec2r wTi = circle->angularVelocity() * R * t;
+            Vec2r vTf = vTi + wTi;
+            circle->addForceAt(-(vTf)*M / _dt, circle->centroid() - n*R);
+*/
+            circle->moveBy(minimalVect.normalized() * (minimalVect.length() - circle->radius()));
         }
         else if(polygon->bodyType() == BodyType::DYNAMIC)
         {

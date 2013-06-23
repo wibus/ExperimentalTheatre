@@ -14,6 +14,7 @@ namespace prop2
         virtual ~StdPropDesigner();
 
         virtual void setup();
+        virtual void reset();
 
         virtual std::shared_ptr<Circle>   createCircle();
         virtual std::shared_ptr<Polygon>  createPolygon(int nbVertices);

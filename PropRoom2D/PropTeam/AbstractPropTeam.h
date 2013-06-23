@@ -32,6 +32,7 @@ class ImageHud;
         virtual ~AbstractPropTeam();
 
         virtual void setup();
+        virtual void reset();
         virtual void update(real dt);
         virtual void draw(real dt);
 

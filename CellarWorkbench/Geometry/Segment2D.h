@@ -136,7 +136,7 @@ namespace cellar
     template<typename T>
     inline Vector<2, T> Segment2D<T>::unitNormal() const
     {
-        return unitDirector().rotateQuarterCCW();
+        return perpCCW(unitDirector());
     }
 
     template<typename T>
@@ -192,10 +192,9 @@ namespace cellar
     template<typename T>
     typename Segment2D<T>::Transversal Segment2D<T>::pointTransversalPosition(const Vector<2, T>& point) const
     {
-        Vector<2, T> l = (_end-_begin);
-        T len = l.length();
-
-        T pointProjection = (point - _begin) * l.normalize();
+        auto director = (_end - _begin);
+        auto len = director.length();
+        auto pointProjection = dot(point - _begin, director.normalize());
 
         if(pointProjection < 0)
             return BEHIND;
@@ -209,38 +208,34 @@ namespace cellar
     template<typename T>
     T Segment2D<T>::pointMinimalDistance(const Vector<2, T>& point) const
     {
-        Vector<2, T> begToPoint = point - _begin;
-        T begDist = static_cast<T>(begToPoint.length());
-        T endDist = static_cast<T>((point - _end).length());
-        T orthDist= absolute(cross(begToPoint, unitDirector()));
+        switch (pointTransversalPosition(point))
+        {
+        case IN_FRONT:
+            return (point - _end).length();
 
-        return minVal(minVal(begDist, endDist), orthDist);
+        case BEHIND:
+            return (point - _begin).length();
+
+        default:
+            return absolute(cross(point - _begin, unitDirector()));
+        }
     }
 
 
     template<typename T>
     Vector<2, T> Segment2D<T>::pointMinimalDirection(const Vector<2, T>& point) const
     {
-        Vector<2, T> begToPoint = point - _begin;
-        Vector<2, T> endToPoint = point - _end;
-        Vector<2, T> orthToPoint = (begToPoint ^ unitDirector()) * unitNormal();
+        switch (pointTransversalPosition(point))
+        {
+        case IN_FRONT:
+            return point - _end;
 
-        if(begToPoint.length() < endToPoint.length())
-        {
-            if(begToPoint.length() < orthToPoint.length())
-                return begToPoint;
-            else
-                return orthToPoint;
+        case BEHIND:
+            return point - _begin;
+
+        default:
+            return cross(point - _begin, unitDirector()) * unitNormal();
         }
-        else
-        {
-            if(endToPoint.length() < orthToPoint.length())
-                return endToPoint;
-            else
-                return orthToPoint;
-        }
-        //else
-        return orthToPoint;
     }
 
 

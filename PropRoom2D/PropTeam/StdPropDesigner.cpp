@@ -23,6 +23,10 @@ namespace prop2
     {
     }
 
+    void StdPropDesigner::reset()
+    {
+    }
+
     std::shared_ptr<Circle> StdPropDesigner::createCircle()
     {
         std::shared_ptr<Circle> circle( new Circle() );

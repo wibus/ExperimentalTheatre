@@ -38,12 +38,14 @@ namespace prop2
         // Move vertices' centroid to (0,0)
         for(size_t i=0; i<vertices.size(); ++i)
         {
-            _relVertices[i] =  vertices[i] - proposedCentroid;
+            _relVertices[i] = vertices[i] - proposedCentroid;
         }
 
         // Update cached attributes
-        updateAbsVerticesAndOutline();
+        _angle = 0.0;
+        _centroid = proposedCentroid;
         updateTranformMatrix();
+
         updatePerimeter();
         updateArea();
         updateInertia();
@@ -106,7 +108,8 @@ namespace prop2
         size_t nbVertices = _relVertices.size();
         for(size_t i=0; i < nbVertices; ++i)
         {
-            _absVertices[i] = Vec2r(_tranformMatrix * Vec3r(_relVertices[i],real(1)));
+            _absVertices[i] =
+                Vec2r(_tranformMatrix * Vec3r(_relVertices[i], real(1)));
         }
 
         _outline = evaluateOutline(_absVertices);
@@ -117,6 +120,8 @@ namespace prop2
         _tranformMatrix.loadIdentity();
         _tranformMatrix *= cellar::translate(_centroid.x(), _centroid.y());
         _tranformMatrix *= cellar::rotate(_angle);
+
+        updateAbsVerticesAndOutline();
     }
 
     void Polygon::updatePerimeter()

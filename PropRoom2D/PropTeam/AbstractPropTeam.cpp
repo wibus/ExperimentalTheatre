@@ -27,6 +27,12 @@ namespace prop2
         _choreographer->setup();
     }
 
+    void AbstractPropTeam::reset()
+    {
+        _artDirector->reset();
+        _choreographer->reset();
+    }
+
     void AbstractPropTeam::update(real dt)
     {
         _choreographer->update(dt);

@@ -51,6 +51,7 @@ class AbstractShape;
         virtual ~GlArtDirector();
 
         virtual void setup();
+        virtual void reset();
         virtual void draw(real dt);
         virtual void updateViewportSize(int width, int height);
 

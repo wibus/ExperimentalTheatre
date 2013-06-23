@@ -179,10 +179,10 @@ namespace media
         unsigned char* tmp = new unsigned char[size];
         for(int i=0; i<size; i+=4)
         {
-            tmp[i] = _pixels[i+3];
-            tmp[i+1] = _pixels[i];
-            tmp[i+2] = _pixels[i+1];
-            tmp[i+3] = _pixels[i+2];
+            tmp[i] = _pixels[i+2];
+            tmp[i+1] = _pixels[i+1];
+            tmp[i+2] = _pixels[i];
+            tmp[i+3] = _pixels[i+3];
         }
 
         QImage img(tmp,
@@ -190,11 +190,12 @@ namespace media
                    _height,
                    _width*pixelSize(),
                    QImage::Format_ARGB32);
+        bool ok = img.save(fileName.c_str());
 
         delete [] tmp;
         tmp = nullptr;
 
-        return img.save(fileName.c_str());
+        return ok;
     }
 
     Image& Image::addAlphaColor(unsigned char r,
