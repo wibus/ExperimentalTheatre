@@ -37,9 +37,9 @@ namespace cellar
             T w() const;
             T* asArray();
             const T* asArray() const;
-            double distanceTo(const Vector<N, T>& vec2) const;
-            double length()const;
-            double length2()const;
+            T distanceTo(const Vector<N, T>& vec2) const;
+            T length()const;
+            T length2()const;
             Vector<N, T>& normalize();
             Vector<N, T>  normalized() const;
 
@@ -212,19 +212,19 @@ namespace cellar
     }
 
     template <int N, typename T>
-    inline double Vector<N, T>::distanceTo(const Vector<N, T>& vec2) const
+    inline T Vector<N, T>::distanceTo(const Vector<N, T>& vec2) const
     {
         return ((*this) - vec2).length();
     }
 
     template <int N, typename T>
-    inline double Vector<N, T>::length() const
+    inline T Vector<N, T>::length() const
     {
         return std::sqrt( length2() );
     }
 
     template <int N, typename T>
-    inline double Vector<N, T>::length2() const
+    inline T Vector<N, T>::length2() const
     {
         return dot(*this, *this);
     }

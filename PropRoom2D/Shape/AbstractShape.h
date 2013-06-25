@@ -30,9 +30,12 @@ class AbstractCostume;
         const Mat3r& transformMatrix() const;
 
         real mass() const;
+        real inverseMass() const;
         real momentOfInertia() const;
+        real inverseMomentOfInertia() const;
         real density() const;
-        real friction() const;
+        real staticFrictionCoefficient() const;
+        real dynamicFrictionCoefficient() const;
         real bounciness() const;
         real perimeter() const;
         real area() const;
@@ -50,7 +53,8 @@ class AbstractCostume;
         virtual void setBodyType(const BodyType::Enum& type);
 
         virtual void setDensity(const real& density);
-        virtual void setFriction(const real& friction);
+        virtual void setStaticFrictionCoefficient(const real& us);
+        virtual void setDynamicFrictionCoefficient(const real& ud);
         virtual void setBounciness(const real& bounciness);
 
         virtual void moveBy(const Vec2r& displacement);
@@ -60,6 +64,7 @@ class AbstractCostume;
         virtual void setLinearAcceleration(const Vec2r& acceleration);
         virtual void addLinearAcceleration(const Vec2r& acceleration);
         virtual void addLinearForce(const Vec2r& force);
+        virtual void applyLinearImpulse(const Vec2r& impulse);
 
         virtual void rotate(const real& angle);
         virtual void setAngle(const real& angle);
@@ -68,18 +73,19 @@ class AbstractCostume;
         virtual void setAngularAcceleration(const real& acceleration);
         virtual void addAngularAcceleration(const real& acceleration);
         virtual void addAngularForce(const real& force);
+        virtual void applyAngularImpulse(const real& impulse);
 
         virtual void addForceAt(const Vec2r& force, const Vec2r& at);
+        virtual void applyImpulseAt(const Vec2r& impulse, const Vec2r& at);
 
 
         // Tests
         virtual bool contains(const Vec2r& point) const =0;
-        virtual bool intersects(const Segment2Dr& line) const =0;
+        virtual Vec2r nearestSurface(const Vec2r& point) const =0;
 
 
         // Constant attributes
-        static const real INFINIT_INERTIA;
-
+        static const real INFINITE_DENSITY;
 
     protected:
         // Computations
@@ -94,10 +100,11 @@ class AbstractCostume;
 
         Mat3r _tranformMatrix;
 
-        real _mass;
-        real _momentOfInertia;
+        real _inverseMass;
+        real _inverseMomentOfInertia;
         real _density;
-        real _friction;
+        real _staticFrictionCoefficient;
+        real _dynamicFrictionCoefficient;
         real _bounciness;
         real _perimeter;
         real _area;
@@ -126,12 +133,26 @@ class AbstractCostume;
 
     inline real AbstractShape::mass() const
     {
-        return _mass;
+        return _inverseMass ?
+                    real(1.0)/_inverseMass :
+                    real(0.0);
+    }
+
+    inline real AbstractShape::inverseMass() const
+    {
+        return _inverseMass;
     }
 
     inline real AbstractShape::momentOfInertia() const
     {
-        return _momentOfInertia;
+        return _inverseMomentOfInertia ?
+                    real(1.0)/_inverseMomentOfInertia :
+                    real(0.0);
+    }
+
+    inline real AbstractShape::inverseMomentOfInertia() const
+    {
+        return _inverseMomentOfInertia;
     }
 
     inline real AbstractShape::density() const
@@ -139,9 +160,14 @@ class AbstractCostume;
         return _density;
     }
 
-    inline real AbstractShape::friction() const
+    inline real AbstractShape::staticFrictionCoefficient() const
     {
-        return _friction;
+        return _staticFrictionCoefficient;
+    }
+
+    inline real AbstractShape::dynamicFrictionCoefficient() const
+    {
+        return _dynamicFrictionCoefficient;
     }
 
     inline real AbstractShape::bounciness() const

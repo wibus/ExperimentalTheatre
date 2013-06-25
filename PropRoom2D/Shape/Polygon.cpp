@@ -63,44 +63,66 @@ namespace prop2
         _costume = costume;
     }
 
-    bool Polygon::contains(const Vec2r& point) const
+    int getQuadrant(const Vec2r& origin, const Vec2r& pt)
     {
-        bool oddNodes = false;
-
-        size_t nbSides = nbVertices();
-
-        for(size_t i=0, j=nbSides; i < nbSides; i++)
-        {
-            if ((_absVertices[i].y() < point.y() && _absVertices[j].y() >= point.y())
-                    ||
-                (_absVertices[j].y() < point.y() && _absVertices[i].y() >= point.y()))
-            {
-                if (_absVertices[i].x() +
-                      (point.y() - _absVertices[i].y()) /
-                      (_absVertices[j].y() - _absVertices[i].y()) *
-                      (_absVertices[j].x() - _absVertices[i].x())
-                    < point.x())
-                {
-                    oddNodes = !oddNodes;
-                }
-            }
-            j = i;
-        }
-
-        return oddNodes;
+        return pt.x() < origin.x() ?
+                    pt.y() < origin.y() ?
+                        3 :
+                        2 :
+                    pt.y() < origin.y() ?
+                        4 :
+                        1;
     }
 
-    bool Polygon::intersects(const Segment2Dr& line) const
+    bool Polygon::contains(const Vec2r& point) const
     {
-        size_t nbSides = _outline.size();
+        int movesSum = 0;
+        int lastQuadrant = getQuadrant(_outline[0].end(), point);
 
-        for(size_t i=0; i < nbSides; ++i)
+        int nbv = nbVertices();
+        int first = 1, last = nbv+1;
+        for(int i=first; i < last; ++i)
         {
-            if(line.intersects(_outline[i]))
-                return true;
+            int idx = i % nbv;
+            int currentQuadrant = getQuadrant(_outline[idx].end(), point);
+            int delta = currentQuadrant - lastQuadrant;
+
+            switch(delta)
+            {
+            case  3 : delta = -1; break;
+            case -3 : delta =  1; break;
+
+            case  2 :
+            case -2 :
+                delta = 2 * _outline[idx].pointLateralPosition(point);
+                break;
+            }
+
+            movesSum += delta;
+            lastQuadrant = currentQuadrant;
         }
 
-        return false;
+        return movesSum == 4;
+    }
+
+    Vec2r Polygon::nearestSurface(const Vec2r& point) const
+    {
+        Vec2r minDist = _outline[0].pointMinimalDirection(point);
+        real minDistLen2 = minDist.length2();
+
+        int nbv = nbVertices();
+        for(int i=1; i < nbv; ++i)
+        {
+            Vec2r dist = _outline[i].pointMinimalDirection(point);
+            real distLen2 = dist.length2();
+            if(distLen2 < minDistLen2)
+            {
+                minDist = dist;
+                minDistLen2 = distLen2;
+            }
+        }
+
+        return -minDist;
     }
 
     void Polygon::updateAbsVerticesAndOutline()
@@ -155,13 +177,30 @@ namespace prop2
 
     void Polygon::updateInertia()
     {
-        _mass = _density * _area;
+        if(_density == INFINITE_DENSITY ||
+           _bodyType != BodyType::DYNAMIC)
+        {
+            _inverseMass = real(0.0);
+            _inverseMomentOfInertia = real(0.0);
+        }
+        else
+        {
+            _inverseMass = real(1.0) / (_density * _area);
 
-        real meanR = real(0);
-        for(int i=0; i<nbVertices(); ++i) meanR += static_cast<real>(_relVertices[i].length());
-        meanR /= nbVertices();
+            real Ix = real(0.0);
+            real Iy = real(0.0);
+            int nbv = nbVertices();
+            for(int i=0; i < nbv; ++i)
+            {
+                Vec2r pb = _outline[i].begin();
+                Vec2r pe = _outline[i].end();
+                real ai = pb.x()*pe.y() - pe.x()*pb.y();
+                Ix += ai * (pb.y()*pb.y() + pb.y()*pe.y() + pe.y()*pe.y());
+                Iy += ai * (pb.x()*pb.x() + pb.x()*pe.x() + pe.x()*pe.x());
+            }
 
-        _momentOfInertia = real(0.5) * _mass * meanR * meanR;
+            _inverseMomentOfInertia = 12 / ((Ix + Iy) * _density);
+        }
     }
 
     Vec2r Polygon::evaluateCentroid(const std::vector<Vec2r>& vertices)

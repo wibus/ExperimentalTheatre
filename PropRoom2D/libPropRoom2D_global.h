@@ -34,8 +34,8 @@ namespace prop2
 
     namespace BodyType
     {
-    enum Enum {STATIC,
-               CINEMATIC,
+    enum Enum {GRAPHIC,
+               KINEMATIC,
                DYNAMIC,
                NB_TYPES};
     }

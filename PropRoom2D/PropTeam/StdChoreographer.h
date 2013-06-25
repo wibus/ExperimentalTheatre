@@ -9,7 +9,27 @@
 
 namespace prop2
 {
-class AbstractShape;
+    class AbstractShape;
+
+    class StdCollisionReport
+    {
+    public:
+        StdCollisionReport() :
+            areColliding(false),
+            contactPoint(Vec2r(real(0.0), real(0.0))),
+            contactNormal(Vec2r(real(1.0), real(0.0))),
+            penetrationDepth(real(0.0)),
+            shape1(nullptr),
+            shape2(nullptr)
+        {}
+
+        bool areColliding;
+        Vec2r contactPoint;
+        Vec2r contactNormal;
+        real penetrationDepth;
+        std::shared_ptr<AbstractShape> shape1;
+        std::shared_ptr<AbstractShape> shape2;
+    };
 
     class PROP2D_EXPORT StdChoreographer : public AbstractChoreographer
     {
@@ -34,25 +54,32 @@ class AbstractShape;
         virtual void unmanageImageHud(const std::shared_ptr<ImageHud>& image);
 
     protected:
-        virtual void updateVelocity(AbstractShape* shape);
-        virtual void updatePosition(AbstractShape* shape);
+        virtual void updateShape(AbstractShape* shape);
+        virtual void moveApart(
+            const std::shared_ptr<StdCollisionReport>& report);
+        virtual void resolveCollision(
+            const std::shared_ptr<StdCollisionReport>& report);
 
-        virtual void resolveCircleCircle(
-            std::shared_ptr<Circle>& circle1,
-            std::shared_ptr<Circle>& circle2);
+        virtual std::shared_ptr<StdCollisionReport> detectCircleCircle(
+            const std::shared_ptr<Circle>& circle1,
+            const std::shared_ptr<Circle>& circle2);
 
-        virtual void resolveCirclePolygon(
-            std::shared_ptr<Circle>& circle,
-            std::shared_ptr<Polygon>& polygon);
+        virtual std::shared_ptr<StdCollisionReport> detectCirclePolygon(
+            const std::shared_ptr<Circle>& circle,
+            const std::shared_ptr<Polygon>& polygon);
 
-        virtual void resolvePolygonPolygon(
-            std::shared_ptr<Polygon>& polygon1,
-            std::shared_ptr<Polygon>& polygon2);
+        virtual std::shared_ptr<StdCollisionReport> detectPolygonPolygon(
+            const std::shared_ptr<Polygon>& polygon1,
+            const std::shared_ptr<Polygon>& polygon2);
 
         real _dt;
         real _gravity;
         std::vector< std::shared_ptr<Circle> >  _circles;
         std::vector< std::shared_ptr<Polygon> > _polygons;
+
+        real _maxHandledDeltaTime;
+        real _correctionPercentage;
+        real _correctionSlop;
     };
 
 

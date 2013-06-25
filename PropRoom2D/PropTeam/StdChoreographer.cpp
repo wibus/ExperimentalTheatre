@@ -5,6 +5,7 @@
 
 #include <cassert>
 using namespace std;
+using namespace cellar;
 
 
 namespace prop2
@@ -13,7 +14,10 @@ namespace prop2
         _dt(real(0)),
         _gravity(real(98.0)), // 9.8m/s2 * 10px/m
         _circles(),
-        _polygons()
+        _polygons(),
+        _maxHandledDeltaTime(real(0.1)),
+        _correctionPercentage(real(0.65)),
+        _correctionSlop(real(0.1))
     {
     }
 
@@ -37,11 +41,36 @@ namespace prop2
 
         if(_dt == real(0))
         {
+            // No time elapsed,
+            // no need to update
+            return;
+        }
+
+        if(_dt > _maxHandledDeltaTime)
+        {
+            // To much time elpased,
+            // would make the simulation unstable
             return;
         }
 
         size_t nbCircles = _circles.size();
         size_t nbPolygons = _polygons.size();
+
+        // Update positions of all shapes
+        // Set gravity as well
+        for(size_t i=0; i<_circles.size(); ++i)
+        {
+            Circle* circle = _circles[i].get();
+            circle->addLinearAcceleration(Vec2r(real(0), -_gravity));
+            updateShape(circle);
+        }
+
+        for(size_t i=0; i<_polygons.size(); ++i)
+        {
+            Polygon* polygon = _polygons[i].get();
+            polygon->addLinearAcceleration(Vec2r(real(0), -_gravity));
+            updateShape(polygon);
+        }
 
 
         // Resolve collisions of dynamic shapes
@@ -49,25 +78,37 @@ namespace prop2
         // A shape should never trigger a resolveXY() with a preceding shape :
         //  * Circles precede Polygons
         //  * Lower indices precede higher indices
+        std::vector< std::shared_ptr<StdCollisionReport> > collisionReports;
+        std::shared_ptr<StdCollisionReport> report;
 
         for(size_t master=0; master < nbCircles; ++master)
         {
             shared_ptr<Circle>& masterCircle = _circles[master];
+
             if(masterCircle->bodyType() == BodyType::DYNAMIC)
             {
                 for(size_t slave = 0; slave < nbCircles; ++slave)
-                    if(slave > master || _circles[slave]->bodyType() != BodyType::DYNAMIC)
+                {
+                    const std::shared_ptr<Circle>& slaveCircle = _circles[slave];
+                    if(slaveCircle->bodyType() != BodyType::GRAPHIC &&
+                       (slaveCircle->bodyType() == BodyType::KINEMATIC ||
+                        master < slave))
                     {
-                        resolveCircleCircle(masterCircle, _circles[slave]);
-                        updateVelocity(masterCircle.get());
-                        updateVelocity(_circles[slave].get());
+                        report = detectCircleCircle(masterCircle, slaveCircle);
+                        if(report->areColliding)
+                            collisionReports.push_back(report);
                     }
+                }
 
                 for(size_t slave = 0; slave < nbPolygons; ++slave)
                 {
-                    resolveCirclePolygon(masterCircle, _polygons[slave]);
-                    updateVelocity(masterCircle.get());
-                    updateVelocity(_polygons[slave].get());
+                    const std::shared_ptr<Polygon>& slavePolygon = _polygons[slave];
+                    if(slavePolygon->bodyType() != BodyType::GRAPHIC)
+                    {
+                        report = detectCirclePolygon(masterCircle, slavePolygon);
+                        if(report->areColliding)
+                            collisionReports.push_back(report);
+                    }
                 }
             }
         }
@@ -75,36 +116,46 @@ namespace prop2
         for(size_t master=0; master < nbPolygons; ++master)
         {
             shared_ptr<Polygon>& masterPolygon = _polygons[master];
+
             if(masterPolygon->bodyType() == BodyType::DYNAMIC)
             {
                 for(size_t slave = 0; slave < nbCircles; ++slave)
-                    if(_circles[slave]->bodyType() != BodyType::DYNAMIC)
+                {
+                    const std::shared_ptr<Circle>& slaveCircle = _circles[slave];
+                    if(slaveCircle->bodyType() == BodyType::KINEMATIC)
                     {
-                        resolveCirclePolygon(_circles[slave], masterPolygon);
-                        updateVelocity(_circles[slave].get());
-                        updateVelocity(masterPolygon.get());
+                        report = detectCirclePolygon(slaveCircle, masterPolygon);
+                        if(report->areColliding)
+                            collisionReports.push_back(report);
                     }
+                }
 
                 for(size_t slave = 0; slave < nbPolygons; ++slave)
-                    if(slave > master || _polygons[slave]->bodyType() != BodyType::DYNAMIC)
+                {
+                    const std::shared_ptr<Polygon>& slavePolygon = _polygons[slave];
+                    if(slavePolygon->bodyType() != BodyType::GRAPHIC &&
+                       (slavePolygon->bodyType() == BodyType::KINEMATIC ||
+                        master < slave))
                     {
-                        resolvePolygonPolygon(masterPolygon, _polygons[slave]);
-                        updateVelocity(masterPolygon.get());
-                        updateVelocity(_polygons[slave].get());
+                        report = detectPolygonPolygon(masterPolygon, slavePolygon);
+                        if(report->areColliding)
+                            collisionReports.push_back(report);
                     }
+                }
             }
         }
 
 
-        // Update all shapes with added forces
-        for(size_t i=0; i<_circles.size(); ++i)
-            updatePosition(_circles[i].get());
-
-        for(size_t i=0; i<_polygons.size(); ++i)
-            updatePosition(_polygons[i].get());
+        // Resolve found collisions
+        int nbReports = static_cast<int>(collisionReports.size());
+        for(int i=0; i < nbReports; ++i)
+        {
+            moveApart(collisionReports[i]);
+            resolveCollision(collisionReports[i]);
+        }
     }
 
-    void StdChoreographer::updateVelocity(AbstractShape* shape)
+    void StdChoreographer::updateShape(AbstractShape* shape)
     {
         if(shape->bodyType() == BodyType::DYNAMIC)
         {
@@ -114,214 +165,269 @@ namespace prop2
             shape->addAngularVelocity(shape->angularAcceleration() * _dt);
             shape->setAngularAcceleration(real(0));
         }
-    }
-
-    void StdChoreographer::updatePosition(AbstractShape* shape)
-    {
-        if(shape->bodyType() == BodyType::DYNAMIC)
-        {
-            // Gravity
-            shape->addLinearAcceleration(Vec2r(real(0), -_gravity));
-            updateVelocity(shape);
-        }
         if(shape->bodyType() == BodyType::DYNAMIC ||
-           shape->bodyType() == BodyType::CINEMATIC)
+           shape->bodyType() == BodyType::KINEMATIC)
         {
             shape->moveBy(shape->linearVelocity() * _dt);
             shape->rotate(shape->angularVelocity() * _dt);
         }
     }
 
-    void StdChoreographer::resolveCircleCircle(
-        std::shared_ptr<Circle>& circle1,
-        std::shared_ptr<Circle>& circle2)
+
+    void StdChoreographer::moveApart(
+        const std::shared_ptr<StdCollisionReport>& report)
     {
-        Vec2r centersDist = circle2->centroid() - circle1->centroid();
+        AbstractShape* shape1 = report->shape1.get();
+        AbstractShape* shape2 = report->shape2.get();
 
-        // Test for collision
-        real overlappindDist = circle1->radius() + circle2->radius() - (real)centersDist.length();
-        if(overlappindDist < real(0.0) )
-            return;
+        Vec2r n = report->contactNormal;
+        real pen = report->penetrationDepth;
 
-        // Collision normal points out circle1 (local y axis)
-        Vec2r uNormal = centersDist.normalize();
-        // Collision tangent points right to normal (local x axis)
-        Vec2r uTangent = perpCCW(uNormal);
+        real iM1 = shape1->inverseMass();
+        real iM2 = shape2->inverseMass();
 
-        real bounce = ((circle1->bounciness() *
-                        circle2->bounciness()) + 1) / 2;
-
-        if(circle1->bodyType() == BodyType::DYNAMIC &&
-           circle2->bodyType() == BodyType::DYNAMIC)
-        {
-            Vec2r c1vn = proj(circle1->linearVelocity(), uNormal);
-            real  c1mass = circle1->mass();
-
-            Vec2r c2vn = proj(circle2->linearVelocity(), uNormal);
-            real c2mass = circle2->mass();
-
-            real massSum = c1mass + c2mass;
-            real massDiff = c1mass - c2mass;
-
-            Vec2r c1vtFinal = (2*c2mass*c2vn + c1vn*massDiff) / massSum;
-            Vec2r c2vtFinal = (2*c1mass*c1vn - c2vn*massDiff) / massSum;
-
-            // Add forces
-            circle1->addLinearAcceleration(bounce * (c1vtFinal - c1vn) / _dt);
-            circle2->addLinearAcceleration(bounce * (c2vtFinal - c2vn) / _dt);
-
-            // Rotation
-            Vec2r Vr = proj(circle2->linearVelocity() - circle1->linearVelocity(),
-                            uTangent);
-            Vec2r Wr = (circle1->angularVelocity() * circle1->radius() +
-                        circle2->angularVelocity() * circle2->radius()) * (-uTangent);
-            Vec2r impulse = (Vr + Wr) * sqrt(circle1->momentOfInertia() * circle2->momentOfInertia()) /
-                    (circle1->radius() + circle2->radius());
-
-            Vec2r at = circle1->centroid() + uNormal * circle1->radius();
-            circle1->addForceAt(impulse, at);
-            circle2->addForceAt(-impulse, at);
-
-            // Move shapes
-            real c1Move = -(c2mass / massSum * overlappindDist);
-            real c2Move = c1Move + overlappindDist;
-            circle1->moveBy(uNormal * c1Move);
-            circle2->moveBy(uNormal * c2Move);
-        }
-        else if(circle1->bodyType() == BodyType::DYNAMIC)
-        {
-            // Normal
-            Vec2r Vn = proj(circle1->linearVelocity(), uNormal);
-            circle1->addLinearAcceleration(bounce * (-2.0f*Vn) / _dt);
-
-            // Tangent
-            real radius = circle1->radius();
-            real  M  = circle1->mass();
-            real  I  = circle1->momentOfInertia();
-            Vec2r R  = uNormal * circle1->radius();
-            real  Wi = circle1->angularVelocity();
-            Vec2r Vi = proj(circle1->linearVelocity() - circle2->linearVelocity() +
-                        uTangent * circle2->radius() * circle2->angularVelocity(),
-                        uTangent);
-
-            real Wf = (I*Wi - M*cross(R, Vi)) / (I + M*radius*radius);
-
-            circle1->addForceAt(uTangent * (Wf - Wi) * I / (radius * _dt),
-                                circle1->centroid() + R);
-
-            // Move
-            circle1->moveBy(-uNormal * overlappindDist);
-        }
-        else if(circle2->bodyType() == BodyType::DYNAMIC)
-        {
-            // Normal
-            Vec2r Vn = proj(circle2->linearVelocity(), uNormal);
-            circle2->addLinearAcceleration(bounce * (-2.0f*Vn) / _dt);
-
-            // Tangent
-            real  radius = circle2->radius();
-            real  M  = circle2->mass();
-            real  I  = circle2->momentOfInertia();
-            Vec2r R  = -uNormal * circle2->radius();
-            real  Wi = circle2->angularVelocity();
-            Vec2r Vi = proj(circle2->linearVelocity() - circle1->linearVelocity() -
-                            uTangent * circle1->radius() * circle1->angularVelocity(),
-                            uTangent);
-
-            real Wf = (I*Wi - M*cross(R, Vi)) / (I + M*radius*radius);
-
-            circle2->addForceAt(-uTangent * (Wf - Wi) * I / (radius * _dt),
-                                circle2->centroid() + R);
-
-            // Move
-            circle2->moveBy(uNormal * overlappindDist);
-        }
-        else
-        {
-            assert(true /* resolution called for two non-dynamic shapes : circle-circle*/ );
-        }
+        real correction = _correctionPercentage *
+                          maxVal(pen - _correctionSlop, real(0.0)) /
+                          (iM1 + iM2);
+        shape1->moveBy( n * (iM1 * correction));
+        shape2->moveBy(-n * (iM2 * correction));
     }
 
-    void StdChoreographer::resolveCirclePolygon(
-        std::shared_ptr<Circle>& circle,
-        std::shared_ptr<Polygon>& polygon)
+    void StdChoreographer::resolveCollision(
+        const std::shared_ptr<StdCollisionReport>& report)
     {
-        const vector<Segment2Dr>& pOultine = polygon->outline();
-        if(pOultine.empty())
-            return;
+        AbstractShape* shape1 = report->shape1.get();
+        AbstractShape* shape2 = report->shape2.get();
 
-        Vec2r minimalVect;
-        real minimalDist2(0);
-        real radius2 = circle->radius() * circle->radius();
-        size_t nbSides = pOultine.size();
-        for(size_t i=0; i < nbSides; ++i)
+        // Get tangent space coordinate system
+        Vec2r n = report->contactNormal;
+        Vec2r t = perpCW(n);
+
+        // Get distance of shapes' centroid from contact point
+        Vec2r p = report->contactPoint;
+        Vec2r r1 = p - shape1->centroid();
+        Vec2r r2 = p - shape2->centroid();
+
+        // Get shapes' inertia
+        real iM1 = shape1->inverseMass();
+        real iM2 = shape2->inverseMass();
+        real iI1 = shape1->inverseMomentOfInertia();
+        real iI2 = shape2->inverseMomentOfInertia();
+
+        // Get shapes' velocities
+        Vec2r v1 = shape1->linearVelocity();
+        Vec2r v2 = shape2->linearVelocity();
+        real w1 = shape1->angularVelocity();
+        real w2 = shape2->angularVelocity();
+
+        // Get bounce coefficient
+        real e = minVal(shape1->bounciness(), shape2->bounciness());
+
+
+        // Compute normal impulse //
+        real vn1 = dot(v1, n);
+        real vn2 = dot(v2, n);
+        real rn1 = cross(r1, n);
+        real rn2 = cross(r2, n);
+
+        real jn = (1 + e);
+        jn *= ((vn2 + w2*rn2) - (vn1 + w1*rn1));
+        jn /= (iM1 + iM2 + rn1*rn1*iI1 + rn2*rn2*iI2);
+
+
+        // A negative impulse means that the shapes are already moving apart
+        // No need to apply any impulse in that case
+        if(jn < real(0.0)) return;
+
+
+        // Compute tangent impulse //
+        real vt1 = dot(v1, t);
+        real vt2 = dot(v2, t);
+        real rt1 = cross(r1, t);
+        real rt2 = cross(r2, t);
+
+        real jt = real(1.0);
+        jt *= ((vt2 + w2*rt2) - (vt1 + w1*rt1));
+        jt /= (iM1 + iM2 + rt1*rt1*iI1 + rt2*rt2*iI2);
+
+
+        // Compute the final tangent impulse assuming the fact that it is
+        // limited by the shapes' static coefficients of friction and normal force
+        real us = shape1->staticFrictionCoefficient() *
+                  shape2->staticFrictionCoefficient();
+        real absoluteJt = absolute(jt);
+        if(jn*us < absoluteJt)
         {
-            const Segment2Dr& line = pOultine[i];
-            Vec2r distVect = line.pointMinimalDirection(circle->centroid());
-            real distLength2 = distVect.length2();
-            if(distLength2 < radius2)
+            real ud = shape1->dynamicFrictionCoefficient() *
+                      shape2->dynamicFrictionCoefficient();
+            jt *= (jn / absoluteJt) * ud;
+        }
+
+
+        // Apply the final impulse
+        Vec2r j = t*jt + n*jn;
+        shape1->applyImpulseAt( j, p);
+        shape2->applyImpulseAt(-j, p);
+    }
+
+    std::shared_ptr<StdCollisionReport> StdChoreographer::detectCircleCircle(
+        const std::shared_ptr<Circle>& circle1,
+        const std::shared_ptr<Circle>& circle2)
+    {
+        std::shared_ptr<StdCollisionReport> report(new StdCollisionReport());
+
+        real r1 = circle1->radius();
+        real r2 = circle2->radius();
+
+        real minDistLen = r1 + r2;
+        real minDistLen2 = minDistLen*minDistLen;
+
+        Vec2r dist = circle1->centroid() - circle2->centroid();
+        real distLen2 = dist.length2();
+
+        // Return now if the shapes do not collide
+        if(minDistLen2 < distLen2)
+            return report;
+
+        real distLen = sqrt(distLen2);
+        real radiusRatio2 = r2 / (r1+r2);
+
+        report->areColliding = true;
+        report->shape1 = circle1;
+        report->shape2 = circle2;
+        report->penetrationDepth = minDistLen - distLen;
+        report->contactNormal = dist / distLen;
+        report->contactPoint =
+            circle2->centroid() + report->contactNormal * distLen * radiusRatio2;
+
+        return report;
+    }
+
+    std::shared_ptr<StdCollisionReport> StdChoreographer::detectCirclePolygon(
+        const std::shared_ptr<Circle>& circle,
+        const std::shared_ptr<Polygon>& polygon)
+    {
+        std::shared_ptr<StdCollisionReport> report(new StdCollisionReport());
+
+        Vec2r c = circle->centroid();
+        real r = circle->radius();
+
+        Vec2r minDist;
+        real minDistLen2 = r*r;
+
+        int nbv = polygon->nbVertices();
+        const std::vector<Segment2Dr>& outline = polygon->outline();
+        for(int i=0; i < nbv; ++i)
+        {
+            Vec2r dist = outline[i].pointMinimalDirection(c);
+            real distLen2 = dist.length2();
+            if(distLen2 < minDistLen2)
             {
-                Vec2r distVect = line.pointMinimalDirection(circle->centroid());
-                if(!minimalDist2 || distLength2 < minimalVect.length2())
-                    minimalVect = distVect;
-                    minimalDist2 = distLength2;
+                minDist = dist;
+                minDistLen2 = distLen2;
             }
         }
 
-        // If there isn't any collision, exit
-        if(!minimalDist2)
-            return;
+        // Return now if the shapes do not collide
+        if(minDistLen2 == r*r)
+            return report;
 
-        if(circle->bodyType() == BodyType::DYNAMIC &&
-           polygon->bodyType() == BodyType::DYNAMIC)
-        {
-            // TODO wibus 2012-10-28: resolve circle and polygon for circle-polygon
-        }
-        else if(circle->bodyType() == BodyType::DYNAMIC)
-        {
-            Vec2r n = minimalVect.normalized();
-            Vec2r t = perpCW( n );
+        real minDistLen = sqrt(minDistLen2);
 
-            real M = circle->mass();
-            real R = circle->radius();
-            real I = circle->momentOfInertia();
-            real e = circle->bounciness() * polygon->bounciness();
-            Vec2r vi = circle->linearVelocity();
+        report->areColliding = true;
+        report->shape1 = circle;
+        report->shape2 = polygon;
+        report->penetrationDepth = r - minDistLen;
+        report->contactNormal = minDist / minDistLen;
+        report->contactPoint = circle->centroid() -
+                               report->contactNormal *
+                                    (r - report->penetrationDepth / real(2.0));
 
-            real j = -(1 + e)proj(vi, n) / ();
-
-/*
-            Vec2r vNi = proj(circle->linearVelocity(), n);
-            Vec2r vNf = - vNi * circle->bounciness()*polygon->bounciness();
-            circle->addLinearForce((vNf - vNi)*M / _dt);
-
-
-            real VdotT = dot(circle->linearVelocity(), t);
-            real WdotT = circle->angularVelocity();
-            real j = (VdotT - WdotT*R) / (R*R/I + 1.0/M);
-            Vec2r vTi = proj(circle->linearVelocity(), t);
-            Vec2r wTi = circle->angularVelocity() * R * t;
-            Vec2r vTf = vTi + wTi;
-            circle->addForceAt(-(vTf)*M / _dt, circle->centroid() - n*R);
-*/
-            circle->moveBy(minimalVect.normalized() * (minimalVect.length() - circle->radius()));
-        }
-        else if(polygon->bodyType() == BodyType::DYNAMIC)
-        {
-            // TODO wibus 2012-10-28: resolve polygon for circle-polygon
-        }
-        else
-        {
-            assert(true /* resolution called for two non-dynamic shapes : circle-polygon*/ );
-        }
+        return report;
     }
 
-    void StdChoreographer::resolvePolygonPolygon(
-        std::shared_ptr<Polygon>& polygon1,
-        std::shared_ptr<Polygon>& polygon2)
+    std::shared_ptr<StdCollisionReport> StdChoreographer::detectPolygonPolygon(
+        const std::shared_ptr<Polygon>& polygon1,
+        const std::shared_ptr<Polygon>& polygon2)
     {
-        // TODO wibus 2012-10-21 : Implement polygon-polygon
-        // collision resolution
+        std::shared_ptr<StdCollisionReport> report(new StdCollisionReport());
+
+        const std::vector<Segment2Dr>& outline1 = polygon1->outline();
+        const std::vector<Segment2Dr>& outline2 = polygon2->outline();
+
+        int nbv1 = polygon1->nbVertices();
+        int nbv2 = polygon2->nbVertices();
+
+        Vec2r weightedNormalsAverage;
+        Vec2r weightedCollisionPointsAverage;
+        real weightsAccumulator = real(0.0);
+
+        for(int i=0; i < nbv1; ++i)
+        {
+            Vec2r pt = outline1[i].begin();
+            if(!polygon2->contains(pt))
+                continue;
+
+            Vec2r minDist = outline2[0].pointMinimalDirection(pt);
+            real minDistLen2 = minDist.length2();
+            for(int j=1; j < nbv2; ++j)
+            {
+                Vec2r dist = outline2[j].pointMinimalDirection(pt);
+                real distLen2 = dist.length2();
+                if(minDistLen2 < distLen2)
+                    continue;
+
+                minDist = dist;
+                minDistLen2 = distLen2;
+            }
+
+            real pointContribution = sqrt(minDistLen2);
+            weightsAccumulator += pointContribution;
+            weightedNormalsAverage -= pointContribution * minDist;
+            weightedCollisionPointsAverage += pointContribution * pt;
+        }
+
+        for(int i=0; i < nbv2; ++i)
+        {
+            Vec2r pt = outline2[i].begin();
+            if(!polygon1->contains(pt))
+                continue;
+
+            Vec2r minDist = outline1[0].pointMinimalDirection(pt);
+            real minDistLen2 = minDist.length2();
+            for(int j=1; j < nbv1; ++j)
+            {
+                Vec2r dist = outline1[j].pointMinimalDirection(pt);
+                real distLen2 = dist.length2();
+                if(minDistLen2 < distLen2)
+                    continue;
+
+                minDist = dist;
+                minDistLen2 = distLen2;
+            }
+
+            real pointContribution = sqrt(minDistLen2);
+            weightsAccumulator += pointContribution;
+            weightedNormalsAverage += pointContribution * minDist;
+            weightedCollisionPointsAverage += pointContribution * pt;
+        }
+
+        // Return now if the shapes do not collide
+        if(weightsAccumulator == real(0.0))
+            return report;
+
+        Vec2r col = weightedCollisionPointsAverage / weightsAccumulator;
+        Vec2r pen = weightedNormalsAverage / weightsAccumulator;
+        real penLen = pen.length();
+
+        report->areColliding = true;
+        report->shape1 = polygon1;
+        report->shape2 = polygon2;
+        report->penetrationDepth = penLen;
+        report->contactNormal = pen / penLen;
+        report->contactPoint = col;
+
+        return report;
     }
 
     void StdChoreographer::manageCircle(const std::shared_ptr<Circle>& circle)
@@ -370,10 +476,12 @@ namespace prop2
 
     void StdChoreographer::unmanageTextHud(const std::shared_ptr<TextHud>&)
     {
+        // Nothing to do
     }
 
     void StdChoreographer::unmanageImageHud(const std::shared_ptr<ImageHud>&)
     {
+        // Nothing to do
     }
 
 }

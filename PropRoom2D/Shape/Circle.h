@@ -33,7 +33,7 @@ class CircleCostume;
 
         // Tests
         virtual bool contains(const Vec2r& point) const;
-        virtual bool intersects(const Segment2Dr& line) const;
+        virtual Vec2r nearestSurface(const Vec2r& point) const;
 
 
     protected:

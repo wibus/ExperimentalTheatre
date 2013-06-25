@@ -5,16 +5,17 @@
 
 namespace prop2
 {
-    const real AbstractShape::INFINIT_INERTIA = real(0);
+    const real AbstractShape::INFINITE_DENSITY = real(0);
 
     AbstractShape::AbstractShape(PropType::Enum propType) :
         AbstractProp(propType),
         _bodyType(BodyType::DYNAMIC),
         _tranformMatrix(real(1.0)),
-        _mass(INFINIT_INERTIA),
-        _momentOfInertia(INFINIT_INERTIA),
+        _inverseMass(real(0.0)),
+        _inverseMomentOfInertia(real(0.0)),
         _density(real(1.0)),
-        _friction(real(1.0)),
+        _staticFrictionCoefficient(real(1.0)),
+        _dynamicFrictionCoefficient(real(1.0)),
         _bounciness(real(1.0)),
         _perimeter(real(0.0)),
         _area(real(0.0)),
@@ -33,18 +34,30 @@ namespace prop2
 
     void AbstractShape::setBodyType(const BodyType::Enum& type)
     {
-        _bodyType = type;
+        if(_bodyType != type)
+        {
+            _bodyType = type;
+            updateInertia();
+        }
     }
 
     void AbstractShape::setDensity(const real& density)
     {
-        _density = density;
-        updateInertia();
+        if(_density != density)
+        {
+            _density = density;
+            updateInertia();
+        }
     }
 
-    void AbstractShape::setFriction(const real& friction)
+    void AbstractShape::setStaticFrictionCoefficient(const real& us)
     {
-        _friction = friction;
+        _staticFrictionCoefficient = us;
+    }
+
+    void AbstractShape::setDynamicFrictionCoefficient(const real& ud)
+    {
+        _dynamicFrictionCoefficient = ud;
     }
 
     void AbstractShape::setBounciness(const real& bounciness)
@@ -54,8 +67,11 @@ namespace prop2
 
     void AbstractShape::moveBy(const Vec2r& displacement)
     {
-        _centroid += displacement;
-        updateTranformMatrix();
+        if(displacement != Vec2r())
+        {
+            _centroid += displacement;
+            updateTranformMatrix();
+        }
     }
 
     void AbstractShape::setCentroid(const Vec2r& position)
@@ -86,16 +102,21 @@ namespace prop2
 
     void AbstractShape::addLinearForce(const Vec2r& force)
     {
-        if(_mass != INFINIT_INERTIA)
-        {
-            _linearAcceleration += force / _mass;
-        }
+        _linearAcceleration += force * _inverseMass;
+    }
+
+    void AbstractShape::applyLinearImpulse(const Vec2r& impulse)
+    {
+        _linearVelocity += impulse * _inverseMass;
     }
 
     void AbstractShape::rotate(const real& angle)
     {
-        _angle += angle;
-        updateTranformMatrix();
+        if(angle != real(0.0))
+        {
+            _angle += angle;
+            updateTranformMatrix();
+        }
     }
 
     void AbstractShape::setAngle(const real& angle)
@@ -126,16 +147,25 @@ namespace prop2
 
     void AbstractShape::addAngularForce(const real& force)
     {
-        if(_momentOfInertia != INFINIT_INERTIA)
-        {
-            _angularAcceleration += force / _momentOfInertia;
-        }
+        _angularAcceleration += force * _inverseMomentOfInertia;
+    }
+
+    void AbstractShape::applyAngularImpulse(const real& impulse)
+    {
+        _angularVelocity += impulse * _inverseMomentOfInertia;
     }
 
     void AbstractShape::addForceAt(const Vec2r& force, const Vec2r& at)
     {
-        Vec2r radius = at - _centroid;
+        Vec2r radius = at - centroid();
         addAngularForce(cross(radius, force));
         addLinearForce(force);
+    }
+
+    void AbstractShape::applyImpulseAt(const Vec2r& impulse, const Vec2r& at)
+    {
+        Vec2r radius = at - centroid();
+        applyAngularImpulse(cross(radius, impulse));
+        applyLinearImpulse(impulse);
     }
 }

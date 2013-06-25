@@ -37,7 +37,7 @@ class PolygonCostume;
 
         // Tests
         virtual bool contains(const Vec2r& point) const;
-        virtual bool intersects(const Segment2Dr& line) const;
+        virtual Vec2r nearestSurface(const Vec2r& point) const;
 
 
     protected:
@@ -49,7 +49,8 @@ class PolygonCostume;
         virtual void updateInertia();
 
         static Vec2r evaluateCentroid(const std::vector<Vec2r>& vertices);
-        static std::vector<Segment2Dr> evaluateOutline(const std::vector<Vec2r>& vertices);
+        static std::vector<Segment2Dr> evaluateOutline(
+                const std::vector<Vec2r>& vertices);
 
 
         // Attributes

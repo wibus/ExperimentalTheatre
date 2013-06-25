@@ -41,12 +41,14 @@ namespace prop2
 
     bool Circle::contains(const Vec2r& point) const
     {
-        return (_centroid - point).length() < _radius;
+        return (centroid() - point).length() < _radius;
     }
 
-    bool Circle::intersects(const Segment2Dr& line) const
+    Vec2r Circle::nearestSurface(const Vec2r& point) const
     {
-        return line.pointMinimalDistance(_centroid) < _radius;
+        Vec2r direction = point - centroid();
+        real distance = direction.length();
+        return direction.normalize() * (radius() - distance);
     }
 
     void Circle::updateTranformMatrix()
@@ -69,7 +71,16 @@ namespace prop2
 
     void Circle::updateInertia()
     {
-        _mass = _density * _area;
-        _momentOfInertia = real(0.5) * _mass * _radius * _radius;
+        if(_density == INFINITE_DENSITY ||
+           _bodyType != BodyType::DYNAMIC)
+        {
+            _inverseMass = real(0.0);
+            _inverseMomentOfInertia = real(0.0);
+        }
+        else
+        {
+            _inverseMass = real(1.0) / (_density * _area);
+            _inverseMomentOfInertia = (2 * _inverseMass) / (_radius * _radius);
+        }
     }
 }

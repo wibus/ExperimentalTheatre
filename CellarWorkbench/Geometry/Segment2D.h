@@ -33,12 +33,8 @@ namespace cellar
         void setEnd(const Vector<2, T>& pos);
         void moveBy(const Vector<2, T>& ds);
 
-
-        enum Lateral     {LEFT,     RIGHT,          NB_LATERALS};
-        enum Transversal {IN_FRONT, BESIDE, BEHIND, NB_TRANSVERSALS};
-
-        Lateral     pointLateralPosition(const Vector<2, T>& point) const;
-        Transversal pointTransversalPosition(const Vector<2, T>& point) const;
+        signed char pointLateralPosition(const Vector<2, T>& point) const;
+        signed char pointTransversalPosition(const Vector<2, T>& point) const;
         T           pointMinimalDistance(const Vector<2, T>& point) const;
         Vector<2, T> pointMinimalDirection(const Vector<2, T>& point) const;
         bool        intersects(const Segment2D<T>& line) const;
@@ -178,30 +174,25 @@ namespace cellar
 
 
     template<typename T>
-    typename Segment2D<T>::Lateral Segment2D<T>::pointLateralPosition(const Vector<2, T>& point) const
+    signed char Segment2D<T>::pointLateralPosition(const Vector<2, T>& point) const
     {
-        T pointLineDist = (point-_begin) ^ (_end-_begin);
-
-        if(pointLineDist >= 0)
-            return LEFT;
-        //else
-            return RIGHT;
+        return sign(cross(_end - _begin, point - _begin));
     }
 
 
     template<typename T>
-    typename Segment2D<T>::Transversal Segment2D<T>::pointTransversalPosition(const Vector<2, T>& point) const
+    signed char Segment2D<T>::pointTransversalPosition(const Vector<2, T>& point) const
     {
         auto director = (_end - _begin);
         auto len = director.length();
         auto pointProjection = dot(point - _begin, director.normalize());
 
         if(pointProjection < 0)
-            return BEHIND;
+            return -1;
         else if(pointProjection > len)
-            return IN_FRONT;
+            return 1;
         //else
-        return BESIDE;
+        return 0;
     }
 
 
@@ -210,14 +201,14 @@ namespace cellar
     {
         switch (pointTransversalPosition(point))
         {
-        case IN_FRONT:
+        case 1:
             return (point - _end).length();
 
-        case BEHIND:
+        case -1:
             return (point - _begin).length();
 
         default:
-            return absolute(cross(point - _begin, unitDirector()));
+            return absolute(dot(point - _begin, unitNormal()));
         }
     }
 
@@ -227,14 +218,14 @@ namespace cellar
     {
         switch (pointTransversalPosition(point))
         {
-        case IN_FRONT:
+        case 1:
             return point - _end;
 
-        case BEHIND:
+        case -1:
             return point - _begin;
 
         default:
-            return cross(point - _begin, unitDirector()) * unitNormal();
+            return proj(point - _begin, unitNormal());
         }
     }
 
