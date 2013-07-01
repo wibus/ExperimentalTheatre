@@ -65,6 +65,7 @@ namespace cellar
             bool           operator==(const Vector<N, T>& vec) const;
             bool           operator!=(const Vector<N, T>& vec) const;
             bool           operator< (const Vector<N, T>& vec) const;
+                           operator bool() const;
 
     private :
             T _v[N];
@@ -384,6 +385,16 @@ namespace cellar
             if(vec[i] < _v[i])
                 return false;
         }
+
+        return false;
+    }
+
+    template <int N, typename T>
+    Vector<N, T>::operator bool() const
+    {
+        for(int i=0; i < N; ++i)
+            if(_v[i])
+                return true;
 
         return false;
     }

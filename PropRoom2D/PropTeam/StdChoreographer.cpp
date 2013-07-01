@@ -57,19 +57,13 @@ namespace prop2
         size_t nbPolygons = _polygons.size();
 
         // Update positions of all shapes
-        // Set gravity as well
         for(size_t i=0; i<_circles.size(); ++i)
         {
-            Circle* circle = _circles[i].get();
-            circle->addLinearAcceleration(Vec2r(real(0), -_gravity));
-            updateShape(circle);
+            updateShape(_circles[i]);
         }
-
         for(size_t i=0; i<_polygons.size(); ++i)
         {
-            Polygon* polygon = _polygons[i].get();
-            polygon->addLinearAcceleration(Vec2r(real(0), -_gravity));
-            updateShape(polygon);
+            updateShape(_polygons[i]);
         }
 
 
@@ -155,24 +149,27 @@ namespace prop2
         }
     }
 
-    void StdChoreographer::updateShape(AbstractShape* shape)
+    void StdChoreographer::updateShape(
+        const std::shared_ptr<AbstractShape>& shape)
     {
         if(shape->bodyType() == BodyType::DYNAMIC)
         {
-            shape->addLinearVelocity(shape->linearAcceleration() * _dt);
-            shape->setLinearAcceleration(Vec2r(real(0), real(0)));
+            // Apply the gravitationnal acceleration to dynamic shapes
+            shape->addLinearAcceleration(Vec2r(real(0), -_gravity));
+        }
 
-            shape->addAngularVelocity(shape->angularAcceleration() * _dt);
-            shape->setAngularAcceleration(real(0));
-        }
-        if(shape->bodyType() == BodyType::DYNAMIC ||
-           shape->bodyType() == BodyType::KINEMATIC)
-        {
-            shape->moveBy(shape->linearVelocity() * _dt);
-            shape->rotate(shape->angularVelocity() * _dt);
-        }
+        // Update the velocities of the shape
+        shape->addLinearVelocity(shape->linearAcceleration()   * _dt);
+        shape->addAngularVelocity(shape->angularAcceleration() * _dt);
+
+        // Move the shape
+        shape->moveBy(shape->linearVelocity()  * _dt);
+        shape->rotate(shape->angularVelocity() * _dt);
+
+        // Reset the accelerations
+        shape->setLinearAcceleration(Vec2r());
+        shape->setAngularAcceleration(real(0.0));
     }
-
 
     void StdChoreographer::moveApart(
         const std::shared_ptr<StdCollisionReport>& report)

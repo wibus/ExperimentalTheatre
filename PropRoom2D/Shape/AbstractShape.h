@@ -86,6 +86,7 @@ class AbstractCostume;
 
         // Constant attributes
         static const real INFINITE_DENSITY;
+        static const real INFINITE_INERTIA;
 
     protected:
         // Computations

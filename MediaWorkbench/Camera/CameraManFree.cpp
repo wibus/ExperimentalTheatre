@@ -62,7 +62,8 @@ namespace media
             (_camera->tripod().to() - _camera->tripod().from()).normalized();
         cellar::Vec3f side = -cross(dir, _camera->tripod().up()).normalized();
 
-        cellar::Vec3f newDir =  dir * cos(radians) +  side * sin(radians);
+        cellar::Vec3f newDir =  dir  *  (float)cos(radians) +
+                                side * (float)sin(radians);
 
         _camera->setTripod(_camera->tripod().from(),
                            _camera->tripod().from() + newDir,
@@ -73,8 +74,8 @@ namespace media
     {
         cellar::Vec3f dir =
             (_camera->tripod().to() - _camera->tripod().from()).normalized();
-        cellar::Vec3f newDir =  dir * cos(radians) +
-                                  _camera->tripod().up() * sin(radians);
+        cellar::Vec3f newDir =  dir *                    (float)cos(radians) +
+                                _camera->tripod().up() * (float)sin(radians);
 
         _camera->setTripod(_camera->tripod().from(),
                            _camera->tripod().from() + newDir,

@@ -6,14 +6,15 @@
 namespace prop2
 {
     const real AbstractShape::INFINITE_DENSITY = real(0);
+    const real AbstractShape::INFINITE_INERTIA = real(0);
 
     AbstractShape::AbstractShape(PropType::Enum propType) :
         AbstractProp(propType),
-        _bodyType(BodyType::DYNAMIC),
+        _bodyType(BodyType::GRAPHIC),
         _tranformMatrix(real(1.0)),
-        _inverseMass(real(0.0)),
-        _inverseMomentOfInertia(real(0.0)),
-        _density(real(1.0)),
+        _inverseMass(INFINITE_INERTIA),
+        _inverseMomentOfInertia(INFINITE_INERTIA),
+        _density(real(1)),
         _staticFrictionCoefficient(real(1.0)),
         _dynamicFrictionCoefficient(real(1.0)),
         _bounciness(real(1.0)),
@@ -67,7 +68,7 @@ namespace prop2
 
     void AbstractShape::moveBy(const Vec2r& displacement)
     {
-        if(displacement != Vec2r())
+        if(displacement)
         {
             _centroid += displacement;
             updateTranformMatrix();
@@ -76,8 +77,11 @@ namespace prop2
 
     void AbstractShape::setCentroid(const Vec2r& position)
     {
-        _centroid = position;
-        updateTranformMatrix();
+        if(_centroid != position)
+        {
+            _centroid = position;
+            updateTranformMatrix();
+        }
     }
 
     void AbstractShape::setLinearVelocity(const Vec2r& velocity)
@@ -112,7 +116,7 @@ namespace prop2
 
     void AbstractShape::rotate(const real& angle)
     {
-        if(angle != real(0.0))
+        if(angle)
         {
             _angle += angle;
             updateTranformMatrix();
@@ -121,8 +125,11 @@ namespace prop2
 
     void AbstractShape::setAngle(const real& angle)
     {
-        _angle = angle;
-        updateTranformMatrix();
+        if(_angle != angle)
+        {
+            _angle = angle;
+            updateTranformMatrix();
+        }
     }
 
     void AbstractShape::setAngularVelocity(const real& velocity)

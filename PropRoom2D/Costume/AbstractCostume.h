@@ -17,19 +17,16 @@ namespace prop2
         virtual ~AbstractCostume();
 
         // Getters
-        bool isOpaque() const;
         real depth() const;
         Vec4r colorFilter() const;
         std::string textureName() const;
 
         // Setters
-        virtual void setIsOpaque(bool isOpaque);
         virtual void setDepth(real depth);
         virtual void setColorFilter(const Vec4r& filter);
         virtual void setTextureName(const std::string& fileName);
 
     private:
-        bool _isOpaque;
         real _depth;
         Vec4r _colorFilter;
         std::string _textureName;
@@ -38,10 +35,6 @@ namespace prop2
 
 
     // IMPLEMENTATION //
-    inline bool AbstractCostume::isOpaque() const
-    {
-        return _isOpaque;
-    }
 
     inline real AbstractCostume::depth() const
     {

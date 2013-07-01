@@ -54,7 +54,8 @@ namespace prop2
         virtual void unmanageImageHud(const std::shared_ptr<ImageHud>& image);
 
     protected:
-        virtual void updateShape(AbstractShape* shape);
+        virtual void updateShape(
+            const std::shared_ptr<AbstractShape>& shape);
         virtual void moveApart(
             const std::shared_ptr<StdCollisionReport>& report);
         virtual void resolveCollision(

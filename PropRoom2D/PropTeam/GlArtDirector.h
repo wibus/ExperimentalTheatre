@@ -5,7 +5,6 @@
 #include "AbstractArtDirector.h"
 
 #include <vector>
-#include <queue>
 #include <map>
 
 #include <GL/GlProgram.h>
@@ -15,11 +14,6 @@
 namespace prop2
 {
 class AbstractShape;
-
-    class PROP2D_EXPORT ShapeOrderer
-    {
-    public: bool operator() (AbstractShape* lhs, AbstractShape* rhs);
-    };
 
     class PROP2D_EXPORT GlFont
     {
@@ -66,11 +60,10 @@ class AbstractShape;
         virtual void unmanageImageHud(const std::shared_ptr<ImageHud>& image);
 
     protected:
-        virtual void drawOrderedTransparentShapes();
-        virtual void drawCircle(Circle* circle);
-        virtual void drawPolygon(Polygon* polygon);
-        virtual void drawTextHud(TextHud* text);
-        virtual void drawImageHud(ImageHud* image);
+        virtual void drawCircle(const std::shared_ptr<Circle>& circle);
+        virtual void drawPolygon(const std::shared_ptr<Polygon>& polygon);
+        virtual void drawTextHud(const std::shared_ptr<TextHud>& text);
+        virtual void drawImageHud(const std::shared_ptr<ImageHud>& image);
 
         virtual void setupCircleShader(const media::GlInputsOutputs& loc);
         virtual void setupPolygonShader(const media::GlInputsOutputs& loc);
@@ -88,10 +81,6 @@ class AbstractShape;
         std::vector< std::shared_ptr<TextHud> >  _texts;
         std::vector< std::shared_ptr<ImageHud> > _images;
         std::map<std::string, GlFont> _fonts;
-
-        std::priority_queue< AbstractShape*,
-                             std::vector<AbstractShape*>,
-                             ShapeOrderer > _tranparentShapes;
 
         media::GlProgram _circleShader;
         media::GlProgram _polygonShader;

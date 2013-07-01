@@ -9,6 +9,7 @@
 #include "Hud/ImageHud.h"
 
 #include <cassert>
+#include <algorithm>
 
 #include <GL3/gl3w.h>
 
@@ -27,7 +28,8 @@ using namespace media;
 
 namespace prop2
 {
-    bool ShapeOrderer::operator() (AbstractShape* lhs, AbstractShape* rhs)
+    bool DepthOrderer(const std::shared_ptr<AbstractShape>& lhs,
+                      const std::shared_ptr<AbstractShape>& rhs)
     {
         return lhs->abstractCostume().depth() <
                rhs->abstractCostume().depth();
@@ -108,116 +110,96 @@ namespace prop2
 
     void GlArtDirector::draw(real)
     {        
-        glDepthMask(GL_TRUE);
-        glEnable(GL_DEPTH_TEST);
-        glDisable(GL_BLEND);
-
-        for(auto it = _circles.begin(); it != _circles.end(); ++it)
-        {
-            Circle* circle = (*it).get();
-            if(circle->isVisible())
-            {
-                if(circle->costume()->isOpaque())
-                {
-                    drawCircle(circle);
-                }
-                else
-                {
-                    _tranparentShapes.push(circle);
-                }
-            }
-        }
-
-        for(auto it = _polygons.begin(); it != _polygons.end(); ++it)
-        {
-            Polygon* polygon = (*it).get();
-            if(polygon->isVisible())
-            {
-                if(polygon->costume()->isOpaque())
-                {
-                    drawPolygon(polygon);
-                }
-                else
-                {
-                    _tranparentShapes.push(polygon);
-                }
-            }
-        }
-
         glDepthMask(GL_FALSE);
+        glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        drawOrderedTransparentShapes();
+        int nbShapes = static_cast<int>(_circles.size() + _polygons.size());
+        std::vector< std::shared_ptr<AbstractShape> > shapes(nbShapes);
+        int shapeIdx = 0;
 
-        glDisable(GL_DEPTH_TEST);
-
-
-        // Draw images hud before text because its usualy what we want
-        for(auto it = _images.begin(); it != _images.end(); ++it)
+        auto circlesEnd = _circles.end();
+        for(auto it = _circles.begin(); it != circlesEnd; ++it)
         {
-            ImageHud* image = (*it).get();
-            if(image->isVisible())
-            {
-                drawImageHud(image);
-            }
+            shapes[shapeIdx++] = *it;
         }
-
-        // Draw texts on top of images hud
-        for(auto it = _texts.begin(); it != _texts.end(); ++it)
+        auto polygonsEnd = _polygons.end();
+        for(auto it = _polygons.begin(); it != polygonsEnd; ++it)
         {
-            TextHud* text = (*it).get();
-            if(text->isVisible())
-            {
-                drawTextHud(text);
-            }
+            shapes[shapeIdx++] = *it;
         }
+        std::sort(shapes.begin(), shapes.end(), DepthOrderer);
 
-        glDepthMask(GL_TRUE);
-        glEnable(GL_DEPTH_TEST);
-        glDisable(GL_BLEND);
-    }
-
-    void GlArtDirector::drawOrderedTransparentShapes()
-    {
-        while(!_tranparentShapes.empty())
+        // Draw shapes under HUDs
+        for(int i=0; i < nbShapes; ++i)
         {
-            AbstractShape* shape = _tranparentShapes.top();
-            _tranparentShapes.pop();
-
+            const std::shared_ptr<AbstractShape>& shape = shapes[i];
             switch(shape->propType())
             {
             case PropType::CIRCLE:
-                drawCircle(static_cast<Circle*>(shape));
+                drawCircle(static_pointer_cast<Circle>(shape));
                 break;
 
             case PropType::POLYGON:
-                drawPolygon(static_cast<Polygon*>(shape));
+                drawPolygon(static_pointer_cast<Polygon>(shape));
                 break;
 
             default:
                 assert(false /* Not a shape */);
             }
         }
+
+        glDisable(GL_MULTISAMPLE);
+
+        // Draw images HUD before text because its usualy what we want
+        auto imagesEnd = _images.end();
+        for(auto it = _images.begin(); it != imagesEnd; ++it)
+        {
+            if((*it)->isVisible())
+            {
+                drawImageHud(*it);
+            }
+        }
+
+        // Draw texts on top of images HUD
+        auto textsEnd = _texts.end();
+        for(auto it = _texts.begin(); it != textsEnd; ++it)
+        {
+            if((*it)->isVisible())
+            {
+                drawTextHud(*it);
+            }
+        }
+
+        glDepthMask(GL_TRUE);
+        glEnable(GL_DEPTH_TEST);
+        glDisable(GL_BLEND);
+        glEnable(GL_MULTISAMPLE);
     }
 
-    void GlArtDirector::drawCircle(Circle* circle)
+    void GlArtDirector::drawCircle(const std::shared_ptr<Circle>& circle)
     {
+        glDisable(GL_MULTISAMPLE);
+
         _circleShader.pushProgram();
         _circleShader.setMat3f("ModelView",   circle->transformMatrix());
         _circleShader.setFloat("Depth",       circle->costume()->depth());
         _circleShader.setVec4f("ColorFilter", circle->costume()->colorFilter());
         _circleShader.setVec2f("TexOffset",   circle->costume()->textureCenter());
         _circleShader.setFloat("TexStretch",  circle->costume()->textureRadius());
+        _circleShader.setFloat("Radius",      circle->radius());
         _circleVao.bind();
         glBindTexture(GL_TEXTURE_2D, GlToolkit::genTextureId(
             getImageBank().getImage(circle->costume()->textureName())));
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
         _circleVao.unbind();
         _circleShader.popProgram();
+
+        glEnable(GL_MULTISAMPLE);
     }
 
-    void GlArtDirector::drawPolygon(Polygon* polygon)
+    void GlArtDirector::drawPolygon(const std::shared_ptr<Polygon>& polygon)
     {
         _polygonShader.pushProgram();
         _polygonShader.setMat3f("ModelView",    Mat3f());
@@ -253,7 +235,7 @@ namespace prop2
         _polygonShader.popProgram();
     }
 
-    void GlArtDirector::drawTextHud(TextHud* text)
+    void GlArtDirector::drawTextHud(const std::shared_ptr<TextHud>& text)
     {
         _textHudShader.pushProgram();
         _textHudVao.bind();
@@ -337,7 +319,7 @@ namespace prop2
         _imageHudShader.popProgram();
     }
 
-    void GlArtDirector::drawImageHud(ImageHud* image)
+    void GlArtDirector::drawImageHud(const std::shared_ptr<ImageHud>& image)
     {
         _imageHudShader.pushProgram();
         _imageHudVao.bind();

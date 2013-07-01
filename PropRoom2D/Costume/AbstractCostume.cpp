@@ -4,7 +4,6 @@
 namespace prop2
 {
     AbstractCostume::AbstractCostume() :
-        _isOpaque(true),
         _depth(real(0.0)),
         _colorFilter(real(1.0), real(1.0), real(1.0), real(1.0)),
         _textureName("")
@@ -13,11 +12,6 @@ namespace prop2
 
     AbstractCostume::~AbstractCostume()
     {
-    }
-
-    void AbstractCostume::setIsOpaque(bool isOpaque)
-    {
-        _isOpaque = isOpaque;
     }
 
     void AbstractCostume::setDepth(real depth)

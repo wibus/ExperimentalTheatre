@@ -30,14 +30,24 @@ using namespace prop2;
 
 namespace scaena
 {
+    namespace
+    {
+        QGLFormat getGLFormat()
+        {
+            QGLFormat format(QGL::SampleBuffers);
+            format.setSamples(8);
+            return format;
+        }
+    }
+
     QGLStage::QGLStage(QWidget* parent) :
-        QGLWidget(parent),
+        QGLWidget(getGLFormat() ,parent),
         AbstractStage("QGLStage"),
         _updateTimer(),
         _drawTimer(),
         _isDrawSynch(false)
     {
-        setUpdateInterval(15);
+        setUpdateInterval(20);
         setDrawInterval(0);
         setDrawSynch(true);
 
@@ -194,6 +204,18 @@ namespace scaena
 
         oss.str("");
         oss << "GLSL version: " << glGetString(GL_SHADING_LANGUAGE_VERSION);
+        getLog().postMessage(new Message('I', false, oss.str(), "QGLStage"));
+
+        oss.str("");
+        int nbBuffers;
+        glGetIntegerv(GL_SAMPLE_BUFFERS, &nbBuffers);
+        oss << "Multisampling number of buffers: " << nbBuffers;
+        getLog().postMessage(new Message('I', false, oss.str(), "QGLStage"));
+
+        oss.str("");
+        int nbSamples;
+        glGetIntegerv(GL_SAMPLES, &nbSamples);
+        oss << "Multisampling number of samples: " << nbSamples;
         getLog().postMessage(new Message('I', false, oss.str(), "QGLStage"));
 
 

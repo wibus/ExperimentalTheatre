@@ -55,7 +55,8 @@ namespace media
             return;
 
         cellar::Vec3f front = (_camera->tripod().to() - _camera->tripod().from()).normalized();
-        cellar::Vec3f nUp = cellar::rotate(front.x(), front.y(), front.z(), radians) * _camera->tripod().up();
+        cellar::Vec3f nUp =  cellar::rotate(front.x(), front.y(), front.z(), radians) * 
+                             cellar::Vec4f(_camera->tripod().up(), 0.0);
         _camera->setTripod(_camera->tripod().from(),
                            _camera->tripod().to(),
                            nUp);

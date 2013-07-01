@@ -180,8 +180,8 @@ namespace prop2
         if(_density == INFINITE_DENSITY ||
            _bodyType != BodyType::DYNAMIC)
         {
-            _inverseMass = real(0.0);
-            _inverseMomentOfInertia = real(0.0);
+            _inverseMass = INFINITE_INERTIA;
+            _inverseMomentOfInertia = INFINITE_INERTIA;
         }
         else
         {
