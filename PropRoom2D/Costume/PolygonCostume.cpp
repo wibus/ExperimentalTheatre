@@ -9,6 +9,14 @@ namespace prop2
         _verticesColors(nbVertices, Vec4r(1, 1, 1, 1)),
         _verticesTexCoords(nbVertices, Vec2r(0, 0))
     {
+        if(nbVertices == 4)
+        {
+            // Handle the most frequent case
+            _verticesTexCoords[0](real(0), real(0));
+            _verticesTexCoords[1](real(1), real(0));
+            _verticesTexCoords[2](real(1), real(1));
+            _verticesTexCoords[3](real(0), real(1));
+        }
     }
 
     PolygonCostume::~PolygonCostume()

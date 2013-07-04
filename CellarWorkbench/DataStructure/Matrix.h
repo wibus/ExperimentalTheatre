@@ -78,16 +78,20 @@ namespace cellar
     template <int N, typename T>
     Matrix<N,T> inverse(const Matrix<N,T>& mat);
 
+    template <int N, typename T>
+    Matrix<N+1,T> translate(const Vector<N,T>& t);
     template <typename T>
     Matrix<3,T> translate(const T& tx, const T& ty);
     template <typename T>
     Matrix<4,T> translate(const T& tx, const T& ty, const T& tz);
+
+    template <int N, typename T>
+    Matrix<N+1,T> scale(const Vector<N,T>& s);
     template <typename T>
-    Matrix<2,T> scale(const T& sx, const T& sy);
+    Matrix<3,T> scale(const T& sx, const T& sy);
     template <typename T>
-    Matrix<3,T> scale(const T& sx, const T& sy, const T& sz);
-    template <typename T>
-    Matrix<4,T> scale(const T& sx, const T& sy, const T& sz, const T& sw);
+    Matrix<4,T> scale(const T& sx, const T& sy, const T& sz);
+
     template <typename T>
     Matrix<3,T> rotate(const T& radians);
     template <typename T>
@@ -508,54 +512,66 @@ namespace cellar
         return adjugate(mat) / det(mat);
     }
 
+    template <int N, typename T>
+    Matrix<N+1,T> translate(const Vector<N,T>& t)
+    {
+        Matrix<N+1,T> res;
+        for(int i=0; i<N; ++i)
+            res[i][N] = t[i];
+        return res;
+    }
+
     template <typename T>
     inline Matrix<3,T> translate(const T& tx, const T& ty)
     {
-        Matrix<3,T> res;
-        res[0][2] = tx;
-        res[1][2] = ty;
-        return res;
-    }
-
-    template <typename T>
-    inline Matrix<4,T> translate(const T& tx, const T& ty, const T& tz)
-    {
-        Matrix<4,T> res;
-        res[0][3] = tx;
-        res[1][3] = ty;
-        res[2][3] = tz;
-        return res;
-    }
-
-    template <typename T>
-    inline Matrix<2,T> scale(const T& sx, const T& sy)
-    {
         T values[] = {
-            sx, T(0),
-            sy, T(0)
-        };
-        return Matrix<2,T>(values);
-    }
-
-    template <typename T>
-    Matrix<3,T> scale(const T& sx, const T& sy, const T& sz)
-    {
-        T values[] = {
-            sx,   T(0), T(0),
-            T(0), sy,   T(0),
-            T(0), T(0), sz
+            T(1), T(0), tx,
+            T(0), T(1), ty,
+            T(0), T(0), T(1)
         };
         return Matrix<3,T>(values);
     }
 
     template <typename T>
-    Matrix<4,T> scale(const T& sx, const T& sy, const T& sz, const T& sw)
+    Matrix<4,T> translate(const T& tx, const T& ty, const T& tz)
+    {
+        T values[] = {
+            T(1), T(0), T(0), tx,
+            T(0), T(1), T(0), ty,
+            T(0), T(0), T(1), tz,
+            T(0), T(0), T(0), T(1)
+        };
+        return Matrix<4,T>(values);
+    }
+
+    template <int N, typename T>
+    Matrix<N+1,T> scale(const Vector<N,T>& s)
+    {
+        Matrix<N+1,T> res;
+        for(int i=0; i<N; ++i)
+            res[i][i] = s[i];
+        return res;
+    }
+
+    template <typename T>
+    inline Matrix<3,T> scale(const T& sx, const T& sy)
+    {
+        T values[] = {
+            sx,   T(0), T(0),
+            T(0), sy,   T(0),
+            T(0), T(0), T(1)
+        };
+        return Matrix<3,T>(values);
+    }
+
+    template <typename T>
+    Matrix<4,T> scale(const T& sx, const T& sy, const T& sz)
     {
         T values[] = {
             sx,   T(0), T(0), T(0),
             T(0), sy,   T(0), T(0),
             T(0), T(0), sz,   T(0),
-            T(0), T(0), T(0), sw
+            T(0), T(0), T(0), T(1)
         };
         return Matrix<4,T>(values);
     }

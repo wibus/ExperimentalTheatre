@@ -21,26 +21,28 @@ class CircleCostume;
 
         // Costume
         virtual const AbstractCostume& abstractCostume() const;
-        const std::shared_ptr<CircleCostume>& costume() const;
-        void setCostume(const std::shared_ptr<CircleCostume>& costume);
+        virtual const std::shared_ptr<CircleCostume>& costume() const;
+        virtual void setCostume(const std::shared_ptr<CircleCostume>& costume);
 
-
-        // Shape properties
-        real radius() const;
+        // Radius
+        virtual real radius() const;
         virtual void setRadius(const real& radius);
-        virtual void setCenter(const Vec2r& position);
 
+        // Center (centroid
+        virtual Vec2r center() const;
+        virtual void setCenter(const Vec2r& position);
 
         // Tests
         virtual bool contains(const Vec2r& point) const;
         virtual Vec2r nearestSurface(const Vec2r& point) const;
 
+        // Area
+        virtual real computeArea() const;
+
 
     protected:
-        // Computations
+        // Cached attributes update
         virtual void updateTranformMatrix();
-        virtual void updatePerimeter();
-        virtual void updateArea();
         virtual void updateInertia();
 
 
@@ -48,24 +50,6 @@ class CircleCostume;
         std::shared_ptr<CircleCostume> _costume;
         real _radius;
     };
-
-
-
-    // IMPLEMENTATION //
-    inline const std::shared_ptr<CircleCostume>& Circle::costume() const
-    {
-        return _costume;
-    }
-
-    inline void Circle::setCostume(const std::shared_ptr<CircleCostume>& costume)
-    {
-        _costume = costume;
-    }
-
-    inline real Circle::radius() const
-    {
-        return _radius;
-    }
 }
 
 #endif // PROPROOM2D_CIRCLE_H

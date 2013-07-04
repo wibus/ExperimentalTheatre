@@ -2,6 +2,7 @@
 
 #include "Shape/Circle.h"
 #include "Shape/Polygon.h"
+#include "Material/Material.h"
 
 #include <cassert>
 using namespace std;
@@ -218,7 +219,8 @@ namespace prop2
         real w2 = shape2->angularVelocity();
 
         // Get bounce coefficient
-        real e = minVal(shape1->bounciness(), shape2->bounciness());
+        real e = minVal(shape1->material()->bounciness(),
+                        shape2->material()->bounciness());
 
 
         // Compute normal impulse //
@@ -250,13 +252,13 @@ namespace prop2
 
         // Compute the final tangent impulse assuming the fact that it is
         // limited by the shapes' static coefficients of friction and normal force
-        real us = shape1->staticFrictionCoefficient() *
-                  shape2->staticFrictionCoefficient();
+        real us = shape1->material()->staticFrictionCoefficient() *
+                  shape2->material()->staticFrictionCoefficient();
         real absoluteJt = absolute(jt);
         if(jn*us < absoluteJt)
         {
-            real ud = shape1->dynamicFrictionCoefficient() *
-                      shape2->dynamicFrictionCoefficient();
+            real ud = shape1->material()->dynamicFrictionCoefficient() *
+                      shape2->material()->dynamicFrictionCoefficient();
             jt *= (jn / absoluteJt) * ud;
         }
 

@@ -202,34 +202,35 @@ namespace prop2
     void GlArtDirector::drawPolygon(const std::shared_ptr<Polygon>& polygon)
     {
         _polygonShader.pushProgram();
-        _polygonShader.setMat3f("ModelView",    Mat3f());
+        _polygonShader.setMat3f("ModelView",    polygon->transformMatrix());
         _polygonShader.setFloat("Depth",        polygon->costume()->depth());
         _polygonShader.setVec4f("ColorFilter",  polygon->costume()->colorFilter());
         _polygonShader.setVec2f("TexOffset",    Vec2f(real(0.0), real(0.0)));
         _polygonShader.setFloat("TexStretch",   real(1.0));
 
         _polygonVao.bind();
+        int nbVertices = polygon->nbVertices();
         glBindBuffer(GL_ARRAY_BUFFER, _polygonVao.bufferId("position"));
         glBufferData(GL_ARRAY_BUFFER,
-                     2*4*polygon->absVertices().size(),
-                     polygon->absVertices().data(),
+                     2*4*nbVertices,
+                     polygon->relVertices().data(),
                      GL_DYNAMIC_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, _polygonVao.bufferId("color"));
         glBufferData(GL_ARRAY_BUFFER,
-                     4*4*polygon->costume()->verticesColors().size(),
+                     4*4*nbVertices,
                      polygon->costume()->verticesColors().data(),
                      GL_DYNAMIC_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, _polygonVao.bufferId("texCoord"));
         glBufferData(GL_ARRAY_BUFFER,
-                     2*4*polygon->costume()->verticesTexCoords().size(),
+                     2*4*nbVertices,
                      polygon->costume()->verticesTexCoords().data(),
                      GL_DYNAMIC_DRAW);
 
         glBindTexture(GL_TEXTURE_2D, GlToolkit::genTextureId(
             getImageBank().getImage(polygon->costume()->textureName())));
-        glDrawArrays(GL_TRIANGLE_FAN, 0, (int)polygon->relVertices().size());
+        glDrawArrays(GL_TRIANGLE_FAN, 0, nbVertices);
 
         _polygonVao.unbind();
         _polygonShader.popProgram();

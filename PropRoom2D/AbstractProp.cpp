@@ -3,7 +3,7 @@
 
 namespace prop2
 {
-    PropId AbstractProp::_nextId_ = -1; //First assigned ID will be '0'
+    PropId AbstractProp::_nextId_ = 0; //First assigned ID will be '0'
 
     AbstractProp::AbstractProp(PropType::Enum type) :
         _id(_assigneId_()),

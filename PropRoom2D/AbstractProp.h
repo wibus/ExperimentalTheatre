@@ -56,7 +56,7 @@ namespace prop2
 
     inline PropId AbstractProp::_assigneId_()
     {
-        return ++_nextId_;
+        return _nextId_++;
     }
 }
 

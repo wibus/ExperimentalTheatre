@@ -1,5 +1,6 @@
 #include "Polygon.h"
 #include "Costume/PolygonCostume.h"
+#include "Material/Material.h"
 
 
 #include <cassert>
@@ -15,8 +16,7 @@ namespace prop2
         AbstractShape(PropType::POLYGON),
         _costume(),
         _relVertices(nbVertices),
-        _absVertices(nbVertices),
-        _outline(nbVertices > 1 ? nbVertices : 0)
+        _outline(nbVertices)
     {
     }
 
@@ -29,38 +29,56 @@ namespace prop2
         return *_costume;
     }
 
-    void Polygon::setVertices(const std::vector<Vec2r>& vertices)
+    const std::shared_ptr<PolygonCostume>& Polygon::costume() const
     {
-        assert(vertices.size() == _relVertices.size());
-
-        Vec2r proposedCentroid = evaluateCentroid(vertices);
-
-        // Move vertices' centroid to (0,0)
-        for(size_t i=0; i<vertices.size(); ++i)
-        {
-            _relVertices[i] = vertices[i] - proposedCentroid;
-        }
-
-        // Update cached attributes
-        _angle = 0.0;
-        _centroid = proposedCentroid;
-        updateTranformMatrix();
-
-        updatePerimeter();
-        updateArea();
-        updateInertia();
-    }
-
-    void Polygon::moveVertexAt(int cIdx, const Vec2r& position)
-    {
-        assert(0 <= cIdx && cIdx < (int)_absVertices.size());
-        moveBy(position - _absVertices[cIdx]);
+        return _costume;
     }
 
     void Polygon::setCostume(const std::shared_ptr<PolygonCostume>& costume)
     {
         assert(costume->verticesColors().size() == (size_t)nbVertices());
         _costume = costume;
+    }
+
+    int Polygon::nbVertices() const
+    {
+        return static_cast<int>(_relVertices.size());
+    }
+
+    const std::vector<Vec2r>& Polygon::relVertices() const
+    {
+        return _relVertices;
+    }
+
+    const std::vector<Segment2Dr>& Polygon::outline() const
+    {
+        return _outline;
+    }
+
+    void Polygon::setVertices(const std::vector<Vec2r>& absolutePositions)
+    {
+        assert(absolutePositions.size() == (size_t)nbVertices());
+
+        Vec2r proposedCentroid = evaluateCentroid(absolutePositions);
+
+        // Move vertices' centroid to (0,0)
+        int nbv = nbVertices();
+        for(int i=0; i<nbv; ++i)
+        {
+            _relVertices[i] = absolutePositions[i] - proposedCentroid;
+        }
+
+        // Update cached attributes
+        _angle = real(0);
+        _centroid = proposedCentroid;
+        updateTranformMatrix();
+        updateInertia();
+    }
+
+    void Polygon::moveVertexAt(int cIdx, const Vec2r& position)
+    {
+        assert(0 <= cIdx && cIdx < nbVertices());
+        moveBy(position - _outline[cIdx].begin());
     }
 
     int getQuadrant(const Vec2r& origin, const Vec2r& pt)
@@ -125,46 +143,13 @@ namespace prop2
         return -minDist;
     }
 
-    void Polygon::updateAbsVerticesAndOutline()
+    real Polygon::computeArea() const
     {
-        size_t nbVertices = _relVertices.size();
-        for(size_t i=0; i < nbVertices; ++i)
-        {
-            _absVertices[i] =
-                Vec2r(_tranformMatrix * Vec3r(_relVertices[i], real(1)));
-        }
-
-        _outline = evaluateOutline(_absVertices);
-    }
-
-    void Polygon::updateTranformMatrix()
-    {
-        _tranformMatrix.loadIdentity();
-        _tranformMatrix *= cellar::translate(_centroid.x(), _centroid.y());
-        _tranformMatrix *= cellar::rotate(_angle);
-
-        updateAbsVerticesAndOutline();
-    }
-
-    void Polygon::updatePerimeter()
-    {
-        _perimeter = real(0.0);
-
-        size_t nbvert = _outline.size();
-        for(size_t i=0; i < nbvert; ++i)
-        {
-            _perimeter += static_cast<real>((_outline[i].end() - _outline[i].begin()).length());
-        }
-    }
-
-    void Polygon::updateArea()
-    {
-        size_t nbSides = _outline.size();
-        if(nbSides == 0) _area = real(0);
 
         real diagonal1 = real(0.0);
         real diagonal2 = real(0.0);
 
+        int nbSides = nbVertices();
         for(size_t i=0; i < nbSides; ++i)
         {
             const Segment2Dr& line = _outline[i];
@@ -172,53 +157,66 @@ namespace prop2
             diagonal2 += line.begin().y() * line.end().x();
         }
 
-        _area = absolute(diagonal1 - diagonal2) / real(2.0);
+        return absolute(diagonal1 - diagonal2) / real(2.0);
+    }
+
+    void Polygon::updateTranformMatrix()
+    {
+        _tranformMatrix.loadIdentity();
+        _tranformMatrix *= cellar::translate(_centroid);
+        _tranformMatrix *= cellar::rotate(_angle);
+
+        // Update outline
+        int nbv = nbVertices();
+        for(int i=0; i<nbv; ++i)
+        {
+            _outline[i].setBegin(_tranformMatrix *
+                                 Vec3r(_relVertices[i], real(1)));
+        }
+        for(int i=0; i<nbv; ++i)
+        {
+            _outline[i].setEnd(_outline[(i+1)%nbv].begin());
+        }
     }
 
     void Polygon::updateInertia()
     {
-        if(_density == INFINITE_DENSITY ||
-           _bodyType != BodyType::DYNAMIC)
+        if(_material)
         {
-            _inverseMass = INFINITE_INERTIA;
-            _inverseMomentOfInertia = INFINITE_INERTIA;
-        }
-        else
-        {
-            _inverseMass = real(1.0) / (_density * _area);
+            real density = _material->density();
+            _inverseMass = real(1.0) / (density * computeArea());
 
             real Ix = real(0.0);
             real Iy = real(0.0);
             int nbv = nbVertices();
             for(int i=0; i < nbv; ++i)
             {
-                Vec2r pb = _outline[i].begin();
-                Vec2r pe = _outline[i].end();
+                Vec2r pb = _relVertices[i];
+                Vec2r pe = _relVertices[(i+1)%nbv];
                 real ai = pb.x()*pe.y() - pe.x()*pb.y();
                 Ix += ai * (pb.y()*pb.y() + pb.y()*pe.y() + pe.y()*pe.y());
                 Iy += ai * (pb.x()*pb.x() + pb.x()*pe.x() + pe.x()*pe.x());
             }
-
-            _inverseMomentOfInertia = 12 / ((Ix + Iy) * _density);
+            _inverseMomentOfInertia = 12 / ((Ix + Iy) * density);
+        }
+        else
+        {
+            _inverseMass = real(0);
+            _inverseMomentOfInertia = real(0);
         }
     }
 
     Vec2r Polygon::evaluateCentroid(const std::vector<Vec2r>& vertices)
     {
-        size_t nbvert = vertices.size();
-        if(nbvert == 0) return Vec2r(real(0.0), real(0.0));
-
-        vector<Segment2Dr> outline = evaluateOutline(vertices);
-
         real diagonal1 = real(0.0);
         real diagonal2 = real(0.0);
         Vec2r center(real(0), real(0));
 
-        for(size_t i=0; i < nbvert; ++i)
+        int nbv = static_cast<int>(vertices.size());
+        for(int i=0; i < nbv; ++i)
         {
-            const Segment2Dr& line = outline[i];
-            const Vec2r& begin = line.begin();
-            const Vec2r& end = line.end();
+            const Vec2r& begin = vertices[i];
+            const Vec2r& end = vertices[(i+1)%nbv];
             real diag1 = begin.x() * end.y();
             real diag2 = begin.y() * end.x();
             real diagDiff = diag1 - diag2;
@@ -230,25 +228,5 @@ namespace prop2
         real area = absolute(diagonal1 - diagonal2) / real(2.0);
 
         return center / (real(6.0) * area);
-    }
-
-    std::vector<Segment2Dr> Polygon::evaluateOutline(const std::vector<Vec2r>& vertices)
-    {
-        size_t nbVert = vertices.size();
-
-        vector<Segment2Dr> lines;
-        lines.reserve(nbVert);
-
-        for(size_t i=0; i < nbVert-1; ++i)
-        {
-            lines.push_back(Segment2Dr(vertices[i], vertices[i+1]));
-        }
-
-        if(nbVert > 1)
-        {
-            lines.push_back(Segment2Dr(vertices.back(), vertices.front()));
-        }
-
-        return lines;
     }
 }
