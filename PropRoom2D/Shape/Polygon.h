@@ -39,6 +39,9 @@ class PolygonCostume;
         // Area
         virtual real computeArea() const;
 
+        // Polygon type
+        virtual bool isConcave() const;
+
 
     protected:
         // Computations
@@ -53,6 +56,7 @@ class PolygonCostume;
         std::shared_ptr<PolygonCostume> _costume;
         std::vector<Vec2r> _relVertices;
         std::vector< Segment2Dr > _outline;
+        bool _isConcave;
     };
 }
 

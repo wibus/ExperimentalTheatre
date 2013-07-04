@@ -230,7 +230,30 @@ namespace prop2
 
         glBindTexture(GL_TEXTURE_2D, GlToolkit::genTextureId(
             getImageBank().getImage(polygon->costume()->textureName())));
+
+        if(polygon->isConcave())
+        {
+            glDisable(GL_CULL_FACE);
+            glEnable(GL_STENCIL_TEST);
+            glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+            glStencilFunc(GL_NEVER, 0, 1);
+            glStencilOp(GL_INVERT, GL_INVERT, GL_INVERT);
+            glClearStencil(0);
+
+            glDrawArrays(GL_TRIANGLE_FAN, 0, nbVertices);
+
+            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+            glStencilFunc(GL_EQUAL, 1, 1);
+            glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
+            glEnable(GL_CULL_FACE);
+        }
+
         glDrawArrays(GL_TRIANGLE_FAN, 0, nbVertices);
+
+        if(polygon->isConcave())
+        {
+            glDisable(GL_STENCIL_TEST);
+        }
 
         _polygonVao.unbind();
         _polygonShader.popProgram();

@@ -16,7 +16,8 @@ namespace prop2
         AbstractShape(PropType::POLYGON),
         _costume(),
         _relVertices(nbVertices),
-        _outline(nbVertices)
+        _outline(nbVertices),
+        _isConcave(false)
     {
     }
 
@@ -66,6 +67,20 @@ namespace prop2
         for(int i=0; i<nbv; ++i)
         {
             _relVertices[i] = absolutePositions[i] - proposedCentroid;
+        }
+
+        // Test for concaveness
+        _isConcave = false;
+        for(int i=0; i<nbv; ++i)
+        {
+            Vec2r dir = _relVertices[(i+1)%nbv] - _relVertices[i];
+            Vec2r nextDir = _relVertices[(i+2)%nbv] - _relVertices[(i+1)%nbv];
+            Vec2r nextNormal = perpCCW(nextDir);
+            if(dot(dir, nextNormal) < real(0))
+            {
+                _isConcave = true;
+                break;
+            }
         }
 
         // Update cached attributes
@@ -158,6 +173,11 @@ namespace prop2
         }
 
         return absolute(diagonal1 - diagonal2) / real(2.0);
+    }
+
+    bool Polygon::isConcave() const
+    {
+        return _isConcave;
     }
 
     void Polygon::updateTranformMatrix()
