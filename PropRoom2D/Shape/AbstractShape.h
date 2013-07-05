@@ -60,6 +60,11 @@ class Material;
         virtual void setLinearAcceleration(const Vec2r& acceleration);
         virtual void addLinearAcceleration(const Vec2r& acceleration);
 
+        // Linear friction
+        virtual Vec3r linearFrictionCoefficients() const;
+        virtual void setLinearFrictionCoefficients(const Vec3r& coeffs);
+        virtual void setLinearFrictionCoefficient(int order, real coeff);
+
         // Rotation
         virtual real angle() const;
         virtual void rotate(const real& angle);
@@ -74,6 +79,11 @@ class Material;
         virtual real angularAcceleration() const;
         virtual void setAngularAcceleration(const real& acceleration);
         virtual void addAngularAcceleration(const real& acceleration);
+
+        // Angular friction
+        virtual Vec3r angularFrictionCoefficients() const;
+        virtual void setAngularFrictionCoefficients(const Vec3r& coeffs);
+        virtual void setAngularFrictionCoefficient(int order, real coeff);
 
         // Force
         virtual void addLinearForce(const Vec2r& force);
@@ -115,10 +125,12 @@ class Material;
         Vec2r _centroid;
         Vec2r _linearVelocity;
         Vec2r _linearAcceleration;
+        Vec3r _linearFirctionCoefficients;
 
         real _angle;
         real _angularVelocity;
         real _angularAcceleration;
+        Vec3r _angularFirctionCoefficients;
 
         Mat3r _tranformMatrix;
     };

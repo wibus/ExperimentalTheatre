@@ -163,13 +163,69 @@ namespace prop2
         shape->addLinearVelocity(shape->linearAcceleration()   * _dt);
         shape->addAngularVelocity(shape->angularAcceleration() * _dt);
 
-        // Move the shape
-        shape->moveBy(shape->linearVelocity()  * _dt);
-        shape->rotate(shape->angularVelocity() * _dt);
-
         // Reset the accelerations
         shape->setLinearAcceleration(Vec2r());
         shape->setAngularAcceleration(real(0.0));
+
+        // Apply friction
+        Vec3r linearFriction = shape->linearFrictionCoefficients();
+        if(linearFriction)
+        {
+            Vec2r linearVelocityDir = shape->linearVelocity();
+            if(linearVelocityDir)
+            {
+                real  linearVelocityLen2 = linearVelocityDir.length2();
+                real  linearVelocityLen = sqrt(linearVelocityLen2);
+                linearVelocityDir /= linearVelocityLen;
+
+                real linearDecelerationMagnitude =
+                        linearFriction[0] +
+                        linearFriction[1] * linearVelocityLen +
+                        linearFriction[2] * linearVelocityLen2;
+                linearDecelerationMagnitude *= _dt;
+
+                if(linearDecelerationMagnitude <  linearVelocityLen)
+                {
+                    shape->addLinearVelocity(
+                        -linearVelocityDir * linearDecelerationMagnitude);
+                }
+                else
+                {
+                    shape->setLinearVelocity(Vec2r(real(0), real(0)));
+                }
+            }
+        }
+        Vec3r angularFriction = shape->angularFrictionCoefficients();
+        if(angularFriction)
+        {
+            real angularVelocity = shape->angularVelocity();
+            if(angularVelocity)
+            {
+                real angularVelocity2 = angularVelocity * angularVelocity;
+                real angularVelocityDir = sign(angularVelocity);
+                angularVelocity = absolute(angularVelocity);
+
+                real angularDecelerationMagnitude =
+                        angularFriction[0] +
+                        angularFriction[1] * angularVelocity +
+                        angularFriction[2] * angularVelocity2;
+                angularDecelerationMagnitude *= _dt;
+
+                if(angularDecelerationMagnitude < angularVelocity)
+                {
+                    shape->addAngularVelocity(
+                        -angularVelocityDir * angularDecelerationMagnitude);
+                }
+                else
+                {
+                    shape->setAngularVelocity(real(0));
+                }
+            }
+        }
+
+        // Move the shape
+        shape->moveBy(shape->linearVelocity()  * _dt);
+        shape->rotate(shape->angularVelocity() * _dt);
     }
 
     void StdChoreographer::moveApart(

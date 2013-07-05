@@ -19,9 +19,11 @@ namespace prop2
         _centroid(real(0.0), real(0.0)),
         _linearVelocity(real(0.0), real(0.0)),
         _linearAcceleration(real(0.0), real(0.0)),
+        _linearFirctionCoefficients(real(0), real(0), real(0)),
         _angle(real(0.0)),
         _angularVelocity(real(0.0)),
-        _angularAcceleration(real(0.0))
+        _angularAcceleration(real(0.0)),
+        _angularFirctionCoefficients(real(0), real(0), real(0))
     {
     }
 
@@ -160,6 +162,22 @@ namespace prop2
         _linearAcceleration += acceleration;
     }
 
+    Vec3r AbstractShape::linearFrictionCoefficients() const
+    {
+        return _linearFirctionCoefficients;
+    }
+
+    void AbstractShape::setLinearFrictionCoefficients(const Vec3r& coeffs)
+    {
+        _linearFirctionCoefficients = coeffs;
+    }
+
+    void AbstractShape::setLinearFrictionCoefficient(int order, real coeff)
+    {
+        assert(order < _linearFirctionCoefficients.getNbComponents());
+        _linearFirctionCoefficients[order] = coeff;
+    }
+
     real AbstractShape::angle() const
     {
         return _angle;
@@ -211,6 +229,22 @@ namespace prop2
     void AbstractShape::addAngularAcceleration(const real& acceleration)
     {
         _angularAcceleration += acceleration;
+    }
+
+    Vec3r AbstractShape::angularFrictionCoefficients() const
+    {
+        return _angularFirctionCoefficients;
+    }
+
+    void AbstractShape::setAngularFrictionCoefficients(const Vec3r& coeffs)
+    {
+        _angularFirctionCoefficients = coeffs;
+    }
+
+    void AbstractShape::setAngularFrictionCoefficient(int order, real coeff)
+    {
+        assert(order < _angularFirctionCoefficients.getNbComponents());
+        _angularFirctionCoefficients[order] = coeff;
     }
 
     void AbstractShape::addLinearForce(const Vec2r& force)

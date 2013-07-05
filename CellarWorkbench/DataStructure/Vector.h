@@ -31,6 +31,7 @@ namespace cellar
             Vector(const Vector<3, T2>& vec2, T w);            
 
             //Geters
+            int getNbComponents() const;
             T x() const;
             T y() const;
             T z() const;
@@ -188,6 +189,9 @@ namespace cellar
 
 
     //Geters
+    template <int N, typename T>
+    inline int Vector<N, T>::getNbComponents() const {return N;}
+
     template <int N, typename T>
     inline T Vector<N, T>::x() const {return _v[Axis::X];}
 
