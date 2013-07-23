@@ -42,6 +42,9 @@ class PolygonCostume;
         // Polygon type
         virtual bool isConcave() const;
 
+        // Polygon vertices generation
+        static std::vector<cellar::Vec2f> rectangle(real width, real height);
+        static std::vector<cellar::Vec2f> regularPolygon(real radius, int nbSides);
 
     protected:
         // Computations

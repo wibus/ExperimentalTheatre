@@ -180,6 +180,26 @@ namespace prop2
         return _isConcave;
     }
 
+    std::vector<cellar::Vec2f> Polygon::rectangle(real width, real height)
+    {
+        std::vector<cellar::Vec2f> vertices;
+        vertices.push_back(Vec2f(-width/real(2), -height/real(2)));
+        vertices.push_back(Vec2f( width/real(2), -height/real(2)));
+        vertices.push_back(Vec2f( width/real(2),  height/real(2)));
+        vertices.push_back(Vec2f(-width/real(2),  height/real(2)));
+        return vertices;
+    }
+    std::vector<cellar::Vec2f> Polygon::regularPolygon(real radius, int nbSides)
+    {
+        std::vector<cellar::Vec2f> vertices;
+        for(int i=0; i<nbSides; ++i)
+        {
+            double angle = 2.0*i*cellar::PI/nbSides;
+            vertices.push_back(radius * Vec2r(cos(angle), sin(angle)));
+        }
+        return vertices;
+    }
+
     void Polygon::updateTranformMatrix()
     {
         _tranformMatrix.loadIdentity();

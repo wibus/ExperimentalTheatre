@@ -39,10 +39,11 @@ namespace cellar
             T* asArray();
             const T* asArray() const;
             T distanceTo(const Vector<N, T>& vec2) const;
-            T length()const;
-            T length2()const;
+            T length() const;
+            T length2() const;
             Vector<N, T>& normalize();
             Vector<N, T>  normalized() const;
+            T angle() const;
 
             //Seters
             void setX(T x);
@@ -67,6 +68,8 @@ namespace cellar
             bool           operator!=(const Vector<N, T>& vec) const;
             bool           operator< (const Vector<N, T>& vec) const;
                            operator bool() const;
+
+            static Vector<2, T> polar(const T& angle, const T& radius = T(1));
 
     private :
             T _v[N];
@@ -252,6 +255,12 @@ namespace cellar
         return Vector<N, T>(*this).normalize();
     }
 
+    template <int N, typename T>
+    inline T Vector<N, T>::angle() const
+    {
+        return ::atan2(_v[Axis::Y], _v[Axis::X]);
+    }
+
 
     //Seters
     template <int N, typename T>
@@ -401,6 +410,12 @@ namespace cellar
                 return true;
 
         return false;
+    }
+
+    template <int N, typename T>
+    Vector<2, T> Vector<N, T>::polar(const T& angle, const T& radius)
+    {
+        return Vector<2, T>(cos(angle) * radius, sin(angle) * radius);
     }
 
     template<int N, typename T>
