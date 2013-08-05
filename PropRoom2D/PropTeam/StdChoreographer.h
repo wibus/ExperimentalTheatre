@@ -37,7 +37,7 @@ namespace prop2
         StdChoreographer();
         virtual ~StdChoreographer();
 
-        virtual void setGravity(real yMeterPerSeconds2);
+        virtual void setGravity(const Vec2r& unitsPerSecondSquared);
 
         virtual void setup();
         virtual void reset();
@@ -74,7 +74,7 @@ namespace prop2
             const std::shared_ptr<Polygon>& polygon2);
 
         real _dt;
-        real _gravity;
+        Vec2r _gravity;
         std::vector< std::shared_ptr<Circle> >  _circles;
         std::vector< std::shared_ptr<Polygon> > _polygons;
 
@@ -86,9 +86,9 @@ namespace prop2
 
 
     // IMPLEMENTATION //
-    inline void StdChoreographer::setGravity(real yMeterPerSeconds2)
+    inline void StdChoreographer::setGravity(const Vec2r& unitsPerSecondSquared)
     {
-        _gravity = yMeterPerSeconds2;
+        _gravity = unitsPerSecondSquared;
     }
 }
 

@@ -22,7 +22,7 @@ class ImageHud;
     public:
         virtual ~AbstractChoreographer() {}
 
-        virtual void setGravity(real yMeterPerSeconds2) =0;
+        virtual void setGravity(const Vec2r& unitsPerSecondSquared) =0;
 
         virtual void update(real dt) =0;
 

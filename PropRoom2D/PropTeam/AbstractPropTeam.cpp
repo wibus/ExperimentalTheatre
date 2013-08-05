@@ -119,5 +119,10 @@ namespace prop2
         camera.registerObserver(*_artDirector);
         camera.refresh();
     }
+
+    void AbstractPropTeam::setGravity(const Vec2r& unitsPerSecondSquared)
+    {
+        _choreographer->setGravity(unitsPerSecondSquared);
+    }
 }
 

@@ -53,6 +53,7 @@ class ImageHud;
         virtual void deleteImageHud(std::shared_ptr<ImageHud>& imageHud);
 
         virtual void setCamera(media::Camera& camera);
+        virtual void setGravity(const Vec2r& unitsPerSecondSquared);
 
     protected:
         // Getter for prop team members

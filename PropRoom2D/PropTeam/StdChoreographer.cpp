@@ -13,7 +13,7 @@ namespace prop2
 {
     StdChoreographer::StdChoreographer() :
         _dt(real(0)),
-        _gravity(0 /*real(98.0)*/), // 9.8m/s2 * 10px/m
+        _gravity(real(0), real(0)),
         _circles(),
         _polygons(),
         _maxHandledDeltaTime(real(0.1)),
@@ -156,7 +156,7 @@ namespace prop2
         if(shape->bodyType() == EBodyType::DYNAMIC)
         {
             // Apply the gravitationnal acceleration to dynamic shapes
-            shape->addLinearAcceleration(Vec2r(real(0), -_gravity));
+            shape->addLinearAcceleration(_gravity);
         }
 
         // Update the velocities of the shape
