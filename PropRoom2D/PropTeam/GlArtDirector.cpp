@@ -17,6 +17,7 @@
 
 #include <Misc/Log.h>
 
+#include <Camera/Camera.h>
 #include <Image/Image.h>
 #include <Image/ImageBank.h>
 #include <GL/GlToolkit.h>
@@ -58,6 +59,37 @@ namespace prop2
     {
     }
 
+    void GlArtDirector::notify(media::CameraMsg &msg)
+    {
+        Mat4r shapeProjectionMatrix = msg.camera.projectionMatrix() *
+                                      msg.camera.viewMatrix();
+
+        _circleShader.pushProgram();
+        _circleShader.setMat4f("Projection", shapeProjectionMatrix);
+        _circleShader.popProgram();
+
+        _polygonShader.pushProgram();
+        _polygonShader.setMat4f("Projection", shapeProjectionMatrix);
+        _polygonShader.popProgram();
+
+        if(msg.change == CameraMsg::EChange::PROJECTION)
+        {
+            _viewportSize = msg.camera.viewport();
+            Mat4r hudProjectionMatrix =
+                    ortho<real>(real(0),  _viewportSize.x(),
+                                real(0),  _viewportSize.y(),
+                                real(-1), real(1));
+
+            _textHudShader.pushProgram();
+            _textHudShader.setMat4f("Projection", hudProjectionMatrix);
+            _textHudShader.popProgram();
+
+            _imageHudShader.pushProgram();
+            _imageHudShader.setMat4f("Projection", hudProjectionMatrix);
+            _imageHudShader.popProgram();
+        }
+    }
+
     void GlArtDirector::setup()
     {
         if(!_shadersInitialized)
@@ -72,8 +104,6 @@ namespace prop2
             setupTextHudShader(locations);
             setupImageHudShader(locations);
 
-            updateViewportSize(_viewportSize.x(), _viewportSize.y());
-
             _shadersInitialized = true;
         }
     }
@@ -84,28 +114,6 @@ namespace prop2
         _polygons.clear();
         _texts.clear();
         _images.clear();
-    }
-
-    void GlArtDirector::updateViewportSize(int width, int height)
-    {
-        _viewportSize(width, height);
-        Mat4r projection = ortho<real>(0, width, 0, height, -1.0, 1.0);
-
-        _circleShader.pushProgram();
-        _circleShader.setMat4f("Projection", projection);
-        _circleShader.popProgram();
-
-        _polygonShader.pushProgram();
-        _polygonShader.setMat4f("Projection", projection);
-        _polygonShader.popProgram();
-
-        _textHudShader.pushProgram();
-        _textHudShader.setMat4f("Projection", projection);
-        _textHudShader.popProgram();
-
-        _imageHudShader.pushProgram();
-        _imageHudShader.setMat4f("Projection", projection);
-        _imageHudShader.popProgram();
     }
 
     void GlArtDirector::draw(real)
@@ -137,11 +145,11 @@ namespace prop2
             const std::shared_ptr<AbstractShape>& shape = shapes[i];
             switch(shape->propType())
             {
-            case PropType::CIRCLE:
+            case EPropType::CIRCLE:
                 drawCircle(static_pointer_cast<Circle>(shape));
                 break;
 
-            case PropType::POLYGON:
+            case EPropType::POLYGON:
                 drawPolygon(static_pointer_cast<Polygon>(shape));
                 break;
 
@@ -528,11 +536,11 @@ namespace prop2
         _imageHudVao.createBuffer("texCoord", texCoordBuff);
     }
 
-    Vec2r GlArtDirector::getAnchor(const HorizontalAnchor::Enum& h,
-                                  const VerticalAnchor::Enum&   v)
+    Vec2r GlArtDirector::getAnchor(const EHorizontalAnchor& h,
+                                   const EVerticalAnchor&   v)
     {
-        return Vec2r(h == HorizontalAnchor::RIGHT ? _viewportSize.x() : 0,
-                     v == VerticalAnchor::TOP     ? _viewportSize.y() : 0);
+        return Vec2r(h == EHorizontalAnchor::RIGHT ? _viewportSize.x() : 0,
+                     v == EVerticalAnchor::TOP     ? _viewportSize.y() : 0);
     }
 
     GlFont::GlFont(const string& name) :

@@ -6,6 +6,11 @@
 #include "libPropRoom2D_global.h"
 
 
+namespace media
+{
+class Camera;
+}
+
 namespace prop2
 {
 class AbstractPropDesigner;
@@ -47,7 +52,7 @@ class ImageHud;
         virtual void deleteTextHud(std::shared_ptr<TextHud>& textHud);
         virtual void deleteImageHud(std::shared_ptr<ImageHud>& imageHud);
 
-        virtual void updateViewportSize(int width, int height);
+        virtual void setCamera(media::Camera& camera);
 
     protected:
         // Getter for prop team members

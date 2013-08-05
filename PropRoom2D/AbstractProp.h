@@ -9,14 +9,14 @@ namespace prop2
     class PROP2D_EXPORT AbstractProp
     {
     protected:
-        AbstractProp(PropType::Enum propType);
+        AbstractProp(EPropType propType);
 
     public:
         virtual ~AbstractProp();
 
         // Getters
         PropId   id() const;
-        PropType::Enum propType() const;
+        EPropType propType() const;
         bool     isVisible() const;
 
         // Setters
@@ -26,9 +26,9 @@ namespace prop2
         static PropId _assigneId_();
         static PropId _nextId_;
 
-        PropId         _id;
-        PropType::Enum _propType;
-        bool           _isVisible;
+        PropId   _id;
+        EPropType _propType;
+        bool     _isVisible;
     };
 
 
@@ -39,7 +39,7 @@ namespace prop2
         return _id;
     }
 
-    inline PropType::Enum AbstractProp::propType() const
+    inline EPropType AbstractProp::propType() const
     {
         return _propType;
     }

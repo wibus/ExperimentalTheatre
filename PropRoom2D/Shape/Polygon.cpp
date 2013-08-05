@@ -13,7 +13,7 @@ using namespace cellar;
 namespace prop2
 {
     Polygon::Polygon(int nbVertices) :
-        AbstractShape(PropType::POLYGON),
+        AbstractShape(EPropType::POLYGON),
         _costume(),
         _relVertices(nbVertices),
         _outline(nbVertices),

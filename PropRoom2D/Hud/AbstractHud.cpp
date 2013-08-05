@@ -3,10 +3,10 @@
 
 namespace prop2
 {
-    AbstractHud::AbstractHud(PropType::Enum type) :
+    AbstractHud::AbstractHud(EPropType type) :
         AbstractProp(type),
-        _horizontalAnchor(HorizontalAnchor::LEFT),
-        _verticalAnchor(VerticalAnchor::BOTTOM)
+        _horizontalAnchor(EHorizontalAnchor::LEFT),
+        _verticalAnchor(EVerticalAnchor::BOTTOM)
     {
     }
 

@@ -4,7 +4,7 @@
 namespace prop2
 {
     TextHud::TextHud() :
-        AbstractHud(PropType::TEXT_HUD),
+        AbstractHud(EPropType::TEXT_HUD),
         _height(real(12.0)),
         _handlePosition(real(0.0), real(0.0)),
         _text(""),

@@ -44,10 +44,11 @@ class AbstractShape;
         GlArtDirector();
         virtual ~GlArtDirector();
 
+        virtual void notify(media::CameraMsg &msg);
+
         virtual void setup();
         virtual void reset();
         virtual void draw(real dt);
-        virtual void updateViewportSize(int width, int height);
 
         virtual void manageCircle(const std::shared_ptr<Circle>& circle);
         virtual void managePolygon(const std::shared_ptr<Polygon>& polygon);
@@ -70,8 +71,8 @@ class AbstractShape;
         virtual void setupTextHudShader(const media::GlInputsOutputs& loc);
         virtual void setupImageHudShader(const media::GlInputsOutputs& loc);
 
-        virtual Vec2r getAnchor(const HorizontalAnchor::Enum& h,
-                               const VerticalAnchor::Enum&   v);
+        virtual Vec2r getAnchor(const EHorizontalAnchor& h,
+                                const EVerticalAnchor&   v);
 
 
         bool _shadersInitialized;

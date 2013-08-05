@@ -10,7 +10,7 @@ namespace prop2
     class PROP2D_EXPORT AbstractHud : public AbstractProp
     {
     protected:
-        AbstractHud(PropType::Enum propType);
+        AbstractHud(EPropType propType);
 
     public:
         virtual ~AbstractHud();
@@ -19,39 +19,39 @@ namespace prop2
         virtual real width() const =0;
         virtual real height() const =0;
         virtual Vec2r handlePosition() const = 0;
-        HorizontalAnchor::Enum horizontalAnchor() const;
-        VerticalAnchor::Enum   verticalAnchor() const;
+        EHorizontalAnchor horizontalAnchor() const;
+        EVerticalAnchor   verticalAnchor() const;
 
         // Setters
         virtual void setHeight(real height) =0;
         virtual void setHandlePosition(const Vec2r& position) = 0;
-        void setHorizontalAnchor(const HorizontalAnchor::Enum& anchor);
-        void setVerticalAnchor(const VerticalAnchor::Enum& anchor);
+        void setHorizontalAnchor(const EHorizontalAnchor& anchor);
+        void setVerticalAnchor(const EVerticalAnchor& anchor);
 
     protected:
-        HorizontalAnchor::Enum _horizontalAnchor;
-        VerticalAnchor::Enum _verticalAnchor;
+        EHorizontalAnchor _horizontalAnchor;
+        EVerticalAnchor   _verticalAnchor;
     };
 
 
 
     // IMPLEMENTATION //
-    inline HorizontalAnchor::Enum AbstractHud::horizontalAnchor() const
+    inline EHorizontalAnchor AbstractHud::horizontalAnchor() const
     {
         return _horizontalAnchor;
     }
 
-    inline VerticalAnchor::Enum AbstractHud::verticalAnchor() const
+    inline EVerticalAnchor AbstractHud::verticalAnchor() const
     {
         return _verticalAnchor;
     }
 
-    inline void AbstractHud::setHorizontalAnchor(const HorizontalAnchor::Enum& anchor)
+    inline void AbstractHud::setHorizontalAnchor(const EHorizontalAnchor& anchor)
     {
         _horizontalAnchor = anchor;
     }
 
-    inline void AbstractHud::setVerticalAnchor(const VerticalAnchor::Enum& anchor)
+    inline void AbstractHud::setVerticalAnchor(const EVerticalAnchor& anchor)
     {
         _verticalAnchor = anchor;
     }

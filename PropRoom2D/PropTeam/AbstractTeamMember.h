@@ -15,7 +15,6 @@ namespace prop2
 
         virtual void setup() =0;
         virtual void reset() =0;
-        virtual void updateViewportSize(int, int) {}
     };
 }
 

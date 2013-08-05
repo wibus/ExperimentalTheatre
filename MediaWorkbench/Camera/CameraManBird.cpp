@@ -67,21 +67,21 @@ namespace media
         if(_camera == nullptr)
             return;
 
-        _camera->setMode(Camera::FRAME);
+        _camera->setMode(Camera::EMode::FRAME);
 
-        _camera->setFrame((float)_camera->knowWindowWidth(),
-                          (float)_camera->knowWindowHeight());
+        _camera->setFrame((float)_camera->viewportWidth(),
+                          (float)_camera->viewportHeight());
 
-        _camera->setLens(Camera::Lens::ORTHOGRAPHIC,
-                         -_camera->knowWindowWidth() / 2.0f,  _camera->knowWindowWidth() / 2.0f,
-                         -_camera->knowWindowHeight() / 2.0f, _camera->knowWindowHeight() / 2.0f,
+        _camera->setLens(Camera::Lens::EType::ORTHOGRAPHIC,
+                         -_camera->viewportWidth() / 2.0f,  _camera->viewportWidth() / 2.0f,
+                         -_camera->viewportHeight() / 2.0f, _camera->viewportHeight() / 2.0f,
                          -1.0f, 1.0f);
 
-        _camera->setTripod(cellar::Vec3f(_camera->knowWindowWidth() / 2.0f,
-                                           _camera->knowWindowHeight() / 2.0f,
+        _camera->setTripod(cellar::Vec3f(_camera->viewportWidth() / 2.0f,
+                                           _camera->viewportHeight() / 2.0f,
                                            0.0f),
-                           cellar::Vec3f(_camera->knowWindowWidth() / 2.0f,
-                                           _camera->knowWindowHeight() / 2.0f,
+                           cellar::Vec3f(_camera->viewportWidth() / 2.0f,
+                                           _camera->viewportHeight() / 2.0f,
                                            -1.0f),
                            cellar::Vec3f(0.0f, 1.0f, 0.0f));
     }

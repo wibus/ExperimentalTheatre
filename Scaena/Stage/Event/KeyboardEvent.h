@@ -9,15 +9,15 @@ namespace scaena
     class SCAENA_EXPORT KeyboardEvent
     {
     public:
-        KeyboardEvent(char ascii, Keyboard::NonAscii nonAscii);
+        KeyboardEvent(char ascii, ENonAscii nonAscii);
 
         char getAscii()     const;
-        Keyboard::NonAscii getNonAscii()  const;
+        ENonAscii getNonAscii()  const;
 
 
     private :
         char _ascii;
-        Keyboard::NonAscii _nonAscii;
+        ENonAscii _nonAscii;
     };
 
 
@@ -26,7 +26,7 @@ namespace scaena
     inline char KeyboardEvent::getAscii() const
         {return _ascii;}
 
-    inline Keyboard::NonAscii KeyboardEvent::getNonAscii() const
+    inline ENonAscii KeyboardEvent::getNonAscii() const
         {return _nonAscii;}
 }
 

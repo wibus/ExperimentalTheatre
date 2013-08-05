@@ -10,8 +10,6 @@
 
 namespace cellar
 {
-    namespace Axis{enum Enum {X, Y, Z, W};}
-
     template <int N, typename T>
     class Vector
     {
@@ -136,10 +134,10 @@ namespace cellar
     template <int N, typename T>
     inline Vector<N, T>::Vector(const T& x, const T& y, const T& z, const T& w)
     {
-        _v[Axis::X] = x;
-        _v[Axis::Y] = y;
-        if(2 < N) _v[Axis::Z] = z;
-        if(3 < N) _v[Axis::W] = w;
+        _v[0] = x;
+        _v[1] = y;
+        if(2 < N) _v[2] = z;
+        if(3 < N) _v[3] = w;
     }
 
     template <int N, typename T>
@@ -157,7 +155,7 @@ namespace cellar
                 _v[i] = vec2[i];
             for(int i=N2; i<N; ++i)
                 _v[i] = T(0);
-            if(3 < N) _v[Axis::W] = T(1);
+            if(3 < N) _v[3] = T(1);
         }
     }
 
@@ -165,29 +163,29 @@ namespace cellar
     template <typename T2>
     inline Vector<N, T>::Vector(const Vector<2, T2>& vec2, T z)
     {
-        _v[Axis::X] = vec2[Axis::X];
-        _v[Axis::Y] = vec2[Axis::Y];
-        if(2 < N) _v[Axis::Z] = z;
+        _v[0] = vec2[0];
+        _v[1] = vec2[1];
+        if(2 < N) _v[2] = z;
     }
 
     template <int N, typename T>
     template <typename T2>
     inline Vector<N, T>::Vector(const Vector<2, T2>& vec2, T z, T w)
     {
-        _v[Axis::X] = vec2[Axis::X];
-        _v[Axis::Y] = vec2[Axis::Y];
-        if(2 < N) _v[Axis::Z] = z;
-        if(3 < N) _v[Axis::W] = w;
+        _v[0] = vec2[0];
+        _v[1] = vec2[1];
+        if(2 < N) _v[2] = z;
+        if(3 < N) _v[3] = w;
     }
 
     template <int N, typename T>
     template <typename T2>
     inline Vector<N, T>::Vector(const Vector<3, T2>& vec2, T w)
     {
-        _v[Axis::X] = vec2[Axis::X];
-        _v[Axis::Y] = vec2[Axis::Y];
-        if(2 < N) _v[Axis::Z] = vec2[Axis::Z];
-        if(3 < N) _v[Axis::W] = w;
+        _v[0] = vec2[0];
+        _v[1] = vec2[1];
+        if(2 < N) _v[2] = vec2[2];
+        if(3 < N) _v[3] = w;
     }
 
 
@@ -196,16 +194,16 @@ namespace cellar
     inline int Vector<N, T>::getNbComponents() const {return N;}
 
     template <int N, typename T>
-    inline T Vector<N, T>::x() const {return _v[Axis::X];}
+    inline T Vector<N, T>::x() const {return _v[0];}
 
     template <int N, typename T>
-    inline T Vector<N, T>::y() const {return _v[Axis::Y];}
+    inline T Vector<N, T>::y() const {return _v[1];}
 
     template <int N, typename T>
-    inline T Vector<N, T>::z() const {return N < 3 ? T(0) : _v[Axis::Z];}
+    inline T Vector<N, T>::z() const {return N < 3 ? T(0) : _v[2];}
 
     template <int N, typename T>
-    inline T Vector<N, T>::w() const {return N < 4 ? T(1) : _v[Axis::W];}
+    inline T Vector<N, T>::w() const {return N < 4 ? T(1) : _v[3];}
 
     template <int N, typename T>
     inline T* Vector<N, T>::asArray()
@@ -258,22 +256,22 @@ namespace cellar
     template <int N, typename T>
     inline T Vector<N, T>::angle() const
     {
-        return ::atan2(_v[Axis::Y], _v[Axis::X]);
+        return ::atan2(_v[1], _v[0]);
     }
 
 
     //Seters
     template <int N, typename T>
-    inline void Vector<N, T>::setX(T x) {_v[Axis::X] = x;}
+    inline void Vector<N, T>::setX(T x) {_v[0] = x;}
 
     template <int N, typename T>
-    inline void Vector<N, T>::setY(T y) {_v[Axis::Y] = y;}
+    inline void Vector<N, T>::setY(T y) {_v[1] = y;}
 
     template <int N, typename T>
-    inline void Vector<N, T>::setZ(T z) {if(2 < N) _v[Axis::Z] = z;}
+    inline void Vector<N, T>::setZ(T z) {if(2 < N) _v[2] = z;}
 
     template <int N, typename T>
-    inline void Vector<N, T>::setW(T w) {if(3 < N) _v[Axis::W] = w;}
+    inline void Vector<N, T>::setW(T w) {if(3 < N) _v[3] = w;}
 
 
     //Operateurs surcharges
@@ -354,10 +352,10 @@ namespace cellar
     template <int N, typename T>
     inline Vector<N, T>& Vector<N, T>::operator() (const T& x, const T& y, const T& z, const T& w)
     {
-        _v[Axis::X] = x;
-        _v[Axis::Y] = y;
-        if(2 < N) _v[Axis::Z] = z;
-        if(3 < N) _v[Axis::W] = w;
+        _v[0] = x;
+        _v[1] = y;
+        if(2 < N) _v[2] = z;
+        if(3 < N) _v[3] = w;
         return *this;
     }
 
@@ -446,9 +444,9 @@ namespace cellar
     Vector<3, T> cross(const Vector<3, T>& vec1, const Vector<3, T>& vec2)
     {
         Vector<3, T> res;
-        res[Axis::X] = vec1[1]*vec2[2] - vec1[2]*vec2[1];
-        res[Axis::Y] = vec1[2]*vec2[0] - vec1[0]*vec2[2];
-        res[Axis::Z] = vec1[0]*vec2[1] - vec1[1]*vec2[0];
+        res[0] = vec1[1]*vec2[2] - vec1[2]*vec2[1];
+        res[1] = vec1[2]*vec2[0] - vec1[0]*vec2[2];
+        res[2] = vec1[0]*vec2[1] - vec1[1]*vec2[0];
         return res;
     }
 
@@ -461,13 +459,13 @@ namespace cellar
     template<typename T>
     inline Vector<2,T> perpCW(const Vector<2,T>& vec)
     {
-        return Vector<2,T>(vec[Axis::Y], -vec[Axis::X]);
+        return Vector<2,T>(vec[1], -vec[0]);
     }
 
     template<typename T>
     inline Vector<2,T> perpCCW(const Vector<2,T>& vec)
     {
-        return Vector<2,T>(-vec[Axis::Y], vec[Axis::X]);
+        return Vector<2,T>(-vec[1], vec[0]);
     }
 
     template<typename T>
@@ -476,8 +474,8 @@ namespace cellar
         double s = sin(radians);
         double c = cos(radians);
         return Vector<2,T>(
-            vec[Axis::X] * c - vec[Axis::Y] * s,
-            vec[Axis::X] * s + vec[Axis::Y] * c
+            vec[0] * c - vec[1] * s,
+            vec[0] * s + vec[1] * c
         );
     }
 

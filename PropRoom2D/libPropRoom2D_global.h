@@ -23,36 +23,36 @@ namespace prop2
 
     // Shapes attributes
     typedef unsigned int PropId;
-    namespace PropType
+    enum class EPropType
     {
-    enum Enum {CIRCLE,
-               POLYGON,
-               TEXT_HUD,
-               IMAGE_HUD,
-               NB_TYPES};
-    }
+        CIRCLE,
+        POLYGON,
+        TEXT_HUD,
+        IMAGE_HUD,
+        NB_TYPES
+    };
 
-    namespace BodyType
+    enum class EBodyType
     {
-    enum Enum {GRAPHIC,
-               KINEMATIC,
-               DYNAMIC,
-               NB_TYPES};
-    }
+        GRAPHIC,
+        KINEMATIC,
+        DYNAMIC,
+        NB_TYPES
+    };
 
-    namespace HorizontalAnchor
+    enum class  EHorizontalAnchor
     {
-    enum Enum {LEFT,
-               RIGHT,
-               NB_ANCHORS};
-    }
+        LEFT,
+        RIGHT,
+        NB_ANCHORS
+    };
 
-    namespace VerticalAnchor
+    enum class  EVerticalAnchor
     {
-    enum Enum {BOTTOM,
-               TOP,
-               NB_ANCHORS};
-    }
+        BOTTOM,
+        TOP,
+        NB_ANCHORS
+    };
 
 
     // Vectors and matrices

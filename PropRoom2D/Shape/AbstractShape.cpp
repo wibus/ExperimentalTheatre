@@ -9,10 +9,10 @@ namespace prop2
 
     const real AbstractShape::INFINITE_INERTIA = real(0);
 
-    AbstractShape::AbstractShape(PropType::Enum propType) :
+    AbstractShape::AbstractShape(EPropType propType) :
         AbstractProp(propType),
         _material(),
-        _bodyType(BodyType::GRAPHIC),
+        _bodyType(EBodyType::GRAPHIC),
         _tranformMatrix(real(1.0)),
         _inverseMass(INFINITE_INERTIA),
         _inverseMomentOfInertia(INFINITE_INERTIA),
@@ -57,18 +57,18 @@ namespace prop2
 
     void AbstractShape::notify(MaterialUpdate& msg)
     {
-        if(msg.type == MaterialUpdate::DENSITY)
+        if(msg.type == MaterialUpdate::EType::DENSITY)
         {
             updateInertia();
         }
     }
 
-    BodyType::Enum AbstractShape::bodyType() const
+    EBodyType AbstractShape::bodyType() const
     {
         return _bodyType;
     }
 
-    void AbstractShape::setBodyType(const BodyType::Enum& type)
+    void AbstractShape::setBodyType(const EBodyType& type)
     {
         if(_bodyType != type)
         {
@@ -83,28 +83,28 @@ namespace prop2
 
     real AbstractShape::mass() const
     {
-        return _bodyType ==  BodyType::DYNAMIC && _inverseMass ?
+        return _bodyType ==  EBodyType::DYNAMIC && _inverseMass ?
             real(1)/_inverseMass :
             INFINITE_INERTIA;
     }
 
     real AbstractShape::inverseMass() const
     {
-        return _bodyType ==  BodyType::DYNAMIC ?
+        return _bodyType ==  EBodyType::DYNAMIC ?
             _inverseMass :
             INFINITE_INERTIA;
     }
 
     real AbstractShape::momentOfInertia() const
     {
-        return _bodyType ==  BodyType::DYNAMIC && _inverseMomentOfInertia ?
+        return _bodyType ==  EBodyType::DYNAMIC && _inverseMomentOfInertia ?
             real(1)/_inverseMomentOfInertia :
             INFINITE_INERTIA;
     }
 
     real AbstractShape::inverseMomentOfInertia() const
     {
-        return _bodyType ==  BodyType::DYNAMIC ?
+        return _bodyType ==  EBodyType::DYNAMIC ?
             _inverseMomentOfInertia :
             INFINITE_INERTIA;
     }
@@ -249,13 +249,13 @@ namespace prop2
 
     void AbstractShape::addLinearForce(const Vec2r& force)
     {
-        if(_bodyType == BodyType::DYNAMIC)
+        if(_bodyType == EBodyType::DYNAMIC)
             _linearAcceleration += force * _inverseMass;
     }
 
     void AbstractShape::addAngularForce(const real& force)
     {
-        if(_bodyType == BodyType::DYNAMIC)
+        if(_bodyType == EBodyType::DYNAMIC)
             _angularAcceleration += force * _inverseMomentOfInertia;
     }
 
@@ -268,13 +268,13 @@ namespace prop2
 
     void AbstractShape::applyLinearImpulse(const Vec2r& impulse)
     {
-        if(_bodyType == BodyType::DYNAMIC)
+        if(_bodyType == EBodyType::DYNAMIC)
             _linearVelocity += impulse * _inverseMass;
     }
 
     void AbstractShape::applyAngularImpulse(const real& impulse)
     {
-        if(_bodyType == BodyType::DYNAMIC)
+        if(_bodyType == EBodyType::DYNAMIC)
             _angularVelocity += impulse * _inverseMomentOfInertia;
     }
 

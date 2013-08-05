@@ -3,6 +3,8 @@
 #include "AbstractArtDirector.h"
 #include "AbstractChoreographer.h"
 
+#include <Camera/Camera.h>
+
 
 namespace prop2
 {
@@ -29,6 +31,7 @@ namespace prop2
 
     void AbstractPropTeam::reset()
     {
+        _propDesigner->reset();
         _artDirector->reset();
         _choreographer->reset();
     }
@@ -111,10 +114,10 @@ namespace prop2
         imageHud.reset();
     }
 
-    void AbstractPropTeam::updateViewportSize(int width, int height)
+    void AbstractPropTeam::setCamera(media::Camera& camera)
     {
-        _artDirector->updateViewportSize(width, height);
-        _choreographer->updateViewportSize(width, height);
+        camera.registerObserver(*_artDirector);
+        camera.refresh();
     }
 }
 

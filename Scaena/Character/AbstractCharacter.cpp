@@ -6,14 +6,15 @@ using namespace std;
 
 namespace scaena
 {
-    AbstractCharacter::AbstractCharacter(AbstractStage& stage,
-                         const string& id,
-                         Priority priority) :
-        _stage(stage),
-        _id(id),
-        _priority(priority),
-        _updates(true),
-        _visible(true)
+    AbstractCharacter::AbstractCharacter(
+        AbstractStage& stage,
+        const string& id,
+        float priority) :
+            _stage(stage),
+            _id(id),
+            _priority(priority),
+            _updates(true),
+            _visible(true)
     {}
 
     AbstractCharacter::~AbstractCharacter()

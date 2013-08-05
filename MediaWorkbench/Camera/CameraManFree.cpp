@@ -31,12 +31,14 @@ namespace media
         float aspectRatio = _camera->lens().width() / _camera->lens().height();
         float halfScreen = tan(radians / 2.0f) * nearPlane;
 
-        _camera->setLens(Camera::Lens::PERSPECTIVE,
-                         -halfScreen,                halfScreen,
+        _camera->setLens(Camera::Lens::EType::PERSPECTIVE,
+                         -halfScreen,               halfScreen,
                          -halfScreen / aspectRatio, halfScreen / aspectRatio,
                          nearPlane,                 farPlane);
 
-        _camera->setTripod(cellar::Vec3f(0, 0, 0), cellar::Vec3f(0, 1, 0), cellar::Vec3f(0, 0, 1));
+        _camera->setTripod(cellar::Vec3f(0, 0, 0),
+                           cellar::Vec3f(0, 1, 0),
+                           cellar::Vec3f(0, 0, 1));
     }
 
     void CameraManFree::forward(float dist)
@@ -84,7 +86,7 @@ namespace media
 
     void CameraManFree::setupCamera()
     {
-        _camera->setMode(Camera::EXPAND);
+        _camera->setMode(Camera::EMode::EXPAND);
         setFov(0.78f, 0.3f, 300.0f);
     }
 }

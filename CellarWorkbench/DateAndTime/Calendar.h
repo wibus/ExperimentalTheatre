@@ -7,11 +7,11 @@
 
 namespace cellar
 {
-    enum Month    {JANUARY,     FEBRUARY,   MARCH,      APRIL,
-                   MAY,         JUNE,       JULY,       AUGUST,
-                   SEPTEMBER,   OCTOBER,    NOVEMBER,   DECEMBER, NB_MONTHS};
+    enum class EMonth {JANUARY,     FEBRUARY,   MARCH,      APRIL,
+                      MAY,         JUNE,       JULY,       AUGUST,
+                      SEPTEMBER,   OCTOBER,    NOVEMBER,   DECEMBER, NB_MONTHS};
 
-    enum TimeJump   {YEAR, MONTH, DAY, HOUR, MINUTE, SECOND, NB_TIME_JUMPS};
+    enum class ETimeJump {YEAR, MONTH, DAY, HOUR, MINUTE, SECOND, NB_TIME_JUMPS};
 
     struct CELLAR_EXPORT Date
     {
@@ -98,7 +98,7 @@ namespace cellar
 
     inline int Date::nbDaysInMonth(int year, int month)
     {
-        return NB_DAYS_IN_MONTH[month] + (isLeap(year) && month == FEBRUARY ? 1 : 0);
+        return NB_DAYS_IN_MONTH[month] + (isLeap(year) && month == (int)EMonth::FEBRUARY ? 1 : 0);
     }
 
     inline bool Date::operator!=(const Date& t) const

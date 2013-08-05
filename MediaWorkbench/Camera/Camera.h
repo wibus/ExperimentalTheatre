@@ -38,15 +38,15 @@ namespace media
             friend class Camera;
 
         public:
-            enum Type {ORTHOGRAPHIC, PERSPECTIVE};
+            enum class EType {ORTHOGRAPHIC, PERSPECTIVE};
 
             Lens();
-            Lens(Type type,
+            Lens(EType type,
                  float left,       float right,
                  float bottom,     float top,
                  float nearPlane,  float farPlane);
 
-            Type   type() const;
+            EType type() const;
             float left() const;
             float right() const;
             float bottom() const;
@@ -57,12 +57,12 @@ namespace media
             float height() const;
 
         private:
-            void set(Type type,
+            void set(EType type,
                      float left,         float right,
                      float bottom,       float top,
                      float nearPlane,    float farPlane);
 
-            Type _type;
+            EType _type;
             float _left;
             float _right;
             float _bottom;
@@ -97,15 +97,15 @@ namespace media
         };
 
     public:
-        enum Mode {EXPAND, FRAME, STRETCH};
+        enum class EMode {EXPAND, FRAME, STRETCH};
 
         Camera();
-        Camera(Mode mode, const Frame &frame,
+        Camera(EMode mode, const Frame &frame,
                const Lens &lens, const Tripod &tripod,
-               int windowWidth, int windowHeight);
+               const cellar::Vec2i& viewport);
 
-        Mode    mode() const;
-        void    setMode(Mode mode);
+        EMode    mode() const;
+        void    setMode(EMode mode);
 
         const Frame&  frame();
         const Lens&   lens();
@@ -116,7 +116,7 @@ namespace media
         void setFrame(float width, float height);
         void setLens(float left,         float right,
                      float bottom,       float top);
-        void setLens(Lens::Type type,
+        void setLens(Lens::EType type,
                      float left,         float right,
                      float bottom,       float top,
                      float nearPlane,    float farPlane);
@@ -128,9 +128,10 @@ namespace media
 
 
         // Notify new window size
-        void notifyNewWindowSize(int width, int height);
-        int  knowWindowWidth() const;
-        int  knowWindowHeight() const;
+        void updateViewport(int width, int height);
+        const cellar::Vec2i& viewport() const;
+        int  viewportWidth() const;
+        int  viewportHeight() const;
 
         void zoom(float ratio);
 
@@ -142,26 +143,25 @@ namespace media
         void updateProjectionMatrix();
         void updateViewMatrix();
 
-        Mode _mode;
+        EMode _mode;
         Frame _frame;
         Lens _lens;
-        Tripod _tripod;        
-        int _windowWidth;
-        int _windowHeight;
+        Tripod _tripod;
+        cellar::Vec2i _viewport;
         cellar::Mat4f _projMatrix;
         cellar::Mat4f _viewMatrix;
     };
 
     struct CameraMsg
     {
-        enum Change {PROJECTION, VIEW};
+        enum class EChange {PROJECTION, VIEW};
 
         Camera& camera;
-        Change change;
+        EChange change;
 
     private:
         friend class Camera;
-        CameraMsg(Camera& camera, Change change) :
+        CameraMsg(Camera& camera, EChange change) :
             camera(camera), change(change) {}
     };
 
@@ -169,13 +169,13 @@ namespace media
 
     // IMPLEMENTATION //
     // CAMERA //
-    inline Camera::Mode Camera::mode() const {return _mode;}
-    inline void Camera::setMode(Mode mode) {_mode = mode;}
+    inline Camera::EMode Camera::mode() const {return _mode;}
     inline const Camera::Frame&  Camera::frame() {return _frame;}
     inline const Camera::Lens& Camera::lens() {return _lens;}
     inline const Camera::Tripod &Camera::tripod() {return _tripod;}
-    inline int Camera::knowWindowWidth() const {return _windowWidth;}
-    inline int Camera::knowWindowHeight() const {return _windowHeight;}
+    inline const cellar::Vec2i& Camera::viewport() const {return _viewport;}
+    inline int Camera::viewportWidth() const {return _viewport.x();}
+    inline int Camera::viewportHeight() const {return _viewport.y();}
     inline cellar::Mat4f& Camera::projectionMatrix() {return _projMatrix;}
     inline cellar::Mat4f& Camera::viewMatrix() {return _viewMatrix;}
 
@@ -185,7 +185,7 @@ namespace media
     inline void  Camera::Frame::set(float width, float height) {_width = width; _height = height;}
 
     // CAMERA::LENS //
-    inline Camera::Lens::Type Camera::Lens::type() const {return _type;}
+    inline Camera::Lens::EType Camera::Lens::type() const {return _type;}
     inline float Camera::Lens::left() const {return _left;}
     inline float Camera::Lens::right() const {return _right;}
     inline float Camera::Lens::bottom() const {return _bottom;}
@@ -205,11 +205,16 @@ namespace media
                                     const cellar::Vec3f& to,
                                     const cellar::Vec3f& up)
     {
-        _from = from; _to = to; _up = up;
+        _from = from;
+        _to = to;
+        _up = up;
     }
 
     inline void Camera::Tripod::moveBy(const cellar::Vec3f& dist)
-        {_from += dist; _to += dist;}
+    {
+        _from += dist;
+        _to += dist;
+    }
 }
 
 

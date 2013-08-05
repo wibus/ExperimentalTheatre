@@ -4,7 +4,7 @@
 namespace prop2
 {
     ImageHud::ImageHud() :
-        AbstractHud(PropType::IMAGE_HUD),        
+        AbstractHud(EPropType::IMAGE_HUD),        
         _imageName(""),
         _cornersPositions(4),
         _cornersTexCoords(4),

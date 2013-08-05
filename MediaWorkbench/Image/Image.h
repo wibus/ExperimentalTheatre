@@ -11,7 +11,7 @@ namespace media
     class MEDIA_EXPORT Image
     {
     public :
-        enum Format {GRAY, RGB, RGBA};
+        enum class EFormat {GRAY, RGB, RGBA};
 
         Image();
         Image(const Image& image);

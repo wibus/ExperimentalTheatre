@@ -22,7 +22,7 @@ class Material;
             public cellar::SpecificObserver<MaterialUpdate>
     {
     protected:
-        AbstractShape(PropType::Enum propType);
+        AbstractShape(EPropType propType);
 
     public:
         virtual ~AbstractShape();
@@ -36,8 +36,8 @@ class Material;
         virtual void notify(MaterialUpdate& msg);
 
         // Body type
-        virtual BodyType::Enum bodyType() const;
-        virtual void setBodyType(const BodyType::Enum& type);
+        virtual EBodyType bodyType() const;
+        virtual void setBodyType(const EBodyType& type);
 
         // Inertia
         virtual real mass() const;
@@ -117,7 +117,7 @@ class Material;
 
         // Attributes
         std::shared_ptr<Material> _material;
-        BodyType::Enum _bodyType;
+        EBodyType _bodyType;
 
         real _inverseMass;
         real _inverseMomentOfInertia;

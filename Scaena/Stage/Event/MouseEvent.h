@@ -12,16 +12,16 @@ namespace scaena
     class SCAENA_EXPORT MouseEvent
     {
     public:
-        MouseEvent(Mouse::Button button,
+        MouseEvent(EMouseButton button,
                    const cellar::Vec2i& pos,
                    const cellar::Vec2i& globalPos);
 
-        Mouse::Button button() const;
+        EMouseButton button() const;
         cellar::Vec2i position() const;
         cellar::Vec2i globalPosition() const;
 
     private:
-        Mouse::Button _button;
+        EMouseButton _button;
         cellar::Vec2i _position;
         cellar::Vec2i _globalPosition;
     };
@@ -29,7 +29,7 @@ namespace scaena
 
 
     // IMPLEMENTATION //
-    inline Mouse::Button MouseEvent::button() const
+    inline EMouseButton MouseEvent::button() const
         {return _button;}
 
     inline cellar::Vec2i MouseEvent::position() const

@@ -53,12 +53,13 @@ namespace scaena
             BeginStepCaller beginStepCaller( time );
             _play->welcome( beginStepCaller );
 
+            _propTeam->update( time.elapsedTime() );
+
             EndStepCaller endStepCaller( time );
             _play->welcome( endStepCaller );
 
+            // Set displacement to zero
             _synchronousMouse->setPosition(synchronousMouse().position());
-
-            _propTeam->update( time.elapsedTime() );
         }
     }
 
@@ -83,6 +84,7 @@ namespace scaena
             throw PlayNotFound("No play to start");
 
         _propTeam->setup();
+        _propTeam->setCamera(*_camera);
         _play->start();
     }
 

@@ -6,6 +6,13 @@
 
 #include <memory>
 
+#include <DesignPattern/SpecificObserver.h>
+
+
+namespace media
+{
+class CameraMsg;
+}
 
 namespace prop2
 {
@@ -14,13 +21,17 @@ class Polygon;
 class TextHud;
 class ImageHud;
 
-    class PROP2D_EXPORT AbstractArtDirector : public AbstractTeamMember
+    class PROP2D_EXPORT AbstractArtDirector :
+            public cellar::SpecificObserver<media::CameraMsg>,
+            public AbstractTeamMember
     {
     protected:
         AbstractArtDirector() {}
 
     public:
         virtual ~AbstractArtDirector() {}
+
+        virtual void notify(media::CameraMsg &msg) = 0;
 
         virtual void draw(real dt) =0;
 

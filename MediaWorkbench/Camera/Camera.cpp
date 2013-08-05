@@ -5,36 +5,51 @@ namespace media
 {
     // CAMERA //
     Camera::Camera() :
-        _mode(EXPAND),
+        _mode(EMode::EXPAND),
         _frame(),
         _lens(),
         _tripod(),
-        _windowWidth(2),
-        _windowHeight(2),
+        _viewport(1, 1),
         _projMatrix(),
         _viewMatrix()
     {
         updateMatrices();
     }
 
-    Camera::Camera(Mode mode, const Frame& frame,
+    Camera::Camera(EMode mode, const Frame& frame,
                    const Lens &lens, const Tripod &tripod,
-                   int windowWidth,  int windowHeight) :
+                   const cellar::Vec2i& viewport) :
         _mode(mode),
         _frame(frame),
         _lens(lens),
         _tripod(tripod),
-        _windowWidth(windowWidth),
-        _windowHeight(windowHeight),
+        _viewport(viewport),
         _projMatrix(),
         _viewMatrix()
     {
         updateMatrices();
     }
 
+
+    void Camera::setMode(EMode mode)
+    {
+        if(_mode != mode)
+        {
+            _mode = mode;
+            updateViewport(_viewport.x(), _viewport.y());
+        }
+    }
+
     void Camera::setFrame(float width, float height)
     {
-        _frame.set(width, height);
+        if(_frame.width() != width && _frame.height() != height)
+        {
+            _frame.set(width, height);
+            if(_mode == EMode::FRAME)
+            {
+                updateViewport(_viewport.x(), _viewport.y());
+            }
+        }
     }
 
     void Camera::setLens(float left,         float right,
@@ -46,7 +61,7 @@ namespace media
                 _lens.nearPlane(), _lens.farPlane());
     }
 
-    void Camera::setLens(Lens::Type type,
+    void Camera::setLens(Lens::EType type,
                          float left,         float right,
                          float bottom,       float top,
                          float nearPlane,    float farPlane)
@@ -71,50 +86,52 @@ namespace media
 
     void Camera::refresh()
     {
-        updateMatrices();
+        updateViewport(_viewport.x(), _viewport.y());
+        updateViewMatrix();
     }
 
-    void Camera::notifyNewWindowSize(int width, int height)
+    void Camera::updateViewport(int width, int height)
     {
         if(width == 0 || height == 0)
             return;
 
-        if(_mode == EXPAND)
+        cellar::Vec2i oldViewport(_viewport);
+        _viewport(width, height);
+
+        if(_mode == EMode::EXPAND)
         {
-            float wRatio = static_cast<float>(width) / _windowWidth;
-            float hRatio = static_cast<float>(height) / _windowHeight;
+            float wRatio = static_cast<float>(width) / oldViewport.x();
+            float hRatio = static_cast<float>(height) / oldViewport.y();
 
             setLens(_lens.left() * wRatio,   _lens.right() * wRatio,
                     _lens.bottom() * hRatio, _lens.top() * hRatio);
-
-            setFrame(_lens.right() - _lens.left(),
-                     _lens.top() - _lens.bottom());
         }
-        else if(_mode == FRAME)
+        else if(_mode == EMode::FRAME)
         {
             float aspectRatio = static_cast<float>(width) / height;
             float dW, dH;
 
             if( aspectRatio < (_frame.width() / _frame.height()) )
             {
-                dW = _frame.width() / 2.0f;
+                dW = _frame.width();
                 dH = dW / aspectRatio;
             }
             else
             {
-                dH = _frame.height() / 2.0f;
+                dH = _frame.height();
                 dW = dH * aspectRatio;
             }
-            setLens(-dW, dW,
-                    -dH, dH);
+
+            float wRatio = static_cast<float>(dW) / (_lens.right() - _lens.left());
+            float hRatio = static_cast<float>(dH) / (_lens.top() - _lens.bottom());
+
+            setLens(_lens.left() * wRatio,   _lens.right() * wRatio,
+                    _lens.bottom() * hRatio, _lens.top() * hRatio);
         }
-        else if(_mode == STRETCH)
+        else if(_mode == EMode::STRETCH)
         {
             // Let stretch
         }
-
-        _windowWidth = width;
-        _windowHeight = height;
     }
 
     void Camera::zoom(float ratio)
@@ -139,35 +156,40 @@ namespace media
     {
         _projMatrix.loadIdentity();
 
-        if(_lens.type() == Lens::ORTHOGRAPHIC)
-            _projMatrix *= cellar::ortho(_lens.left(),       _lens.right(),
-                                 _lens.bottom(),     _lens.top(),
-                                 _lens.nearPlane(),  _lens.farPlane());
+        if(_lens.type() == Lens::EType::ORTHOGRAPHIC)
+            _projMatrix *= cellar::ortho(
+                _lens.left(),      _lens.right(),
+                _lens.bottom(),    _lens.top(),
+                _lens.nearPlane(), _lens.farPlane());
 
-        else if(_lens.type() == Lens::PERSPECTIVE)
-            _projMatrix *= cellar::frustrum(_lens.left(),      _lens.right(),
-                                    _lens.bottom(),    _lens.top(),
-                                    _lens.nearPlane(), _lens.farPlane());
+        else if(_lens.type() == Lens::EType::PERSPECTIVE)
+            _projMatrix *= cellar::frustrum(
+                _lens.left(),      _lens.right(),
+                _lens.bottom(),    _lens.top(),
+                _lens.nearPlane(), _lens.farPlane());
 
         setIsChanged( true );
-        CameraMsg msg(*this, CameraMsg::PROJECTION);
+        CameraMsg msg(*this, CameraMsg::EChange::PROJECTION);
         notifyObservers( msg );
     }
 
     void Camera::updateViewMatrix()
     {
-        _viewMatrix = lookAt(_tripod.from(), _tripod.to(), _tripod.up());
+        _viewMatrix = lookAt(
+            _tripod.from(),
+            _tripod.to(),
+            _tripod.up());
 
         setIsChanged( true );
-        CameraMsg msg(*this, CameraMsg::VIEW);
+        CameraMsg msg(*this, CameraMsg::EChange::VIEW);
         notifyObservers( msg);
     }
 
 
     // CAMERA::FRAME //
     Camera::Frame::Frame() :
-        _width(2.0f),
-        _height(2.0f)
+        _width(1.0f),
+        _height(1.0f)
     {
     }
 
@@ -179,17 +201,17 @@ namespace media
 
     // CAMERA::LENS //
     Camera::Lens::Lens() :
-        _type(ORTHOGRAPHIC),
-        _left(-1.0),
+        _type(EType::ORTHOGRAPHIC),
+        _left(0.0),
         _right(1.0),
-        _bottom(-1.0),
+        _bottom(0.0),
         _top(1.0),
         _nearPlane(-1.0),
         _farPlane(1.0)
     {
     }
 
-    Camera::Lens::Lens(Type type,
+    Camera::Lens::Lens(EType type,
          float left,       float right,
          float bottom,     float top,
          float nearPlane,  float farPlane) :
@@ -203,7 +225,7 @@ namespace media
     {
     }
 
-    void Camera::Lens::set(Type type,
+    void Camera::Lens::set(EType type,
                            float left,      float right,
                            float bottom,    float top,
                            float nearPlane, float farPlane)

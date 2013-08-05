@@ -12,6 +12,7 @@ namespace cellar
     public:
         Matrix();
         explicit Matrix(const T* values);
+        explicit Matrix(const T values[N][N]);
         explicit Matrix(const T& diagonalValue);
         template <int N2, typename T2> Matrix(const Matrix<N2, T2>& rhs);
         ~Matrix();
@@ -130,6 +131,18 @@ namespace cellar
     Matrix<N,T>::Matrix(const T* values)
     {
         loadValues(values);
+    }
+
+    template <int N, typename T>
+    Matrix<N,T>::Matrix(const T values[N][N])
+    {
+        for(int i=0; i<N; ++i)
+        {
+            for(int j=0; j<N; ++j)
+            {
+                _m[i][j] = values[i][j];
+            }
+        }
     }
 
     template <int N, typename T>

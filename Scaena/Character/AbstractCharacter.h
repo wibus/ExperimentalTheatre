@@ -18,11 +18,9 @@ namespace scaena
 
     class SCAENA_EXPORT AbstractCharacter
     {
-    public: enum Priority {FIRST, GREAT, NORMAL, LESS, LAST};
-
     protected: AbstractCharacter(AbstractStage& stage,
                                  const std::string& id,
-                                 Priority priority = NORMAL);
+                                 float priority = 0.0);
 
     public:
         virtual ~AbstractCharacter();
@@ -46,7 +44,7 @@ namespace scaena
 
         // Getters
         AbstractStage&      stage()     const;
-        Priority            priority()  const;
+        float               priority()  const;
         const std::string   id()        const;
         bool                updates()   const;
         bool                visible()   const;
@@ -63,7 +61,7 @@ namespace scaena
     private :
         AbstractStage& _stage;
         std::string _id;
-        Priority _priority;
+        float _priority;
 
         bool _updates;
         bool _visible;
@@ -76,7 +74,7 @@ namespace scaena
     inline AbstractStage& AbstractCharacter::stage() const
         {return _stage;}
 
-    inline AbstractCharacter::Priority AbstractCharacter::priority() const
+    inline float AbstractCharacter::priority() const
         {return _priority;}
 
     inline const std::string AbstractCharacter::id() const
@@ -99,7 +97,7 @@ namespace scaena
 
     // Operators
     inline bool AbstractCharacter::operator< (const AbstractCharacter& character) const
-        {return (_priority < character._priority);}
+        {return (character._priority < _priority);}
 
 
 }

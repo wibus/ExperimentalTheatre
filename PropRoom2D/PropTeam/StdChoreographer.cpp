@@ -13,7 +13,7 @@ namespace prop2
 {
     StdChoreographer::StdChoreographer() :
         _dt(real(0)),
-        _gravity(real(98.0)), // 9.8m/s2 * 10px/m
+        _gravity(0 /*real(98.0)*/), // 9.8m/s2 * 10px/m
         _circles(),
         _polygons(),
         _maxHandledDeltaTime(real(0.1)),
@@ -80,13 +80,13 @@ namespace prop2
         {
             shared_ptr<Circle>& masterCircle = _circles[master];
 
-            if(masterCircle->bodyType() == BodyType::DYNAMIC)
+            if(masterCircle->bodyType() == EBodyType::DYNAMIC)
             {
                 for(size_t slave = 0; slave < nbCircles; ++slave)
                 {
                     const std::shared_ptr<Circle>& slaveCircle = _circles[slave];
-                    if(slaveCircle->bodyType() != BodyType::GRAPHIC &&
-                       (slaveCircle->bodyType() == BodyType::KINEMATIC ||
+                    if(slaveCircle->bodyType() != EBodyType::GRAPHIC &&
+                       (slaveCircle->bodyType() == EBodyType::KINEMATIC ||
                         master < slave))
                     {
                         report = detectCircleCircle(masterCircle, slaveCircle);
@@ -98,7 +98,7 @@ namespace prop2
                 for(size_t slave = 0; slave < nbPolygons; ++slave)
                 {
                     const std::shared_ptr<Polygon>& slavePolygon = _polygons[slave];
-                    if(slavePolygon->bodyType() != BodyType::GRAPHIC)
+                    if(slavePolygon->bodyType() != EBodyType::GRAPHIC)
                     {
                         report = detectCirclePolygon(masterCircle, slavePolygon);
                         if(report->areColliding)
@@ -112,12 +112,12 @@ namespace prop2
         {
             shared_ptr<Polygon>& masterPolygon = _polygons[master];
 
-            if(masterPolygon->bodyType() == BodyType::DYNAMIC)
+            if(masterPolygon->bodyType() == EBodyType::DYNAMIC)
             {
                 for(size_t slave = 0; slave < nbCircles; ++slave)
                 {
                     const std::shared_ptr<Circle>& slaveCircle = _circles[slave];
-                    if(slaveCircle->bodyType() == BodyType::KINEMATIC)
+                    if(slaveCircle->bodyType() == EBodyType::KINEMATIC)
                     {
                         report = detectCirclePolygon(slaveCircle, masterPolygon);
                         if(report->areColliding)
@@ -128,8 +128,8 @@ namespace prop2
                 for(size_t slave = 0; slave < nbPolygons; ++slave)
                 {
                     const std::shared_ptr<Polygon>& slavePolygon = _polygons[slave];
-                    if(slavePolygon->bodyType() != BodyType::GRAPHIC &&
-                       (slavePolygon->bodyType() == BodyType::KINEMATIC ||
+                    if(slavePolygon->bodyType() != EBodyType::GRAPHIC &&
+                       (slavePolygon->bodyType() == EBodyType::KINEMATIC ||
                         master < slave))
                     {
                         report = detectPolygonPolygon(masterPolygon, slavePolygon);
@@ -153,7 +153,7 @@ namespace prop2
     void StdChoreographer::updateShape(
         const std::shared_ptr<AbstractShape>& shape)
     {
-        if(shape->bodyType() == BodyType::DYNAMIC)
+        if(shape->bodyType() == EBodyType::DYNAMIC)
         {
             // Apply the gravitationnal acceleration to dynamic shapes
             shape->addLinearAcceleration(Vec2r(real(0), -_gravity));

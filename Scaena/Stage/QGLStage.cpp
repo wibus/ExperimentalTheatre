@@ -228,8 +228,7 @@ namespace scaena
     void QGLStage::resizeGL(int w, int h)
     {
         glViewport(0,0,w,h);
-        camera().notifyNewWindowSize(w, h);
-        propTeam().updateViewportSize(w, h);
+        camera().updateViewport(w, h);
     }
 
     void QGLStage::paintGL()
@@ -275,7 +274,7 @@ namespace scaena
     KeyboardEvent QGLStage::convertKeyEvent(QKeyEvent * event)
     {
         char ascii = '\0';
-        Keyboard::NonAscii nonAscii = Keyboard::NO_NONASCII;
+        ENonAscii nonAscii = ENonAscii::NO_NONASCII;
 
         if(event->text().toStdString().size() != 0)
             ascii = event->text().toStdString().at(0);
@@ -283,24 +282,24 @@ namespace scaena
         else
             switch(event->key())
             {
-            case Qt::Key_Shift :    nonAscii = Keyboard::SHIFT;   break;
-            case Qt::Key_Control :  nonAscii = Keyboard::CTRL;    break;
-            case Qt::Key_Tab :      nonAscii = Keyboard::TAB;     break;
+            case Qt::Key_Shift :    nonAscii = ENonAscii::SHIFT;   break;
+            case Qt::Key_Control :  nonAscii = ENonAscii::CTRL;    break;
+            case Qt::Key_Tab :      nonAscii = ENonAscii::TAB;     break;
 
-            case Qt::Key_Alt :      nonAscii = Keyboard::ALT;     break;
-            case Qt::Key_AltGr :    nonAscii = Keyboard::ALT_CAR; break;
-            case Qt::Key_Super_L :  nonAscii = Keyboard::SUPER;   break;
-            case Qt::Key_Super_R :  nonAscii = Keyboard::SUPER;   break;
-            case Qt::Key_Escape :   nonAscii = Keyboard::ESCAPE;  break;
+            case Qt::Key_Alt :      nonAscii = ENonAscii::ALT;     break;
+            case Qt::Key_AltGr :    nonAscii = ENonAscii::ALT_CAR; break;
+            case Qt::Key_Super_L :  nonAscii = ENonAscii::SUPER;   break;
+            case Qt::Key_Super_R :  nonAscii = ENonAscii::SUPER;   break;
+            case Qt::Key_Escape :   nonAscii = ENonAscii::ESCAPE;  break;
 
-            case Qt::Key_Up :       nonAscii = Keyboard::UP;      break;
-            case Qt::Key_Down :     nonAscii = Keyboard::DOWN;    break;
-            case Qt::Key_Left :     nonAscii = Keyboard::LEFT;    break;
-            case Qt::Key_Right :    nonAscii = Keyboard::RIGHT;   break;
+            case Qt::Key_Up :       nonAscii = ENonAscii::UP;      break;
+            case Qt::Key_Down :     nonAscii = ENonAscii::DOWN;    break;
+            case Qt::Key_Left :     nonAscii = ENonAscii::LEFT;    break;
+            case Qt::Key_Right :    nonAscii = ENonAscii::RIGHT;   break;
 
-            case Qt::Key_Space :    nonAscii = Keyboard::SPACE;   break;
+            case Qt::Key_Space :    nonAscii = ENonAscii::SPACE;   break;
 
-            default :               nonAscii = Keyboard::NO_NONASCII;
+            default :               nonAscii = ENonAscii::NO_NONASCII;
             }
 
         return KeyboardEvent(ascii, nonAscii);
@@ -341,14 +340,14 @@ namespace scaena
         Vec2i pos(event->x(), event->y());
         Vec2i globalPos(event->globalX(), event->globalY());
 
-        Mouse::Button button = Mouse::NO_BUTTON;
+        EMouseButton button = EMouseButton::NO_BUTTON;
 
         switch(event->button())
         {
-        case Qt::LeftButton :   button = Mouse::LEFT;      break;
-        case Qt::MiddleButton : button = Mouse::MIDDLE;    break;
-        case Qt::RightButton :  button = Mouse::RIGHT;     break;
-        default :               button = Mouse::NO_BUTTON;
+        case Qt::LeftButton :   button = EMouseButton::LEFT;      break;
+        case Qt::MiddleButton : button = EMouseButton::MIDDLE;    break;
+        case Qt::RightButton :  button = EMouseButton::RIGHT;     break;
+        default :               button = EMouseButton::NO_BUTTON;
         }
 
         return MouseEvent(button, pos, globalPos);

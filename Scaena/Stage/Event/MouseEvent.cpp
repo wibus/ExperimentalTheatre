@@ -3,7 +3,7 @@
 
 namespace scaena
 {
-    MouseEvent::MouseEvent(Mouse::Button button,
+    MouseEvent::MouseEvent(EMouseButton button,
                            const cellar::Vec2i& pos,
                            const cellar::Vec2i& globalPos) :
         _button(button),

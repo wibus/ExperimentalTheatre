@@ -12,7 +12,7 @@ namespace prop2
 
     struct PROP2D_EXPORT MaterialUpdate
     {
-        enum EType
+        enum class EType
         {
             DENSITY,
             BOUNCINESS,

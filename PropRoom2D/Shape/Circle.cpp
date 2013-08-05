@@ -9,7 +9,7 @@ using namespace cellar;
 namespace prop2
 {
     Circle::Circle() :
-        AbstractShape(PropType::CIRCLE),
+        AbstractShape(EPropType::CIRCLE),
         _costume(),
         _radius(1.0)
     {

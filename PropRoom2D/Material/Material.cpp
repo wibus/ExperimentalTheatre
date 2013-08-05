@@ -47,7 +47,7 @@ namespace prop2
             _density = density;
             setIsChanged(true);
             MaterialUpdate msg(
-                MaterialUpdate::DENSITY,
+                MaterialUpdate::EType::DENSITY,
                 _density,
                 *this);
             notifyObservers(msg);
@@ -61,7 +61,7 @@ namespace prop2
             _bounciness = bounciness;
             setIsChanged(true);
             MaterialUpdate msg(
-                MaterialUpdate::BOUNCINESS,
+                MaterialUpdate::EType::BOUNCINESS,
                 _bounciness,
                 *this);
             notifyObservers(msg);
@@ -75,7 +75,7 @@ namespace prop2
             _staticFrictionCoefficient = us;
             setIsChanged(true);
             MaterialUpdate msg(
-                MaterialUpdate::STATIC_FIRCTION_COEFFICIENT,
+                MaterialUpdate::EType::STATIC_FIRCTION_COEFFICIENT,
                 _staticFrictionCoefficient,
                 *this);
             notifyObservers(msg);
@@ -89,7 +89,7 @@ namespace prop2
             _dynamicFrictionCoefficient = ud;
             setIsChanged(true);
             MaterialUpdate msg(
-                MaterialUpdate::DYNAMIC_FIRCTION_COEFFICIENT,
+                MaterialUpdate::EType::DYNAMIC_FIRCTION_COEFFICIENT,
                 _dynamicFrictionCoefficient,
                 *this);
             notifyObservers(msg);

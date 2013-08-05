@@ -9,7 +9,7 @@ namespace scaena
         _position(0, 0),
         _displacement(0, 0)
     {
-        memset(_buttonPressed, false, Mouse::NB_BUTTONS * sizeof(bool));
+        memset(_buttonPressed, false, (int)EMouseButton::NB_BUTTONS * sizeof(bool));
     }
 
     void SynchronousMouse::setPosition(const cellar::Vec2i& position)
