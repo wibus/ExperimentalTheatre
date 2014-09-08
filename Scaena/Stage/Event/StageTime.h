@@ -11,19 +11,19 @@ namespace scaena
     public :
         StageTime(float totalTime,
                   float elapsedTime,
-                  float framePerSecond,
+                  float framesPerSecond,
                   bool  isSlow = false);
 
         bool  isSlow() const;
         float totalTime() const;
         float elapsedTime() const;
-        float framePerSecond() const;
+        float framesPerSecond() const;
 
     private :
         bool  _isSlow;
         float _totalTime;
         float _elapsedTime;
-        float _framePerSecond;
+        float _framesPerSecond;
     };
 
 
@@ -44,9 +44,9 @@ namespace scaena
         return _elapsedTime;
     }
 
-    inline float StageTime::framePerSecond() const
+    inline float StageTime::framesPerSecond() const
     {
-        return _framePerSecond;
+        return _framesPerSecond;
     }
 }
 
