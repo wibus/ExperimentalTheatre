@@ -5,7 +5,7 @@
 #include <vector>
 #include <map>
 
-#include <GL3/gl3w.h>
+#include <gl3w.h>
 
 #include "libMediaWorkbench_global.h"
 #include "DataStructure/Vector.h"

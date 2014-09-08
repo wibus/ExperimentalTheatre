@@ -11,7 +11,7 @@
 #include <cassert>
 #include <algorithm>
 
-#include <GL3/gl3w.h>
+#include <gl3w.h>
 
 #include <QFile>
 
@@ -61,20 +61,27 @@ namespace prop2
 
     void GlArtDirector::notify(media::CameraMsg &msg)
     {
-        Mat4r shapeProjectionMatrix = msg.camera.projectionMatrix() *
-                                      msg.camera.viewMatrix();
+        const Camera& camera = msg.camera;
+
+        Mat4r shapeProjectionMatrix = camera.projectionMatrix() *
+                                      camera.viewMatrix();
+        Vec2r zoom = divide(Vec2r(camera.lens().right() - camera.lens().left(),
+                                  camera.lens().top() - camera.lens().bottom()),
+                            Vec2r(camera.viewport()));
 
         _circleShader.pushProgram();
         _circleShader.setMat4f("Projection", shapeProjectionMatrix);
+        _circleShader.setVec2f("Zoom", zoom);
         _circleShader.popProgram();
 
         _polygonShader.pushProgram();
         _polygonShader.setMat4f("Projection", shapeProjectionMatrix);
+        _polygonShader.setVec2f("Zoom", zoom);
         _polygonShader.popProgram();
 
         if(msg.change == CameraMsg::EChange::PROJECTION)
         {
-            _viewportSize = msg.camera.viewport();
+            _viewportSize = camera.viewport();
             Mat4r hudProjectionMatrix =
                     ortho<real>(real(0),  _viewportSize.x(),
                                 real(0),  _viewportSize.y(),

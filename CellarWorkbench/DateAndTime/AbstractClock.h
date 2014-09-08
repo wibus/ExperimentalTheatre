@@ -16,13 +16,13 @@ namespace cellar
 
         virtual void start() = 0;
         virtual float tick() = 0;
-        virtual float reset() = 0;
-        virtual float stop() = 0;
+        virtual void reset();
+        virtual float stop();
 
         bool isRunning() const;
 
         float totalSeconds() const;
-        float secondsPerTick() const;
+        float elapsedSeconds() const;
         float ticksPerSecond() const;
 
         static const float AGE_RATIO;
@@ -30,7 +30,7 @@ namespace cellar
     protected :
         bool _isRunning;
         float _totalSeconds;
-        float _secondsPerTick;
+        float _elapsedSeconds;
         float _ticksPerSecond;
     };
 
@@ -38,7 +38,7 @@ namespace cellar
     // IMPLEMENTATION //
     inline bool AbstractClock::isRunning() const {return _isRunning;}
     inline float AbstractClock::totalSeconds() const {return _totalSeconds;}
-    inline float AbstractClock::secondsPerTick() const {return _secondsPerTick;}
+    inline float AbstractClock::elapsedSeconds() const {return _elapsedSeconds;}
     inline float AbstractClock::ticksPerSecond() const {return _ticksPerSecond;}
 }
 

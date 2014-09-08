@@ -7,189 +7,236 @@
 
 namespace cellar
 {
-    template <typename T>
-    class Grid2D
+
+/// A dynamic 2D rectangular array.
+/// For 2D grids of pointers with automatic memory deallocation, see PGrid2D.
+template <typename T>
+class Grid2D
+{
+public:
+    /// Default constructor
+    Grid2D();
+
+    /// Copy constructor
+    /// \param[in] grid Grid to copy
+    Grid2D(const Grid2D<T>& grid);
+
+    /// Constructor
+    /// \param[in] width Number of columns in the grid
+    /// \param[in] height Number of rows in the grid
+    Grid2D(int width, int height);
+
+    /// Constructor
+    /// \param[in] width Number of columns in the grid
+    /// \param[in] height Number of rows in the grid
+    /// \param[in] defaulValue Default value for every element
+    Grid2D(int width, int height, const T& defaulValue);
+
+    /// Destructor
+    virtual ~Grid2D();
+
+    /// Getter for the width of the grid
+    /// \return Grid width
+    int getWidth() const;
+
+    /// Getter for the height of the grid
+    /// \return Grid height
+    int getHeight() const;
+
+    /// Assignement operator overloaded to copy the content of the grid
+    /// \param[in] grid Grid to be copied
+    /// \return A reference to this object
+    Grid2D<T>& operator =(const Grid2D<T>& grid);
+
+    /// Subscript operator overloaded to get a line of the grid
+    /// \param[in] y Line index
+    /// \return A pointer to the first element of the line
+    /// \note For access with grid initialization and bound checks,
+    ///       use get(x, y)
+    T* operator [](int y);
+
+    /// Subscript operator overloaded to get a line of the grid
+    /// \param[in] y Line index
+    /// \return A pointer to constant values to the first element of the line
+    /// \note For access with grid initialization and bound checks,
+    ///       use get(x, y)
+    const T* operator [](int y) const;
+
+    /// Element access with grid initialization and bound checks
+    /// \param[in] x Column index of the element
+    /// \param[in] y Row index of the element
+    /// \return Reference to the specified element
+    T& get(int x, int y);
+
+    /// Element access with grid initialization and bound checks
+    /// \param[in] x Column index of the element
+    /// \param[in] y Row index of the element
+    /// \return Const reference to the specified element
+    const T& get(int x, int y) const;
+
+    /// Element access with grid initialization and bound checks
+    /// \param[in] pos Row and Column of the element
+    /// \return Reference to the specified element
+    T& get(const Vec2i& pos);
+
+    /// Element access with grid initialization and bound checks (const version)
+    /// \param[in] pos Row and Column of the element
+    /// \return Const reference to the specified element
+    const T& get(const Vec2i& pos) const;
+
+    /// Modification of an element
+    /// \param[in] x Column index of the element
+    /// \param[in] y Row index of the element
+    /// \param[in] value New value of the element
+    /// \note Equivalent to "grid[y][x] = value;" and "grid.get(x, y) = value;"
+    void set(int x, int y, const T& value);
+
+    /// Modification of an element
+    /// \param[in] pos Row and Column of the element
+    /// \param[in] value New value of the element
+    /// \note Equivalent to "grid.get(pos) = value;"
+    void set(const Vec2i& pos, const T& value);
+
+
+protected:
+    T* _grid;
+    int _width;
+    int _height;
+};
+
+
+
+// IMPLEMENTATION //
+template <typename T>
+Grid2D<T>::Grid2D() :
+    _grid(nullptr),
+    _width(0),
+    _height(0)
+{
+}
+
+template <typename T>
+Grid2D<T>::Grid2D(const Grid2D<T>& grid) :
+    _grid(new T[grid.getWidth() * grid.getHeight()]),
+    _width(grid._width),
+    _height(grid._height)
+{
+    for(int j=0; j<_height; ++j)
+        for(int i=0; i<_width; ++i)
+            set(i, j, grid.get(i, j));
+}
+
+template <typename T>
+Grid2D<T>::Grid2D(int width, int height) :
+    _grid(new T[width * height]),
+    _width(width),
+    _height(height)
+{
+
+}
+
+template <typename T>
+Grid2D<T>::Grid2D(int width, int height, const T& defaulValue) :
+    _grid(new T[width * height]),
+    _width(width),
+    _height(height)
+{
+    for(int j=0; j<_height; ++j)
+        for(int i=0; i<_width; ++i)
+            set(i, j, defaulValue);
+}
+
+template <typename T>
+Grid2D<T>::~Grid2D()
+{
+    delete [] _grid;
+    _grid = nullptr;
+}
+
+template <typename T>
+inline int Grid2D<T>::getWidth() const
+{
+    return _width;
+}
+
+template <typename T>
+inline int Grid2D<T>::getHeight() const
+{
+    return _height;
+}
+
+template <typename T>
+Grid2D<T>& Grid2D<T>::operator =(const Grid2D<T>& grid)
+{
+    if(this != &grid)
     {
-    public:
-        Grid2D();
-        Grid2D(const Grid2D<T>& grid);
-        Grid2D(int width, int height);
-        Grid2D(int width, int height, const T& defaulVal);
-        virtual ~Grid2D();
-
-        int width() const;
-        int height() const;
-
-        Grid2D<T>& operator =(const Grid2D<T>& grid);
-        T*       operator [](int y);
-        const T* operator [](int y) const;
-        T&       get(int x, int y);
-        const T& get(int x, int y) const;
-        T&       get(const Vec2i& pos);
-        const T& get(const Vec2i& pos) const;
-        void     set(int x, int y, const T& value);
-        void     set(const Vec2i& pos, const T& value);
-
-
-    protected:
-        T** _grid;
-        int _width;
-        int _height;
-    };
-
-
-
-    // IMPLEMENTATION //
-    template <typename T>
-    Grid2D<T>::Grid2D() :
-        _grid(nullptr),
-        _width(0),
-        _height(0)
-    {
-    }
-
-    template <typename T>
-    Grid2D<T>::Grid2D(const Grid2D<T>& grid) :
-        _grid(nullptr),
-        _width(grid._width),
-        _height(grid._height)
-    {
-        _grid = new T*[_height];
+        if(_width != grid.getWidth() ||
+           _height != grid.getHeight())
+        {
+            this->~Grid2D();
+            _width = grid.getWidth();
+            _height = grid.getHeight();
+            _grid = new T[_width * _height];
+        }
 
         for(int j=0; j<_height; ++j)
-        {
-            _grid[j] = new T[_width];
             for(int i=0; i<_width; ++i)
-                _grid[j][i] = grid.get(i, j);
-        }
+                set(i, j, grid.get(i, j));
     }
 
-    template <typename T>
-    Grid2D<T>::Grid2D(int width, int height) :
-        _grid(nullptr),
-        _width(width),
-        _height(height)
-    {
-        _grid = new T*[_height];
+    return *this;
+}
 
-        for(int j=0; j<_height; ++j)
-            _grid[j] = new T[_width];
-    }
+template <typename T>
+inline T* Grid2D<T>::operator [](int y)
+{
+    return const_cast<T*>(const_cast< const Grid2D<T>& >(*this)[y]);
+}
 
-    template <typename T>
-    Grid2D<T>::Grid2D(int width, int height, const T& defaultVal) :
-        _grid(nullptr),
-        _width(width),
-        _height(height)
-    {
-        _grid = new T*[_height];
+template <typename T>
+inline const T* Grid2D<T>::operator [](int y) const
+{
+    return &_grid[y*_width];
+}
 
-        for(int j=0; j<_height; ++j)
-        {
-            _grid[j] = new T[_width];
-            for(int i=0; i<_width; ++i)
-                _grid[j][i] = defaultVal;
-        }
-    }
+template <typename T>
+inline T& Grid2D<T>::get(int x, int y)
+{
+    return const_cast<T&>(const_cast< const Grid2D<T>& >(*this).get(x, y));
+}
 
-    template <typename T>
-    Grid2D<T>::~Grid2D()
-    {
-        for(int j=0; j<_height; ++j)
-            delete [] _grid[j];
+template <typename T>
+const T& Grid2D<T>::get(int x, int y) const
+{
+    assert(_grid);
+    assert(0 <= x && x < _width);
+    assert(0 <= y && y < _height);
+    return (*this)[y][x];
+}
 
-        delete [] _grid;
-    }
+template <typename T>
+inline T& Grid2D<T>::get(const Vec2i &pos)
+{
+    return get(pos.x(), pos.y());
+}
 
-    template <typename T>
-    inline int Grid2D<T>::width() const
-    {
-        return _width;
-    }
+template <typename T>
+inline const T& Grid2D<T>::get(const Vec2i &pos) const
+{
+    return get(pos.x(), pos.y());
+}
 
-    template <typename T>
-    inline int Grid2D<T>::height() const
-    {
-        return _height;
-    }
+template <typename T>
+inline void Grid2D<T>::set(int x, int y, const T& value)
+{
+    (*this).get(x, y) = value;
+}
 
-    template <typename T>
-    Grid2D<T>& Grid2D<T>::operator =(const Grid2D<T>& grid)
-    {
-        if(this != &grid)
-        {
-            for(int j=0; j<_height; ++j)
-                delete [] _grid[j];
-            delete [] _grid;
-
-            _width = grid._width;
-            _height = grid._height;
-
-            _grid = new T*[_height];
-
-            for(int j=0; j<_height; ++j)
-            {
-                _grid[j] = new T[_width];
-                for(int i=0; i<_width; ++i)
-                    _grid[j][i] = grid.get(i, j);
-            }
-        }
-
-        return *this;
-    }
-
-    template <typename T>
-    inline T* Grid2D<T>::operator [](int y)
-    {
-        assert(_grid);
-        return _grid[y];
-    }
-
-    template <typename T>
-    inline const T* Grid2D<T>::operator [](int y) const
-    {
-        assert(_grid);
-        return _grid[y];
-    }
-
-    template <typename T>
-    inline T& Grid2D<T>::get(int x, int y)
-    {
-        assert(_grid);
-        return _grid[y][x];
-    }
-
-    template <typename T>
-    inline const T& Grid2D<T>::get(int x, int y) const
-    {
-        assert( _grid);
-        return _grid[y][x];
-    }
-
-    template <typename T>
-    inline T& Grid2D<T>::get(const Vec2i &pos)
-    {
-        return get(pos.x(), pos.y());
-    }
-
-    template <typename T>
-    inline const T& Grid2D<T>::get(const Vec2i &pos) const
-    {
-        return get(pos.x(), pos.y());
-    }
-
-    template <typename T>
-    inline void Grid2D<T>::set(int x, int y, const T& value)
-    {
-        assert(_grid);
-        _grid[y][x] = value;
-    }
-
-    template <typename T>
-    inline void Grid2D<T>::set(const Vec2i &pos, const T &value)
-    {
-        set(pos.x(), pos.y(), value);
-    }
+template <typename T>
+inline void Grid2D<T>::set(const Vec2i &pos, const T &value)
+{
+    set(pos.x(), pos.y(), value);
+}
 }
 
 #endif // CELLARWORKBENCH_GRID_2D_H

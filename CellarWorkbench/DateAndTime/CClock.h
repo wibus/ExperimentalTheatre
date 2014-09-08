@@ -13,8 +13,7 @@ namespace cellar
 
         virtual void start();
         virtual float tick();
-        virtual float reset();
-        virtual float stop();
+        virtual void reset();
 
     private:
         unsigned int _lastRawSample;

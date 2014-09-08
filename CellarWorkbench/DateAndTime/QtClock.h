@@ -17,12 +17,11 @@ namespace cellar
 
         virtual void start();
         virtual float tick();
-        virtual float reset();
-        virtual float stop();
+        virtual void reset();
 
     private:
         QElapsedTimer* _qtTimer;
-        unsigned int _lastRawSample;
+        unsigned long long _lastRawSample;
         unsigned int _nbSamples;
         float _samplesSum;
         float _evalInterval;

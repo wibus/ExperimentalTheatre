@@ -36,12 +36,10 @@
 
 namespace cellar
 {
-    SimplexNoise::SimplexNoise()
-    {
-    }
+    inline int fastfloor(float x) {return x > 0 ? (int) x : (int) x - 1;}
 
     // 2D raw Simplex noise
-    float SimplexNoise::noise2d( const float x, const float y ) {
+    float SimplexNoise::noise2d(float x, float y ) {
         // Noise contributions from the three corners
         float n0, n1, n2;
 
@@ -111,7 +109,7 @@ namespace cellar
 
 
     // 3D raw Simplex noise
-    float SimplexNoise::noise3d( const float x, const float y, const float z ) {
+    float SimplexNoise::noise3d(float x, float y, float z ) {
         float n0, n1, n2, n3; // Noise contributions from the four corners
 
         // Skew the input space to determine which simplex cell we're in
@@ -205,7 +203,7 @@ namespace cellar
 
 
     // 4D raw Simplex noise
-    float SimplexNoise::noise4d( const float x, const float y, const float z, const float w ) {
+    float SimplexNoise::noise4d(float x, float y, float z, float w ) {
         // The skewing and unskewing factors are hairy again for the 4D case
         float F4 = (sqrtf(5.0f)-1.0f)/4.0f;
         float G4 = (5.0f-sqrtf(5.0f))/20.0f;
@@ -337,27 +335,25 @@ namespace cellar
         return 27.0f * (n0 + n1 + n2 + n3 + n4);
     }
 
-    float SimplexNoise::noiseTile1d(const float x, const float zoom)
+    float SimplexNoise::noiseTile1d(float x, float radius)
     {
-        return x*zoom*0.0f;
+        float a1 = x * 2.0f * PI;
+        float x1 = cos(a1) * radius;
+        float y1 = sin(a1) * radius;
+        return noise2d(x1, y1);
     }
 
-    float SimplexNoise::noiseTile2d(const float x, const float y, const float zoom)
+    float SimplexNoise::noiseTile2d(float x, float y, float radius)
     {
-        float xa = x * 2.0f * PI;
-        float x1 = cos(xa) * zoom;
-        float y1 = sin(xa) * zoom;
+        float a1 = x * 2.0f * PI;
+        float x1 = cos(a1) * radius;
+        float y1 = sin(a1) * radius;
 
-        float ya = y * 2.0f * PI;
-        float x2 = cos(ya) * zoom;
-        float y2 = sin(ya) * zoom;
+        float a2 = y * 2.0f * PI;
+        float x2 = cos(a2) * radius;
+        float y2 = sin(a2) * radius;
 
         return noise4d(x1, y1, x2, y2);
-    }
-
-    int SimplexNoise::fastfloor( const float x )
-    {
-        return x > 0 ? (int) x : (int) x - 1;
     }
 
     float SimplexNoise::dot( const int* g, const float x, const float y )

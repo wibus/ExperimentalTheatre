@@ -26,6 +26,12 @@ namespace cellar
     T clamp(T value, T min, T max);
 
     template <typename T>
+    T saturate(T value);
+
+    template<typename T>
+    T smoothstep(T edge1, T edge2, T value);
+
+    template <typename T>
     T minVal(T val1, T val2);
 
     template <typename T>
@@ -33,6 +39,9 @@ namespace cellar
 
     template <typename T>
     bool inRange(T val, T min, T max);
+
+    template <typename T>
+    T modulate(T value, T inf, T sup);
 
 
     // Absolute
@@ -73,6 +82,19 @@ namespace cellar
     }
 
     template <typename T>
+    inline T saturate(T value)
+    {
+        return clamp(value, T(0), T(1));
+    }
+
+    template<typename T>
+    inline T smoothstep(T value, T edge1, T edge2)
+    {
+        T x = saturate((value-edge1) / (edge2-edge1));
+        return x*x*(3 - 2*x);
+    }
+
+    template <typename T>
     inline T minVal(T val1, T val2)
     {
         return val1 < val2 ? val1 : val2;
@@ -88,6 +110,14 @@ namespace cellar
     inline bool inRange(T val, T min, T max)
     {
         return val < min ? false : (val > max ? false : true);
+    }
+
+    template <typename T>
+    inline T modulate(T value, T inf, T sup)
+    {
+        T dist = value-inf;
+        T width = (sup-inf);
+        return value - floor(dist/width) * width;
     }
 
     template <typename T>

@@ -9,31 +9,45 @@ namespace scaena
     class SCAENA_EXPORT StageTime
     {
     public :
-        StageTime(float elapsedTime,
-                  float totalTime,
+        StageTime(float totalTime,
+                  float elapsedTime,
+                  float framePerSecond,
                   bool  isSlow = false);
 
+        bool  isSlow() const;
+        float totalTime() const;
         float elapsedTime() const;
-        float totalTime()   const;
-        bool  isSlow()      const;
+        float framePerSecond() const;
 
     private :
-        float _elapsedTime;
-        float _totalTime;
         bool  _isSlow;
+        float _totalTime;
+        float _elapsedTime;
+        float _framePerSecond;
     };
 
 
 
     // IMPLEMENTATION //
-    inline float StageTime::elapsedTime() const
-        {return _elapsedTime;}
+    inline bool StageTime::isSlow() const
+    {
+        return _isSlow;
+    }
 
     inline float StageTime::totalTime() const
-        {return _totalTime;}
+    {
+        return _totalTime;
+    }
 
-    inline bool StageTime::isSlow() const
-        {return _isSlow;}
+    inline float StageTime::elapsedTime() const
+    {
+        return _elapsedTime;
+    }
+
+    inline float StageTime::framePerSecond() const
+    {
+        return _framePerSecond;
+    }
 }
 
 #endif // SCAENA_STAGE_TIME_H

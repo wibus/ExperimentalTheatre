@@ -11,4 +11,8 @@
 #   define CELLAR_EXPORT
 #endif
 
+/// \namespace cellar
+/// \brief All the classes and functions of the Cellar Workbench module
+namespace cellar {}
+
 #endif // CELLARWORKBENCH_LIBCELLARWORKBENCH_GLOBAL_H

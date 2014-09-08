@@ -2,3 +2,6 @@
 *.user
 *.user.*
 Makefile
+
+# Doc
+html/

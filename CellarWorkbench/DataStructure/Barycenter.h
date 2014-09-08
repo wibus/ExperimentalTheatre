@@ -7,87 +7,89 @@
 
 namespace cellar
 {
-    class CELLAR_EXPORT Barycenter
-    {
-    public:
-        Barycenter(const Vec3f& center = Vec3f(0.0f, 0.0f, 0.0f),
-                   float mass=0.0f);
 
-        // Geters
-        const Vec3f center() const;
-        float mass() const;
+/// To compute the center of mass of a multibody object
+class CELLAR_EXPORT Barycenter
+{
+public:
+    /// Default constructor
+    Barycenter();
 
-        // Seters
-        void setCenter(const Vec3f& center);
-        void setMass(float mass);
+    /// Constructor
+    /// \param[in] center Position of the center of mass
+    /// \param[in] mass Total mass at that point
+    Barycenter(const Vec3d& center, double mass);
 
-        // Operators
-              Barycenter& operator()(const Vec3f& center, float mass);
-        const Barycenter  operator+ (const Barycenter& barycenter) const;
-              Barycenter& operator+=(const Barycenter& barycenter);
-        const Barycenter  operator- (const Barycenter& barycenter) const;
-              Barycenter& operator-=(const Barycenter& barycenter);
+    /// Getter for the position of the center of mass
+    /// \return Position of the center of mass
+    const Vec3d& getCenter() const;
 
-    private :
-        Vec3f _center;
-        float _mass;
-    };
+    /// Getter for the total mass
+    /// \return Total mass
+    double getMass() const;
+
+    /// Setter for the position of the position of the center of mass
+    /// \param[in] center Position of the center of mass
+    void setCenter(const Vec3d& getCenter);
+
+    /// Setter for the total mass
+    /// \param[in] mass Total of mass
+    void setMass(double getMass);
+
+    /// Parenthesis operator overloaded to set both 'center' and 'mass'.
+    /// \param[in] center Position of the center of mass
+    /// \param[in] mass Total of mass
+    /// \return A reference to this object
+    Barycenter& operator()(const Vec3d& center, double mass);
+
+    /// Addition operator overloaded to compute the union of two barycenter
+    /// \param[in] barycenter Barycenter to add to the actual barycenter
+    /// \return The addition of the two barycenters
+    Barycenter  operator+ (const Barycenter& barycenter) const;
+
+    /// Addition assignement operator overloaded to add a barycenter to this
+    /// \param[in] barycenter Barycenter to add to the actual barycenter
+    /// \return This augmented barycenter
+    Barycenter& operator+=(const Barycenter& barycenter);
+
+    /// Subtraction operator overloaded to subtract a part of this barycenter
+    /// \param[in] barycenter Barycenter to subtract to this
+    /// \return The subtraction of the two barycenter
+    Barycenter  operator- (const Barycenter& barycenter) const;
+
+    /// Subtraction operator overloaded to subtract a part of this barycenter
+    /// \param[in] barycenter Barycenter to subtract to this
+    /// \return This reduced barycenter
+    Barycenter& operator-=(const Barycenter& barycenter);
+
+private :
+    Vec3d _center;
+    double _mass;
+};
 
 
 
-    // IMPLEMENTATION //
-    inline Barycenter::Barycenter(const Vec3f& center, float mass=0.0f)
-        : _center(center),
-          _mass(mass) {}
-    //Geters
-    inline Vec3f Barycenter::center() const {return _center;}
-    inline float Barycenter::mass() const {return _mass;}
-    //Seters
-    inline void Barycenter::setCenter(const Vec3f& center) {_center = center;}
-    inline void Barycenter::setMass(float mass) {_mass = mass;}
-    //Operators
-    inline Barycenter& Barycenter::operator()(const Vec3f& center, float mass)
-    {
-        _center = center;
-        _mass = mass;
-        return *this;
-    }
-    inline const Barycenter Barycenter::operator+ (const Barycenter& barycenter) const
-    {
-        Vec3f newCenter =
-                (_center*_mass + barycenter._center*barycenter._mass) /
-                (_mass+barycenter._mass);
-        float newMass = _mass+barycenter._mass;
+// IMPLEMENTATION //
+inline const Vec3d& Barycenter::getCenter() const
+{
+    return _center;
+}
 
-        return Barycenter(newCenter, newMass);
-    }
-    inline Barycenter& Barycenter::operator+=(const Barycenter& barycenter)
-    {
-        Vec3f newCenter =
-                (_center*_mass + barycenter._center*barycenter._mass) /
-                (_mass+barycenter._mass);
-        float newMass = _mass+barycenter._mass;
+inline double Barycenter::getMass() const
+{
+    return _mass;
+}
 
-        return (*this)(newCenter, newMass);
-    }
-    inline const Barycenter Barycenter::operator-(const Barycenter& barycenter) const
-    {
-        Vec3f newCenter =
-                (_center*_mass - barycenter._center*barycenter._mass) /
-                (_mass-barycenter._mass);
-        float newMass = _mass-barycenter._mass;
+inline void Barycenter::setCenter(const Vec3d& center)
+{
+    _center = center;
+}
 
-        return Barycenter(newCenter, newMass);
-    }
-    inline Barycenter& Barycenter::operator-=(const Barycenter& barycenter)
-    {
-        Vec3f newCenter =
-                (_center*_mass - barycenter._center*barycenter._mass) /
-                (_mass-barycenter._mass);
-        float newMass = _mass-barycenter._mass;
+inline void Barycenter::setMass(double mass)
+{
+    _mass = mass;
+}
 
-        return (*this)(newCenter, newMass);
-    }
 }
 
 #endif // CELLARWORKBENCH_BARYCENTER_H

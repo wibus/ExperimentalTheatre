@@ -31,58 +31,53 @@ namespace cellar
 
     void QtClock::start()
     {
-        _isRunning = true;
-        _totalSeconds = 0.0f;
-        _qtTimer->start();
+        if(!_isRunning)
+        {
+            _isRunning = true;
+            _totalSeconds = 0.0f;
+            _lastRawSample = _qtTimer->elapsed();
+            _qtTimer->start();
+        }
     }
 
     float QtClock::tick()
     {
-        float elapsed = (_qtTimer->elapsed() - _lastRawSample) / (float) CLOCKS_PER_SECOND;
-
-        _totalSeconds += elapsed;
-
-        ++_nbSamples;
-        _samplesSum += elapsed;
-
-        if(_samplesSum >= _evalInterval)
+        if(!_isRunning)
         {
-            if(_secondsPerTick == 0.0f)
-                _secondsPerTick = _samplesSum / _nbSamples;
-
-            _secondsPerTick = AGE_RATIO * _samplesSum / _nbSamples +
-                              (1 - AGE_RATIO) * _secondsPerTick;
-            _ticksPerSecond = 1.0f / _secondsPerTick;
-
-            _nbSamples = 0;
-            _samplesSum = 0.0f;
+            return 0.0f;
         }
 
-        _lastRawSample = _qtTimer->elapsed();
-        return elapsed;
+        unsigned long long sample = _qtTimer->elapsed();
+        _elapsedSeconds = (sample - _lastRawSample) /
+                        static_cast<float>(CLOCKS_PER_SECOND);
+
+        _lastRawSample = sample;
+        _totalSeconds += _elapsedSeconds;
+        _samplesSum += _elapsedSeconds;
+        ++_nbSamples;
+
+        if(!_ticksPerSecond)
+        {
+            _ticksPerSecond = _nbSamples / _samplesSum;
+            _samplesSum = 0.0f;
+            _nbSamples = 0;
+        }
+        else if(_evalInterval <= _samplesSum)
+        {
+            _ticksPerSecond = (1 - AGE_RATIO) * _ticksPerSecond +
+                              AGE_RATIO * _nbSamples / _samplesSum;
+            _samplesSum = 0.0f;
+            _nbSamples = 0;
+        }
+
+        return _elapsedSeconds;
     }
 
-    float QtClock::reset()
+    void QtClock::reset()
     {
-        float elapsed = (_qtTimer->elapsed() - _lastRawSample) / (float) CLOCKS_PER_SECOND;
-        _secondsPerTick = 0.0f;
-        _ticksPerSecond = 0.0f;
-        _nbSamples = 0;
+        AbstractClock::reset();
+        _lastRawSample = 0;
         _samplesSum = 0.0f;
-
-        _lastRawSample = _qtTimer->elapsed();
-        return (_totalSeconds += elapsed);
-    }
-
-    float QtClock::stop()
-    {
-        _isRunning = false;
-        _totalSeconds += (_qtTimer->elapsed() - _lastRawSample) / (float) CLOCKS_PER_SECOND;
-        _secondsPerTick = 0.0f;
-        _ticksPerSecond = 0.0f;
         _nbSamples = 0;
-        _samplesSum = 0.0f;
-
-        return _totalSeconds;
     }
 }

@@ -13,7 +13,7 @@ namespace media
         _projMatrix(),
         _viewMatrix()
     {
-        updateMatrices();
+        refresh();
     }
 
     Camera::Camera(EMode mode, const Frame& frame,
@@ -27,7 +27,7 @@ namespace media
         _projMatrix(),
         _viewMatrix()
     {
-        updateMatrices();
+        refresh();
     }
 
 
@@ -36,24 +36,57 @@ namespace media
         if(_mode != mode)
         {
             _mode = mode;
-            updateViewport(_viewport.x(), _viewport.y());
+            refreshProjection();
         }
     }
 
-    void Camera::setFrame(float width, float height)
+    void Camera::setFrame(const cellar::Vec2f& size)
     {
-        if(_frame.width() != width && _frame.height() != height)
+        setFrame(size, _frame.center());
+    }
+
+    void Camera::setFrame(const cellar::Vec2f& size,
+                          const cellar::Vec2f& center)
+    {
+        if(size   != _frame.size() ||
+           center != _frame.center())
         {
-            _frame.set(width, height);
+            _frame.set(size, center);
             if(_mode == EMode::FRAME)
             {
-                updateViewport(_viewport.x(), _viewport.y());
+                refreshProjection();
             }
         }
     }
 
-    void Camera::setLens(float left,         float right,
-                         float bottom,       float top)
+    void Camera::setLens(Lens::EType type)
+    {
+        if(type != _lens.type())
+        {
+            setLens(type,
+                    _lens.left(),      _lens.right(),
+                    _lens.bottom(),    _lens.top(),
+                    _lens.nearPlane(), _lens.farPlane());
+        }
+    }
+
+    void Camera::setLens(float nearPlane,
+                         float farPlane)
+    {
+        if(nearPlane != _lens.nearPlane() ||
+           farPlane  != _lens.farPlane())
+        {
+            setLens(_lens.type(),
+                    _lens.left(),   _lens.right(),
+                    _lens.bottom(), _lens.top(),
+                    nearPlane,      farPlane);
+        }
+    }
+
+    void Camera::setLens(float left,
+                         float right,
+                         float bottom,
+                         float top)
     {
         setLens(_lens.type(),
                 left,              right,
@@ -62,12 +95,18 @@ namespace media
     }
 
     void Camera::setLens(Lens::EType type,
-                         float left,         float right,
-                         float bottom,       float top,
-                         float nearPlane,    float farPlane)
+                         float left,
+                         float right,
+                         float bottom,
+                         float top,
+                         float nearPlane,
+                         float farPlane)
     {
-        _lens.set(type, left, right, bottom, top, nearPlane, farPlane);
-        updateProjectionMatrix();
+        _lens.set(type,
+                  left,      right,
+                  bottom,    top,
+                  nearPlane, farPlane);
+        refreshProjection();
     }
 
     void Camera::setTripod(const cellar::Vec3f& from,
@@ -86,8 +125,13 @@ namespace media
 
     void Camera::refresh()
     {
-        updateViewport(_viewport.x(), _viewport.y());
+        refreshProjection();
         updateViewMatrix();
+    }
+
+    void Camera::refreshProjection()
+    {
+        updateViewport(_viewport.x(), _viewport.y());
     }
 
     void Camera::updateViewport(int width, int height)
@@ -103,47 +147,40 @@ namespace media
             float wRatio = static_cast<float>(width) / oldViewport.x();
             float hRatio = static_cast<float>(height) / oldViewport.y();
 
-            setLens(_lens.left() * wRatio,   _lens.right() * wRatio,
-                    _lens.bottom() * hRatio, _lens.top() * hRatio);
+            _lens.set(_lens.type(),
+                      _lens.left()   * wRatio, _lens.right() * wRatio,
+                      _lens.bottom() * hRatio, _lens.top()   * hRatio,
+                      _lens.nearPlane(),       _lens.farPlane());
         }
         else if(_mode == EMode::FRAME)
         {
-            float aspectRatio = static_cast<float>(width) / height;
             float dW, dH;
-
-            if( aspectRatio < (_frame.width() / _frame.height()) )
+            cellar::Vec2f frameCenter = _frame.center();
+            float viewportAspectRatio = static_cast<float>(width) / height;
+            if(viewportAspectRatio < _frame.aspectRatio())
             {
-                dW = _frame.width();
-                dH = dW / aspectRatio;
+                dW = _frame.size().x();
+                dH = dW / viewportAspectRatio;
+                frameCenter.setY(frameCenter.y() / viewportAspectRatio);
             }
             else
             {
-                dH = _frame.height();
-                dW = dH * aspectRatio;
+                dH = _frame.size().y();
+                dW = dH * viewportAspectRatio;
+                frameCenter.setX(frameCenter.x() * viewportAspectRatio);
             }
 
-            float wRatio = static_cast<float>(dW) / (_lens.right() - _lens.left());
-            float hRatio = static_cast<float>(dH) / (_lens.top() - _lens.bottom());
-
-            setLens(_lens.left() * wRatio,   _lens.right() * wRatio,
-                    _lens.bottom() * hRatio, _lens.top() * hRatio);
+            _lens.set(_lens.type(),
+                      -frameCenter.x(), dW - frameCenter.x(),
+                      -frameCenter.y(), dH - frameCenter.y(),
+                      _lens.nearPlane(),    _lens.farPlane());
         }
         else if(_mode == EMode::STRETCH)
         {
             // Let stretch
         }
-    }
 
-    void Camera::zoom(float ratio)
-    {
-        if(ratio == 0.0f)
-            return;
-
-        float resize = 1.0f / ratio;
-        setFrame(_frame.width() * resize, _frame.height() * resize);
-
-        setLens(_lens.left() * resize,   _lens.right() * resize,
-                _lens.bottom() * resize, _lens.top() * resize);
+        updateProjectionMatrix();
     }
 
     void Camera::updateMatrices()
@@ -154,16 +191,14 @@ namespace media
 
     void Camera::updateProjectionMatrix()
     {
-        _projMatrix.loadIdentity();
-
         if(_lens.type() == Lens::EType::ORTHOGRAPHIC)
-            _projMatrix *= cellar::ortho(
+            _projMatrix = cellar::ortho(
                 _lens.left(),      _lens.right(),
                 _lens.bottom(),    _lens.top(),
                 _lens.nearPlane(), _lens.farPlane());
 
         else if(_lens.type() == Lens::EType::PERSPECTIVE)
-            _projMatrix *= cellar::frustrum(
+            _projMatrix = cellar::frustrum(
                 _lens.left(),      _lens.right(),
                 _lens.bottom(),    _lens.top(),
                 _lens.nearPlane(), _lens.farPlane());
@@ -187,15 +222,10 @@ namespace media
 
 
     // CAMERA::FRAME //
-    Camera::Frame::Frame() :
-        _width(1.0f),
-        _height(1.0f)
-    {
-    }
-
-    Camera::Frame::Frame(float width, float height) :
-        _width(width),
-        _height(height)
+    Camera::Frame::Frame(const cellar::Vec2f& size,
+                         const cellar::Vec2f& center) :
+        _size(size),
+        _center(center)
     {
     }
 

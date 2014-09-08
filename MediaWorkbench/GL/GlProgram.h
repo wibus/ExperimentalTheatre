@@ -7,7 +7,7 @@
 #include <stack>
 #include <memory>
 
-#include <GL3/gl3w.h>
+#include <gl3w.h>
 
 #include "DataStructure/Vector.h"
 #include "DataStructure/Matrix.h"

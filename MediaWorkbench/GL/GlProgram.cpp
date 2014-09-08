@@ -2,7 +2,7 @@
 #include "GlShader.h"
 #include "GlShaderBank.h"
 #include "GlToolkit.h"
-#include <GL3/gl3w.h>
+#include <gl3w.h>
 #include "Image/ImageBank.h"
 #include <DataStructure/Vector.h>
 #include <DataStructure/Matrix.h>

@@ -47,8 +47,9 @@ namespace scaena
         if(_play != 0x0)
         {
             _updateClock->tick();
-            StageTime time(_updateClock->secondsPerTick(),
-                           _updateClock->totalSeconds());
+            StageTime time(_updateClock->totalSeconds(),
+                           _updateClock->elapsedSeconds(),
+                           _updateClock->ticksPerSecond());
 
             BeginStepCaller beginStepCaller( time );
             _play->welcome( beginStepCaller );
@@ -68,8 +69,9 @@ namespace scaena
         if(_play != 0x0)
         {
             _drawClock->tick();
-            StageTime time(_drawClock->secondsPerTick(),
-                           _drawClock->totalSeconds());
+            StageTime time(_drawClock->totalSeconds(),
+                           _drawClock->elapsedSeconds(),
+                           _drawClock->ticksPerSecond());
 
             DrawCaller drawCaller( time );
             _play->welcome( drawCaller );

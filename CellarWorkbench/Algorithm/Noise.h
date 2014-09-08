@@ -37,30 +37,91 @@
 
 namespace cellar
 {
-    class CELLAR_EXPORT SimplexNoise
-    {
-    public:
-        SimplexNoise();
 
-        static float noise2d(const float x, const float y);
-        static float noise3d(const float x, const float y, const float z);
-        static float noise4d(const float x, const float y, const float z, const float w);
+/// Class offering static simplex noise functions for 2, 3 and 4 dimensions.
+/// 'Tile' versions can be used to produce juxtaposable tiles
+/// (i.e. junctions will not be noticeable)
+class CELLAR_EXPORT SimplexNoise
+{
+public:
+    /// 2 dimensions simplex noise function
+    /// \param[in]  x First dimension parameter
+    /// \param[in]  y Second dimension parameter
+    /// \return Floating point number in the range [-1, 1]
+    static float noise2d(float x, float y);
 
-        static float noiseTile1d(const float x, const float zoom=1.0f);
-        static float noiseTile2d(const float x, const float y, const float zoom=1.0f);
+    /// 3 dimensions simplex noise function
+    /// \param[in]  x First dimension parameter
+    /// \param[in]  y Second dimension parameter
+    /// \param[in]  z Third dimension parameter
+    /// \return Floating point number in the range [-1, 1]
+    static float noise3d(float x, float y, float z);
 
-    private:
-        static int fastfloor(const float x);
+    /// 4 dimensions simplex noise function
+    /// \param[in]  x First dimension parameter
+    /// \param[in]  y Second dimension parameter
+    /// \param[in]  z Third dimension parameter
+    /// \param[in]  w Fourth dimension parameter
+    /// \return Floating point number in the range [-1, 1]
+    static float noise4d(float x, float y, float z, float w);
 
-        static float dot(const int* g, const float x, const float y);
-        static float dot(const int* g, const float x, const float y, const float z);
-        static float dot(const int* g, const float x, const float y, const float z, const float w);
+    /// 1D Simplex noise function where F(x=0) = F(x=1) and F'(x=0) = F'(x=1),
+    /// where F(x) is the simplex noise function and F'(x) its first derivative.
+    /// \param[in]  x First dimension parameter
+    /// \param[in]  radius Radius of the loop
+    /// \return Floating point number in the range [-1, 1]
+    static float noiseTile1d(float x, float radius=1.0f);
 
-        static const int grad3[12][3];
-        static const int grad4[32][4];
-        static const int perm[512];
-        static const int simplex[64][4];
-    };
+    /// 2D Simplex noise function where
+    /// F(x=0, y=b) = F(x=1, y=b),
+    /// F(x=a, y=0) = F(x=a, y=1),
+    /// F'(x=0, y=b) = F'(x=1, y=b),
+    /// F'(x=a, y=0) = F'(x=a, y=1),
+    /// where F(x, y) is the simplex noise function and
+    /// F'(x, y) its first derivative.
+    /// \param[in]  x First dimension parameter
+    /// \param[in]  y Second dimension parameter
+    /// \param[in]  radius Radius of the loops
+    /// \return Floating point number in the range [-1, 1]
+    static float noiseTile2d(float x, float y, float radius=1.0f);
+
+private:
+    /// Deleted default constructor
+    SimplexNoise() = delete;
+    /// Deleted copy constructor
+    SimplexNoise(const SimplexNoise& other) = delete;
+    /// Deleted assignement operator
+    SimplexNoise& operator=(const SimplexNoise& other) = delete;
+
+    /// Dot product between a 2D vectors
+    /// \param[in] g 2D vector
+    /// \param[in] x First coponent of a 2D vector
+    /// \param[in] y Second component of a 2D vector
+    /// \return Dot product of Vector(g[0, 1]) and Vector(x, y)
+    static float dot(const int* g, const float x, const float y);
+
+    /// Dot product between a 3D vectors
+    /// \param[in] g 3D vector
+    /// \param[in] x First coponent of a 3D vector
+    /// \param[in] y Second component of a 3D vector
+    /// \param[in] z Third component of a 3D vector
+    /// \return Dot product of Vector(g[0, 1, 2]) and Vector(x, y, z)
+    static float dot(const int* g, const float x, const float y, const float z);
+
+    /// Dot product between a 3D vectors
+    /// \param[in] g 3D vector
+    /// \param[in] x First coponent of a 3D vector
+    /// \param[in] y Second component of a 3D vector
+    /// \param[in] z Third component of a 3D vector
+    /// \param[in] w Fourth component of a 3D vector
+    /// \return Dot product of Vector(g[0, 1, 2, 3]) and Vector(x, y, z, w)
+    static float dot(const int* g, const float x, const float y, const float z, const float w);
+
+    static const int grad3[12][3];
+    static const int grad4[32][4];
+    static const int perm[512];
+    static const int simplex[64][4];
+};
 }
 
 #endif // CELLARWORKBENCH_NOISE_H

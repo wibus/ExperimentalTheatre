@@ -1,6 +1,6 @@
 #include "GlShader.h"
 
-#include <GL3/gl3w.h>
+#include <gl3w.h>
 #include "Misc/CellarUtils.h"
 #include "Misc/Log.h"
 
@@ -40,8 +40,6 @@ namespace media
     {
         _fileName = fileName;
         return loadFromString( fileToString(fileName) );
-
-        int pom = printHello();
     }
 
     bool GlShader::loadFromString(const std::string& source)

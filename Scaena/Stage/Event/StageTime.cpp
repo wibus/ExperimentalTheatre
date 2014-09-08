@@ -3,11 +3,13 @@
 
 namespace scaena
 {
-    StageTime::StageTime(float elapsedTime,
-                         float totalTime,
+    StageTime::StageTime(float totalTime,
+                         float elapsedTime,
+                         float framePerSecond,
                          bool isSlow) :
-        _elapsedTime(elapsedTime),
+        _isSlow(isSlow),
         _totalTime(totalTime),
-        _isSlow(isSlow)
+        _elapsedTime(elapsedTime),
+        _framePerSecond(framePerSecond)
     {}
 }

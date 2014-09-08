@@ -20,17 +20,19 @@ namespace media
             friend class Camera;
 
         public:
-            Frame();
-            Frame(float width, float height);
+            explicit Frame(const cellar::Vec2f& size = cellar::Vec2f(1, 1),
+                           const cellar::Vec2f& center = cellar::Vec2f(0, 0));
 
-            float width() const;
-            float height() const;
+            const cellar::Vec2f& size() const;
+            const cellar::Vec2f& center() const;
+            float aspectRatio() const;
 
         private:
-            void set(float width, float height);
+            void set(const cellar::Vec2f& size,
+                     const cellar::Vec2f& center);
 
-            float _width;
-            float _height;
+            cellar::Vec2f _size;
+            cellar::Vec2f _center;
         };
 
         class MEDIA_EXPORT Lens
@@ -107,13 +109,17 @@ namespace media
         EMode    mode() const;
         void    setMode(EMode mode);
 
-        const Frame&  frame();
-        const Lens&   lens();
-        const Tripod& tripod();
+        const Frame&  frame() const;
+        const Lens&   lens() const;
+        const Tripod& tripod() const;
 
 
         // Modifiers
-        void setFrame(float width, float height);
+        void setFrame(const cellar::Vec2f& size);
+        void setFrame(const cellar::Vec2f& size,
+                      const cellar::Vec2f& center);
+        void setLens(Lens::EType type);
+        void setLens(float nearPlane,    float farPlane);
         void setLens(float left,         float right,
                      float bottom,       float top);
         void setLens(Lens::EType type,
@@ -124,7 +130,9 @@ namespace media
                        const cellar::Vec3f& to,
                        const cellar::Vec3f& up);
         void moveBy(const cellar::Vec3f& dist);
+
         void refresh();
+        void refreshProjection();
 
 
         // Notify new window size
@@ -133,10 +141,8 @@ namespace media
         int  viewportWidth() const;
         int  viewportHeight() const;
 
-        void zoom(float ratio);
-
-        cellar::Mat4f& projectionMatrix();
-        cellar::Mat4f& viewMatrix();
+        const cellar::Mat4f& projectionMatrix() const;
+        const cellar::Mat4f& viewMatrix() const;
 
     private:
         void updateMatrices();
@@ -170,19 +176,25 @@ namespace media
     // IMPLEMENTATION //
     // CAMERA //
     inline Camera::EMode Camera::mode() const {return _mode;}
-    inline const Camera::Frame&  Camera::frame() {return _frame;}
-    inline const Camera::Lens& Camera::lens() {return _lens;}
-    inline const Camera::Tripod &Camera::tripod() {return _tripod;}
+    inline const Camera::Frame&  Camera::frame() const {return _frame;}
+    inline const Camera::Lens& Camera::lens() const {return _lens;}
+    inline const Camera::Tripod &Camera::tripod() const {return _tripod;}
     inline const cellar::Vec2i& Camera::viewport() const {return _viewport;}
     inline int Camera::viewportWidth() const {return _viewport.x();}
     inline int Camera::viewportHeight() const {return _viewport.y();}
-    inline cellar::Mat4f& Camera::projectionMatrix() {return _projMatrix;}
-    inline cellar::Mat4f& Camera::viewMatrix() {return _viewMatrix;}
+    inline const cellar::Mat4f& Camera::projectionMatrix() const {return _projMatrix;}
+    inline const cellar::Mat4f& Camera::viewMatrix() const {return _viewMatrix;}
 
     // FRAME //
-    inline float Camera::Frame::width() const {return _width;}
-    inline float Camera::Frame::height() const {return _height;}
-    inline void  Camera::Frame::set(float width, float height) {_width = width; _height = height;}
+    inline const cellar::Vec2f& Camera::Frame::size() const {return _size;}
+    inline const cellar::Vec2f& Camera::Frame::center() const {return _center;}
+    inline float Camera::Frame::aspectRatio() const {return _size.x() / _size.y();}
+    inline void  Camera::Frame::set(const cellar::Vec2f& size,
+                                    const cellar::Vec2f& center)
+    {
+        _size = size;
+        _center = center;
+    }
 
     // CAMERA::LENS //
     inline Camera::Lens::EType Camera::Lens::type() const {return _type;}

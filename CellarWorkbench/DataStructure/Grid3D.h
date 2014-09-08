@@ -6,178 +6,260 @@
 
 namespace cellar
 {
-    template <typename T>
-    class Grid3D
+
+/// A dynamic 3D "rectangular" array.
+/// See this structure as a stack of Grid2Ds.
+/// For 3D grids of pointers with automatic memory deallocation, see PGrid3D.
+template <typename T>
+class Grid3D
+{
+public:
+    /// Default constructor
+    Grid3D();
+
+    /// Copy constructor
+    /// \param[in] grid Grid to copy
+    Grid3D(const Grid3D<T>& grid);
+
+    /// Constructor
+    /// \param[in] width Number of columns in the grid
+    /// \param[in] height Number of rows in the grid
+    /// \param[in] depth Number of levels in the grid
+    Grid3D(int width, int height, int depth);
+
+    /// Constructor
+    /// \param[in] width Number of columns in the grid
+    /// \param[in] height Number of rows in the grid
+    /// \param[in] depth Number of levels in the grid
+    /// \param[in] defaulValue Default value for every element
+    Grid3D(int width, int height, int depth, const T& defaulVal);
+
+    /// Destructor
+    virtual ~Grid3D();
+
+    /// Getter for the width of the grid
+    /// \return Grid width
+    int getWidth() const;
+
+    /// Getter for the height of the grid
+    /// \return Grid height
+    int getHeight() const;
+
+    /// Getter for the depth of the grid (number of Grid2Ds in the stack)
+    /// \return Grid depth
+    int getDepth() const;
+
+    /// Assignement operator overloaded to copy the content of the grid
+    /// \param[in] grid Grid to be copied
+    /// \return A reference to this object
+    Grid3D<T>& operator =(const Grid3D<T>& grid);
+
+    /// Subscript operator overloaded to get a level of the grid
+    /// \param[in] z Level index
+    /// \return A reference to the specified grid level
+    /// \note For access with grid initialization and bound checks,
+    ///       use get(x, y, z)
+    Grid2D<T>& operator [](int z);
+
+    /// Subscript operator overloaded to get a level of the grid
+    /// \param[in] z Level index
+    /// \return A const reference to the specified grid level
+    /// \note For access with grid initialization and bound checks,
+    ///       use get(x, y, z)
+    const Grid2D<T>& operator [](int z) const;
+
+    /// Element access with grid initialization and bound checks
+    /// \param[in] x Column index of the element
+    /// \param[in] y Row index of the element
+    /// \param[in] z Level index of the element
+    /// \return Reference to the specified element
+    T& get(int x, int y, int z);
+
+    /// Element access with grid initialization and bound checks
+    /// \param[in] x Column index of the element
+    /// \param[in] y Row index of the element
+    /// \param[in] z Level index of the element
+    /// \return Const reference to the specified element
+    const T& get(int x, int y, int z) const;
+
+    /// Element access with grid initialization and bound checks
+    /// \param[in] pos Row, Column and Level of the element
+    /// \return Reference to the specified element
+    T& get(const Vec3i& pos);
+
+    /// Element access with grid initialization and bound checks
+    /// \param[in] pos Row, Column and Level of the element
+    /// \return Const reference to the specified element
+    const T& get(const Vec3i& pos) const;
+
+    /// Modification of an element
+    /// \param[in] x Column index of the element
+    /// \param[in] y Row index of the element
+    /// \param[in] z Level index of the element
+    /// \param[in] value New value of the element
+    /// \note Equivalent to "grid[z][y][x] = value;"
+    ///       and "grid.get(x, y, z) = value;"
+    void set(int x, int y, int z, const T& value);
+
+    /// Modification of an element
+    /// \param[in] pos Row, Column and Level of the element
+    /// \param[in] value New value of the element
+    /// \note Equivalent to "grid.get(pos) = value;"
+    void set(const Vec3i& pos, const T& value);
+
+
+protected:
+    Grid2D<T>* _grids;
+    int _width;
+    int _height;
+    int _depth;
+};
+
+
+
+// IMPLEMENTATION //
+template<typename T>
+Grid3D<T>::Grid3D() :
+    _grids(nullptr),
+    _width(0),
+    _height(0),
+    _depth(0)
+{
+}
+
+template<typename T>
+Grid3D<T>::Grid3D(const Grid3D<T>& grid) :
+    _grids(new Grid2D<T>[grid.getDepth()]),
+    _width(grid.getWidth()),
+    _height(grid.getHeight()),
+    _depth(grid.getDepth())
+{
+    for(int z=0; z<_depth; ++z)
+        _grids[z] = grid[z];
+}
+
+template<typename T>
+Grid3D<T>::Grid3D(int width, int height, int depth) :
+    _grids(new Grid2D<T>[depth]),
+    _width(width),
+    _height(height),
+    _depth(depth)
+{
+    for(int z=0; z<_depth; ++z)
+        _grids[z] = Grid2D<T>(width, height);
+}
+
+template<typename T>
+Grid3D<T>::Grid3D(int width, int depth, int height, const T& defaulVal) :
+    _grids(new Grid2D<T>[depth]),
+    _width(width),
+    _height(height),
+    _depth(depth)
+{
+    for(int z=0; z<_depth; ++z)
+        _grids[z] = Grid2D<T>(width, height, defaulVal);
+}
+
+template<typename T>
+Grid3D<T>::~Grid3D()
+{
+    delete [] _grids;
+}
+
+
+template<typename T>
+inline int Grid3D<T>::getWidth() const
+{
+    return _width;
+}
+
+template<typename T>
+inline int Grid3D<T>::getHeight() const
+{
+    return _height;
+}
+
+template<typename T>
+inline int Grid3D<T>::getDepth() const
+{
+    return _depth;
+}
+
+template<typename T>
+Grid3D<T>& Grid3D<T>::operator =(const Grid3D<T>& grid)
+{
+    if(this != &grid)
     {
-    public:
-        Grid3D();
-        Grid3D(const Grid3D<T>& grid);
-        Grid3D(int width, int depth, int height);
-        Grid3D(int width, int depth, int height, const T& defaulVal);
-        virtual ~Grid3D();
+        if(_width != grid.getWidth()   ||
+           _height != grid.getHeight() ||
+           _depth != grid.getDepth())
+        {
+            this->~Grid3D();
+            _width = grid.getWidth();
+            _height = grid.getHeight();
+            _depth = grid.getDepth();
+            _grids = new T[_depth];
+        }
 
-        int width() const;
-        int depth() const;
-        int height() const;
-
-        Grid3D<T>& operator =(const Grid3D<T>& grid);
-        Grid2D<T>&       operator [](int z);
-        const Grid2D<T>& operator [](int z) const;
-        T&       get(int x, int y, int z);
-        const T& get(int x, int y, int z) const;
-        T&       get(const Vec3i& pos);
-        const T& get(const Vec3i& pos) const;
-        void     set(int x, int y, int z, const T& value);
-        void     set(const Vec3i& pos, const T& value);
-
-
-    protected:
-        Grid2D<T>* _grids;
-        int _width;
-        int _depth;
-        int _height;
-    };
-
-
-
-    // IMPLEMENTATION //
-    template<typename T>
-    Grid3D<T>::Grid3D() :
-        _grids(0x0),
-        _width(0),
-        _depth(0),
-        _height(0)
-    {
-    }
-
-    template<typename T>
-    Grid3D<T>::Grid3D(const Grid3D<T>& grid) :
-        _grids(0x0),
-        _width(grid.width()),
-        _depth(grid.depth()),
-        _height(grid.height())
-    {
-        _grids = new Grid2D<T>[_height];
-        for(int z=0; z<_height; ++z)
+        for(int z=0; z<_depth; ++z)
             _grids[z] = grid._grids[z];
     }
 
-    template<typename T>
-    Grid3D<T>::Grid3D(int width, int depth, int height) :
-        _grids(0x0),
-        _width(width),
-        _depth(depth),
-        _height(height)
-    {
-        _grids = new Grid2D<T>[_height];
-        for(int z=0; z<_height; ++z)
-            _grids[z] = Grid2D<T>(width, depth);
-    }
+    return *this;
+}
 
-    template<typename T>
-    Grid3D<T>::Grid3D(int width, int depth, int height, const T& defaulVal) :
-        _grids(0x0),
-        _width(width),
-        _depth(depth),
-        _height(height)
-    {
-        _grids = new Grid2D<T>[_height];
-        for(int z=0; z<_height; ++z)
-            _grids[z] = Grid2D<T>(width, depth, defaulVal);
-    }
+template<typename T>
+inline Grid2D<T>& Grid3D<T>::operator [](int z)
+{
+    return const_cast<Grid2D<T>&>(const_cast< const Grid3D<T>& >(*this)[z]);
+}
 
-    template<typename T>
-    Grid3D<T>::~Grid3D()
-    {
-        delete [] _grids;
-    }
+template<typename T>
+inline const Grid2D<T>& Grid3D<T>::operator [](int z) const
+{
+    return _grids[z];
+}
 
+template<typename T>
+inline T& Grid3D<T>::get(int x, int y, int z)
+{
+    return const_cast<T&>(const_cast< const Grid3D<T>& >(*this).get(x, y, z));
+}
 
-    template<typename T>
-    inline int Grid3D<T>::width() const
-    {
-        return _width;
-    }
+template<typename T>
+const T& Grid3D<T>::get(int x, int y, int z) const
+{
+    assert(_grids);
+    assert(0 <= x && x < _width);
+    assert(0 <= y && y < _height);
+    assert(0 <= z && z < _depth);
+    return _grids[z][y][x];
+}
 
-    template<typename T>
-    inline int Grid3D<T>::depth() const
-    {
-        return _depth;
-    }
+template<typename T>
+inline T& Grid3D<T>::get(const Vec3i& pos)
+{
+    return const_cast<T&>(const_cast< const Grid3D<T>& >(*this).get(pos));
+}
 
-    template<typename T>
-    inline int Grid3D<T>::height() const
-    {
-        return _height;
-    }
+template<typename T>
+inline const T& Grid3D<T>::get(const Vec3i& pos) const
+{
+    return get(pos.x(), pos.y(), pos.z());
+}
 
+template<typename T>
+inline void Grid3D<T>::set(int x, int y, int z, const T& value)
+{
+    get(x, y, z) = value;
+}
 
-    template<typename T>
-    Grid3D<T>& Grid3D<T>::operator =(const Grid3D<T>& grid)
-    {
-        if(this != &grid)
-        {
-            delete [] _grids;
+template<typename T>
+inline void Grid3D<T>::set(const Vec3i& pos, const T& value)
+{
+    set(pos.x(), pos.y(), pos.z(), value);
+}
 
-            _width = grid._width;
-            _depth = grid._depth;
-            _height = grid._height;
-
-            _grids = new Grid2D<T>[_height];
-            for(int z=0; z<_height; ++z)
-                _grids[z] = grid._grids[z];
-        }
-
-        return *this;
-    }
-
-    template<typename T>
-    Grid2D<T>& Grid3D<T>::operator [](int z)
-    {
-        return _grids[z];
-    }
-
-    template<typename T>
-    const Grid2D<T>& Grid3D<T>::operator [](int z) const
-    {
-        return _grids[z];
-    }
-
-    template<typename T>
-    T& Grid3D<T>::get(int x, int y, int z)
-    {
-        return _grids[z][y][x];
-    }
-
-    template<typename T>
-    const T& Grid3D<T>::get(int x, int y, int z) const
-    {
-        return _grids[z][y][x];
-    }
-
-    template<typename T>
-    T& Grid3D<T>::get(const Vec3i& pos)
-    {
-        return _grids[pos.z()][pos.x()][pos.y()];
-    }
-
-    template<typename T>
-    const T& Grid3D<T>::get(const Vec3i& pos) const
-    {
-        return _grids[pos.z()][pos.x()][pos.y()];
-    }
-
-    template<typename T>
-    void Grid3D<T>::set(int x, int y, int z, const T& value)
-    {
-        _grids[z][y][x] = value;
-    }
-
-    template<typename T>
-    void Grid3D<T>::set(const Vec3i& pos, const T& value)
-    {
-        _grids[pos.z()][pos.x()][pos.y()] = value;
-    }
 }
 
 #endif // CELLARWORKBENCH_GRID3D_H
