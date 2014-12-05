@@ -11,7 +11,7 @@
 #include <cassert>
 #include <algorithm>
 
-#include <gl3w.h>
+#include <GL3/gl3w.h>
 
 #include <QFile>
 

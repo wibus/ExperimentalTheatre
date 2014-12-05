@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include <gl3w.h>
+#include <GL3/gl3w.h>
 
 #include "libMediaWorkbench_global.h"
 

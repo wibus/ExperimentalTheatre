@@ -14,7 +14,7 @@ SET(SCAENA_INCLUDE_DIR
     ${MEDIA_SRC_DIR}
     ${PROP2_SRC_DIR}
     ${SCAENA_SRC_DIR}
-    ${GL3_SRC_DIR})
+    ${EXTH_OTS_DIR})
 SET(SCAENA_QT_MODULES
     Widgets
     OpenGL)

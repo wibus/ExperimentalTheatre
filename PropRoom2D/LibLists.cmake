@@ -12,7 +12,7 @@ SET(PROP2_INCLUDE_DIR
     ${CELLAR_SRC_DIR}
     ${MEDIA_SRC_DIR}
     ${PROP2_SRC_DIR}
-    ${GL3_SRC_DIR})
+    ${EXTH_OTS_DIR})
 SET(PROP2_QT_MODULES
     Core
     Gui)

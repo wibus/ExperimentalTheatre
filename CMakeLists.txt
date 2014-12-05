@@ -22,8 +22,12 @@ SET(LIB_TYPE SHARED)
 MESSAGE(STATUS "Experimental Theatre library type: ${LIB_TYPE}")
 
 
-# Build of the GL3W library
-ADD_SUBDIRECTORY(_GL3)
+# OTSes
+SET(EXTH_OTS_DIR ${EXPERIMETAL_THEATRE_SRC_DIR}/_ots)
+ADD_SUBDIRECTORY(${EXTH_OTS_DIR}/GL3)
+ADD_SUBDIRECTORY(${EXTH_OTS_DIR}/glm)
+ADD_SUBDIRECTORY(${EXTH_OTS_DIR}/fftw)
+ADD_SUBDIRECTORY(${EXTH_OTS_DIR}/freetype-gl)
 
 # Experimental Theatre's libraries
 ADD_SUBDIRECTORY(CellarWorkbench)

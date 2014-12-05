@@ -1,14 +1,16 @@
 #include "GlProgram.h"
-#include "GlShader.h"
-#include "GlShaderBank.h"
-#include "GlToolkit.h"
-#include <gl3w.h>
-#include "Image/ImageBank.h"
+
+#include <GL3/gl3w.h>
+
 #include <DataStructure/Vector.h>
 #include <DataStructure/Matrix.h>
 #include <Misc/Log.h>
 #include <Misc/CellarUtils.h>
 
+#include "GlShader.h"
+#include "GlShaderBank.h"
+#include "GlToolkit.h"
+#include "Image/ImageBank.h"
 
 
 #include <cassert>

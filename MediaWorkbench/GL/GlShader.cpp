@@ -1,6 +1,7 @@
 #include "GlShader.h"
 
-#include <gl3w.h>
+#include <GL3/gl3w.h>
+
 #include "Misc/CellarUtils.h"
 #include "Misc/Log.h"
 
