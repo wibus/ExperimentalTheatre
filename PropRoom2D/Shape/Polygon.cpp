@@ -86,7 +86,7 @@ namespace prop2
         // Update cached attributes
         _angle = real(0);
         _centroid = proposedCentroid;
-        updateTranformMatrix();
+        updateTransformMatrix();
         updateInertia();
     }
 
@@ -200,7 +200,7 @@ namespace prop2
         return vertices;
     }
 
-    void Polygon::updateTranformMatrix()
+    void Polygon::updateTransformMatrix()
     {
         _tranformMatrix.loadIdentity();
         _tranformMatrix *= cellar::translate(_centroid);

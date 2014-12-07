@@ -44,7 +44,7 @@ namespace prop2
         _radius = radius;
 
         // Update cached attributes
-        updateTranformMatrix();
+        updateTransformMatrix();
         updateInertia();
     }
 
@@ -75,7 +75,7 @@ namespace prop2
         return static_cast<real>(PI) * _radius * _radius;
     }
 
-    void Circle::updateTranformMatrix()
+    void Circle::updateTransformMatrix()
     {
         _tranformMatrix.loadIdentity();
         _tranformMatrix *= cellar::translate(_centroid);

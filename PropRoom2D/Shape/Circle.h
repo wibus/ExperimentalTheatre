@@ -42,7 +42,7 @@ class CircleCostume;
 
     protected:
         // Cached attributes update
-        virtual void updateTranformMatrix();
+        virtual void updateTransformMatrix();
         virtual void updateInertia();
 
 

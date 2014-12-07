@@ -48,7 +48,7 @@ class PolygonCostume;
 
     protected:
         // Computations
-        virtual void updateTranformMatrix();
+        virtual void updateTransformMatrix();
         virtual void updateInertia();
 
         // Helper methods

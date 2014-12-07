@@ -111,7 +111,7 @@ class Material;
 
     protected:
         // Cached attributes update
-        virtual void updateTranformMatrix() =0;
+        virtual void updateTransformMatrix() =0;
         virtual void updateInertia() =0;
 
 

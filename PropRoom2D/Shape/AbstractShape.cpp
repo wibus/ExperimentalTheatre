@@ -119,7 +119,7 @@ namespace prop2
         if(displacement)
         {
             _centroid += displacement;
-            updateTranformMatrix();
+            updateTransformMatrix();
         }
     }
 
@@ -128,7 +128,7 @@ namespace prop2
         if(_centroid != position)
         {
             _centroid = position;
-            updateTranformMatrix();
+            updateTransformMatrix();
         }
     }
 
@@ -188,7 +188,7 @@ namespace prop2
         if(angle)
         {
             _angle += angle;
-            updateTranformMatrix();
+            updateTransformMatrix();
         }
     }
 
@@ -197,7 +197,7 @@ namespace prop2
         if(_angle != angle)
         {
             _angle = angle;
-            updateTranformMatrix();
+            updateTransformMatrix();
         }
     }
 

@@ -24,15 +24,15 @@ MESSAGE(STATUS "Experimental Theatre library type: ${LIB_TYPE}")
 
 # OTSes
 SET(EXTH_OTS_DIR ${EXPERIMETAL_THEATRE_SRC_DIR}/_ots)
+ADD_SUBDIRECTORY(${EXTH_OTS_DIR}/freetype-gl)
 ADD_SUBDIRECTORY(${EXTH_OTS_DIR}/GL3)
 ADD_SUBDIRECTORY(${EXTH_OTS_DIR}/glm)
-ADD_SUBDIRECTORY(${EXTH_OTS_DIR}/fftw)
-ADD_SUBDIRECTORY(${EXTH_OTS_DIR}/freetype-gl)
 
 # Experimental Theatre's libraries
 ADD_SUBDIRECTORY(CellarWorkbench)
 ADD_SUBDIRECTORY(MediaWorkbench)
 ADD_SUBDIRECTORY(PropRoom2D)
+ADD_SUBDIRECTORY(PropRoom3D)
 ADD_SUBDIRECTORY(Scaena)
 
 # Unit tests (empty)
