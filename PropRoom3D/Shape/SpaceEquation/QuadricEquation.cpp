@@ -16,16 +16,15 @@ namespace prop3
     {
     }
 
-    PlaneEquation::~PlaneEquation()
+    EPointPosition PlaneEquation::isIn(const glm::dvec3& point) const
     {
+        double dist = glm::dot(_normal, point) + _d;
+        return dist < 0 ? EPointPosition::IN :
+                    dist > 0.0 ? EPointPosition::OUT :
+                        EPointPosition::ON;
     }
 
-    bool PlaneEquation::isIn(const glm::dvec3& point) const
-    {
-        return glm::dot(_normal, point) + _d < 0;
-    }
-
-    double PlaneEquation::computeSignedDistance(const glm::dvec3& point) const
+    double PlaneEquation::signedDistance(const glm::dvec3& point) const
     {
         return glm::dot(_normal, point) + _d;
     }
@@ -52,18 +51,16 @@ namespace prop3
 
     }
 
-    SphereEquation::~SphereEquation()
-    {
-
-    }
-
-    bool SphereEquation::isIn(const glm::dvec3& point) const
+    EPointPosition SphereEquation::isIn(const glm::dvec3& point) const
     {
         glm::dvec3 dist = point - _center;
-        return glm::dot(dist, dist) < _radius2;
+        double dist2 = glm::dot(dist, dist);
+        return dist2 < _radius2 ? EPointPosition::IN :
+                    dist2 > _radius2 ? EPointPosition::OUT :
+                        EPointPosition::ON;
     }
 
-    double SphereEquation::computeSignedDistance(const glm::dvec3& point) const
+    double SphereEquation::signedDistance(const glm::dvec3& point) const
     {
         glm::dvec3 dist = point - _center;
         return glm::length(dist) -  _radius;
@@ -80,12 +77,14 @@ namespace prop3
         double discr = b*b - 4*a*c;
         if(discr > 0.0)
         {
-            double t1 = (-b - glm::sqrt(discr)) / (2 * a);
+            double disrcSqrt = glm::sqrt(discr);
+
+            double t1 = (-b - disrcSqrt) / (2 * a);
             glm::dvec3 pt = ray.origin + ray.direction*t1;
             glm::dvec3 n = glm::normalize(pt - _center);
             reports.push_back(RaycastReport(pt, n, t1));
 
-            double t2 = (-b - glm::sqrt(discr)) / (2 * a);
+            double t2 = (-b + disrcSqrt) / (2 * a);
             pt = ray.origin + ray.direction*t2;
             n = glm::normalize(pt - _center);
             reports.push_back(RaycastReport(pt, n, t2));

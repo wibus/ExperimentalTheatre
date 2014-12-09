@@ -4,20 +4,35 @@
 
 namespace prop3
 {
+    SpaceEquation::SpaceEquation()
+    {
+
+    }
+
+    SpaceEquation::~SpaceEquation()
+    {
+
+    }
+
     EqNot::EqNot(const std::shared_ptr<SpaceEquation>& eq) :
         _eq(eq)
     {
 
     }
 
-    bool EqNot::isIn(const glm::dvec3& point) const
+    EPointPosition EqNot::isIn(const glm::dvec3& point) const
     {
-        return !_eq->isIn(point);
+        EPointPosition pos = _eq->isIn(point);
+        return pos != EPointPosition::IN ?
+                pos == EPointPosition::OUT ?
+                    EPointPosition::IN :
+                    EPointPosition::ON :
+                    EPointPosition::OUT;
     }
 
-    double EqNot::computeSignedDistance(const glm::dvec3& point) const
+    double EqNot::signedDistance(const glm::dvec3& point) const
     {
-        return -_eq->computeSignedDistance(point);
+        return -_eq->signedDistance(point);
     }
 
     void EqNot::raycast(const Ray& ray,
@@ -41,21 +56,27 @@ namespace prop3
     {
     }
 
-    bool EqOr::isIn(const glm::dvec3& point) const
+    EPointPosition EqOr::isIn(const glm::dvec3& point) const
     {
+        EPointPosition pos = EPointPosition::OUT;
         for(const auto& eq : _eqs)
-            if(eq->isIn(point))
-                return true;
-        return false;
+        {
+            EPointPosition eqPtPos = eq->isIn(point);
+            if(eqPtPos == EPointPosition::IN)
+                return EPointPosition::IN;
+            else if(eqPtPos == EPointPosition::ON)
+                pos = EPointPosition::ON;
+        }
+        return pos;
     }
 
-    double EqOr::computeSignedDistance(const glm::dvec3& point) const
+    double EqOr::signedDistance(const glm::dvec3& point) const
     {
         static_assert(std::numeric_limits<double>::is_iec559, "IEEE 754 required");
         double minDist = std::numeric_limits<double>::infinity();
         for(const auto& eq : _eqs)
         {
-            minDist = glm::min(minDist, eq->computeSignedDistance(point));
+            minDist = glm::min(minDist, eq->signedDistance(point));
         }
 
         return minDist;
@@ -77,7 +98,8 @@ namespace prop3
                 {
                     if(eq.get() != eqTest.get())
                     {
-                        if(eqTest->isIn(report.position))
+                        if(eqTest->isIn(report.position) ==
+                           EPointPosition::IN)
                         {
                             isIn = true;
                             break;
@@ -106,21 +128,27 @@ namespace prop3
         _eqs = eqs;
     }
 
-    bool EqAnd::isIn(const glm::dvec3& point) const
+    EPointPosition EqAnd::isIn(const glm::dvec3& point) const
     {
+        EPointPosition pos = EPointPosition::IN;
         for(const auto& eq : _eqs)
-            if(!eq->isIn(point))
-                return false;
-        return true;
+        {
+            EPointPosition eqPtPos = eq->isIn(point);
+            if(eqPtPos == EPointPosition::OUT)
+                return EPointPosition::OUT;
+            else if(eqPtPos == EPointPosition::ON)
+                pos = EPointPosition::ON;
+        }
+        return pos;
     }
 
-    double EqAnd::computeSignedDistance(const glm::dvec3& point) const
+    double EqAnd::signedDistance(const glm::dvec3& point) const
     {
         static_assert(std::numeric_limits<double>::is_iec559, "IEEE 754 required");
         double maxDist = -std::numeric_limits<double>::infinity();
         for(const auto& eq : _eqs)
         {
-            maxDist = glm::max(maxDist, eq->computeSignedDistance(point));
+            maxDist = glm::max(maxDist, eq->signedDistance(point));
         }
 
         return maxDist;
@@ -142,7 +170,8 @@ namespace prop3
                 {
                     if(eq.get() != eqTest.get())
                     {
-                        if(!eqTest->isIn(report.position))
+                        if(eqTest->isIn(report.position) ==
+                           EPointPosition::OUT)
                         {
                             isIn = false;
                             break;

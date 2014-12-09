@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include <glm/glm.hpp>
+#include <GLM/glm.hpp>
 
 #include "libPropRoom3D_global.h"
 

@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include <glm/glm.hpp>
+#include <GLM/glm.hpp>
 
 #include "libPropRoom3D_global.h"
 
@@ -14,6 +14,13 @@ namespace prop3
 class Ray;
 class RaycastReport;
 
+    enum class EPointPosition
+    {
+        OUT,
+        ON,
+        IN
+    };
+
     class PROP3D_EXPORT SpaceEquation
     {
     protected:
@@ -22,11 +29,11 @@ class RaycastReport;
     public:
         virtual ~SpaceEquation();
 
-        bool isIn(double x, double y, double z) const;
-        virtual bool isIn(const glm::dvec3& point) const = 0;
+        EPointPosition isIn(double x, double y, double z) const;
+        virtual EPointPosition isIn(const glm::dvec3& point) const = 0;
 
-        double computeSignedDistance(double x, double y, double z) const;
-        virtual double computeSignedDistance(const glm::dvec3& point) const = 0;
+        double signedDistance(double x, double y, double z) const;
+        virtual double signedDistance(const glm::dvec3& point) const = 0;
 
         virtual void raycast(const Ray& ray, std::vector<RaycastReport>& reports) const =0;
     };
@@ -38,8 +45,8 @@ class RaycastReport;
     public:
         EqNot(const std::shared_ptr<SpaceEquation>& eq);
 
-        virtual bool isIn(const glm::dvec3& point) const;
-        virtual double computeSignedDistance(const glm::dvec3& point) const;
+        virtual EPointPosition isIn(const glm::dvec3& point) const;
+        virtual double signedDistance(const glm::dvec3& point) const;
         virtual void raycast(const Ray& ray, std::vector<RaycastReport>& reports) const;
 
     private:
@@ -55,8 +62,8 @@ class RaycastReport;
              const std::shared_ptr<SpaceEquation>& eq2);
         EqOr(const std::vector<std::shared_ptr<SpaceEquation>>& eqs);
 
-        virtual bool isIn(const glm::dvec3& point) const;
-        virtual double computeSignedDistance(const glm::dvec3& point) const;
+        virtual EPointPosition isIn(const glm::dvec3& point) const;
+        virtual double signedDistance(const glm::dvec3& point) const;
         virtual void raycast(const Ray& ray, std::vector<RaycastReport>& reports) const;
 
     private:
@@ -72,8 +79,8 @@ class RaycastReport;
              const std::shared_ptr<SpaceEquation>& eq2);
         EqAnd(const std::vector<std::shared_ptr<SpaceEquation>>& eqs);
 
-        virtual bool isIn(const glm::dvec3& point) const;
-        virtual double computeSignedDistance(const glm::dvec3& point) const;
+        virtual EPointPosition isIn(const glm::dvec3& point) const;
+        virtual double signedDistance(const glm::dvec3& point) const;
         virtual void raycast(const Ray& ray, std::vector<RaycastReport>& reports) const;
 
     private:
@@ -105,14 +112,14 @@ class RaycastReport;
 
 
     // IMPLEMENTATION //
-    inline bool SpaceEquation::isIn(double x, double y, double z) const
+    inline EPointPosition SpaceEquation::isIn(double x, double y, double z) const
     {
         return isIn(glm::dvec3(x, y, z));
     }
 
-    inline double SpaceEquation::computeSignedDistance(double x, double y, double z) const
+    inline double SpaceEquation::signedDistance(double x, double y, double z) const
     {
-        return computeSignedDistance(glm::dvec3(x, y, z));
+        return signedDistance(glm::dvec3(x, y, z));
     }
 }
 

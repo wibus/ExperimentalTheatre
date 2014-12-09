@@ -23,13 +23,14 @@ SET(ExTh_INCLUDE_DIRS
     ${EXPERIMENTAL_THEATRE_INSTALL_PREFIX}/include/CellarWorkbench
     ${EXPERIMENTAL_THEATRE_INSTALL_PREFIX}/include/MediaWorkbench
     ${EXPERIMENTAL_THEATRE_INSTALL_PREFIX}/include/PropRoom2D
-    ${EXPERIMENTAL_THEATRE_INSTALL_PREFIX}/include/Scaena
-    ${EXPERIMENTAL_THEATRE_INSTALL_PREFIX}/include/_ots)
+    ${EXPERIMENTAL_THEATRE_INSTALL_PREFIX}/include/PropRoom3D
+    ${EXPERIMENTAL_THEATRE_INSTALL_PREFIX}/include/Scaena)
 
     
 SET(ExTh_LIBRARIES
     CellarWorkbench
     MediaWorkbench
     PropRoom2D
+    PropRoom3D
     Scaena
     GL3)

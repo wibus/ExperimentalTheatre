@@ -4,8 +4,8 @@
 #include <memory>
 #include <vector>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
+#include <GLM/glm.hpp>
+#include <GLM/gtc/quaternion.hpp>
 
 #include <DesignPattern/SpecificObserver.h>
 
@@ -21,6 +21,12 @@ class Hardware;
 
     struct PROP3D_EXPORT Ray
     {
+        Ray(const glm::dvec3& origin,
+            const glm::dvec3& direction) :
+            origin(origin),
+            direction(direction)
+        {}
+
         glm::dvec3 origin;
         glm::dvec3 direction;
     };
@@ -129,7 +135,7 @@ class Hardware;
         // Tests
         virtual bool contains(const glm::dvec3& point) const =0;
         virtual glm::dvec3 nearestSurface(const glm::dvec3& point) const =0;
-        virtual void raycast(const Ray& ray, std::vector<RaycastReport>& reports) const;
+        virtual void raycast(const Ray& ray, std::vector<RaycastReport>& reports) const =0;
 
 
         // Constant attributes

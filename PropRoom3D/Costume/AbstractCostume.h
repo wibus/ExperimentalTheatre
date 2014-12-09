@@ -5,7 +5,7 @@
 
 #include <memory>
 
-#include <glm/glm.hpp>
+#include <GLM/glm.hpp>
 
 
 namespace prop3

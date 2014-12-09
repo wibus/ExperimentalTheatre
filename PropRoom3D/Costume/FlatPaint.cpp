@@ -1,6 +1,6 @@
 #include "FlatPaint.h"
 
-#include <glm/gtc/random.hpp>
+#include <GLM/gtc/random.hpp>
 
 namespace prop3
 {

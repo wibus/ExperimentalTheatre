@@ -15,7 +15,7 @@ namespace prop3
 
     bool Brep::contains(const glm::dvec3& point) const
     {
-        return _eq->isIn(point);
+        return _eq->isIn(point) == EPointPosition::IN;
     }
 
     glm::dvec3 Brep::nearestSurface(const glm::dvec3& point) const
