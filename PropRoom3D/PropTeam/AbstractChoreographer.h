@@ -25,13 +25,9 @@ namespace prop3
 
         virtual void manageBrep(const std::shared_ptr<Brep>& brep) =0;
         virtual void manageMesh(const std::shared_ptr<Mesh>& mesh) =0;
-        virtual void managePlane(const std::shared_ptr<Plane>& plane) =0;
-        virtual void manageSphere(const std::shared_ptr<Sphere>& sphere) =0;
 
         virtual void unmanageBrep(const std::shared_ptr<Brep>& brep) =0;
         virtual void unmanageMesh(const std::shared_ptr<Mesh>& mesh) =0;
-        virtual void unmanagePlane(const std::shared_ptr<Plane>& plane) =0;
-        virtual void unmanageSphere(const std::shared_ptr<Sphere>& sphere) =0;
     };
 }
 

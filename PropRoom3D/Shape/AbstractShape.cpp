@@ -1,17 +1,25 @@
 #include "AbstractShape.h"
-#include "Material/Material.h"
+#include "Hardware/Hardware.h"
+#include "Costume/FlatPaint.h"
 
 #include <cassert>
 
 
 namespace prop3
 {
+    // First assigned ID will be '0'
+    PropId AbstractShape::_nextId_ = 0;
 
+    // Inertia
     const double AbstractShape::INFINITE_INERTIA = 0.0;
     const glm::dmat3 AbstractShape::INFINITE_MOMENT_OF_INERTIA(0.0);
 
+
     AbstractShape::AbstractShape(EPropType propType) :
-        AbstractProp(propType),
+        _id(_assigneId_()),
+        _propType(propType),
+        _isVisible(true),
+        _costume(new FlatPaint(glm::vec3(1))),
         _material(),
         _bodyType(EBodyType::GRAPHIC),
         _transformMatrix(1.0),
@@ -36,12 +44,22 @@ namespace prop3
         }
     }
 
-    const std::shared_ptr<Material>& AbstractShape::material() const
+    const std::shared_ptr<AbstractCostume>& AbstractShape::costume() const
+    {
+        return _costume;
+    }
+
+    const void AbstractShape::setCostume(const std::shared_ptr<AbstractCostume>& costume)
+    {
+        _costume = costume;
+    }
+
+    const std::shared_ptr<Hardware>& AbstractShape::hardware() const
     {
         return _material;
     }
 
-    void AbstractShape::setMaterial(const std::shared_ptr<Material>& material)
+    void AbstractShape::setHardware(const std::shared_ptr<Hardware>& material)
     {
         if(_material)
         {
@@ -56,9 +74,9 @@ namespace prop3
         }
     }
 
-    void AbstractShape::notify(MaterialUpdate& msg)
+    void AbstractShape::notify(HardwareUpdate& msg)
     {
-        if(msg.type == MaterialUpdate::EType::DENSITY)
+        if(msg.type == HardwareUpdate::EType::DENSITY)
         {
             updateInertia();
         }

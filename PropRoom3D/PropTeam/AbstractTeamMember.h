@@ -7,8 +7,6 @@ namespace prop3
 {
 class Brep;
 class Mesh;
-class Plane;
-class Sphere;
 
     class PROP3D_EXPORT AbstractTeamMember
     {

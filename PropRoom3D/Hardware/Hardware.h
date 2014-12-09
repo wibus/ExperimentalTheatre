@@ -1,5 +1,5 @@
-#ifndef PROPROOM3D_MATERIAL_H
-#define PROPROOM3D_MATERIAL_H
+#ifndef PROPROOM3D_HARDWARE_H
+#define PROPROOM3D_HARDWARE_H
 
 #include "libPropRoom3D_global.h"
 #include <DesignPattern/SpecificSubject.h>
@@ -8,9 +8,9 @@
 namespace prop3
 {
     // Forward declarations
-    class Material;
+    class Hardware;
 
-    struct PROP3D_EXPORT MaterialUpdate
+    struct PROP3D_EXPORT HardwareUpdate
     {
         enum class EType
         {
@@ -21,19 +21,19 @@ namespace prop3
             NB_TYPES
         };
 
-        MaterialUpdate(EType type, double value, Material& material) :
+        HardwareUpdate(EType type, double value, Hardware& material) :
             type(type), value(value), material(material) {}
 
         EType type;
         double value;
-        Material& material;
+        Hardware& material;
     };
 
-    class PROP3D_EXPORT Material : public cellar::SpecificSubject<MaterialUpdate>
+    class PROP3D_EXPORT Hardware : public cellar::SpecificSubject<HardwareUpdate>
     {
     public:
-        Material();
-        virtual ~Material();
+        Hardware();
+        virtual ~Hardware();
 
         virtual double density() const;
         virtual double bounciness() const;
@@ -56,4 +56,4 @@ namespace prop3
     };
 }
 
-#endif // PROPROOM3D_MATERIAL_H
+#endif // PROPROOM3D_HARDWARE_H

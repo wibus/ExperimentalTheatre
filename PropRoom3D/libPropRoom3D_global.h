@@ -21,8 +21,6 @@ namespace prop3
     // Prop types
     enum class EPropType
     {
-        PLANE,
-        SPHERE,
         MESH,
         BREP,
         NB_TYPES

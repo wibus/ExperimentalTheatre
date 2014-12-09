@@ -2,6 +2,7 @@
 #define PROPROOM3D_ABSTRACTSHAPE_H
 
 #include <memory>
+#include <vector>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -9,20 +10,38 @@
 #include <DesignPattern/SpecificObserver.h>
 
 #include "libPropRoom3D_global.h"
-#include "AbstractProp.h"
 
 
 namespace prop3
 {
 class AbstractPropTeam;
 class AbstractCostume;
-class MaterialUpdate;
-class Material;
+class HardwareUpdate;
+class Hardware;
 
+    struct PROP3D_EXPORT Ray
+    {
+        glm::dvec3 origin;
+        glm::dvec3 direction;
+    };
+
+    struct PROP3D_EXPORT RaycastReport
+    {
+        RaycastReport(const glm::dvec3& position,
+                      const glm::dvec3& normal,
+                      double t) :
+            position(position),
+            normal(normal),
+            t(t)
+        {}
+
+        glm::dvec3 position;
+        glm::dvec3 normal;
+        double t;
+    };
 
     class PROP3D_EXPORT AbstractShape :
-            public AbstractProp,
-            public cellar::SpecificObserver<MaterialUpdate>
+            public cellar::SpecificObserver<HardwareUpdate>
     {
     protected:
         AbstractShape(EPropType propType);
@@ -30,13 +49,22 @@ class Material;
     public:
         virtual ~AbstractShape();
 
+        // Identification
+        PropId id() const;
+        EPropType propType() const;
+
+        // Visibility
+        bool isVisible() const;
+        void setIsVisible(bool isVisible);
+
         // Costume
-        virtual const AbstractCostume& abstractCostume() const =0;
+        virtual const std::shared_ptr<AbstractCostume>& costume() const;
+        virtual const void setCostume(const std::shared_ptr<AbstractCostume>& costume);
 
         // Material
-        virtual const std::shared_ptr<Material>& material() const;
-        virtual void setMaterial(const std::shared_ptr<Material>& material);
-        virtual void notify(MaterialUpdate& msg);
+        virtual const std::shared_ptr<Hardware>& hardware() const;
+        virtual void setHardware(const std::shared_ptr<Hardware>& hardware);
+        virtual void notify(HardwareUpdate& msg);
 
         // Body type
         virtual EBodyType bodyType() const;
@@ -101,9 +129,7 @@ class Material;
         // Tests
         virtual bool contains(const glm::dvec3& point) const =0;
         virtual glm::dvec3 nearestSurface(const glm::dvec3& point) const =0;
-
-        // Area
-        virtual double computeArea() const = 0;
+        virtual void raycast(const Ray& ray, std::vector<RaycastReport>& reports) const;
 
 
         // Constant attributes
@@ -117,7 +143,8 @@ class Material;
 
 
         // Attributes
-        std::shared_ptr<Material> _material;
+        std::shared_ptr<AbstractCostume> _costume;
+        std::shared_ptr<Hardware> _material;
         EBodyType _bodyType;
 
         double _invMass;
@@ -134,10 +161,45 @@ class Material;
         glm::dquat _angularAcceleration;
         glm::dvec3 _angularFirctionCoefficients;
 
-        glm::dmat3 _rotationMatrix;
-        glm::dmat3 _invRotationMatrix;
-        glm::dmat3 _transformMatrix;
+        glm::dmat4 _transformMatrix;
+        glm::dmat4 _transformMatrixInv;
+
+    private:
+        static PropId _assigneId_();
+        static PropId _nextId_;
+
+        PropId    _id;
+        EPropType _propType;
+        bool      _isVisible;
     };
+
+
+
+    // IMPLEMENTATION //
+    inline PropId AbstractShape::id() const
+    {
+        return _id;
+    }
+
+    inline EPropType AbstractShape::propType() const
+    {
+        return _propType;
+    }
+
+    inline bool AbstractShape::isVisible() const
+    {
+        return _isVisible;
+    }
+
+    inline void AbstractShape::setIsVisible(bool isVisible)
+    {
+        _isVisible = isVisible;
+    }
+
+    inline PropId AbstractShape::_assigneId_()
+    {
+        return _nextId_++;
+    }
 }
 
 #endif // PROPROOM3D_ABSTRACTSHAPE_H

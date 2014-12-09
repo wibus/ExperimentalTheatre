@@ -8,9 +8,9 @@
 namespace prop2
 {
     // Forward declarations
-    class Material;
+    class Hardware;
 
-    struct PROP2D_EXPORT MaterialUpdate
+    struct PROP2D_EXPORT HardwareUpdate
     {
         enum class EType
         {
@@ -21,19 +21,19 @@ namespace prop2
             NB_TYPES
         };
 
-        MaterialUpdate(EType type, real value, Material& material) :
+        HardwareUpdate(EType type, real value, Hardware& material) :
             type(type), value(value), material(material) {}
 
         EType type;
         real value;
-        Material& material;
+        Hardware& material;
     };
 
-    class PROP2D_EXPORT Material : public cellar::SpecificSubject<MaterialUpdate>
+    class PROP2D_EXPORT Hardware : public cellar::SpecificSubject<HardwareUpdate>
     {
     public:
-        Material();
-        virtual ~Material();
+        Hardware();
+        virtual ~Hardware();
 
         virtual real density() const;
         virtual real bounciness() const;

@@ -1,5 +1,5 @@
 #include "AbstractShape.h"
-#include "Material/Material.h"
+#include "Hardware/Hardware.h"
 
 #include <cassert>
 
@@ -35,12 +35,12 @@ namespace prop2
         }
     }
 
-    const std::shared_ptr<Material>& AbstractShape::material() const
+    const std::shared_ptr<Hardware>& AbstractShape::hardware() const
     {
         return _material;
     }
 
-    void AbstractShape::setMaterial(const std::shared_ptr<Material>& material)
+    void AbstractShape::setHardware(const std::shared_ptr<Hardware>& material)
     {
         if(_material)
         {
@@ -55,9 +55,9 @@ namespace prop2
         }
     }
 
-    void AbstractShape::notify(MaterialUpdate& msg)
+    void AbstractShape::notify(HardwareUpdate& msg)
     {
-        if(msg.type == MaterialUpdate::EType::DENSITY)
+        if(msg.type == HardwareUpdate::EType::DENSITY)
         {
             updateInertia();
         }

@@ -1,6 +1,6 @@
 #include "Circle.h"
 #include "Costume/CircleCostume.h"
-#include "Material/Material.h"
+#include "Hardware/Hardware.h"
 
 #include <Misc/CellarUtils.h>
 using namespace cellar;

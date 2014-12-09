@@ -13,13 +13,13 @@ namespace prop2
 {
 class AbstractPropTeam;
 class AbstractCostume;
-class MaterialUpdate;
-class Material;
+class HardwareUpdate;
+class Hardware;
 
 
     class PROP2D_EXPORT AbstractShape :
             public AbstractProp,
-            public cellar::SpecificObserver<MaterialUpdate>
+            public cellar::SpecificObserver<HardwareUpdate>
     {
     protected:
         AbstractShape(EPropType propType);
@@ -31,9 +31,9 @@ class Material;
         virtual const AbstractCostume& abstractCostume() const =0;
 
         // Material
-        virtual const std::shared_ptr<Material>& material() const;
-        virtual void setMaterial(const std::shared_ptr<Material>& material);
-        virtual void notify(MaterialUpdate& msg);
+        virtual const std::shared_ptr<Hardware>& hardware() const;
+        virtual void setHardware(const std::shared_ptr<Hardware>& hardware);
+        virtual void notify(HardwareUpdate& msg);
 
         // Body type
         virtual EBodyType bodyType() const;
@@ -116,7 +116,7 @@ class Material;
 
 
         // Attributes
-        std::shared_ptr<Material> _material;
+        std::shared_ptr<Hardware> _material;
         EBodyType _bodyType;
 
         real _inverseMass;

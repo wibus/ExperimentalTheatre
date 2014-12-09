@@ -22,8 +22,6 @@ class AbstractChoreographer;
 class AbstractShape;
 class Brep;
 class Mesh;
-class Plane;
-class Sphere;
 
     class PROP3D_EXPORT AbstractPropTeam
     {
@@ -42,14 +40,10 @@ class Sphere;
 
         // Factory methods
         virtual std::shared_ptr<Brep>   createBrep();
-        virtual std::shared_ptr<Mesh>   createMesh(int triangleCount);
-        virtual std::shared_ptr<Plane>  createPlane();
-        virtual std::shared_ptr<Sphere> createSphere();
+        virtual std::shared_ptr<Mesh>   createMesh(int vertexCount);
 
         virtual void deleteBrep(std::shared_ptr<Brep>& brep);
         virtual void deleteMesh(std::shared_ptr<Mesh>& mesh);
-        virtual void deletePlane(std::shared_ptr<Plane>& plane);
-        virtual void deleteSphere(std::shared_ptr<Sphere>& sphere);
 
         virtual void setCamera(media::Camera& camera);
         virtual void setGravity(const glm::dvec3& unitsPerSecondSquared);

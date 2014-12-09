@@ -1,95 +1,95 @@
-#include "Material.h"
+#include "Hardware.h"
 
 
-namespace prop2
+namespace prop3
 {
-    const real Material::INFINITE_DENSITY = real(0);
+    const double Hardware::INFINITE_DENSITY = 0.0;
 
 
-    Material::Material() :
-        _density(real(1)),
-        _bounciness(real(1)),
-        _staticFrictionCoefficient(real(1)),
-        _dynamicFrictionCoefficient(real(1))
+    Hardware::Hardware() :
+        _density(1.0),
+        _bounciness(1.0),
+        _staticFrictionCoefficient(1.0),
+        _dynamicFrictionCoefficient(1.0)
     {
 
     }
 
-    Material::~Material()
+    Hardware::~Hardware()
     {
 
     }
 
-    inline real Material::density() const
+    inline double Hardware::density() const
     {
         return _density;
     }
 
-    inline real Material::bounciness() const
+    inline double Hardware::bounciness() const
     {
         return _bounciness;
     }
 
-    inline real Material::staticFrictionCoefficient() const
+    inline double Hardware::staticFrictionCoefficient() const
     {
         return _staticFrictionCoefficient;
     }
 
-    inline real Material::dynamicFrictionCoefficient() const
+    inline double Hardware::dynamicFrictionCoefficient() const
     {
         return _dynamicFrictionCoefficient;
     }
 
-    inline void Material::setDensity(const real& density)
+    inline void Hardware::setDensity(const double& density)
     {
         if(_density != density)
         {
             _density = density;
             setIsChanged(true);
-            MaterialUpdate msg(
-                MaterialUpdate::EType::DENSITY,
+            HardwareUpdate msg(
+                HardwareUpdate::EType::DENSITY,
                 _density,
                 *this);
             notifyObservers(msg);
         }
     }
 
-    inline void Material::setBounciness(const real& bounciness)
+    inline void Hardware::setBounciness(const double& bounciness)
     {
         if(_bounciness != bounciness)
         {
             _bounciness = bounciness;
             setIsChanged(true);
-            MaterialUpdate msg(
-                MaterialUpdate::EType::BOUNCINESS,
+            HardwareUpdate msg(
+                HardwareUpdate::EType::BOUNCINESS,
                 _bounciness,
                 *this);
             notifyObservers(msg);
         }
     }
 
-    inline void Material::setStaticFrictionCoefficient(const real& us)
+    inline void Hardware::setStaticFrictionCoefficient(const double& us)
     {
         if(_staticFrictionCoefficient != us)
         {
             _staticFrictionCoefficient = us;
             setIsChanged(true);
-            MaterialUpdate msg(
-                MaterialUpdate::EType::STATIC_FIRCTION_COEFFICIENT,
+            HardwareUpdate msg(
+                HardwareUpdate::EType::STATIC_FIRCTION_COEFFICIENT,
                 _staticFrictionCoefficient,
                 *this);
             notifyObservers(msg);
         }
     }
 
-    inline void Material::setDynamicFrictionCoefficient(const real& ud)
+    inline void Hardware::setDynamicFrictionCoefficient(const double& ud)
     {
         if(_dynamicFrictionCoefficient != ud)
         {
             _dynamicFrictionCoefficient = ud;
             setIsChanged(true);
-            MaterialUpdate msg(
-                MaterialUpdate::EType::DYNAMIC_FIRCTION_COEFFICIENT,
+            HardwareUpdate msg(
+                HardwareUpdate::EType::DYNAMIC_FIRCTION_COEFFICIENT,
                 _dynamicFrictionCoefficient,
                 *this);
             notifyObservers(msg);

@@ -56,34 +56,14 @@ namespace prop3
         return brep;
     }
 
-    std::shared_ptr<Plane> AbstractPropTeam::createPlane()
+    std::shared_ptr<Mesh> AbstractPropTeam::createMesh(int vertexCount)
     {
-        std::shared_ptr<Plane> plane = _propDesigner->createPlane();
-
-        _artDirector->managePlane(plane);
-        _choreographer->managePlane(plane);
-
-        return plane;
-    }
-
-    std::shared_ptr<Mesh> AbstractPropTeam::createMesh(int triangleCount)
-    {
-        std::shared_ptr<Mesh> mesh = _propDesigner->createMesh(triangleCount);
+        std::shared_ptr<Mesh> mesh = _propDesigner->createMesh(vertexCount);
 
         _artDirector->manageMesh(mesh);
         _choreographer->manageMesh(mesh);
 
         return mesh;
-    }
-
-    std::shared_ptr<Sphere> AbstractPropTeam::createSphere()
-    {
-        std::shared_ptr<Sphere> sphere = _propDesigner->createSphere();
-
-        _artDirector->manageSphere(sphere);
-        _choreographer->manageSphere(sphere);
-
-        return sphere;
     }
 
     void AbstractPropTeam::deleteBrep(std::shared_ptr<Brep>& brep)
@@ -93,25 +73,11 @@ namespace prop3
         brep.reset();
     }
 
-    void AbstractPropTeam::deletePlane(std::shared_ptr<Plane>& plane)
-    {
-        _artDirector->unmanagePlane(plane);
-        _choreographer->unmanagePlane(plane);
-        plane.reset();
-    }
-
     void AbstractPropTeam::deleteMesh(std::shared_ptr<Mesh>& mesh)
     {
         _artDirector->unmanageMesh(mesh);
         _choreographer->unmanageMesh(mesh);
         mesh.reset();
-    }
-
-    void AbstractPropTeam::deleteSphere(std::shared_ptr<Sphere>& sphere)
-    {
-        _artDirector->unmanageSphere(sphere);
-        _choreographer->unmanageSphere(sphere);
-        sphere.reset();
     }
 
     void AbstractPropTeam::setCamera(media::Camera& camera)

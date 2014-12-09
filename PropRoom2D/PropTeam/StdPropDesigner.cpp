@@ -4,7 +4,7 @@
 #include "Costume/CircleCostume.h"
 #include "Shape/Polygon.h"
 #include "Costume/PolygonCostume.h"
-#include "Material/Material.h"
+#include "Hardware/Hardware.h"
 
 #include "Hud/TextHud.h"
 #include "Hud/ImageHud.h"
@@ -35,8 +35,8 @@ namespace prop2
         std::shared_ptr<Circle> circle( new Circle() );
         circle->setCostume(
             std::shared_ptr<CircleCostume>(new CircleCostume()));
-        circle->setMaterial(
-            std::shared_ptr<Material>(new Material()));
+        circle->setHardware(
+            std::shared_ptr<Hardware>(new Hardware()));
 
         return circle;
     }
@@ -47,8 +47,8 @@ namespace prop2
         std::shared_ptr<Polygon> polygon( new Polygon(nbVertices) );
         polygon->setCostume(
             std::shared_ptr<PolygonCostume>(new PolygonCostume(nbVertices)));
-        polygon->setMaterial(
-            std::shared_ptr<Material>(new Material()));
+        polygon->setHardware(
+            std::shared_ptr<Hardware>(new Hardware()));
 
         return polygon;
     }

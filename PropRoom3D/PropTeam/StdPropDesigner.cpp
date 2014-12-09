@@ -27,21 +27,9 @@ namespace prop3
         return std::shared_ptr<Brep>();
     }
 
-    std::shared_ptr<Mesh> StdPropDesigner::createMesh(int triangleCount)
+    std::shared_ptr<Mesh> StdPropDesigner::createMesh(int vertexCount)
     {
         assert(false /* TODO StdPropDesigner::createMesh() */);
         return std::shared_ptr<Mesh>();
-    }
-
-    std::shared_ptr<Plane> StdPropDesigner::createPlane()
-    {
-        assert(false /* TODO StdPropDesigner::createPlane() */);
-        return std::shared_ptr<Plane>();
-    }
-
-    std::shared_ptr<Sphere> StdPropDesigner::createSphere()
-    {
-        assert(false /* TODO StdPropDesigner::createSphere() */);
-        return std::shared_ptr<Sphere>();
     }
 }

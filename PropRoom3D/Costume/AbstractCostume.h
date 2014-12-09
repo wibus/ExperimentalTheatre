@@ -3,7 +3,7 @@
 
 #include "libPropRoom3D_global.h"
 
-#include <string>
+#include <memory>
 
 #include <glm/glm.hpp>
 
@@ -13,36 +13,79 @@ namespace prop3
     class PROP3D_EXPORT AbstractCostume
     {
     protected:
-        AbstractCostume();
+        AbstractCostume() {}
 
     public:
-        virtual ~AbstractCostume();
+        virtual ~AbstractCostume() {}
 
-        // Getters
-        glm::vec4 colorFilter() const;
-        std::string textureName() const;
+        // Medium opacity
+        double mediumOpacity() const;
+        void setMediumOpacity(double mediumOpacity);
 
-        // Setters
-        virtual void setColorFilter(const glm::vec4& filter);
-        virtual void setTextureName(const std::string& fileName);
+        // Medium refractive index
+        double refractiveIndex() const;
+        void setRefractiveIndex(double refractiveIndex);
+
+        // Medium color
+        glm::vec3 mediumColor() const;
+        void setMediumColor(const glm::vec3& mediumColor);
+
+        // Reflexion model
+        virtual glm::dvec3 computeReflection(
+                const glm::dvec3& incidentDirection,
+                const glm::dvec3& surfaceNormal) const = 0;
+
+        virtual glm::dvec3 computeRefraction(
+                const glm::dvec3& incidentDirection,
+                const glm::dvec3& surfaceNormal) const = 0;
+
+        virtual double computeReflexionRatio(
+                const glm::dvec3& incidentDirection,
+                const glm::dvec3& surfaceNormal) const = 0;
+
+        virtual glm::vec3 computeBrdf(
+                const glm::vec3& incomingRadiosity,
+                const glm::dvec3& lightDirection,
+                const glm::dvec3& surfaceNormal,
+                const glm::dvec3& viewDirection) const = 0;
 
     private:
-        glm::vec4 _colorFilter;
-        std::string _textureName;
+        double _mediumOpacity;
+        double _refractiveIndex;
+        glm::vec3 _mediumColor;
     };
 
 
 
     // IMPLEMENTATION //
-
-    inline glm::vec4 AbstractCostume::colorFilter() const
+    inline double AbstractCostume::mediumOpacity() const
     {
-        return _colorFilter;
+        return _mediumOpacity;
     }
 
-    inline std::string AbstractCostume::textureName() const
+    inline void AbstractCostume::setMediumOpacity(double opacity)
     {
-        return _textureName;
+        _mediumOpacity = opacity;
+    }
+
+    inline double AbstractCostume::refractiveIndex() const
+    {
+        return _refractiveIndex;
+    }
+
+    inline void AbstractCostume::setRefractiveIndex(double refractiveIndex)
+    {
+        _refractiveIndex = refractiveIndex;
+    }
+
+    inline glm::vec3 AbstractCostume::mediumColor() const
+    {
+        return _mediumColor;
+    }
+
+    inline void AbstractCostume::setMediumColor(const glm::vec3& color)
+    {
+        _mediumColor = color;
     }
 }
 

@@ -1,6 +1,6 @@
 #include "Polygon.h"
 #include "Costume/PolygonCostume.h"
-#include "Material/Material.h"
+#include "Hardware/Hardware.h"
 
 
 #include <cassert>
