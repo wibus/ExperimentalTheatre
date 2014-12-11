@@ -1,26 +1,64 @@
-#include "SpaceEquation.h"
-#include "Shape/AbstractShape.h"
+#include "Volume.h"
+#include "Prop/Prop.h"
+
+#include <GLM/gtc/matrix_transform.hpp>
 
 
 namespace prop3
 {
-    SpaceEquation::SpaceEquation()
+
+    Transform::Transform(const glm::dmat4& transform) :
+        _mat(transform),
+        _inv(),
+        _isInvComputed(false)
     {
 
     }
 
-    SpaceEquation::~SpaceEquation()
+    Transform::Transform(double scale,
+                         const glm::dquat rotation,
+                         const glm::dvec3 translation) :
+        _mat(1.0),
+        _inv(1.0),
+        _isInvComputed(true)
+    {
+        _mat[0][0] = scale;
+        _mat[1][1] = scale;
+        _mat[2][2] = scale;
+        _mat = glm::mat4_cast(rotation) * _mat;
+        _mat[0] = glm::dvec4(translation, 1);
+
+        _inv[0] = glm::dvec4(-translation, 1);
+        _inv = glm::mat4_cast(glm::conjugate(rotation)) * _mat;
+        glm::dmat4 invScale;
+        invScale[0][0] = 1.0 / scale;
+        invScale[1][1] = 1.0 / scale;
+        invScale[2][2] = 1.0 / scale;
+        _inv = invScale * _inv;
+    }
+
+    Volume::Volume()
     {
 
     }
 
-    EqNot::EqNot(const std::shared_ptr<SpaceEquation>& eq) :
+    Volume::~Volume()
+    {
+
+    }
+
+    VolumeNot::VolumeNot(const std::shared_ptr<Volume>& eq) :
         _eq(eq)
     {
 
     }
 
-    EPointPosition EqNot::isIn(const glm::dvec3& point) const
+    void VolumeNot::transform(const Transform& transform)
+    {
+        _eq->transform(transform);
+    }
+
+    EPointPosition VolumeNot::isIn(const glm::dvec3& point) const
     {
         EPointPosition pos = _eq->isIn(point);
         return pos != EPointPosition::IN ?
@@ -30,12 +68,12 @@ namespace prop3
                     EPointPosition::OUT;
     }
 
-    double EqNot::signedDistance(const glm::dvec3& point) const
+    double VolumeNot::signedDistance(const glm::dvec3& point) const
     {
         return -_eq->signedDistance(point);
     }
 
-    void EqNot::raycast(const Ray& ray,
+    void VolumeNot::raycast(const Ray& ray,
                         std::vector<RaycastReport>& reports) const
     {
         _eq->raycast(ray, reports);
@@ -45,18 +83,18 @@ namespace prop3
         }
     }
 
-    EqOr::EqOr(const std::shared_ptr<SpaceEquation>& eq1,
-               const std::shared_ptr<SpaceEquation>& eq2) :
-        _eqs({eq1, eq2})
-    {
-    }
-
-    EqOr::EqOr(const std::vector<std::shared_ptr<SpaceEquation>>& eqs) :
+    VolumeOr::VolumeOr(const std::vector<std::shared_ptr<Volume>>& eqs) :
         _eqs(eqs)
     {
     }
 
-    EPointPosition EqOr::isIn(const glm::dvec3& point) const
+    void VolumeOr::transform(const Transform& transform)
+    {
+        for(auto& eq : _eqs)
+            eq->transform(transform);
+    }
+
+    EPointPosition VolumeOr::isIn(const glm::dvec3& point) const
     {
         EPointPosition pos = EPointPosition::OUT;
         for(const auto& eq : _eqs)
@@ -70,7 +108,7 @@ namespace prop3
         return pos;
     }
 
-    double EqOr::signedDistance(const glm::dvec3& point) const
+    double VolumeOr::signedDistance(const glm::dvec3& point) const
     {
         static_assert(std::numeric_limits<double>::is_iec559, "IEEE 754 required");
         double minDist = std::numeric_limits<double>::infinity();
@@ -82,8 +120,8 @@ namespace prop3
         return minDist;
     }
 
-    void EqOr::raycast(const Ray& ray,
-                       std::vector<RaycastReport>& reports) const
+    void VolumeOr::raycast(const Ray& ray,
+                           std::vector<RaycastReport>& reports) const
     {
         std::vector<RaycastReport> eqReports;
         for(const auto& eq : _eqs)
@@ -115,20 +153,18 @@ namespace prop3
         }
     }
 
-    EqAnd::EqAnd(const std::shared_ptr<SpaceEquation>& eq1,
-                 const std::shared_ptr<SpaceEquation>& eq2) :
-        _eqs({eq1, eq2})
-    {
-
-    }
-
-    EqAnd::EqAnd(const std::vector<std::shared_ptr<SpaceEquation>>& eqs) :
+    VolumeAnd::VolumeAnd(const std::vector<std::shared_ptr<Volume>>& eqs) :
         _eqs(eqs)
     {
-        _eqs = eqs;
     }
 
-    EPointPosition EqAnd::isIn(const glm::dvec3& point) const
+    void VolumeAnd::transform(const Transform& transform)
+    {
+        for(auto& eq : _eqs)
+            eq->transform(transform);
+    }
+
+    EPointPosition VolumeAnd::isIn(const glm::dvec3& point) const
     {
         EPointPosition pos = EPointPosition::IN;
         for(const auto& eq : _eqs)
@@ -142,7 +178,7 @@ namespace prop3
         return pos;
     }
 
-    double EqAnd::signedDistance(const glm::dvec3& point) const
+    double VolumeAnd::signedDistance(const glm::dvec3& point) const
     {
         static_assert(std::numeric_limits<double>::is_iec559, "IEEE 754 required");
         double maxDist = -std::numeric_limits<double>::infinity();
@@ -154,8 +190,8 @@ namespace prop3
         return maxDist;
     }
 
-    void EqAnd::raycast(const Ray& ray,
-                        std::vector<RaycastReport>& reports) const
+    void VolumeAnd::raycast(const Ray& ray,
+                            std::vector<RaycastReport>& reports) const
     {
         std::vector<RaycastReport> eqReports;
         for(const auto& eq : _eqs)
@@ -185,5 +221,54 @@ namespace prop3
                 }
             }
         }
+    }
+
+
+    std::shared_ptr<Volume> operator!(
+            const std::shared_ptr<Volume>& eq)
+    {
+        return std::shared_ptr<Volume>(new VolumeNot(eq));
+    }
+
+    std::shared_ptr<Volume> operator| (
+            const std::shared_ptr<Volume>& eq1,
+            const std::shared_ptr<Volume>& eq2)
+    {
+        std::shared_ptr<VolumeOr> cast1;
+        if(cast1 = std::dynamic_pointer_cast<VolumeOr>(eq1))
+        {
+            cast1->addVolume(eq2);
+            return cast1;
+        }
+
+        std::shared_ptr<VolumeOr> cast2;
+        if(cast2 = std::dynamic_pointer_cast<VolumeOr>(eq2))
+        {
+            cast2->addVolume(eq1);
+            return cast2;
+        }
+
+        return std::shared_ptr<Volume>(new VolumeOr({eq1, eq2}));
+    }
+
+    std::shared_ptr<Volume> operator& (
+            const std::shared_ptr<Volume>& eq1,
+            const std::shared_ptr<Volume>& eq2)
+    {
+        std::shared_ptr<VolumeAnd> cast1;
+        if(cast1 = std::dynamic_pointer_cast<VolumeAnd>(eq1))
+        {
+            cast1->addVolume(eq2);
+            return cast1;
+        }
+
+        std::shared_ptr<VolumeAnd> cast2;
+        if(cast2 = std::dynamic_pointer_cast<VolumeAnd>(eq2))
+        {
+            cast2->addVolume(eq1);
+            return cast2;
+        }
+
+        return std::shared_ptr<Volume>(new VolumeAnd({eq1, eq2}));
     }
 }

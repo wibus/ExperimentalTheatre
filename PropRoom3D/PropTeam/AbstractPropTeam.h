@@ -19,7 +19,7 @@ class AbstractPropDesigner;
 class AbstractArtDirector;
 class AbstractChoreographer;
 
-class AbstractShape;
+class Prop;
 class Brep;
 class Mesh;
 
