@@ -16,8 +16,7 @@ namespace prop3
         virtual void setup();
         virtual void reset();
 
-        virtual std::shared_ptr<Brep>   createBrep();
-        virtual std::shared_ptr<Mesh>   createMesh(int vertexCount);
+        virtual std::shared_ptr<Prop>   createProp();
     };
 }
 

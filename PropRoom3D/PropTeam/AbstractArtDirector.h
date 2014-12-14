@@ -4,14 +4,15 @@
 #include "libPropRoom3D_global.h"
 #include "AbstractTeamMember.h"
 
-#include <memory>
-
 #include <DesignPattern/SpecificObserver.h>
 
+#include <memory>
+
+#include <GLM/glm.hpp>
 
 namespace media
 {
-class CameraMsg;
+    class CameraMsg;
 }
 
 namespace prop3
@@ -26,15 +27,12 @@ namespace prop3
     public:
         virtual ~AbstractArtDirector() {}
 
-        virtual void notify(media::CameraMsg &msg) = 0;
-
         virtual void draw(double dt) =0;
 
-        virtual void manageBrep(const std::shared_ptr<Brep>& brep) =0;
-        virtual void manageMesh(const std::shared_ptr<Mesh>& mesh) =0;
+        virtual void notify(media::CameraMsg &msg) = 0;
 
-        virtual void unmanageBrep(const std::shared_ptr<Brep>& brep) =0;
-        virtual void unmanageMesh(const std::shared_ptr<Mesh>& mesh) =0;
+        virtual void manageProp(const std::shared_ptr<Prop>& prop) =0;
+        virtual void unmanageProp(const std::shared_ptr<Prop>& prop) =0;
     };
 }
 

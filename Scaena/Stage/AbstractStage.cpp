@@ -15,8 +15,8 @@ using namespace cellar;
 #include <Camera/Camera.h>
 using namespace media;
 
-#include <PropTeam/AbstractPropTeam.h>
-using namespace prop2;
+#include <PropRoom2D/PropTeam/AbstractPropTeam.h>
+#include <PropRoom3D/PropTeam/AbstractPropTeam.h>
 
 namespace scaena
 {
@@ -24,7 +24,8 @@ namespace scaena
         _id(id),
         _play(),
         _camera(new Camera()),
-        _propTeam((AbstractPropTeam*)nullptr),
+        _propTeam2D(nullptr),
+        _propTeam3D(nullptr),
         _synchronousKeyboard(new SynchronousKeyboard()),
         _synchronousMouse(new SynchronousMouse()),
         _updateClock(new CClock()),
@@ -37,9 +38,14 @@ namespace scaena
     {
     }
 
-    void AbstractStage::setPropTeam(prop2::AbstractPropTeam* team)
+    void AbstractStage::setPropTeam2D(prop2::AbstractPropTeam* team)
     {
-        _propTeam.reset(team);
+        _propTeam2D.reset(team);
+    }
+
+    void AbstractStage::setPropTeam3D(prop3::AbstractPropTeam* team)
+    {
+        _propTeam3D.reset(team);
     }
 
     void AbstractStage::update()
@@ -54,7 +60,8 @@ namespace scaena
             BeginStepCaller beginStepCaller( time );
             _play->welcome( beginStepCaller );
 
-            _propTeam->update( time.elapsedTime() );
+            _propTeam3D->update( time.elapsedTime() );
+            _propTeam2D->update( time.elapsedTime() );
 
             EndStepCaller endStepCaller( time );
             _play->welcome( endStepCaller );
@@ -76,7 +83,8 @@ namespace scaena
             DrawCaller drawCaller( time );
             _play->welcome( drawCaller );
 
-            _propTeam->draw( time.elapsedTime() );
+            _propTeam3D->draw( time.elapsedTime() );
+            _propTeam2D->draw( time.elapsedTime() );
         }
     }
 
@@ -85,8 +93,12 @@ namespace scaena
         if(_play.get() == 0x0)
             throw PlayNotFound("No play to start");
 
-        _propTeam->setup();
-        _propTeam->setCamera(*_camera);
+        _propTeam3D->setup();
+        _propTeam3D->setCamera(*_camera);
+
+        _propTeam2D->setup();
+        _propTeam2D->setCamera(*_camera);
+
         _play->start();
     }
 

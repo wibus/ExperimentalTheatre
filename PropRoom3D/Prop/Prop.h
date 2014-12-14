@@ -20,45 +20,15 @@ class AbstractCostume;
 class HardwareUpdate;
 class Hardware;
 
-    struct PROP3D_EXPORT Ray
-    {
-        Ray(const glm::dvec3& origin,
-            const glm::dvec3& direction) :
-            origin(origin),
-            direction(direction)
-        {}
-
-        glm::dvec3 origin;
-        glm::dvec3 direction;
-    };
-
-    struct PROP3D_EXPORT RaycastReport
-    {
-        RaycastReport(const glm::dvec3& position,
-                      const glm::dvec3& normal,
-                      double t) :
-            position(position),
-            normal(normal),
-            t(t)
-        {}
-
-        glm::dvec3 position;
-        glm::dvec3 normal;
-        double t;
-    };
-
     class PROP3D_EXPORT Prop :
             public cellar::SpecificObserver<HardwareUpdate>
     {
-    protected:
-        Prop(EPropType propType);
-
     public:
+        Prop();
         virtual ~Prop();
 
         // Identification
         PropId id() const;
-        EPropType propType() const;
 
         // Visibility
         bool isVisible() const;
@@ -149,8 +119,8 @@ class Hardware;
 
     protected:
         // Cached attributes update
-        virtual void updateTransformMatrix() =0;
-        virtual void updateInertia() =0;
+        virtual void updateTransformMatrix();
+        virtual void updateInertia();
 
 
         // Attributes
@@ -181,7 +151,6 @@ class Hardware;
         static PropId _nextId_;
 
         PropId    _id;
-        EPropType _propType;
         bool      _isVisible;
     };
 
@@ -191,11 +160,6 @@ class Hardware;
     inline PropId Prop::id() const
     {
         return _id;
-    }
-
-    inline EPropType Prop::propType() const
-    {
-        return _propType;
     }
 
     inline bool Prop::isVisible() const

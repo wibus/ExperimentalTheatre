@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <GLM/glm.hpp>
+#include <GLM/gtc/quaternion.hpp>
 
 #include "libPropRoom3D_global.h"
 

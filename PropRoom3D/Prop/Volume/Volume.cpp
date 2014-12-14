@@ -1,5 +1,5 @@
 #include "Volume.h"
-#include "Prop/Prop.h"
+#include "Raycast.h"
 
 #include <GLM/gtc/matrix_transform.hpp>
 

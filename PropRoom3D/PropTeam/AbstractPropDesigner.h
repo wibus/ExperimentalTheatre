@@ -17,8 +17,7 @@ namespace prop3
     public:
         virtual ~AbstractPropDesigner() {}
 
-        virtual std::shared_ptr<Brep>   createBrep() =0;
-        virtual std::shared_ptr<Mesh>   createMesh(int vertexCount) =0;
+        virtual std::shared_ptr<Prop> createProp() = 0;
     };
 }
 

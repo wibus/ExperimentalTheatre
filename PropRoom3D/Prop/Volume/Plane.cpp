@@ -1,5 +1,5 @@
 #include "Plane.h"
-#include "Prop/Prop.h"
+#include "Raycast.h"
 
 namespace prop3
 {
@@ -46,7 +46,7 @@ namespace prop3
         {
             double t = -(glm::dot(_normal, ray.origin) + _d) / dirDotNorm;
             glm::dvec3 pt = ray.origin + ray.direction * t;
-            reports.push_back(RaycastReport(pt, _normal, t));
+            reports.push_back(RaycastReport(t, pt, _normal));
         }
     }
 }

@@ -1,4 +1,5 @@
 #include "StdPropDesigner.h"
+#include "Prop/Prop.h"
 
 #include <cassert>
 
@@ -21,15 +22,8 @@ namespace prop3
     {
     }
 
-    std::shared_ptr<Brep> StdPropDesigner::createBrep()
+    std::shared_ptr<Prop> StdPropDesigner::createProp()
     {
-        assert(false /* TODO StdPropDesigner::createBrep() */);
-        return std::shared_ptr<Brep>();
-    }
-
-    std::shared_ptr<Mesh> StdPropDesigner::createMesh(int vertexCount)
-    {
-        assert(false /* TODO StdPropDesigner::createMesh() */);
-        return std::shared_ptr<Mesh>();
+        return std::shared_ptr<Prop>(new Prop());
     }
 }

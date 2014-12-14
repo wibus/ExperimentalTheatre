@@ -17,8 +17,12 @@ namespace media
     class Camera;
 }
 
-
 namespace prop2
+{
+    class AbstractPropTeam;
+}
+
+namespace prop3
 {
     class AbstractPropTeam;
 }
@@ -71,13 +75,15 @@ namespace scaena
         AbstractPlay&         play()         const;
         bool                  isRunning()    const;
         media::Camera&        camera();
-        prop2::AbstractPropTeam& propTeam()  const;
-        const SynchronousKeyboard& synchronousKeyboard() const;
-        const SynchronousMouse&    synchronousMouse() const;
+        prop2::AbstractPropTeam&    propTeam2D()  const;
+        prop3::AbstractPropTeam&    propTeam3D()  const;
+        const SynchronousKeyboard&  synchronousKeyboard() const;
+        const SynchronousMouse&     synchronousMouse() const;
 
 
         // Setters
-        void setPropTeam(prop2::AbstractPropTeam* team);
+        void setPropTeam2D(prop2::AbstractPropTeam* team);
+        void setPropTeam3D(prop3::AbstractPropTeam* team);
         void  setAsRunning(bool run);
         virtual void startPlay(); //throw(PlayNotFound)
         virtual void endPlay();   //throw(PlayNotFound)
@@ -88,7 +94,8 @@ namespace scaena
         std::string _id;
         std::shared_ptr<AbstractPlay> _play;
         std::shared_ptr<media::Camera> _camera;
-        std::shared_ptr<prop2::AbstractPropTeam> _propTeam;
+        std::shared_ptr<prop2::AbstractPropTeam> _propTeam2D;
+        std::shared_ptr<prop3::AbstractPropTeam> _propTeam3D;
         std::shared_ptr<SynchronousKeyboard> _synchronousKeyboard;
         std::shared_ptr<SynchronousMouse> _synchronousMouse;
         std::shared_ptr<cellar::AbstractClock> _updateClock;
@@ -110,8 +117,11 @@ namespace scaena
     inline media::Camera& AbstractStage::camera()
         {return *_camera;}
 
-    inline prop2::AbstractPropTeam& AbstractStage::propTeam()  const
-        {return *_propTeam;}
+    inline prop2::AbstractPropTeam& AbstractStage::propTeam2D()  const
+        {return *_propTeam2D;}
+
+    inline prop3::AbstractPropTeam& AbstractStage::propTeam3D()  const
+        {return *_propTeam3D;}
 
     inline const SynchronousKeyboard& AbstractStage::synchronousKeyboard() const
         {return *_synchronousKeyboard;}

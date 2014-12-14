@@ -20,8 +20,6 @@ class AbstractArtDirector;
 class AbstractChoreographer;
 
 class Prop;
-class Brep;
-class Mesh;
 
     class PROP3D_EXPORT AbstractPropTeam
     {
@@ -39,11 +37,8 @@ class Mesh;
         virtual void draw(double dt);
 
         // Factory methods
-        virtual std::shared_ptr<Brep>   createBrep();
-        virtual std::shared_ptr<Mesh>   createMesh(int vertexCount);
-
-        virtual void deleteBrep(std::shared_ptr<Brep>& brep);
-        virtual void deleteMesh(std::shared_ptr<Mesh>& mesh);
+        virtual std::shared_ptr<Prop>   createProp();
+        virtual void deleteProp(std::shared_ptr<Prop>& prop);
 
         virtual void setCamera(media::Camera& camera);
         virtual void setGravity(const glm::dvec3& unitsPerSecondSquared);

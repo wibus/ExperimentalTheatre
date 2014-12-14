@@ -14,7 +14,6 @@ namespace prop3
         _propDesigner(propDesigner),
         _artDirector(artDirector),
         _choreographer(choreographer)
-
     {
     }
 
@@ -46,38 +45,21 @@ namespace prop3
         _artDirector->draw(dt);
     }
 
-    std::shared_ptr<Brep> AbstractPropTeam::createBrep()
+    std::shared_ptr<Prop> AbstractPropTeam::createProp()
     {
-        std::shared_ptr<Brep> brep = _propDesigner->createBrep();
+        std::shared_ptr<Prop> prop = _propDesigner->createProp();
 
-        _artDirector->manageBrep(brep);
-        _choreographer->manageBrep(brep);
+        _artDirector->manageProp(prop);
+        _choreographer->manageProp(prop);
 
-        return brep;
+        return prop;
     }
 
-    std::shared_ptr<Mesh> AbstractPropTeam::createMesh(int vertexCount)
+    void AbstractPropTeam::deleteProp(std::shared_ptr<Prop>& prop)
     {
-        std::shared_ptr<Mesh> mesh = _propDesigner->createMesh(vertexCount);
-
-        _artDirector->manageMesh(mesh);
-        _choreographer->manageMesh(mesh);
-
-        return mesh;
-    }
-
-    void AbstractPropTeam::deleteBrep(std::shared_ptr<Brep>& brep)
-    {
-        _artDirector->unmanageBrep(brep);
-        _choreographer->unmanageBrep(brep);
-        brep.reset();
-    }
-
-    void AbstractPropTeam::deleteMesh(std::shared_ptr<Mesh>& mesh)
-    {
-        _artDirector->unmanageMesh(mesh);
-        _choreographer->unmanageMesh(mesh);
-        mesh.reset();
+        _artDirector->unmanageProp(prop);
+        _choreographer->unmanageProp(prop);
+        prop.reset();
     }
 
     void AbstractPropTeam::setCamera(media::Camera& camera)

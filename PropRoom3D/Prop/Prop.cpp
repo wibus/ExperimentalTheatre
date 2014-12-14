@@ -15,9 +15,8 @@ namespace prop3
     const glm::dmat3 Prop::INFINITE_MOMENT_OF_INERTIA(0.0);
 
 
-    Prop::Prop(EPropType propType) :
+    Prop::Prop() :
         _id(_assigneId_()),
-        _propType(propType),
         _isVisible(true),
         _costume(new FlatPaint(glm::vec3(1))),
         _material(),
@@ -252,5 +251,15 @@ namespace prop3
     void Prop::raycast(const Ray& ray, std::vector<RaycastReport>& reports) const
     {
         _eq->raycast(ray, reports);
+    }
+
+    void Prop::updateTransformMatrix()
+    {
+        assert(false /* Not Implemented */);
+    }
+
+    void Prop::updateInertia()
+    {
+        assert(false /* Not Implemented */);
     }
 }

@@ -6,6 +6,9 @@ SET(PROP3_PROP_TEAM_HEADERS
     ${PROP3_SRC_DIR}/PropTeam/AbstractPropDesigner.h
     ${PROP3_SRC_DIR}/PropTeam/AbstractPropTeam.h
     ${PROP3_SRC_DIR}/PropTeam/AbstractTeamMember.h
+    ${PROP3_SRC_DIR}/PropTeam/CpuRaytracer.h
+    ${PROP3_SRC_DIR}/PropTeam/StdGlPropTeam.h
+    ${PROP3_SRC_DIR}/PropTeam/StdChoreographer.h
     ${PROP3_SRC_DIR}/PropTeam/StdPropDesigner.h)
 
 # Costumes
@@ -19,6 +22,7 @@ SET(PROP3_HARDWARE_HEADERS
 
 # Volumes
 SET(PROP3_VOLUME_HEADERS
+    ${PROP3_SRC_DIR}/Prop/Volume/Raycast.h
     ${PROP3_SRC_DIR}/Prop/Volume/Volume.h
     ${PROP3_SRC_DIR}/Prop/Volume/Plane.h
     ${PROP3_SRC_DIR}/Prop/Volume/Sphere.h)
@@ -41,6 +45,9 @@ SET(PROP3_HEADERS
 # Prop Team
 SET(PROP3_PROP_TEAM_SOURCES
     ${PROP3_SRC_DIR}/PropTeam/AbstractPropTeam.cpp
+    ${PROP3_SRC_DIR}/PropTeam/CpuRaytracer.cpp
+    ${PROP3_SRC_DIR}/PropTeam/StdGlPropTeam.cpp
+    ${PROP3_SRC_DIR}/PropTeam/StdChoreographer.cpp
     ${PROP3_SRC_DIR}/PropTeam/StdPropDesigner.cpp)
 
 # Costumes

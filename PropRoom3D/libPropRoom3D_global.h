@@ -17,14 +17,6 @@ namespace prop3
 {
     // Shapes attributes
     typedef unsigned int PropId;
-    
-    // Prop types
-    enum class EPropType
-    {
-        MESH,
-        BREP,
-        NB_TYPES
-    };
 
     // Body types
     enum class EBodyType

@@ -1,5 +1,5 @@
 #include "Sphere.h"
-#include "Prop/Prop.h"
+#include "Raycast.h"
 
 namespace prop3
 {
@@ -56,19 +56,19 @@ namespace prop3
             double t1 = (-b - disrcSqrt) / (2 * a);
             glm::dvec3 pt = ray.origin + ray.direction*t1;
             glm::dvec3 n = glm::normalize(pt - _center);
-            reports.push_back(RaycastReport(pt, n, t1));
+            reports.push_back(RaycastReport(t1, pt, n));
 
             double t2 = (-b + disrcSqrt) / (2 * a);
             pt = ray.origin + ray.direction*t2;
             n = glm::normalize(pt - _center);
-            reports.push_back(RaycastReport(pt, n, t2));
+            reports.push_back(RaycastReport(t2, pt, n));
         }
         else if(discr == 0.0)
         {
             double t = -b / (2 * a);
             glm::dvec3 pt = ray.origin + ray.direction*t;
             glm::dvec3 n = glm::normalize(pt - _center);
-            reports.push_back(RaycastReport(pt, n, t));
+            reports.push_back(RaycastReport(t, pt, n));
         }
     }
 }

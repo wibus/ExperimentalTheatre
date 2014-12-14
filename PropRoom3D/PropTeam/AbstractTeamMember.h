@@ -5,8 +5,7 @@
 
 namespace prop3
 {
-class Brep;
-class Mesh;
+class Prop;
 
     class PROP3D_EXPORT AbstractTeamMember
     {

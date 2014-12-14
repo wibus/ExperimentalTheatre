@@ -33,21 +33,25 @@ namespace prop3
         // Reflexion model
         virtual glm::dvec3 computeReflection(
                 const glm::dvec3& incidentDirection,
-                const glm::dvec3& surfaceNormal) const = 0;
+                const glm::dvec3& surfaceNormal,
+                const glm::vec3& texCoord = glm::vec3(0)) const = 0;
 
         virtual glm::dvec3 computeRefraction(
                 const glm::dvec3& incidentDirection,
-                const glm::dvec3& surfaceNormal) const = 0;
+                const glm::dvec3& surfaceNormal,
+                const glm::vec3& texCoord = glm::vec3(0)) const = 0;
 
         virtual double computeReflexionRatio(
                 const glm::dvec3& incidentDirection,
-                const glm::dvec3& surfaceNormal) const = 0;
+                const glm::dvec3& surfaceNormal,
+                const glm::vec3& texCoord = glm::vec3(0)) const = 0;
 
         virtual glm::vec3 computeBrdf(
                 const glm::vec3& incomingRadiosity,
                 const glm::dvec3& lightDirection,
                 const glm::dvec3& surfaceNormal,
-                const glm::dvec3& viewDirection) const = 0;
+                const glm::dvec3& viewDirection,
+                const glm::vec3& texCoord = glm::vec3(0)) const = 0;
 
     private:
         double _mediumOpacity;

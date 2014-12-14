@@ -16,7 +16,8 @@ namespace prop3
 
     glm::dvec3 FlatPaint::computeReflection(
             const glm::dvec3& incidentDirection,
-            const glm::dvec3& surfaceNormal) const
+            const glm::dvec3& surfaceNormal,
+            const glm::vec3& texCoord) const
     {
         glm::dvec3 randDir = glm::sphericalRand(1.0);
         if(glm::dot(randDir, surfaceNormal) < 0.0)
@@ -26,14 +27,16 @@ namespace prop3
 
      glm::dvec3 FlatPaint::computeRefraction(
             const glm::dvec3& incidentDirection,
-            const glm::dvec3& surfaceNormal) const
+            const glm::dvec3& surfaceNormal,
+            const glm::vec3& texCoord) const
     {
         return glm::vec3(0.0);
     }
 
     double FlatPaint::computeReflexionRatio(
             const glm::dvec3& incidentDirection,
-            const glm::dvec3& surfaceNormal) const
+            const glm::dvec3& surfaceNormal,
+            const glm::vec3& texCoord) const
     {
         return 1.0;
     }
@@ -42,7 +45,8 @@ namespace prop3
             const glm::vec3& incomingRadiosity,
             const glm::dvec3& lightDirection,
             const glm::dvec3& surfaceNormal,
-            const glm::dvec3& viewDirection) const
+            const glm::dvec3& viewDirection,
+            const glm::vec3& texCoord) const
     {
         return (incomingRadiosity * mediumColor()) *
                 glm::max(0.0f, (float)glm::dot(lightDirection, surfaceNormal));
