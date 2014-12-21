@@ -3,9 +3,6 @@
 
 #include <memory>
 
-#include "libScaena_global.h"
-#include "ScaenaException/PlayNotFound.h"
-
 
 namespace cellar
 {
@@ -26,6 +23,8 @@ namespace prop3
 {
     class AbstractTeam;
 }
+
+#include "../ScaenaException/PlayNotFound.h"
 
 
 namespace scaena

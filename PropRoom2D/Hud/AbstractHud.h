@@ -1,8 +1,7 @@
 #ifndef PROPROOM2D_ABSTRACTHUD_H
 #define PROPROOM2D_ABSTRACTHUD_H
 
-#include "libPropRoom2D_global.h"
-#include "AbstractProp.h"
+#include "../AbstractProp.h"
 
 
 namespace prop2

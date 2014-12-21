@@ -1,10 +1,9 @@
 #ifndef PROPROOM2D_STDCHOREOGRAPHER_H
 #define PROPROOM2D_STDCHOREOGRAPHER_H
 
-#include "libPropRoom2D_global.h"
-#include "AbstractChoreographer.h"
-
 #include <vector>
+
+#include "AbstractChoreographer.h"
 
 
 namespace prop2

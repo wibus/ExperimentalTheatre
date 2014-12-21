@@ -1,8 +1,8 @@
 #ifndef CELLARWORKBENCH_PLANE3D_H
 #define CELLARWORKBENCH_PLANE3D_H
 
-#include "libCellarWorkbench_global.h"
-#include "DataStructure/Vector.h"
+#include "../libCellarWorkbench_global.h"
+#include "../DataStructure/Vector.h"
 
 namespace cellar
 {

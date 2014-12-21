@@ -2,11 +2,12 @@
 #define CELLARWORKBENCH_CELLARUTILS_H
 
 #include <cstdlib>
-#include <sstream>
 #include <cmath>
+
+#include <sstream>
 #include <tuple>
 
-#include "libCellarWorkbench_global.h"
+#include "../libCellarWorkbench_global.h"
 
 
 namespace cellar

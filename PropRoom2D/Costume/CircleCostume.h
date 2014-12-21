@@ -1,7 +1,6 @@
 #ifndef PROPROOM2D_CIRCLECOSTUME_H
 #define PROPROOM2D_CIRCLECOSTUME_H
 
-#include "libPropRoom2D_global.h"
 #include "AbstractCostume.h"
 
 

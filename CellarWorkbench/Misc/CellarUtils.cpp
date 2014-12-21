@@ -1,9 +1,11 @@
 #include "CellarUtils.h"
 
-#include <QFile>
-#include <QTextStream>
 #include <sstream>
 using namespace std;
+
+#include <QFile>
+#include <QTextStream>
+
 
 namespace cellar
 {

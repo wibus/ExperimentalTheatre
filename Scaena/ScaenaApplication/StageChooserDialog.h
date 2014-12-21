@@ -2,9 +2,10 @@
 #define SCAENA_STAGECHOOSERDIALOG_H
 
 #include <vector>
+
 #include <QWidget>
 
-#include "libScaena_global.h"
+#include "../libScaena_global.h"
 
 
 namespace scaena

@@ -2,7 +2,8 @@
 #define CELLARWORKBENCH_TIMER_H
 
 #include <ctime>
-#include "libCellarWorkbench_global.h"
+
+#include "../libCellarWorkbench_global.h"
 
 
 namespace cellar

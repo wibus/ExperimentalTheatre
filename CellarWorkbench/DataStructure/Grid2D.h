@@ -2,8 +2,9 @@
 #define CELLARWORKBENCH_GRID_2D_H
 
 #include <cassert>
-#include "libCellarWorkbench_global.h"
+
 #include "Vector.h"
+
 
 namespace cellar
 {

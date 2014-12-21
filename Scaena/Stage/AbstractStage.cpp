@@ -1,22 +1,25 @@
-#include "Stage/AbstractStage.h"
-
-#include "Play/AbstractPlay.h"
-#include "Stage/Manager/BeginStepCaller.h"
-#include "Stage/Manager/EndStepCaller.h"
-#include "Stage/Manager/DrawCaller.h"
-#include "Stage/Event/SynchronousKeyboard.h"
-#include "Stage/Event/SynchronousMouse.h"
+#include "AbstractStage.h"
 
 using namespace std;
 
-#include <DateAndTime/CClock.h>
+#include <CellarWorkbench/DateAndTime/CClock.h>
 using namespace cellar;
 
-#include <Camera/Camera.h>
+#include <MediaWorkbench/Camera/Camera.h>
 using namespace media;
 
-#include <PropTeam/AbstractPropTeam.h>
-#include <Team/AbstractTeam.h>
+#include <PropRoom2D/PropTeam/AbstractPropTeam.h>
+#include <PropRoom3D/Team/AbstractTeam.h>
+using namespace prop2;
+using namespace prop3;
+
+#include "../Play/AbstractPlay.h"
+#include "Manager/BeginStepCaller.h"
+#include "Manager/EndStepCaller.h"
+#include "Manager/DrawCaller.h"
+#include "Event/SynchronousKeyboard.h"
+#include "Event/SynchronousMouse.h"
+
 
 namespace scaena
 {

@@ -1,14 +1,14 @@
 #ifndef PROPROOM3D_FLAT_PAINT_H
 #define PROPROOM3D_FLAT_PAINT_H
 
-#include "AbstractCostume.h"
+#include "Costume.h"
 
 
 namespace prop3
 {
 
     class PROP3D_EXPORT FlatPaint :
-            public AbstractCostume
+            public Costume
     {
     public:
         FlatPaint(const glm::dvec3& color);

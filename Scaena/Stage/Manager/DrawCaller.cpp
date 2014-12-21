@@ -1,5 +1,6 @@
 #include "DrawCaller.h"
-#include "Character/AbstractCharacter.h"
+
+#include "../../Character/AbstractCharacter.h"
 
 
 namespace scaena

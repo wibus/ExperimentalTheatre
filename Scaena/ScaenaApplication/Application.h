@@ -6,12 +6,11 @@
 
 #include <QObject>
 
-#include <DesignPattern/Singleton.h>
-#include <DateAndTime/Timer.h>
+#include <CellarWorkbench/DesignPattern/Singleton.h>
+#include <CellarWorkbench/DateAndTime/Timer.h>
 
-#include "libScaena_global.h"
-#include "ScaenaException/PlayNotFound.h"
-#include "ScaenaException/StageNotFound.h"
+#include "../ScaenaException/PlayNotFound.h"
+#include "../ScaenaException/StageNotFound.h"
 
 
 class QApplication;

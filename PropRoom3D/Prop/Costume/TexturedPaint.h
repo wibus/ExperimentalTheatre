@@ -3,6 +3,7 @@
 
 #include "FlatPaint.h"
 
+
 namespace media
 {
     class Image;

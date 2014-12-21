@@ -1,25 +1,24 @@
 #ifndef PROPROOM2D_ABSTRACTARTDIRECTOR_H
 #define PROPROOM2D_ABSTRACTARTDIRECTOR_H
 
-#include "libPropRoom2D_global.h"
-#include "AbstractTeamMember.h"
-
 #include <memory>
 
-#include <DesignPattern/SpecificObserver.h>
+#include <CellarWorkbench/DesignPattern/SpecificObserver.h>
+
+#include "AbstractTeamMember.h"
 
 
 namespace media
 {
-class CameraMsg;
+    class CameraMsg;
 }
 
 namespace prop2
 {
-class Circle;
-class Polygon;
-class TextHud;
-class ImageHud;
+    class Circle;
+    class Polygon;
+    class TextHud;
+    class ImageHud;
 
     class PROP2D_EXPORT AbstractArtDirector :
             public cellar::SpecificObserver<media::CameraMsg>,

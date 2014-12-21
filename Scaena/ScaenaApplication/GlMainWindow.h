@@ -2,11 +2,11 @@
 #define SCAENA_GLMAINWINDOW_H
 
 #include <QWidget>
-#include <Stage/QGLStage.h>
-
 class QMenuBar;
 class QMenu;
 class QAction;
+
+#include "../Stage/QGLStage.h"
 
 
 namespace scaena

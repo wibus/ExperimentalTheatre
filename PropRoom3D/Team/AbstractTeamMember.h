@@ -1,7 +1,8 @@
 #ifndef PROPROOM3D_TEAMMEMBER_H
 #define PROPROOM3D_TEAMMEMBER_H
 
-#include "libPropRoom3D_global.h"
+#include "../libPropRoom3D_global.h"
+
 
 namespace prop3
 {

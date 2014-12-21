@@ -1,12 +1,4 @@
 #include "CpuRaytracer.h"
-#include "Prop/Prop.h"
-#include "Prop/Costume/AbstractCostume.h"
-#include "Prop/Volume/Raycast.h"
-
-#include <CellarWorkbench/Misc/CellarUtils.h>
-#include <CellarWorkbench/Misc/Log.h>
-
-#include <MediaWorkbench/Camera/Camera.h>
 
 #include <algorithm>
 
@@ -14,6 +6,15 @@
 #include <GLM/gtc/random.hpp>
 
 #include <GL3/gl3w.h>
+
+#include <CellarWorkbench/Misc/CellarUtils.h>
+#include <CellarWorkbench/Misc/Log.h>
+
+#include <MediaWorkbench/Camera/Camera.h>
+
+#include "../../Prop/Prop.h"
+#include "../../Prop/Costume/Costume.h"
+#include "../../Prop/Volume/Raycast.h"
 
 
 namespace prop3
@@ -233,8 +234,9 @@ namespace prop3
 
         for(const auto& prop : _props)
         {
+            const std::shared_ptr<Volume>& volume = prop->volume();
             std::vector<RaycastReport> reports;
-            prop->raycast(ray, reports);
+            volume->raycast(ray, reports);
 
             for(const RaycastReport& report : reports)
             {
@@ -249,7 +251,7 @@ namespace prop3
         if(propMin)
         {
             // Surface color
-            std::shared_ptr<AbstractCostume> costume = propMin->costume();
+            const std::shared_ptr<Costume>& costume = propMin->costume();
 
             const glm::dvec3& interPt = reportMin.position;
             bool isEntering = glm::dot(ray.direction, reportMin.normal) < 0.0;

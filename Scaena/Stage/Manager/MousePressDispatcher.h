@@ -2,7 +2,7 @@
 #define SCAENA_MOUSE_PRESS_DISPATCHER_H
 
 #include "StageManager.h"
-#include "Stage/Event/MouseEvent.h"
+#include "../Event/MouseEvent.h"
 
 
 namespace scaena

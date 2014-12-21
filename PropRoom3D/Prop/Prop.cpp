@@ -1,8 +1,9 @@
 #include "Prop.h"
-#include "Hardware/Hardware.h"
-#include "Costume/FlatPaint.h"
 
 #include <cassert>
+
+#include "Hardware/Hardware.h"
+#include "Costume/FlatPaint.h"
 
 
 namespace prop3
@@ -48,12 +49,12 @@ namespace prop3
         _isVisible = isVisible;
     }
 
-    void Prop::setEquation(const std::shared_ptr<Volume>& eq)
+    void Prop::setVolume(const std::shared_ptr<Volume>& volume)
     {
-        _eq = eq;
+        _volume = volume;
     }
 
-    const void Prop::setCostume(const std::shared_ptr<AbstractCostume>& costume)
+    const void Prop::setCostume(const std::shared_ptr<Costume>& costume)
     {
         _costume = costume;
     }
@@ -235,22 +236,6 @@ namespace prop3
 
         glm::dvec3 radius = at - _centroid;
         applyAngularImpulse(glm::cross(radius, impulse));
-    }
-
-    bool Prop::contains(const glm::dvec3& point) const
-    {
-        return _eq->isIn(point) == EPointPosition::IN;
-    }
-
-    glm::dvec3 Prop::nearestSurface(const glm::dvec3& point) const
-    {
-        assert(false /* Not Implemented */);
-        return point;
-    }
-
-    void Prop::raycast(const Ray& ray, std::vector<RaycastReport>& reports) const
-    {
-        _eq->raycast(ray, reports);
     }
 
     void Prop::updateTransformMatrix()

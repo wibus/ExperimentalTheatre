@@ -1,7 +1,7 @@
 #ifndef MEDIAWORKBENCH_CAMERAMANFREE_H
 #define MEDIAWORKBENCH_CAMERAMANFREE_H
 
-#include "libMediaWorkbench_global.h"
+#include "../libMediaWorkbench_global.h"
 
 
 namespace media

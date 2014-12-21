@@ -1,7 +1,8 @@
 #include "StdDesigner.h"
-#include "Prop/Prop.h"
 
 #include <cassert>
+
+#include "../../Prop/Prop.h"
 
 
 namespace prop3

@@ -3,10 +3,6 @@
 using namespace std;
 
 
- /*
-  *     Abstract exception TheaterException
-  */
-
 namespace scaena
 {
     ScaenaException::ScaenaException(const string& what) throw() :

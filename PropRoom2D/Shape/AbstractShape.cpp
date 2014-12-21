@@ -1,7 +1,8 @@
 #include "AbstractShape.h"
-#include "Hardware/Hardware.h"
 
 #include <cassert>
+
+#include "../Hardware/Hardware.h"
 
 
 namespace prop2

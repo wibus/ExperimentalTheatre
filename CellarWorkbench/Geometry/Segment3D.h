@@ -1,8 +1,10 @@
 #ifndef CELLARWORKBENCH_LINE3D_H
 #define CELLARWORKBENCH_LINE3D_H
 
-#include "libCellarWorkbench_global.h"
-#include "DataStructure/Vector.h"
+#include <CellarWorkbench/DataStructure/Vector.h>
+
+#include "../libCellarWorkbench_global.h"
+
 
 namespace cellar
 {

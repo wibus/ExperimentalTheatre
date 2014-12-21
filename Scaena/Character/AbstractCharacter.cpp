@@ -1,7 +1,8 @@
 #include "AbstractCharacter.h"
-#include "Stage/Manager/StageManager.h"
 
 using namespace std;
+
+#include "../Stage/Manager/StageManager.h"
 
 
 namespace scaena

@@ -1,10 +1,9 @@
 #ifndef PROPROOM3D_ABSTRACTDESIGNER_H
 #define PROPROOM3D_ABSTRACTDESIGNER_H
 
-#include "libPropRoom3D_global.h"
-#include "../AbstractTeamMember.h"
-
 #include <memory>
+
+#include "../AbstractTeamMember.h"
 
 
 namespace prop3

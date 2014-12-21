@@ -1,15 +1,14 @@
 #include "StdPropDesigner.h"
 
-#include "Shape/Circle.h"
-#include "Costume/CircleCostume.h"
-#include "Shape/Polygon.h"
-#include "Costume/PolygonCostume.h"
-#include "Hardware/Hardware.h"
-
-#include "Hud/TextHud.h"
-#include "Hud/ImageHud.h"
-
 #include <cassert>
+
+#include "../Shape/Circle.h"
+#include "../Shape/Polygon.h"
+#include "../Costume/CircleCostume.h"
+#include "../Costume/PolygonCostume.h"
+#include "../Hardware/Hardware.h"
+#include "../Hud/TextHud.h"
+#include "../Hud/ImageHud.h"
 
 
 namespace prop2

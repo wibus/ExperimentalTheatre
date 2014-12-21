@@ -4,7 +4,7 @@
 #include <memory>
 #include <map>
 
-#include "DesignPattern/Singleton.h"
+#include <CellarWorkbench/DesignPattern/Singleton.h>
 #include "GlShader.h"
 
 

@@ -1,10 +1,11 @@
 #ifndef MEDIAWORKBENCH_CAMERA_H
 #define MEDIAWORKBENCH_CAMERA_H
 
-#include "libMediaWorkbench_global.h"
-#include <DesignPattern/SpecificSubject.h>
-#include <DataStructure/Vector.h>
-#include <DataStructure/Matrix.h>
+#include <CellarWorkbench/DesignPattern/SpecificSubject.h>
+#include <CellarWorkbench/DataStructure/Vector.h>
+#include <CellarWorkbench/DataStructure/Matrix.h>
+
+#include "../libMediaWorkbench_global.h"
 
 
 namespace media

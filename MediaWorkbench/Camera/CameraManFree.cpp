@@ -1,7 +1,8 @@
 #include "CameraManFree.h"
-#include "Camera.h"
 
 #include <cmath>
+
+#include "Camera.h"
 
 
 namespace media

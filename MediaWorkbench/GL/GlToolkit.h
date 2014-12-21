@@ -3,7 +3,7 @@
 
 #include <map>
 
-#include "libMediaWorkbench_global.h"
+#include "../libMediaWorkbench_global.h"
 
 
 namespace media

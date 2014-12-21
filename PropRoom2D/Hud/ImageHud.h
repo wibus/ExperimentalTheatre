@@ -1,11 +1,10 @@
 #ifndef PROPROOM2D_IMAGEHUD_H
 #define PROPROOM2D_IMAGEHUD_H
 
-#include "libPropRoom2D_global.h"
-#include "AbstractHud.h"
-
 #include <string>
 #include <vector>
+
+#include "AbstractHud.h"
 
 
 namespace prop2

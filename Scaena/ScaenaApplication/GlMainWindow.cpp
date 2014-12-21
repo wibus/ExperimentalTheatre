@@ -6,8 +6,8 @@
 #include <QVBoxLayout>
 #include <QFileDialog>
 
-#include <Play/AbstractPlay.h>
-#include <Act/AbstractAct.h>
+#include "../Play/AbstractPlay.h"
+#include "../Act/AbstractAct.h"
 
 
 namespace scaena

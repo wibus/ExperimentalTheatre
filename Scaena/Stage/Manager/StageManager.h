@@ -1,7 +1,7 @@
 #ifndef SCAENA_STAGE_MANAGER_H
 #define SCAENA_STAGE_MANAGER_H
 
-#include "libScaena_global.h"
+#include "../../libScaena_global.h"
 
 
 namespace scaena

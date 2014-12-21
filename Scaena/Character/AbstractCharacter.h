@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "libScaena_global.h"
+#include "../libScaena_global.h"
 
 
 namespace scaena

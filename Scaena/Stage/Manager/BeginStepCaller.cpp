@@ -1,5 +1,6 @@
 #include "BeginStepCaller.h"
-#include "Character/AbstractCharacter.h"
+
+#include "../../Character/AbstractCharacter.h"
 
 
 namespace scaena

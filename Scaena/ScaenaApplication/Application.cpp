@@ -1,19 +1,19 @@
 #include "Application.h"
 
-#include "StageChooserDialog.h"
-#include "Stage/QGLStage.h"
-#include "Play/AbstractPlay.h"
+using namespace std;
 
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QWidget>
 #include <QComboBox>
-#include <Misc/Log.h>
-#include <Misc/CellarUtils.h>
 
-using namespace std;
-
+#include <CellarWorkbench/Misc/Log.h>
+#include <CellarWorkbench/Misc/CellarUtils.h>
 using namespace cellar;
+
+#include "StageChooserDialog.h"
+#include "../Stage/QGLStage.h"
+#include "../Play/AbstractPlay.h"
 
 
 namespace scaena

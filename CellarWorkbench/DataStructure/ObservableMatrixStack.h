@@ -2,7 +2,7 @@
 #define CELLARWORKBENCH_OBSERVABLEMATRIXSTACK_H
 
 #include "MatrixStack.h"
-#include "DesignPattern/SpecificSubject.h"
+#include "../DesignPattern/SpecificSubject.h"
 
 
 namespace cellar

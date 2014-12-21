@@ -1,21 +1,21 @@
 #include "GlProgram.h"
 
+#include <cassert>
+using namespace std;
+
 #include <GL3/gl3w.h>
 
-#include <DataStructure/Vector.h>
-#include <DataStructure/Matrix.h>
-#include <Misc/Log.h>
-#include <Misc/CellarUtils.h>
+#include <CellarWorkbench/DataStructure/Vector.h>
+#include <CellarWorkbench/DataStructure/Matrix.h>
+#include <CellarWorkbench/Misc/Log.h>
+#include <CellarWorkbench/Misc/CellarUtils.h>
+using namespace cellar;
 
 #include "GlShader.h"
 #include "GlShaderBank.h"
 #include "GlToolkit.h"
-#include "Image/ImageBank.h"
+#include "../Image/ImageBank.h"
 
-
-#include <cassert>
-using namespace std;
-using namespace cellar;
 
 namespace media
 {

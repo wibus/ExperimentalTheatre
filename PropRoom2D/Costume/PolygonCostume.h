@@ -1,10 +1,10 @@
 #ifndef PROPROOM2D_POLYGONCOSTUME_H
 #define PROPROOM2D_POLYGONCOSTUME_H
 
-#include "libPropRoom2D_global.h"
+#include <vector>
+
 #include "AbstractCostume.h"
 
-#include <vector>
 
 namespace prop2
 {

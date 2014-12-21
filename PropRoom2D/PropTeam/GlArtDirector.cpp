@@ -1,30 +1,29 @@
 #include "GlArtDirector.h"
 
-#include "Shape/Circle.h"
-#include "Costume/CircleCostume.h"
-#include "Shape/Polygon.h"
-#include "Costume/PolygonCostume.h"
-
-#include "Hud/TextHud.h"
-#include "Hud/ImageHud.h"
-
 #include <cassert>
+
 #include <algorithm>
+using namespace std;
 
 #include <GL3/gl3w.h>
 
 #include <QFile>
 
-#include <Misc/Log.h>
-
-#include <Camera/Camera.h>
-#include <Image/Image.h>
-#include <Image/ImageBank.h>
-#include <GL/GlToolkit.h>
-
-using namespace std;
+#include <CellarWorkbench/Misc/Log.h>
 using namespace cellar;
+
+#include <MediaWorkbench/Camera/Camera.h>
+#include <MediaWorkbench/Image/Image.h>
+#include <MediaWorkbench/Image/ImageBank.h>
+#include <MediaWorkbench/GL/GlToolkit.h>
 using namespace media;
+
+#include "../Shape/Circle.h"
+#include "../Shape/Polygon.h"
+#include "../Costume/CircleCostume.h"
+#include "../Costume/PolygonCostume.h"
+#include "../Hud/TextHud.h"
+#include "../Hud/ImageHud.h"
 
 
 namespace prop2

@@ -1,7 +1,6 @@
 #ifndef PROPROOM2D_STDGLPROPTEAM_H
 #define PROPROOM2D_STDGLPROPTEAM_H
 
-#include "libPropRoom2D_global.h"
 #include "AbstractPropTeam.h"
 
 

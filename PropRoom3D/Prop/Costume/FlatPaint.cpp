@@ -2,6 +2,7 @@
 
 #include <GLM/gtc/random.hpp>
 
+
 namespace prop3
 {
     FlatPaint::FlatPaint(const glm::dvec3& color)

@@ -1,14 +1,14 @@
 #ifndef PROPROOM2D_GLARTDIRECTOR_H
 #define PROPROOM2D_GLARTDIRECTOR_H
 
-#include "libPropRoom2D_global.h"
-#include "AbstractArtDirector.h"
-
 #include <vector>
 #include <map>
 
-#include <GL/GlProgram.h>
-#include <GL/GlVao.h>
+#include <MediaWorkbench/GL/GlProgram.h>
+#include <MediaWorkbench/GL/GlVao.h>
+
+#include "AbstractArtDirector.h"
+
 
 
 namespace prop2

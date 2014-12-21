@@ -1,11 +1,11 @@
 #include "GlShader.h"
 
+using namespace std;
+
 #include <GL3/gl3w.h>
 
-#include "Misc/CellarUtils.h"
-#include "Misc/Log.h"
-
-using namespace std;
+#include <CellarWorkbench/Misc/CellarUtils.h>
+#include <CellarWorkbench/Misc/Log.h>
 using namespace cellar;
 
 

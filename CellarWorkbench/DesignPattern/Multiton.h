@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 
-#include "libCellarWorkbench_global.h"
+#include "../libCellarWorkbench_global.h"
 
 
 namespace cellar

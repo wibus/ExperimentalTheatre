@@ -2,7 +2,7 @@
 #define SCAENA_BEGIN_STEP_CALLER_H
 
 #include "StageManager.h"
-#include "Stage/Event/StageTime.h"
+#include "../Event/StageTime.h"
 
 
 namespace scaena

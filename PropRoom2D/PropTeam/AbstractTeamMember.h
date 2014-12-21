@@ -1,7 +1,8 @@
 #ifndef PROPROOM2D_TEAMMEMBER_H
 #define PROPROOM2D_TEAMMEMBER_H
 
-#include "libPropRoom2D_global.h"
+#include "../libPropRoom2D_global.h"
+
 
 namespace prop2
 {

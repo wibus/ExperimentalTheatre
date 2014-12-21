@@ -1,8 +1,9 @@
 #ifndef PROPROOM2D_MATERIAL_H
 #define PROPROOM2D_MATERIAL_H
 
-#include "libPropRoom2D_global.h"
-#include <DesignPattern/SpecificSubject.h>
+#include <CellarWorkbench/DesignPattern/SpecificSubject.h>
+
+#include "../libPropRoom2D_global.h"
 
 
 namespace prop2

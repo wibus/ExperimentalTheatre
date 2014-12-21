@@ -3,27 +3,27 @@
 
 #include <memory>
 
-#include "libPropRoom2D_global.h"
+#include "../libPropRoom2D_global.h"
 
 
 namespace media
 {
-class Camera;
+    class Camera;
 }
 
 namespace prop2
 {
-class AbstractPropDesigner;
-class AbstractArtDirector;
-class AbstractChoreographer;
+    class AbstractPropDesigner;
+    class AbstractArtDirector;
+    class AbstractChoreographer;
 
-class AbstractShape;
-class Circle;
-class Polygon;
+    class AbstractShape;
+    class Circle;
+    class Polygon;
 
-class AbstractHud;
-class TextHud;
-class ImageHud;
+    class AbstractHud;
+    class TextHud;
+    class ImageHud;
 
 
     class PROP2D_EXPORT AbstractPropTeam

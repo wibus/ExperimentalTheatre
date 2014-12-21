@@ -1,9 +1,12 @@
 #include "ImageBank.h"
-#include "Image.h"
-#include "Misc/Log.h"
 
 using namespace std;
+
+#include <CellarWorkbench/Misc/Log.h>
 using namespace cellar;
+
+#include "Image.h"
+
 
 namespace media
 {

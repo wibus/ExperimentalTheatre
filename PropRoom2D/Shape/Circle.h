@@ -3,7 +3,6 @@
 
 #include <memory>
 
-#include "libPropRoom2D_global.h"
 #include "AbstractShape.h"
 
 

@@ -1,8 +1,9 @@
 #ifndef MEDIAWORKBENCH_CAMERAMANBIRD_H
 #define MEDIAWORKBENCH_CAMERAMANBIRD_H
 
-#include "libMediaWorkbench_global.h"
-#include "DataStructure/Vector.h"
+#include <CellarWorkbench/DataStructure/Vector.h>
+
+#include "../libMediaWorkbench_global.h"
 
 
 namespace media

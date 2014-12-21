@@ -1,8 +1,9 @@
 #ifndef PROPROOM3D_HARDWARE_H
 #define PROPROOM3D_HARDWARE_H
 
-#include "libPropRoom3D_global.h"
-#include <DesignPattern/SpecificSubject.h>
+#include <CellarWorkbench/DesignPattern/SpecificSubject.h>
+
+#include "../../libPropRoom3D_global.h"
 
 
 namespace prop3

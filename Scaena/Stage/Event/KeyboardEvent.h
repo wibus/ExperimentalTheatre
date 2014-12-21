@@ -1,8 +1,9 @@
 #ifndef SCAENA_KEYBOARD_EVENT_H
 #define SCAENA_KEYBOARD_EVENT_H
 
-#include "libScaena_global.h"
+#include "../../libScaena_global.h"
 #include "EventTypes.h"
+
 
 namespace scaena
 {

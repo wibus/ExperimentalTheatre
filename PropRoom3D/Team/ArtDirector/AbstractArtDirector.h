@@ -1,14 +1,14 @@
 #ifndef PROPROOM3D_ABSTRACTARTDIRECTOR_H
 #define PROPROOM3D_ABSTRACTARTDIRECTOR_H
 
-#include "libPropRoom3D_global.h"
-#include "../AbstractTeamMember.h"
-
-#include <DesignPattern/SpecificObserver.h>
-
 #include <memory>
 
 #include <GLM/glm.hpp>
+
+#include <CellarWorkbench/DesignPattern/SpecificObserver.h>
+
+#include "../AbstractTeamMember.h"
+
 
 namespace media
 {

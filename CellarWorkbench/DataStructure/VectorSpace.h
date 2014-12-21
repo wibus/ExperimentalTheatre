@@ -1,7 +1,7 @@
 #ifndef CELLARWORKBENCH_VECTORSPACE_H
 #define CELLARWORKBENCH_VECTORSPACE_H
 
-#include "libCellarWorkbench_global.h"
+#include "../libCellarWorkbench_global.h"
 #include "Vector.h"
 
 namespace cellar

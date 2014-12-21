@@ -5,19 +5,19 @@
 
 #include <GLM/glm.hpp>
 
-#include "libPropRoom3D_global.h"
+#include "../libPropRoom3D_global.h"
 
 
 namespace media
 {
-class Camera;
+    class Camera;
 }
 
 namespace prop3
 {
-class AbstractDesigner;
-class AbstractArtDirector;
-class AbstractChoreographer;
+    class AbstractDesigner;
+    class AbstractArtDirector;
+    class AbstractChoreographer;
 
 class Prop;
 

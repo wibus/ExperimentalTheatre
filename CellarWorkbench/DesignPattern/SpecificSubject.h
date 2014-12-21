@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "libCellarWorkbench_global.h"
+#include "../libCellarWorkbench_global.h"
 #include "SpecificObserver.h"
 
 

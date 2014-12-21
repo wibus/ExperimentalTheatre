@@ -2,7 +2,8 @@
 #define CELLARWORKBENCH_CALENDAR_H
 
 #include <string>
-#include "libCellarWorkbench_global.h"
+
+#include "../libCellarWorkbench_global.h"
 
 
 namespace cellar

@@ -1,14 +1,14 @@
 #ifndef PROPROOM3D_GLASS_H
 #define PROPROOM3D_GLASS_H
 
-#include "AbstractCostume.h"
+#include "Costume.h"
 
 
 namespace prop3
 {
 
     class PROP3D_EXPORT Glass :
-            public AbstractCostume
+            public Costume
     {
     public:
         Glass(const glm::dvec3& color = glm::dvec3(1.0));

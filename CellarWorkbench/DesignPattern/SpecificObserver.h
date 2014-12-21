@@ -1,7 +1,7 @@
 #ifndef CELLARWORKBENCH_SPECIFIC_OBSERVER_H
 #define CELLARWORKBENCH_SPECIFIC_OBSERVER_H
 
-#include "libCellarWorkbench_global.h"
+#include "../libCellarWorkbench_global.h"
 
 
 namespace cellar

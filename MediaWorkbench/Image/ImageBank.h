@@ -1,13 +1,14 @@
 #ifndef MEDIAWORKBENCH_IMAGEBANK_H
 #define MEDIAWORKBENCH_IMAGEBANK_H
 
-#include <string>
 #include <map>
+#include <string>
 #include <memory>
 #include <stdexcept>
 
-#include "libMediaWorkbench_global.h"
-#include "DesignPattern/Singleton.h"
+#include <CellarWorkbench/DesignPattern/Singleton.h>
+
+#include "../libMediaWorkbench_global.h"
 
 
 namespace media

@@ -5,9 +5,8 @@
 #include <string>
 #include <memory>
 
-#include "libScaena_global.h"
-#include "ScaenaException/ActNotFound.h"
-#include "ScaenaException/CharacterNotFound.h"
+#include "../ScaenaException/ActNotFound.h"
+#include "../ScaenaException/CharacterNotFound.h"
 
 
 namespace scaena

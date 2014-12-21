@@ -3,6 +3,7 @@
 
 #include "AbstractChoreographer.h"
 
+
 namespace prop3
 {
     class PROP3D_EXPORT StdChoreographer : public AbstractChoreographer

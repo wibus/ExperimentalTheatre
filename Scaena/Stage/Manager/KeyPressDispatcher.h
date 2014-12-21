@@ -2,7 +2,7 @@
 #define SCAENA_KEY_PRESS_DISPATCHER_H
 
 #include "StageManager.h"
-#include "Stage/Event/KeyboardEvent.h"
+#include "../Event/KeyboardEvent.h"
 
 
 namespace scaena

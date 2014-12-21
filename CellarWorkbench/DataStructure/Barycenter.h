@@ -1,7 +1,6 @@
 #ifndef CELLARWORKBENCH_BARYCENTER_H
 #define CELLARWORKBENCH_BARYCENTER_H
 
-#include "libCellarWorkbench_global.h"
 #include "Vector.h"
 
 

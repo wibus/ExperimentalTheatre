@@ -1,7 +1,6 @@
 #ifndef PROPROOM2D_STDPROPDESIGNER_H
 #define PROPROOM2D_STDPROPDESIGNER_H
 
-#include "libPropRoom2D_global.h"
 #include "AbstractPropDesigner.h"
 
 

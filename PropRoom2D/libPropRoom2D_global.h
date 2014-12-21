@@ -1,9 +1,9 @@
 #ifndef PROPROOM2D_LIBPROPROOM2D_GLOBAL_H
 #define PROPROOM2D_LIBPROPROOM2D_GLOBAL_H
 
-#include <DataStructure/Vector.h>
-#include <DataStructure/Matrix.h>
-#include <Geometry/Segment2D.h>
+#include <CellarWorkbench/DataStructure/Vector.h>
+#include <CellarWorkbench/DataStructure/Matrix.h>
+#include <CellarWorkbench/Geometry/Segment2D.h>
 
 #ifdef _WINDOWS
 #   if defined(PROPROOM2D_LIBRARY)

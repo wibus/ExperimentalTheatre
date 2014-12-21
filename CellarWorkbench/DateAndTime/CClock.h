@@ -3,6 +3,7 @@
 
 #include "AbstractClock.h"
 
+
 namespace cellar
 {
     class CELLAR_EXPORT CClock : public AbstractClock

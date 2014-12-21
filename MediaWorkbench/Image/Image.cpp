@@ -1,11 +1,11 @@
 #include "Image.h"
-#include "Misc/Log.h"
 
 #include <cassert>
-
 using namespace std;
 
 #include <QImage>
+
+#include <CellarWorkbench/Misc/Log.h>
 
 
 namespace media

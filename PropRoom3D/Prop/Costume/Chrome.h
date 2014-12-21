@@ -1,14 +1,14 @@
 #ifndef PROPROOM3D_CHROME_H
 #define PROPROOM3D_CHROME_H
 
-#include "AbstractCostume.h"
+#include "Costume.h"
 
 
 namespace prop3
 {
 
     class PROP3D_EXPORT Chrome :
-            public AbstractCostume
+            public Costume
     {
     public:
         Chrome(const glm::dvec3& color = glm::dvec3(1.0));

@@ -7,7 +7,7 @@
 #include <QTimer>
 #include <QElapsedTimer>
 
-#include "Stage/AbstractStage.h"
+#include "../Stage/AbstractStage.h"
 
 
 namespace scaena

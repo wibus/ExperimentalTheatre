@@ -1,10 +1,9 @@
 #ifndef PROPROOM2D_TEXTHUD_H
 #define PROPROOM2D_TEXTHUD_H
 
-#include "libPropRoom2D_global.h"
-#include "AbstractHud.h"
-
 #include <string>
+
+#include "AbstractHud.h"
 
 
 namespace prop2

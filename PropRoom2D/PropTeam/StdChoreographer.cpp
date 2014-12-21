@@ -1,12 +1,13 @@
 #include "StdChoreographer.h"
 
-#include "Shape/Circle.h"
-#include "Shape/Polygon.h"
-#include "Hardware/Hardware.h"
-
 #include <cassert>
 using namespace std;
+
 using namespace cellar;
+
+#include "../Shape/Circle.h"
+#include "../Shape/Polygon.h"
+#include "../Hardware/Hardware.h"
 
 
 namespace prop2

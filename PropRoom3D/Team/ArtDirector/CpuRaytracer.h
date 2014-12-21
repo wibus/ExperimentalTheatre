@@ -7,6 +7,7 @@
 
 #include "AbstractArtDirector.h"
 
+
 namespace prop3
 {
     class Ray;

@@ -1,18 +1,17 @@
 #ifndef PROPROOM2D_ABSTRACTCHOREOGRAPHER_H
 #define PROPROOM2D_ABSTRACTCHOREOGRAPHER_H
 
-#include "libPropRoom2D_global.h"
-#include "AbstractTeamMember.h"
-
 #include <memory>
+
+#include "AbstractTeamMember.h"
 
 
 namespace prop2
 {
-class Circle;
-class Polygon;
-class TextHud;
-class ImageHud;
+    class Circle;
+    class Polygon;
+    class TextHud;
+    class ImageHud;
 
     class PROP2D_EXPORT AbstractChoreographer : public AbstractTeamMember
     {

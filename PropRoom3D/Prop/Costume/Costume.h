@@ -1,22 +1,22 @@
 #ifndef PROPROOM3D_ABSTRACTCOSTUME_H
 #define PROPROOM3D_ABSTRACTCOSTUME_H
 
-#include "libPropRoom3D_global.h"
-
 #include <memory>
 
 #include <GLM/glm.hpp>
 
+#include "../../libPropRoom3D_global.h"
+
 
 namespace prop3
 {
-    class PROP3D_EXPORT AbstractCostume
+    class PROP3D_EXPORT Costume
     {
     protected:
-        AbstractCostume() {}
+        Costume() {}
 
     public:
-        virtual ~AbstractCostume() {}
+        virtual ~Costume() {}
 
         // Medium opacity
         double mediumOpacity() const;
@@ -68,37 +68,37 @@ namespace prop3
 
 
     // IMPLEMENTATION //
-    inline double AbstractCostume::mediumOpacity() const
+    inline double Costume::mediumOpacity() const
     {
         return _mediumOpacity;
     }
 
-    inline void AbstractCostume::setMediumOpacity(double opacity)
+    inline void Costume::setMediumOpacity(double opacity)
     {
         _mediumOpacity = opacity;
     }
 
-    inline double AbstractCostume::refractiveIndex() const
+    inline double Costume::refractiveIndex() const
     {
         return _refractiveIndex;
     }
 
-    inline void AbstractCostume::setRefractiveIndex(double refractiveIndex)
+    inline void Costume::setRefractiveIndex(double refractiveIndex)
     {
         _refractiveIndex = refractiveIndex;
     }
 
-    inline glm::dvec3 AbstractCostume::mediumColor() const
+    inline glm::dvec3 Costume::mediumColor() const
     {
         return _mediumColor;
     }
 
-    inline void AbstractCostume::setMediumColor(const glm::dvec3& color)
+    inline void Costume::setMediumColor(const glm::dvec3& color)
     {
         _mediumColor = color;
     }
 
-    inline double AbstractCostume::computeReflexionRatio(
+    inline double Costume::computeReflexionRatio(
             const glm::dvec3& incidentDirection,
             const glm::dvec3& surfaceNormal,
             const glm::dvec3& texCoord) const
@@ -106,7 +106,7 @@ namespace prop3
         return 1.0;
     }
 
-    inline glm::dvec3 AbstractCostume::computeRefraction(
+    inline glm::dvec3 Costume::computeRefraction(
             const glm::dvec3& incidentDirection,
             const glm::dvec3& surfaceNormal,
             const glm::dvec3& texCoord) const
@@ -114,7 +114,7 @@ namespace prop3
         return glm::dvec3();
     }
 
-    inline glm::dvec3 AbstractCostume::computeRefractionBrdf(
+    inline glm::dvec3 Costume::computeRefractionBrdf(
             const glm::dvec3& incidentDirection,
             const glm::dvec3& surfaceNormal,
             const glm::dvec3& viewDirection,

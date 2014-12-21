@@ -1,9 +1,10 @@
 #include "Circle.h"
-#include "Costume/CircleCostume.h"
-#include "Hardware/Hardware.h"
 
-#include <Misc/CellarUtils.h>
+#include <CellarWorkbench/Misc/CellarUtils.h>
 using namespace cellar;
+
+#include "../Costume/CircleCostume.h"
+#include "../Hardware/Hardware.h"
 
 
 namespace prop2

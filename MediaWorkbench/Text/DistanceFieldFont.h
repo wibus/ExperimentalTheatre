@@ -1,13 +1,14 @@
 #ifndef MEDIAWORKBENCH_DISTANCE_FIELD_FONT_H
 #define MEDIAWORKBENCH_DISTANCE_FIELD_FONT_H
 
-#include "libMediaWorkbench_global.h"
-
 #include <string>
 #include <vector>
-#include <DataStructure/Vector.h>
 
 class QFont;
+
+#include <CellarWorkbench/DataStructure/Vector.h>
+
+#include "../libMediaWorkbench_global.h"
 
 
 namespace media

@@ -3,7 +3,7 @@
 
 #include <ctype.h>
 
-#include "libScaena_global.h"
+#include "../../libScaena_global.h"
 #include "EventTypes.h"
 
 

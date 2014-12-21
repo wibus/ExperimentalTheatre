@@ -1,9 +1,11 @@
 #include "GlShaderBank.h"
-#include "Misc/CellarUtils.h"
-#include "Misc/Log.h"
 
 using namespace std;
+
+#include <CellarWorkbench/Misc/CellarUtils.h>
+#include <CellarWorkbench/Misc/Log.h>
 using namespace cellar;
+
 
 namespace media
 {

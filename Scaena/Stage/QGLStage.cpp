@@ -1,31 +1,35 @@
 #include "QGLStage.h"
 
-#include "Play/AbstractPlay.h"
-#include "Act/AbstractAct.h"
-#include "Stage/Manager/KeyPressDispatcher.h"
-#include "Stage/Manager/KeyReleaseDispatcher.h"
-#include "Stage/Manager/MouseMoveDispatcher.h"
-#include "Stage/Manager/MousePressDispatcher.h"
-#include "Stage/Manager/MouseReleaseDispatcher.h"
-#include "Stage/Event/StageTime.h"
-#include "Stage/Event/SynchronousKeyboard.h"
-#include "Stage/Event/SynchronousMouse.h"
-
 #include <sstream>
 using namespace std;
-
-#include <Camera/Camera.h>
-#include <GL/GlToolkit.h>
-#include <DateAndTime/QtClock.h>
-#include <Misc/Log.h>
-using namespace cellar;
-
-#include <PropTeam/StdGlPropTeam.h>
-#include <Team/StdGlTeam.h>
 
 #include <QKeyEvent>
 #include <QApplication>
 #include <QDesktopWidget>
+
+#include <CellarWorkbench/DateAndTime/QtClock.h>
+#include <CellarWorkbench/Misc/Log.h>
+using namespace cellar;
+
+#include <MediaWorkbench/Camera/Camera.h>
+#include <MediaWorkbench/GL/GlToolkit.h>
+using namespace media;
+
+#include <PropRoom2D/PropTeam/StdGlPropTeam.h>
+#include <PropRoom3D/Team/StdGlTeam.h>
+using namespace prop2;
+using namespace prop3;
+
+#include "../Play/AbstractPlay.h"
+#include "../Act/AbstractAct.h"
+#include "Manager/KeyPressDispatcher.h"
+#include "Manager/KeyReleaseDispatcher.h"
+#include "Manager/MouseMoveDispatcher.h"
+#include "Manager/MousePressDispatcher.h"
+#include "Manager/MouseReleaseDispatcher.h"
+#include "Event/StageTime.h"
+#include "Event/SynchronousKeyboard.h"
+#include "Event/SynchronousMouse.h"
 
 
 namespace scaena

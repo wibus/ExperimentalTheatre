@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "libCellarWorkbench_global.h"
-#include "DesignPattern/Singleton.h"
+#include "../libCellarWorkbench_global.h"
+#include "../DesignPattern/Singleton.h"
 
 
 namespace cellar

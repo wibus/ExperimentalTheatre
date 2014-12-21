@@ -9,8 +9,9 @@
 
 #include <GL3/gl3w.h>
 
-#include "DataStructure/Vector.h"
-#include "DataStructure/Matrix.h"
+#include <CellarWorkbench/DataStructure/Vector.h>
+#include <CellarWorkbench/DataStructure/Matrix.h>
+
 #include "GlInputsOutputs.h"
 #include "GlShader.h"
 

@@ -3,6 +3,7 @@
 
 #include "AbstractTeam.h"
 
+
 namespace prop3
 {
     class PROP3D_EXPORT StdGlTeam : public AbstractTeam

@@ -25,7 +25,7 @@ SET(PROP3_TEAM_HEADERS
 
 # Costumes
 SET(PROP3_COSTUME_HEADERS
-    ${PROP3_SRC_DIR}/Prop/Costume/AbstractCostume.h
+    ${PROP3_SRC_DIR}/Prop/Costume/Costume.h
     ${PROP3_SRC_DIR}/Prop/Costume/Glass.h
     ${PROP3_SRC_DIR}/Prop/Costume/Chrome.h
     ${PROP3_SRC_DIR}/Prop/Costume/FlatPaint.h

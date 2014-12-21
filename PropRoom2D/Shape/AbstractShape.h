@@ -3,18 +3,17 @@
 
 #include <memory>
 
-#include <DesignPattern/SpecificObserver.h>
+#include <CellarWorkbench/DesignPattern/SpecificObserver.h>
 
-#include "libPropRoom2D_global.h"
-#include "AbstractProp.h"
+#include "../AbstractProp.h"
 
 
 namespace prop2
 {
-class AbstractPropTeam;
-class AbstractCostume;
-class HardwareUpdate;
-class Hardware;
+    class AbstractPropTeam;
+    class AbstractCostume;
+    class HardwareUpdate;
+    class Hardware;
 
 
     class PROP2D_EXPORT AbstractShape :

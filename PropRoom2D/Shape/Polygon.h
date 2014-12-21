@@ -3,14 +3,14 @@
 
 #include <vector>
 
-#include <Geometry/Segment2D.h>
+#include <CellarWorkbench/Geometry/Segment2D.h>
 
-#include "libPropRoom2D_global.h"
 #include "AbstractShape.h"
+
 
 namespace prop2
 {
-class PolygonCostume;
+    class PolygonCostume;
 
 
     class PROP2D_EXPORT Polygon : public AbstractShape

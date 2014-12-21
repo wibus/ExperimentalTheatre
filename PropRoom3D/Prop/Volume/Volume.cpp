@@ -1,7 +1,8 @@
 #include "Volume.h"
-#include "Raycast.h"
 
 #include <GLM/gtc/matrix_transform.hpp>
+
+#include "Raycast.h"
 
 
 namespace prop3

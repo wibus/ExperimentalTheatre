@@ -1,7 +1,7 @@
 #ifndef CELLARWORKBENCH_ABSTRACTCLOCK_H
 #define CELLARWORKBENCH_ABSTRACTCLOCK_H
 
-#include "libCellarWorkbench_global.h"
+#include "../libCellarWorkbench_global.h"
 
 
 namespace cellar

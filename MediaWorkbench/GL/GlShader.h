@@ -5,7 +5,7 @@
 
 #include <GL3/gl3w.h>
 
-#include "libMediaWorkbench_global.h"
+#include "../libMediaWorkbench_global.h"
 
 
 

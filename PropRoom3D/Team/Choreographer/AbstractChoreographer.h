@@ -1,12 +1,11 @@
 #ifndef PROPROOM3D_ABSTRACTCHOREOGRAPHER_H
 #define PROPROOM3D_ABSTRACTCHOREOGRAPHER_H
 
-#include "libPropRoom3D_global.h"
-#include "../AbstractTeamMember.h"
-
 #include <memory>
 
 #include <GLM/glm.hpp>
+
+#include "../AbstractTeamMember.h"
 
 
 namespace prop3

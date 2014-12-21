@@ -1,8 +1,9 @@
 #include "AbstractAct.h"
-#include "Character/AbstractCharacter.h"
-#include "Play/AbstractPlay.h"
 
 using namespace std;
+
+#include "../Character/AbstractCharacter.h"
+#include "../Play/AbstractPlay.h"
 
 
 namespace scaena

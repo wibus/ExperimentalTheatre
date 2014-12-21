@@ -1,9 +1,9 @@
 #ifndef SCAENA_SYNCHRONOUSMOUSE_H
 #define SCAENA_SYNCHRONOUSMOUSE_H
 
-#include <DataStructure/Vector.h>
+#include <CellarWorkbench/DataStructure/Vector.h>
 
-#include "libScaena_global.h"
+#include "../../libScaena_global.h"
 #include "EventTypes.h"
 
 

@@ -1,7 +1,7 @@
 #ifndef CELLARWORKBENCH_SINGLETON_H
 #define CELLARWORKBENCH_SINGLETON_H
 
-#include "libCellarWorkbench_global.h"
+#include "../libCellarWorkbench_global.h"
 
 
 namespace cellar

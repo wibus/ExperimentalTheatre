@@ -2,6 +2,7 @@
 
 #include <cstring>
 
+
 namespace scaena
 {
     SynchronousKeyboard::SynchronousKeyboard()

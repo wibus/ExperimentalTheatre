@@ -7,16 +7,15 @@
 #include <GLM/glm.hpp>
 #include <GLM/gtc/quaternion.hpp>
 
-#include <DesignPattern/SpecificObserver.h>
+#include <CellarWorkbench/DesignPattern/SpecificObserver.h>
 
-#include "libPropRoom3D_global.h"
 #include "Volume/Volume.h"
 
 
 namespace prop3
 {
 class AbstractTeam;
-class AbstractCostume;
+class Costume;
 class HardwareUpdate;
 class Hardware;
 
@@ -35,12 +34,12 @@ class Hardware;
         virtual void setIsVisible(bool isVisible);
 
         // Volume
-        std::shared_ptr<Volume> equation() const;
-        virtual void setEquation(const std::shared_ptr<Volume>& eq);
+        std::shared_ptr<Volume> volume() const;
+        virtual void setVolume(const std::shared_ptr<Volume>& volume);
 
         // Costume
-        const std::shared_ptr<AbstractCostume>& costume() const;
-        virtual const void setCostume(const std::shared_ptr<AbstractCostume>& costume);
+        const std::shared_ptr<Costume>& costume() const;
+        virtual const void setCostume(const std::shared_ptr<Costume>& costume);
 
         // Material
         const std::shared_ptr<Hardware>& hardware() const;
@@ -107,11 +106,6 @@ class Hardware;
         virtual void applyAngularImpulse(const glm::dvec3& impulse);
         virtual void applyImpulseAt(const glm::dvec3& impulse, const glm::dvec3& at);
 
-        // Tests
-        virtual bool contains(const glm::dvec3& point) const;
-        virtual glm::dvec3 nearestSurface(const glm::dvec3& point) const;
-        virtual void raycast(const Ray& ray, std::vector<RaycastReport>& reports) const;
-
 
         // Constant attributes
         static const double INFINITE_INERTIA;
@@ -124,8 +118,8 @@ class Hardware;
 
 
         // Attributes
-        std::shared_ptr<Volume> _eq;
-        std::shared_ptr<AbstractCostume> _costume;
+        std::shared_ptr<Volume> _volume;
+        std::shared_ptr<Costume> _costume;
         std::shared_ptr<Hardware> _material;
         EBodyType _bodyType;
 
@@ -167,12 +161,12 @@ class Hardware;
         return _isVisible;
     }
 
-    inline std::shared_ptr<Volume> Prop::equation() const
+    inline std::shared_ptr<Volume> Prop::volume() const
     {
-        return _eq;
+        return _volume;
     }
 
-    inline const std::shared_ptr<AbstractCostume>& Prop::costume() const
+    inline const std::shared_ptr<Costume>& Prop::costume() const
     {
         return _costume;
     }

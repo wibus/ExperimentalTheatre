@@ -1,9 +1,10 @@
 #include "AbstractPropTeam.h"
+
+#include <MediaWorkbench/Camera/Camera.h>
+
 #include "AbstractPropDesigner.h"
 #include "AbstractArtDirector.h"
 #include "AbstractChoreographer.h"
-
-#include <Camera/Camera.h>
 
 
 namespace prop2

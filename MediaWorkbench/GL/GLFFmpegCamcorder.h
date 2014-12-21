@@ -5,15 +5,16 @@
 #include <string>
 #include <fstream>
 
-#include "libMediaWorkbench_global.h"
-
-extern "C" {
-struct AVCodec;
-struct AVCodecContext;
-struct AVFrame;
-struct AVPacket;
-struct SwsContext;
+extern "C"
+{
+    struct AVCodec;
+    struct AVCodecContext;
+    struct AVFrame;
+    struct AVPacket;
+    struct SwsContext;
 }
+
+#include "../libMediaWorkbench_global.h"
 
 
 namespace media

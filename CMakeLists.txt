@@ -21,6 +21,9 @@ MESSAGE(STATUS "Experimental Theatre install dir: ${EXPERIMETAL_THEATRE_INSTALL_
 SET(LIB_TYPE SHARED)
 MESSAGE(STATUS "Experimental Theatre library type: ${LIB_TYPE}")
 
+SET(EXTH_INSTALL_DIR ExTh)
+MESSAGE(STATUS "Experimental Theatre install directory: ${EXTH_INSTALL_DIR}")
+
 
 # OTSes
 SET(EXTH_OTS_DIR ${EXPERIMETAL_THEATRE_SRC_DIR}/_ots)

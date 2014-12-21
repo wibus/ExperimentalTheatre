@@ -1,4 +1,5 @@
 #include "TexturedPaint.h"
+
 #include <GLM/gtc/random.hpp>
 
 #include <MediaWorkbench/Image/Image.h>
