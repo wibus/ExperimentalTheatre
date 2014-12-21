@@ -117,7 +117,6 @@ namespace prop2
     void AbstractPropTeam::setCamera(media::Camera& camera)
     {
         camera.registerObserver(*_artDirector);
-        camera.refresh();
     }
 
     void AbstractPropTeam::setGravity(const Vec2r& unitsPerSecondSquared)

@@ -27,36 +27,42 @@ namespace prop3
         void setRefractiveIndex(double refractiveIndex);
 
         // Medium color
-        glm::vec3 mediumColor() const;
-        void setMediumColor(const glm::vec3& mediumColor);
+        glm::dvec3 mediumColor() const;
+        void setMediumColor(const glm::dvec3& mediumColor);
+
+        virtual double computeReflexionRatio(
+                const glm::dvec3& incidentDirection,
+                const glm::dvec3& surfaceNormal,
+                const glm::dvec3& texCoord = glm::dvec3(0)) const;
 
         // Reflexion model
         virtual glm::dvec3 computeReflection(
                 const glm::dvec3& incidentDirection,
                 const glm::dvec3& surfaceNormal,
-                const glm::vec3& texCoord = glm::vec3(0)) const = 0;
+                const glm::dvec3& texCoord = glm::dvec3(0)) const = 0;
 
+        virtual glm::dvec3 computeReflectionBrdf(
+                const glm::dvec3& incidentDirection,
+                const glm::dvec3& surfaceNormal,
+                const glm::dvec3& viewDirection,
+                const glm::dvec3& texCoord = glm::dvec3(0)) const = 0;
+
+        // Refraction model
         virtual glm::dvec3 computeRefraction(
                 const glm::dvec3& incidentDirection,
                 const glm::dvec3& surfaceNormal,
-                const glm::vec3& texCoord = glm::vec3(0)) const = 0;
+                const glm::dvec3& texCoord = glm::dvec3(0)) const;
 
-        virtual double computeReflexionRatio(
+        virtual glm::dvec3 computeRefractionBrdf(
                 const glm::dvec3& incidentDirection,
                 const glm::dvec3& surfaceNormal,
-                const glm::vec3& texCoord = glm::vec3(0)) const = 0;
-
-        virtual glm::vec3 computeBrdf(
-                const glm::vec3& incomingRadiosity,
-                const glm::dvec3& lightDirection,
-                const glm::dvec3& surfaceNormal,
                 const glm::dvec3& viewDirection,
-                const glm::vec3& texCoord = glm::vec3(0)) const = 0;
+                const glm::dvec3& texCoord = glm::dvec3(0)) const;
 
     private:
         double _mediumOpacity;
         double _refractiveIndex;
-        glm::vec3 _mediumColor;
+        glm::dvec3 _mediumColor;
     };
 
 
@@ -82,14 +88,39 @@ namespace prop3
         _refractiveIndex = refractiveIndex;
     }
 
-    inline glm::vec3 AbstractCostume::mediumColor() const
+    inline glm::dvec3 AbstractCostume::mediumColor() const
     {
         return _mediumColor;
     }
 
-    inline void AbstractCostume::setMediumColor(const glm::vec3& color)
+    inline void AbstractCostume::setMediumColor(const glm::dvec3& color)
     {
         _mediumColor = color;
+    }
+
+    inline double AbstractCostume::computeReflexionRatio(
+            const glm::dvec3& incidentDirection,
+            const glm::dvec3& surfaceNormal,
+            const glm::dvec3& texCoord) const
+    {
+        return 1.0;
+    }
+
+    inline glm::dvec3 AbstractCostume::computeRefraction(
+            const glm::dvec3& incidentDirection,
+            const glm::dvec3& surfaceNormal,
+            const glm::dvec3& texCoord) const
+    {
+        return glm::dvec3();
+    }
+
+    inline glm::dvec3 AbstractCostume::computeRefractionBrdf(
+            const glm::dvec3& incidentDirection,
+            const glm::dvec3& surfaceNormal,
+            const glm::dvec3& viewDirection,
+            const glm::dvec3& texCoord) const
+    {
+        return glm::dvec3();
     }
 }
 

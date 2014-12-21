@@ -1,6 +1,8 @@
 #ifndef PROPROOM3D_RAYCAST_H
 #define PROPROOM3D_RAYCAST_H
 
+#include <cmath>
+
 #include <map>
 
 #include <GLM/glm.hpp>
@@ -27,17 +29,18 @@ namespace prop3
     {
         RaycastReport(double t,
                       const glm::dvec3& position,
-                      const glm::dvec3& normal) :
+                      const glm::dvec3& normal,
+                      const glm::dvec3& texCoord = glm::dvec3()) :
             t(t),
             position(position),
-            normal(normal)
+            normal(normal),
+            texCoord(texCoord)
         {}
 
         double t;
         glm::dvec3 position;
         glm::dvec3 normal;
-
-        std::map<std::string, glm::vec4> attributes;
+        glm::dvec3 texCoord;
     };
 }
 

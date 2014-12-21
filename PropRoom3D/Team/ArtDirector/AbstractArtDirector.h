@@ -2,7 +2,7 @@
 #define PROPROOM3D_ABSTRACTARTDIRECTOR_H
 
 #include "libPropRoom3D_global.h"
-#include "AbstractTeamMember.h"
+#include "../AbstractTeamMember.h"
 
 #include <DesignPattern/SpecificObserver.h>
 

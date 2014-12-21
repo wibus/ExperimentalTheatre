@@ -1,5 +1,5 @@
-#ifndef PROPROOM3D_FLAT_PAINT_H
-#define PROPROOM3D_FLAT_PAINT_H
+#ifndef PROPROOM3D_CHROME_H
+#define PROPROOM3D_CHROME_H
 
 #include "AbstractCostume.h"
 
@@ -7,12 +7,12 @@
 namespace prop3
 {
 
-    class PROP3D_EXPORT FlatPaint :
+    class PROP3D_EXPORT Chrome :
             public AbstractCostume
     {
     public:
-        FlatPaint(const glm::dvec3& color);
-        virtual ~FlatPaint();
+        Chrome(const glm::dvec3& color = glm::dvec3(1.0));
+        virtual ~Chrome();
 
         // Reflexion model
         virtual glm::dvec3 computeReflection(
@@ -30,4 +30,4 @@ namespace prop3
     };
 }
 
-#endif // PROPROOM3D_FLAT_PAINT_H
+#endif // PROPROOM3D_CHROME_H

@@ -15,8 +15,8 @@ using namespace cellar;
 #include <Camera/Camera.h>
 using namespace media;
 
-#include <PropRoom2D/PropTeam/AbstractPropTeam.h>
-#include <PropRoom3D/PropTeam/AbstractPropTeam.h>
+#include <PropTeam/AbstractPropTeam.h>
+#include <Team/AbstractTeam.h>
 
 namespace scaena
 {
@@ -43,7 +43,7 @@ namespace scaena
         _propTeam2D.reset(team);
     }
 
-    void AbstractStage::setPropTeam3D(prop3::AbstractPropTeam* team)
+    void AbstractStage::setPropTeam3D(prop3::AbstractTeam* team)
     {
         _propTeam3D.reset(team);
     }
@@ -93,11 +93,13 @@ namespace scaena
         if(_play.get() == 0x0)
             throw PlayNotFound("No play to start");
 
-        _propTeam3D->setup();
         _propTeam3D->setCamera(*_camera);
+        _propTeam3D->setup();
 
-        _propTeam2D->setup();
         _propTeam2D->setCamera(*_camera);
+        _propTeam2D->setup();
+
+        _camera->refresh();
 
         _play->start();
     }

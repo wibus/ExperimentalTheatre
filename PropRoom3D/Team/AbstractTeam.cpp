@@ -1,14 +1,14 @@
-#include "AbstractPropTeam.h"
-#include "AbstractPropDesigner.h"
-#include "AbstractArtDirector.h"
-#include "AbstractChoreographer.h"
+#include "AbstractTeam.h"
+#include "ArtDirector/AbstractArtDirector.h"
+#include "Choreographer/AbstractChoreographer.h"
+#include "Designer/AbstractDesigner.h"
 
 #include <Camera/Camera.h>
 
 
 namespace prop3
 {
-    AbstractPropTeam::AbstractPropTeam(AbstractPropDesigner*  propDesigner,
+    AbstractTeam::AbstractTeam(AbstractDesigner*  propDesigner,
                                        AbstractArtDirector*   artDirector,
                                        AbstractChoreographer* choreographer) :
         _propDesigner(propDesigner),
@@ -17,35 +17,35 @@ namespace prop3
     {
     }
 
-    AbstractPropTeam::~AbstractPropTeam()
+    AbstractTeam::~AbstractTeam()
     {
     }
 
-    void AbstractPropTeam::setup()
+    void AbstractTeam::setup()
     {
         _propDesigner->setup();
         _artDirector->setup();
         _choreographer->setup();
     }
 
-    void AbstractPropTeam::reset()
+    void AbstractTeam::reset()
     {
         _propDesigner->reset();
         _artDirector->reset();
         _choreographer->reset();
     }
 
-    void AbstractPropTeam::update(double dt)
+    void AbstractTeam::update(double dt)
     {
         _choreographer->update(dt);
     }
 
-    void AbstractPropTeam::draw(double dt)
+    void AbstractTeam::draw(double dt)
     {
         _artDirector->draw(dt);
     }
 
-    std::shared_ptr<Prop> AbstractPropTeam::createProp()
+    std::shared_ptr<Prop> AbstractTeam::createProp()
     {
         std::shared_ptr<Prop> prop = _propDesigner->createProp();
 
@@ -55,20 +55,19 @@ namespace prop3
         return prop;
     }
 
-    void AbstractPropTeam::deleteProp(std::shared_ptr<Prop>& prop)
+    void AbstractTeam::deleteProp(std::shared_ptr<Prop>& prop)
     {
         _artDirector->unmanageProp(prop);
         _choreographer->unmanageProp(prop);
         prop.reset();
     }
 
-    void AbstractPropTeam::setCamera(media::Camera& camera)
+    void AbstractTeam::setCamera(media::Camera& camera)
     {
         camera.registerObserver(*_artDirector);
-        camera.refresh();
     }
 
-    void AbstractPropTeam::setGravity(const glm::dvec3& unitsPerSecondSquared)
+    void AbstractTeam::setGravity(const glm::dvec3& unitsPerSecondSquared)
     {
         _choreographer->setGravity(unitsPerSecondSquared);
     }

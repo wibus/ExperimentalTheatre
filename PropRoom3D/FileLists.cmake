@@ -1,20 +1,35 @@
 ## Headers ##
-# Prop team
-SET(PROP3_PROP_TEAM_HEADERS
-    ${PROP3_SRC_DIR}/PropTeam/AbstractArtDirector.h
-    ${PROP3_SRC_DIR}/PropTeam/AbstractChoreographer.h
-    ${PROP3_SRC_DIR}/PropTeam/AbstractPropDesigner.h
-    ${PROP3_SRC_DIR}/PropTeam/AbstractPropTeam.h
-    ${PROP3_SRC_DIR}/PropTeam/AbstractTeamMember.h
-    ${PROP3_SRC_DIR}/PropTeam/CpuRaytracer.h
-    ${PROP3_SRC_DIR}/PropTeam/StdGlPropTeam.h
-    ${PROP3_SRC_DIR}/PropTeam/StdChoreographer.h
-    ${PROP3_SRC_DIR}/PropTeam/StdPropDesigner.h)
+# Art Director
+SET(PROP3_ART_DIRECTOR_HEADERS
+    ${PROP3_SRC_DIR}/Team/ArtDirector/AbstractArtDirector.h
+    ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracer.h)
+
+# Choreographer
+SET(PROP3_CHOREOGRAPHER_HEADERS
+    ${PROP3_SRC_DIR}/Team/Choreographer/AbstractChoreographer.h
+    ${PROP3_SRC_DIR}/Team/Choreographer/StdChoreographer.h)
+
+# Designer
+SET(PROP3_DESIGNER_HEADERS
+    ${PROP3_SRC_DIR}/Team/Designer/AbstractDesigner.h
+    ${PROP3_SRC_DIR}/Team/Designer/StdDesigner.h)
+
+# Team
+SET(PROP3_TEAM_HEADERS
+    ${PROP3_ART_DIRECTOR_HEADERS}
+    ${PROP3_CHOREOGRAPHER_HEADERS}
+    ${PROP3_DESIGNER_HEADERS}
+    ${PROP3_SRC_DIR}/Team/AbstractTeam.h
+    ${PROP3_SRC_DIR}/Team/AbstractTeamMember.h
+    ${PROP3_SRC_DIR}/Team/StdGlTeam.h)
 
 # Costumes
 SET(PROP3_COSTUME_HEADERS
     ${PROP3_SRC_DIR}/Prop/Costume/AbstractCostume.h
-    ${PROP3_SRC_DIR}/Prop/Costume/FlatPaint.h)
+    ${PROP3_SRC_DIR}/Prop/Costume/Glass.h
+    ${PROP3_SRC_DIR}/Prop/Costume/Chrome.h
+    ${PROP3_SRC_DIR}/Prop/Costume/FlatPaint.h
+    ${PROP3_SRC_DIR}/Prop/Costume/TexturedPaint.h)
 
 # Hardwares
 SET(PROP3_HARDWARE_HEADERS
@@ -36,23 +51,38 @@ SET(PROP3_PROP_HEADERS
 
 # All the header files #
 SET(PROP3_HEADERS
-    ${PROP3_PROP_TEAM_HEADERS}
+    ${PROP3_TEAM_HEADERS}
     ${PROP3_PROP_HEADERS}
     ${PROP3_SRC_DIR}/libPropRoom3D_global.h)
     
 
 ## Sources ##
-# Prop Team
-SET(PROP3_PROP_TEAM_SOURCES
-    ${PROP3_SRC_DIR}/PropTeam/AbstractPropTeam.cpp
-    ${PROP3_SRC_DIR}/PropTeam/CpuRaytracer.cpp
-    ${PROP3_SRC_DIR}/PropTeam/StdGlPropTeam.cpp
-    ${PROP3_SRC_DIR}/PropTeam/StdChoreographer.cpp
-    ${PROP3_SRC_DIR}/PropTeam/StdPropDesigner.cpp)
+# Art Director
+SET(PROP3_ART_DIRECTOR_SOURCES
+    ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracer.cpp)
+
+# Choreographer
+SET(PROP3_CHOREOGRAPHER_SOURCES
+    ${PROP3_SRC_DIR}/Team/Choreographer/StdChoreographer.cpp)
+
+# Designer
+SET(PROP3_DESIGNER_SOURCES
+    ${PROP3_SRC_DIR}/Team/Designer/StdDesigner.cpp)
+
+# Team
+SET(PROP3_TEAM_SOURCES
+    ${PROP3_ART_DIRECTOR_SOURCES}
+    ${PROP3_CHOREOGRAPHER_SOURCES}
+    ${PROP3_DESIGNER_SOURCES}
+    ${PROP3_SRC_DIR}/Team/AbstractTeam.cpp
+    ${PROP3_SRC_DIR}/Team/StdGlTeam.cpp)
 
 # Costumes
 SET(PROP3_COSTUME_SOURCES
-    ${PROP3_SRC_DIR}/Prop/Costume/FlatPaint.cpp)
+    ${PROP3_SRC_DIR}/Prop/Costume/Glass.cpp
+    ${PROP3_SRC_DIR}/Prop/Costume/Chrome.cpp
+    ${PROP3_SRC_DIR}/Prop/Costume/FlatPaint.cpp
+    ${PROP3_SRC_DIR}/Prop/Costume/TexturedPaint.cpp)
 
 # Hardwares
 SET(PROP3_HARDWARE_SOURCES
@@ -73,7 +103,7 @@ SET(PROP3_PROP_SOURCES
 
 # All the source files #
 SET(PROP3_SOURCES
-    ${PROP3_PROP_TEAM_SOURCES}
+    ${PROP3_TEAM_SOURCES}
     ${PROP3_PROP_SOURCES})
     
 
@@ -108,13 +138,13 @@ SET(PROP3_SRC_FILES
 SOURCE_GROUP("Header Files" FILES ${PROP3_HEADERS_FILTER})
 SOURCE_GROUP("Header Files\\Costume" FILES ${PROP3_COSTUME_HEADERS})
 SOURCE_GROUP("Header Files\\Hardware" FILES ${PROP3_HARDWARE_HEADERS})
-SOURCE_GROUP("Header Files\\Prop Team" FILES ${PROP3_PROP_TEAM_HEADERS})
+SOURCE_GROUP("Header Files\\Prop Team" FILES ${PROP3_TEAM_HEADERS})
 SOURCE_GROUP("Header Files\\Shape" FILES ${PROP3_SHAPE_HEADERS})
 
 SOURCE_GROUP("Source Files" FILES ${PROP3_SOURCES_FILTER})
 SOURCE_GROUP("Source Files\\Costume" FILES ${PROP3_COSTUME_SOURCES})
 SOURCE_GROUP("Source Files\\Hardware" FILES ${PROP3_HARDWARE_SOURCES})
-SOURCE_GROUP("Source Files\\Prop Team" FILES ${PROP3_PROP_TEAM_SOURCES})
+SOURCE_GROUP("Source Files\\Prop Team" FILES ${PROP3_TEAM_SOURCES})
 SOURCE_GROUP("Source Files\\Shape" FILES ${PROP3_SHAPE_SOURCES})
 
 SOURCE_GROUP("Config" FILES ${PROP3_CONFIG_FILES})

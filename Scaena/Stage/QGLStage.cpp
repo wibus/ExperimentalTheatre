@@ -20,8 +20,8 @@ using namespace std;
 #include <Misc/Log.h>
 using namespace cellar;
 
-#include <PropRoom2D/PropTeam/StdGlPropTeam.h>
-#include <PropRoom3D/PropTeam/StdGlPropTeam.h>
+#include <PropTeam/StdGlPropTeam.h>
+#include <Team/StdGlTeam.h>
 
 #include <QKeyEvent>
 #include <QApplication>
@@ -52,7 +52,7 @@ namespace scaena
         setDrawSynch(true);
 
         setPropTeam2D(new prop2::StdGlPropTeam());
-        setPropTeam3D(new prop3::StdGlPropTeam());
+        setPropTeam3D(new prop3::StdGlTeam());
 
         _updateClock.reset( new QtClock() );
         _drawClock.reset( new QtClock() );

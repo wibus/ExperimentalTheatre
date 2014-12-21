@@ -1,5 +1,5 @@
-#ifndef PROPROOM3D_PROPTEAM_H
-#define PROPROOM3D_PROPTEAM_H
+#ifndef PROPROOM3D_ABSTRACTTEAM_H
+#define PROPROOM3D_ABSTRACTTEAM_H
 
 #include <memory>
 
@@ -15,21 +15,21 @@ class Camera;
 
 namespace prop3
 {
-class AbstractPropDesigner;
+class AbstractDesigner;
 class AbstractArtDirector;
 class AbstractChoreographer;
 
 class Prop;
 
-    class PROP3D_EXPORT AbstractPropTeam
+    class PROP3D_EXPORT AbstractTeam
     {
     protected:
-        AbstractPropTeam(AbstractPropDesigner*  propDesigner,
+        AbstractTeam(AbstractDesigner*  propDesigner,
                          AbstractArtDirector*   artDirector,
                          AbstractChoreographer* choreographer);
 
     public:
-        virtual ~AbstractPropTeam();
+        virtual ~AbstractTeam();
 
         virtual void setup();
         virtual void reset();
@@ -45,17 +45,17 @@ class Prop;
 
     protected:
         // Getter for prop team members
-        AbstractPropDesigner&  propDesigner() const;
+        AbstractDesigner&  propDesigner() const;
         AbstractArtDirector&   artDirector() const;
         AbstractChoreographer& choreographer() const;
 
     private:
         // Removed
-        AbstractPropTeam(const AbstractPropTeam&);
-        AbstractPropTeam& operator=(const AbstractPropTeam&);
+        AbstractTeam(const AbstractTeam&);
+        AbstractTeam& operator=(const AbstractTeam&);
 
     private:
-        std::unique_ptr<AbstractPropDesigner>  _propDesigner;
+        std::unique_ptr<AbstractDesigner>  _propDesigner;
         std::unique_ptr<AbstractArtDirector>   _artDirector;
         std::unique_ptr<AbstractChoreographer> _choreographer;
     };
@@ -63,20 +63,20 @@ class Prop;
 
 
     // IMPLEMENTATION //
-    inline AbstractPropDesigner& AbstractPropTeam::propDesigner() const
+    inline AbstractDesigner& AbstractTeam::propDesigner() const
     {
         return *_propDesigner;
     }
 
-    inline AbstractArtDirector& AbstractPropTeam::artDirector() const
+    inline AbstractArtDirector& AbstractTeam::artDirector() const
     {
         return *_artDirector;
     }
 
-    inline AbstractChoreographer& AbstractPropTeam::choreographer() const
+    inline AbstractChoreographer& AbstractTeam::choreographer() const
     {
         return *_choreographer;
     }
 }
 
-#endif // PROPROOM3D_PROPTEAM_H
+#endif // PROPROOM3D_ABSTRACTTEAM_H

@@ -4,7 +4,7 @@
 
 namespace prop3
 {
-    FlatPaint::FlatPaint(const glm::vec3& color)
+    FlatPaint::FlatPaint(const glm::dvec3& color)
     {
         setMediumColor(color);
     }
@@ -17,7 +17,7 @@ namespace prop3
     glm::dvec3 FlatPaint::computeReflection(
             const glm::dvec3& incidentDirection,
             const glm::dvec3& surfaceNormal,
-            const glm::vec3& texCoord) const
+            const glm::dvec3& texCoord) const
     {
         glm::dvec3 randDir = glm::sphericalRand(1.0);
         if(glm::dot(randDir, surfaceNormal) < 0.0)
@@ -25,30 +25,13 @@ namespace prop3
         return randDir;
     }
 
-     glm::dvec3 FlatPaint::computeRefraction(
+    glm::dvec3 FlatPaint::computeReflectionBrdf(
             const glm::dvec3& incidentDirection,
-            const glm::dvec3& surfaceNormal,
-            const glm::vec3& texCoord) const
-    {
-        return glm::vec3(0.0);
-    }
-
-    double FlatPaint::computeReflexionRatio(
-            const glm::dvec3& incidentDirection,
-            const glm::dvec3& surfaceNormal,
-            const glm::vec3& texCoord) const
-    {
-        return 1.0;
-    }
-
-    glm::vec3 FlatPaint::computeBrdf(
-            const glm::vec3& incomingRadiosity,
-            const glm::dvec3& lightDirection,
             const glm::dvec3& surfaceNormal,
             const glm::dvec3& viewDirection,
-            const glm::vec3& texCoord) const
+            const glm::dvec3& texCoord) const
     {
-        return (incomingRadiosity * mediumColor()) *
-                glm::max(0.0f, (float)glm::dot(lightDirection, surfaceNormal));
+        return mediumColor() * glm::max(0.0,
+            -glm::dot(incidentDirection, surfaceNormal));
     }
 }

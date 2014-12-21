@@ -49,4 +49,59 @@ namespace prop3
             reports.push_back(RaycastReport(t, pt, _normal));
         }
     }
+
+
+    // Ghost
+    PlaneGhost::PlaneGhost(const glm::dvec3& normal, const glm::dvec3& point) :
+        Plane(normal, point)
+    {
+    }
+
+    PlaneGhost::PlaneGhost(double a, double b, double c, double d) :
+        Plane(a, b, c, d)
+    {
+    }
+
+    void PlaneGhost::raycast(const Ray&, std::vector<RaycastReport>&) const
+    {
+    }
+
+
+    // Textures
+    // Where normal is (a, b, c) and point is on the plane
+    PlaneTexture::PlaneTexture(const glm::dvec3& normal, const glm::dvec3& point,
+                               const glm::dvec3& u, const glm::dvec3& v,
+                               const glm::dvec3& origin) :
+        Plane(normal, point),
+        _origin(origin),
+        _u(u), _v(v)
+    {
+
+    }
+
+    // From the equation : a*x + b*y + c*z + d = 0
+    PlaneTexture::PlaneTexture(double a, double b, double c, double d,
+                               const glm::dvec3& u, const glm::dvec3& v,
+                               const glm::dvec3& origin) :
+        Plane(a, b, c, d),
+        _origin(origin),
+        _u(u), _v(v)
+    {
+
+    }
+
+    void PlaneTexture::raycast(const Ray& ray, std::vector<RaycastReport>& reports) const
+    {
+        std::vector<RaycastReport> planeReports;
+        Plane::raycast(ray, planeReports);
+
+        for(RaycastReport& r : planeReports)
+        {
+            glm::dvec3 dist = r.position - _origin;
+            r.texCoord.s = glm::dot(dist, _u) / glm::dot(_u, _u);
+            r.texCoord.t = glm::dot(dist, _v) / glm::dot(_v, _v);
+        }
+
+        reports.insert(reports.end(), planeReports.begin(), planeReports.end());
+    }
 }

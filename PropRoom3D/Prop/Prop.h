@@ -15,7 +15,7 @@
 
 namespace prop3
 {
-class AbstractPropTeam;
+class AbstractTeam;
 class AbstractCostume;
 class HardwareUpdate;
 class Hardware;
