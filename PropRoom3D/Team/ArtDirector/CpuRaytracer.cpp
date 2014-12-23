@@ -55,7 +55,9 @@ namespace prop3
         _screenRaysBounceCount(5),
         _viewportSize(1, 1),
         _sampleCount(0),
-        _colorBuffer(1)
+        _colorBuffer(1),
+        _postProdProgram(),
+        _fullscreenVao(0)
     {
     }
 
@@ -76,7 +78,7 @@ namespace prop3
         glBindTexture(GL_TEXTURE_2D, _colorBufferGlId);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_DOUBLE, nullptr);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_FLOAT, nullptr);
 
         glGenFramebuffers(1, &_framebufferGlId);
         glBindFramebuffer(GL_FRAMEBUFFER, _framebufferGlId);
@@ -85,6 +87,32 @@ namespace prop3
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glBindTexture(GL_TEXTURE_2D, 0);
+
+        _postProdProgram.addShader(GL_VERTEX_SHADER, ":/Prop3/shaders/clip_space.vert");
+        _postProdProgram.addShader(GL_FRAGMENT_SHADER, ":/Prop3/shaders/post_prod.frag");
+        _postProdProgram.link();
+        _postProdProgram.pushProgram();
+        _postProdProgram.setInt("ImageTex", 0);
+        _postProdProgram.popProgram();
+
+
+        const float vertices [][3] =  {
+            {-1, -1, 1},
+            { 3, -1, 1},
+            {-1,  3, 1}
+        };
+
+        glGenVertexArrays(1, &_fullscreenVao);
+        glBindVertexArray(_fullscreenVao);
+
+        glGenBuffers(1, &_fullscreenVbo);
+        glBindBuffer(GL_ARRAY_BUFFER, _fullscreenVbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        glEnableVertexAttribArray(0);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
     }
 
     void CpuRaytracer::reset()
@@ -99,6 +127,9 @@ namespace prop3
             clearBuffers();
             _sceneChanged = false;
         }
+
+        if(_props.empty())
+            return;
 
         if(_lightRaysBounceCount != 0)
             shootFromLights();
@@ -203,20 +234,20 @@ namespace prop3
 
     void CpuRaytracer::sendBuffersToGpu()
     {
+        glActiveTexture(0);
         glBindTexture(GL_TEXTURE_2D, _colorBufferGlId);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
-                     _viewportSize.x, _viewportSize.y,
-                     0, GL_RGB, GL_FLOAT, _colorBuffer.data());
+        glTexImage2D(GL_TEXTURE_2D,     0,  GL_RGB,
+                     _viewportSize.x,       _viewportSize.y,
+                     0, GL_RGB, GL_FLOAT,   _colorBuffer.data());
 
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, _framebufferGlId);
-        glReadBuffer(GL_COLOR_ATTACHMENT0);
 
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-        glBlitFramebuffer(0, 0, _viewportSize.x, _viewportSize.y,
-                          0, 0, _viewportSize.x, _viewportSize.y,
-                          GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        _postProdProgram.pushProgram();
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glBindVertexArray(_fullscreenVao);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBindVertexArray(0);
+
+        _postProdProgram.popProgram();
     }
 
 

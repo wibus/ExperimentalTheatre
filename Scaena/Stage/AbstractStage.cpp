@@ -83,10 +83,11 @@ namespace scaena
                            _drawClock->elapsedSeconds(),
                            _drawClock->ticksPerSecond());
 
+            _propTeam3D->draw( time.elapsedTime() );
+
             DrawCaller drawCaller( time );
             _play->welcome( drawCaller );
 
-            _propTeam3D->draw( time.elapsedTime() );
             _propTeam2D->draw( time.elapsedTime() );
         }
     }

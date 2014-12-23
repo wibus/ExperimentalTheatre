@@ -5,6 +5,8 @@
 #include <vector>
 #include <thread>
 
+#include <MediaWorkbench/GL/GlProgram.h>
+
 #include "AbstractArtDirector.h"
 
 
@@ -52,6 +54,10 @@ namespace prop3
 
         unsigned int _framebufferGlId;
         unsigned int _colorBufferGlId;
+
+        media::GlProgram _postProdProgram;
+        unsigned int _fullscreenVao;
+        unsigned int _fullscreenVbo;
 
         std::vector<std::shared_ptr<Prop>> _props;
 
