@@ -2,11 +2,6 @@
 
 #include <algorithm>
 
-#include <GLM/gtc/matrix_transform.hpp>
-#include <GLM/gtc/random.hpp>
-
-#include <GL3/gl3w.h>
-
 #include <CellarWorkbench/Misc/CellarUtils.h>
 #include <CellarWorkbench/Misc/Log.h>
 
@@ -15,338 +10,183 @@
 #include "../../Prop/Prop.h"
 #include "../../Prop/Costume/Costume.h"
 #include "../../Prop/Volume/Raycast.h"
+#include "CpuRaytracerWorker.h"
+#include "QGlPostProdUnit.h"
 
 
 namespace prop3
 {
-    /* Too hard for the moment
-    class CpuRaytracerWorker
-    {
-    public:
-        CpuRaytracerWorker(const std::shared_ptr<CpuRaytracer>& tracer) :
-            _tracer(tracer)
-        {
-        }
-
-        virtual void execute();
-
-    protected:
-        virtual void resizeBuffers();
-        virtual void clearBuffers();
-        virtual void shootFromLights();
-        virtual void shootFromScreen();
-        virtual glm::dvec3 fireScreenRay(const Ray& ray, int depth);
-
-    private:
-        std::shared_ptr<CpuRaytracer> _tracer;
-    };
-
-    void launchWorker(const std::shared_ptr<CpuRaytracer>& tracer)
-    {
-        CpuRaytracerWorker worker(tracer);
-        worker.execute();
-    }
-    */
-
+    const int CpuRaytracer::WORKER_COUNT = 8;
 
     CpuRaytracer::CpuRaytracer() :
-        _sceneChanged(true),
-        _lightRaysBounceCount(0),
-        _screenRaysBounceCount(5),
-        _viewportSize(1, 1),
         _sampleCount(0),
-        _colorBuffer(1),
-        _postProdProgram(),
-        _fullscreenVao(0)
+        _colorBufferTexId(0),
+        _workerObjects(WORKER_COUNT),
+        _workerThreads(),
+        _viewportSize(1, 1),
+        _colorBuffer(3)
     {
+        for(int i=0; i < WORKER_COUNT; ++i)
+        {
+            _workerObjects[i].reset(new CpuRaytracerWorker());
+            _workerThreads.push_back(std::thread(
+                CpuRaytracerWorker::launchWorker,
+                _workerObjects[i]));
+        }
+
+        _postProdUnit.reset(new QGlPostProdUnit());
     }
 
     CpuRaytracer::~CpuRaytracer()
     {
+        for(auto& w : _workerObjects)
+        {
+            w->skip();
+            w->terminate();
+        }
+        for(std::thread& t : _workerThreads)
+        {
+            t.join();
+        }
 
+        glDeleteTextures(1, &_colorBufferTexId);
+        _colorBufferTexId = 0;
     }
 
     void CpuRaytracer::setup()
     {
-        glm::dvec3 upVec(0, 0, 1);
-        glm::dvec3 focusPos = glm::dvec3(-1.2, -1.2, 5.25);
-        _camPos = focusPos + glm::dvec3(25, -40, 14) * 2.0;
-        _viewMatrix = glm::lookAt(_camPos, focusPos, upVec);
+        const float black[] = {0, 0, 0};
 
-
-        glGenTextures(1, &_colorBufferGlId);
-        glBindTexture(GL_TEXTURE_2D, _colorBufferGlId);
+        // Color texture
+        glGenTextures(1, &_colorBufferTexId);
+        glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_FLOAT, nullptr);
-
-        glGenFramebuffers(1, &_framebufferGlId);
-        glBindFramebuffer(GL_FRAMEBUFFER, _framebufferGlId);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                               GL_TEXTURE_2D, _colorBufferGlId, 0);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_FLOAT, black);
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        _postProdProgram.addShader(GL_VERTEX_SHADER, ":/Prop3/shaders/clip_space.vert");
-        _postProdProgram.addShader(GL_FRAGMENT_SHADER, ":/Prop3/shaders/post_prod.frag");
-        _postProdProgram.link();
-        _postProdProgram.pushProgram();
-        _postProdProgram.setInt("ImageTex", 0);
-        _postProdProgram.popProgram();
-
-
-        const float vertices [][3] =  {
-            {-1, -1, 1},
-            { 3, -1, 1},
-            {-1,  3, 1}
-        };
-
-        glGenVertexArrays(1, &_fullscreenVao);
-        glBindVertexArray(_fullscreenVao);
-
-        glGenBuffers(1, &_fullscreenVbo);
-        glBindBuffer(GL_ARRAY_BUFFER, _fullscreenVbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-        glVertexAttribPointer((GLuint)0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-        glEnableVertexAttribArray(0);
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
+        _postProdUnit->setColorBufferTexId(_colorBufferTexId);
+        _postProdUnit->setup();
     }
 
     void CpuRaytracer::reset()
     {
+        for(auto& w : _workerObjects)
+        {
+            w->skip();
+        }
+
         _props.clear();
+
+        for(auto& w : _workerObjects)
+        {
+            w->setProps(_props);
+        }
     }
 
     void CpuRaytracer::draw(double dt)
     {
-        if(_sceneChanged)
+        bool updated = false;
+
+        for(std::shared_ptr<CpuRaytracerWorker>& w : _workerObjects)
         {
-            clearBuffers();
-            _sceneChanged = false;
+            if(w->tryLockPixels())
+            {
+                if(w->frameIsComplete())
+                {
+                    const std::vector<float> pixels = w->pixels();
+
+                    ++_sampleCount;
+                    float alpha = 1.0f / _sampleCount;
+                    int cc = (int) _colorBuffer.size();
+                    for(int i=0; i < cc; ++i)
+                    {
+                        _colorBuffer[i] = glm::mix(_colorBuffer[i], pixels[i], alpha);
+                    }
+
+                    updated = true;
+                }
+
+                w->unlockPixels();
+                w->nextFrame();
+            }
         }
 
-        if(_props.empty())
-            return;
+        if(updated)
+        {
+            sendBuffersToGpu();
+        }
 
-        if(_lightRaysBounceCount != 0)
-            shootFromLights();
-
-        shootFromScreen();
-        sendBuffersToGpu();
+        _postProdUnit->execute();
     }
 
     void CpuRaytracer::notify(media::CameraMsg &msg)
     {
-        _sceneChanged = true;
-
         if(msg.change == media::CameraMsg::EChange::PROJECTION)
         {
-            _viewportSize.x = msg.camera.viewport().x();
-            _viewportSize.y = msg.camera.viewport().y();
-            resizeBuffers();
+            for(auto& w : _workerObjects)
+            {
+                w->skip();
+            }
+
+            int width = msg.camera.viewport().x();
+            int height = msg.camera.viewport().y();
+            _viewportSize = glm::ivec2(width, height);
+            _colorBuffer.resize(width * height * 3);
+            std::fill(_colorBuffer.begin(), _colorBuffer.end(), 0.0f);
+            _sampleCount = 0;
+
+            for(auto& w : _workerObjects)
+            {
+                w->resize(width, height);
+            }
         }
     }
 
     void CpuRaytracer::manageProp(const std::shared_ptr<Prop>& prop)
     {
+        for(auto& w : _workerObjects)
+        {
+            w->skip();
+        }
+
         _props.push_back(prop);
+
+        for(auto& w : _workerObjects)
+        {
+            w->setProps(_props);
+        }
     }
 
     void CpuRaytracer::unmanageProp(const std::shared_ptr<Prop>& prop)
     {
+        for(auto& w : _workerObjects)
+        {
+            w->skip();
+        }
+
         std::remove_if(_props.begin(), _props.end(),
             [&prop](const std::shared_ptr<Prop>& p) {
                 return p == prop;
         });
-    }
 
-    void CpuRaytracer::resizeBuffers()
-    {
-        glm::dmat4 proj = glm::perspectiveFov(
-            glm::pi<double>() / 9.0,
-            (double) _viewportSize.x,
-            (double) _viewportSize.y,
-            1.0, 2.0);
-
-        _viewProjInverse = glm::inverse(proj * _viewMatrix);
-
-        _colorBuffer.resize(_viewportSize.x * _viewportSize.y * 3);
-        clearBuffers();
-    }
-
-    void CpuRaytracer::clearBuffers()
-    {
-        int idx = -1;
-        for(int j=0; j<_viewportSize.y; ++j)
+        for(auto& w : _workerObjects)
         {
-            for(int i=0; i<_viewportSize.x; ++i)
-            {
-                _colorBuffer[++idx] = 0.0;
-                _colorBuffer[++idx] = 0.0;
-                _colorBuffer[++idx] = 0.0;
-            }
-        }
-
-        _sampleCount = 0;
-    }
-
-    void CpuRaytracer::shootFromLights()
-    {
-
-    }
-
-    void CpuRaytracer::shootFromScreen()
-    {
-        double pixelWidth = 2.0 / _viewportSize.x;
-        double pixelHeight = 2.0 / _viewportSize.y;
-        glm::dvec4 screenPos(-1, -1, 0, 1);
-        glm::dvec2 offset = glm::dvec2(pixelWidth, pixelWidth) *
-                            (glm::dvec2(0.5) + glm::circularRand(0.5));
-
-        int idx = 0;
-        ++_sampleCount;
-        double mix = 1.0 / (_sampleCount);
-        Ray ray(_camPos, glm::dvec3(0));
-
-        screenPos.y = -1.0 + offset.y;
-        for(int j=0; j<_viewportSize.y; ++j, screenPos.y += pixelHeight)
-        {
-            screenPos.x = -1.0 + offset.x;
-            for(int i=0; i<_viewportSize.x; ++i, screenPos.x += pixelWidth)
-            {
-                glm::dvec4 dirH = _viewProjInverse * screenPos;
-                ray.direction = glm::normalize(glm::dvec3(dirH / dirH.w) - _camPos);
-
-                glm::dvec3 color = fireScreenRay(ray, _screenRaysBounceCount);
-
-                _colorBuffer[idx] = glm::mix((double)_colorBuffer[idx], color.r, mix);
-                ++idx;
-                _colorBuffer[idx] = glm::mix((double)_colorBuffer[idx], color.g, mix);
-                ++idx;
-                _colorBuffer[idx] = glm::mix((double)_colorBuffer[idx], color.b, mix);
-                ++idx;
-            }
+            w->setProps(_props);
         }
     }
 
     void CpuRaytracer::sendBuffersToGpu()
     {
-        glActiveTexture(0);
-        glBindTexture(GL_TEXTURE_2D, _colorBufferGlId);
+        glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
         glTexImage2D(GL_TEXTURE_2D,     0,  GL_RGB,
                      _viewportSize.x,       _viewportSize.y,
                      0, GL_RGB, GL_FLOAT,   _colorBuffer.data());
 
-
-        _postProdProgram.pushProgram();
-
-        glBindVertexArray(_fullscreenVao);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        glBindVertexArray(0);
-
-        _postProdProgram.popProgram();
-    }
-
-
-    glm::dvec3 CpuRaytracer::fireScreenRay(const Ray& ray, int depth)
-    {
-        if(depth < 0)
-        {
-            return glm::dvec3(0);
-        }
-
-        RaycastReport reportMin(INFINITY, glm::dvec3(), glm::dvec3());
-        std::shared_ptr<Prop> propMin;
-        glm::dvec3 color(0);
-
-
-        for(const auto& prop : _props)
-        {
-            const std::shared_ptr<Volume>& volume = prop->volume();
-            std::vector<RaycastReport> reports;
-            volume->raycast(ray, reports);
-
-            for(const RaycastReport& report : reports)
-            {
-                if(0.0 < report.t && report.t < reportMin.t )
-                {
-                    reportMin = report;
-                    propMin = prop;
-                }
-            }
-        }
-
-        if(propMin)
-        {
-            // Surface color
-            const std::shared_ptr<Costume>& costume = propMin->costume();
-
-            const glm::dvec3& interPt = reportMin.position;
-            bool isEntering = glm::dot(ray.direction, reportMin.normal) < 0.0;
-            double offSetDist = (0.000001 * (isEntering ? 1.0 : -1.0));
-            glm::dvec3 offset = reportMin.normal * offSetDist;
-
-            double reflectionRation = costume->computeReflexionRatio(
-                                          ray.direction,
-                                          reportMin.normal,
-                                          reportMin.texCoord);
-
-            // Reflection
-            glm::dvec3 reflect = costume->computeReflection(
-                                     ray.direction,
-                                     reportMin.normal,
-                                     reportMin.texCoord);
-
-            Ray reflectedRay(interPt + offset, reflect);
-            color += fireScreenRay(reflectedRay, depth-1) *
-                     reflectionRation;
-
-            // Refraction
-            if(reflectionRation != 1.0)
-            {
-                glm::dvec3 refract = costume->computeRefraction(
-                                         ray.direction,
-                                         reportMin.normal,
-                                         reportMin.texCoord);
-
-                Ray refractedRay(interPt - offset, refract);
-                color += fireScreenRay(refractedRay, depth-1) *
-                         (1.0 - reflectionRation);
-            }
-
-            color *= propMin->costume()->computeReflectionBrdf(
-                        -reflectedRay.direction,
-                        reportMin.normal,
-                        -ray.direction,
-                         reportMin.texCoord);
-        }
-        else if(depth != _screenRaysBounceCount)
-        {
-            // Background color
-            const glm::dvec3 blueSkyColor = glm::dvec3(0.25, 0.60, 1.00) * 2.0;
-            const glm::dvec3 skylineColor = glm::dvec3(1.00, 1.00, 1.00) * 2.0;
-            const glm::dvec3 sunColor = glm::dvec3(1.00, 0.7725, 0.5608) * 20.0;
-
-            const glm::dvec3 blueSkyDir = glm::dvec3(0, 0, 1);
-            const glm::dvec3 sunDir = glm::dvec3(0.4082, 0.4082, 0.8165);
-
-            double upDot = glm::dot(blueSkyDir, ray.direction);
-            glm::dvec3 blueSky = blueSkyColor * glm::max(0.0, upDot);
-
-            double a = 1.0 - glm::abs(upDot);
-            a *= a *= a *= a *= a;
-            glm::dvec3 skyline = skylineColor * a;
-
-            double s = glm::max(0.0, glm::dot(sunDir, ray.direction));
-            s *= s *= s *= s *= s *= s;
-            glm::dvec3 sun = sunColor * s;
-
-            color = blueSky + skyline + sun;
-        }
-
-        return color;
+        float sum = 0.0f;
+        for(float c : _colorBuffer)
+            sum += c;
+        std::cout << "Sample count = " << _sampleCount <<
+                     " (sum = " << sum << ")" << std::endl;
     }
 }
