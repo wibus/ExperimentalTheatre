@@ -24,6 +24,8 @@ MESSAGE(STATUS "Experimental Theatre library type: ${LIB_TYPE}")
 SET(EXTH_INSTALL_DIR ExTh)
 MESSAGE(STATUS "Experimental Theatre install directory: ${EXTH_INSTALL_DIR}")
 
+SET(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 
 # OTSes
 SET(EXTH_OTS_DIR ${EXPERIMETAL_THEATRE_SRC_DIR}/_ots)

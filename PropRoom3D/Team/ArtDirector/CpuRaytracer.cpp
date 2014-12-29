@@ -16,7 +16,7 @@
 
 namespace prop3
 {
-    const int CpuRaytracer::WORKER_COUNT = 8;
+    const int CpuRaytracer::WORKER_COUNT = 4;
 
     CpuRaytracer::CpuRaytracer() :
         _sampleCount(0),

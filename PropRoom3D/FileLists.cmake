@@ -42,6 +42,7 @@ SET(PROP3_VOLUME_HEADERS
     ${PROP3_SRC_DIR}/Prop/Volume/Raycast.h
     ${PROP3_SRC_DIR}/Prop/Volume/Volume.h
     ${PROP3_SRC_DIR}/Prop/Volume/Plane.h
+    ${PROP3_SRC_DIR}/Prop/Volume/Quadric.h
     ${PROP3_SRC_DIR}/Prop/Volume/Sphere.h)
 
 # Prop
@@ -96,6 +97,7 @@ SET(PROP3_HARDWARE_SOURCES
 SET(PROP3_VOLUME_SOURCES
     ${PROP3_SRC_DIR}/Prop/Volume/Volume.cpp
     ${PROP3_SRC_DIR}/Prop/Volume/Plane.cpp
+    ${PROP3_SRC_DIR}/Prop/Volume/Quadric.cpp
     ${PROP3_SRC_DIR}/Prop/Volume/Sphere.cpp)
 
 # Props
@@ -110,6 +112,11 @@ SET(PROP3_SOURCES
     ${PROP3_TEAM_SOURCES}
     ${PROP3_PROP_SOURCES})
     
+## UI
+SET(PROP3_UI_FILES
+    ${PROP3_SRC_DIR}/Team/ArtDirector/QGlPostProdUnit.ui)
+
+QT5_WRAP_UI(PROP3_UI_SRCS ${PROP3_UI_FILES})
 
 ## Resources
 SET(PROP3_RCC_FILES
@@ -134,6 +141,8 @@ SET(PROP3_SRC_FILES
     ${PROP3_HEADERS}
     ${PROP3_SOURCES}
     ${PROP3_CONFIG_FILES}
+    ${PROP3_UI_FILES}
+    ${PROP3_UI_SRCS}
     ${PROP3_RESOURCE_FILES}
     ${PROP3_RCC_SRCS})
 
