@@ -1,16 +1,22 @@
-#version 400
+#version 430
+
+subroutine vec3 imageFiltering();
 
 uniform sampler2D ImageTex;
 uniform vec3 TemperatureRgb;
 uniform float ContrastValue;
 uniform float LuminosityValue;
+uniform float AdaptationFactor;
 uniform float LowpassKernel[25];
 uniform int   LowpassSize;
+layout(location=0) subroutine uniform imageFiltering ImageFilteringFunc;
 
 in vec2 screenCoord;
 
 layout(location=0) out vec4 FragColor;
 
+
+// Shader constant data
 const int kTop[] = int[](1, 9, 25);
 
 const int kIdx[] =  int[](
@@ -42,7 +48,13 @@ const ivec2 kOff[] = ivec2[](
 );
 
 
-vec3 lowpassMeanFiltering()
+// Filtering subroutines
+layout(index=0) subroutine(imageFiltering) vec3 diracFiltering()
+{
+    return texture(ImageTex, screenCoord).rgb;
+}
+
+layout(index=1) subroutine(imageFiltering) vec3 lowpassMeanFiltering()
 {
     vec3 meanColor = vec3(0.0);
     int top = kTop[LowpassSize];
@@ -54,6 +66,51 @@ vec3 lowpassMeanFiltering()
     return meanColor;
 }
 
+layout(index=2) subroutine(imageFiltering) vec3 lowpassAdaptativeFiltering()
+{
+    vec3 refColor = texture(ImageTex, screenCoord).rgb;
+    if(refColor == vec3(0))
+        return refColor;
+
+    float refIntensity = length(refColor);
+    vec3 refDirection = refColor / refIntensity;
+    float refWeight = LowpassKernel[kIdx[0]];
+
+    float mass = refWeight;
+    vec3 color = refColor * refWeight;
+    int top = kTop[LowpassSize];
+
+    for(int i=1; i<top; ++i)
+    {
+        vec3 neightboorColor = textureOffset(ImageTex, screenCoord, kOff[i]).rgb;
+        if(neightboorColor == vec3(0))
+            continue;
+
+        float neightboorWeight = LowpassKernel[kIdx[i]];
+        if(AdaptationFactor != 0.0)
+        {
+            float neightboorIntensity = length(neightboorColor);
+            vec3 neightboorDirection = neightboorColor / neightboorIntensity;
+
+            float intensityContribution = 1.0 -
+                    abs(refIntensity - neightboorIntensity) /
+                       (refIntensity + neightboorIntensity);
+            float directionContribution = dot(refDirection, neightboorDirection);
+            float adaptationWeight = directionContribution * intensityContribution;
+            float adaptation = mix(1.0, adaptationWeight, AdaptationFactor);
+
+            neightboorWeight *= adaptation;
+        }
+
+        mass += neightboorWeight;
+        color += neightboorColor * neightboorWeight;
+    }
+
+    return color / mass;
+}
+
+
+// Fixed fonctions
 vec3 adjustWhite(vec3 color)
 {
     return TemperatureRgb * color;
@@ -68,9 +125,10 @@ vec3 adjustIntensity(vec3 color)
 }
 
 
+// Main
 void main()
 {
-    vec3 originalColor = lowpassMeanFiltering();
+    vec3 originalColor = ImageFilteringFunc();
     vec3 adjustedWhiteColor = adjustWhite(originalColor);
     vec3 adjustedIntensityColor = adjustIntensity(adjustedWhiteColor);
     vec3 saturatedColor = clamp(adjustedIntensityColor, 0.0, 1.0);

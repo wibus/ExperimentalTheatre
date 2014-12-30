@@ -33,19 +33,24 @@ namespace prop3
 
 
     private slots:
+        virtual void activateLowPassChecked(int state);
+        virtual void lowpassSizeChanged(int sizeIndex);
+        virtual void lowpassVarianceChanged(double variance);
+        virtual void useAdaptativeFilteringChecked(int state);
+        virtual void adaptativeFilteringFactorChanged(int factor);
         virtual void temperatureChanged(int kelvin);
         virtual void temperatureDefaultClicked();
         virtual void contrastChanged(int contrast);
         virtual void luminosityChanged(int luminosity);
-        virtual void lowpassSizeChanged(int sizeIndex);
-        virtual void lowpassVarianceChanged(double variance);
-        virtual void activateLowPassChecked(int state);
+        virtual void saveOutputImage();
 
+    private:
         virtual void updateKernel(double variance, int size);
 
         static glm::vec3 kelvinToRgb(int kelvin);
         static float computeLuminosityFactor(int luminosity);
         static float computeContrastFactor(int contrast);
+        static float computeAdaptativeFactor(int factor);
         static void buildLowpassKernel(float kernel[], double variance, int size);
         static void updateLowpassKernelTable(QTableWidget* widget, float kernel[]);
         static void updateLowpassKernelUniform(media::GlProgram& prog, float kernel[], int size);
@@ -65,6 +70,8 @@ namespace prop3
         float _lowpassKernel[25];
         int _lowpassKernelSize;
         double _lowpassKernelVar;
+        unsigned int _filteringFunc;
+        float _adaptationFactor;
 
         static const int DEFAULT_WHITE_TEMPERATURE;
     };

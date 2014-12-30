@@ -5,6 +5,8 @@
 
 #include <GLM/gtc/constants.hpp>
 
+#include <QFileDialog>
+
 #include <CellarWorkbench/Misc/CellarUtils.h>
 using namespace cellar;
 
@@ -17,12 +19,7 @@ namespace prop3
         _ui(new Ui::QGlPostProdUnit()),
         _colorBufferTexId(0),
         _fullscreenVao(0),
-        _fullscreenVbo(0),
-        _temperatureColor(kelvinToRgb(DEFAULT_WHITE_TEMPERATURE)),
-        _luminosityValue(0.0),
-        _contrastValue(1.0),
-        _lowpassKernelSize(3),
-        _lowpassKernelVar(0.5)
+        _fullscreenVbo(0)
     {
         _ui->setupUi(this);
     }
@@ -49,6 +46,7 @@ namespace prop3
         _postProdProgram.link();
         _postProdProgram.pushProgram();
         _postProdProgram.setInt("ImageTex", 0);
+        _postProdProgram.setFloat("AdaptationFactor", _adaptationFactor);
         _postProdProgram.setFloat("LuminosityValue", _luminosityValue);
         _postProdProgram.setFloat("ContrastValue", _contrastValue);
         _postProdProgram.setVec3f("TemperatureRgb", cellar::Vec3f(
@@ -78,29 +76,46 @@ namespace prop3
         glBindVertexArray(0);
 
         // Setup signal and slots
-        connect(_ui->temperatureSpin,   (void (QSpinBox::*)(int)) &QSpinBox::valueChanged,
-                this,                   &QGlPostProdUnit::temperatureChanged);
 
-        connect(_ui->temperatureDefaultBtn, &QPushButton::clicked,
-                this,                       &QGlPostProdUnit::temperatureDefaultClicked);
-
-        connect(_ui->contrastSlider, &QSlider::valueChanged,
-                this,                &QGlPostProdUnit::contrastChanged);
-
-        connect(_ui->luminositySlider, &QSlider::valueChanged,
-                this,                  &QGlPostProdUnit::luminosityChanged);
-
+        lowpassSizeChanged(_ui->lowpassSizeCombo->currentIndex());
         connect(_ui->lowpassSizeCombo, (void (QComboBox::*)(int)) &QComboBox::currentIndexChanged,
                 this,                  &QGlPostProdUnit::lowpassSizeChanged);
 
+        lowpassVarianceChanged(_ui->lowpassVarianceSpin->value());
         connect(_ui->lowpassVarianceSpin, (void (QDoubleSpinBox::*)(double)) &QDoubleSpinBox::valueChanged,
                 this,                     &QGlPostProdUnit::lowpassVarianceChanged);
 
+        adaptativeFilteringFactorChanged(_ui->adaptativeFactorSlider->value());
+        connect(_ui->adaptativeFactorSlider, &QSlider::valueChanged,
+                this,                        &QGlPostProdUnit::adaptativeFilteringFactorChanged);
+
+        useAdaptativeFilteringChecked(_ui->useAdaptativeFilteringCheck->checkState());
+        connect(_ui->useAdaptativeFilteringCheck, &QCheckBox::stateChanged,
+                this,                             &QGlPostProdUnit::useAdaptativeFilteringChecked);
+
+        activateLowPassChecked(_ui->activateLowpassCheck->checkState());
         connect(_ui->activateLowpassCheck, &QCheckBox::stateChanged,
                 this,                      &QGlPostProdUnit::activateLowPassChecked);
 
+        temperatureChanged(_ui->temperatureSpin->value());
+        connect(_ui->temperatureSpin,   (void (QSpinBox::*)(int)) &QSpinBox::valueChanged,
+                this,                   &QGlPostProdUnit::temperatureChanged);
 
-        updateKernel(_lowpassKernelVar, _lowpassKernelSize);
+        temperatureDefaultClicked();
+        connect(_ui->temperatureDefaultBtn, &QPushButton::clicked,
+                this,                       &QGlPostProdUnit::temperatureDefaultClicked);
+
+        contrastChanged(_ui->contrastSlider->value());
+        connect(_ui->contrastSlider, &QSlider::valueChanged,
+                this,                &QGlPostProdUnit::contrastChanged);
+
+        luminosityChanged(_ui->luminositySlider->value());
+        connect(_ui->luminositySlider, &QSlider::valueChanged,
+                this,                  &QGlPostProdUnit::luminosityChanged);
+
+        connect(_ui->saveButton, &QPushButton::clicked,
+                this,            &QGlPostProdUnit::saveOutputImage);
+
 
         // Show up the panel
         show();
@@ -113,6 +128,8 @@ namespace prop3
 
         _postProdProgram.pushProgram();
 
+        glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &_filteringFunc);
+
         glDisable(GL_DEPTH_TEST);
         glBindVertexArray(_fullscreenVao);
         glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -120,6 +137,64 @@ namespace prop3
         glEnable(GL_DEPTH_TEST);
 
         _postProdProgram.popProgram();
+    }
+
+    void QGlPostProdUnit::lowpassSizeChanged(int sizeIndex)
+    {
+        if(sizeIndex == 0) _lowpassKernelSize = 3;
+        else if(sizeIndex == 1) _lowpassKernelSize = 5;
+        else assert(false /* Unsupported kernel size */);
+
+        updateKernel(_lowpassKernelVar, _lowpassKernelSize);
+    }
+
+    void QGlPostProdUnit::activateLowPassChecked(int state)
+    {
+        bool isChecked = state;
+        _ui->lowpassWidget->setEnabled(isChecked);
+
+        if(isChecked)
+        {
+            _filteringFunc = _ui->adaptativeWidget->isEnabled() ? 2 : 1;
+        }
+        else
+        {
+            _filteringFunc = 0;
+        }
+    }
+
+    void QGlPostProdUnit::lowpassVarianceChanged(double variance)
+    {
+        if(variance < 0.001) variance = 0.0;
+        _lowpassKernelVar = variance;
+
+        updateKernel(_lowpassKernelVar, _lowpassKernelSize);
+    }
+
+    void QGlPostProdUnit::useAdaptativeFilteringChecked(int state)
+    {
+        bool isChecked = state;
+        _ui->adaptativeWidget->setEnabled(isChecked);\
+
+        if(isChecked)
+        {
+            _filteringFunc = 2;
+        }
+        else
+        {
+            _filteringFunc = 1;
+        }
+    }
+
+    void QGlPostProdUnit::adaptativeFilteringFactorChanged(int factor)
+    {
+        _adaptationFactor = computeAdaptativeFactor(factor);
+
+        _postProdProgram.pushProgram();
+        _postProdProgram.setFloat("AdaptationFactor", _adaptationFactor);
+        _postProdProgram.popProgram();
+
+        _ui->adaptativeFactorLabel->setText(QString::number(factor) + '%');
     }
 
     void QGlPostProdUnit::temperatureChanged(int kelvin)
@@ -146,6 +221,8 @@ namespace prop3
     void QGlPostProdUnit::contrastChanged(int contrast)
     {
         _contrastValue = computeContrastFactor(contrast);
+        _ui->contrastLabel->setText(
+            QString::number((int)(_contrastValue*100)) + '%');
 
         _postProdProgram.pushProgram();
         _postProdProgram.setFloat("ContrastValue", _contrastValue);
@@ -155,39 +232,58 @@ namespace prop3
     void QGlPostProdUnit::luminosityChanged(int luminosity)
     {
         _luminosityValue = computeLuminosityFactor(luminosity);
+        _ui->luminosityLabel->setText(
+            QString::number((double)_luminosityValue, 'g', 2));
 
         _postProdProgram.pushProgram();
         _postProdProgram.setFloat("LuminosityValue", _luminosityValue);
         _postProdProgram.popProgram();
     }
 
-    void QGlPostProdUnit::lowpassSizeChanged(int sizeIndex)
+    void QGlPostProdUnit::saveOutputImage()
     {
-        if(sizeIndex == 0) _lowpassKernelSize = 3;
-        else if(sizeIndex == 1) _lowpassKernelSize = 5;
-        else assert(false /* Unsupported kernel size */);
+        QFileDialog saveDialog(this);
+        saveDialog.setAcceptMode(QFileDialog::AcceptSave);
+        saveDialog.setNameFilter("Images (*.png *.jpg)");
+        saveDialog.setDefaultSuffix("png");
 
-        updateKernel(_lowpassKernelVar, _lowpassKernelSize);
-    }
+        if(saveDialog.exec())
+        {
+            QString fileName = saveDialog.selectedFiles().at(0);
 
-    void QGlPostProdUnit::lowpassVarianceChanged(double variance)
-    {
-        if(variance < 0.001) variance = 0.0;
-        _lowpassKernelVar = variance;
+            GLint viewport[4];
+            glGetIntegerv(GL_VIEWPORT, viewport);
+            int width = viewport[2];
+            int height = viewport[3];
 
-        updateKernel(_lowpassKernelVar, _lowpassKernelSize);
-    }
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            GLubyte* frags = new GLubyte[width * height * 4];
+            glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3],
+                         GL_RGBA, GL_UNSIGNED_BYTE, frags);
 
-    void QGlPostProdUnit::activateLowPassChecked(int state)
-    {
-        bool isChecked = state;
-        _ui->lowpassSizeCombo->setEnabled(isChecked);
-        _ui->lowpassVarianceSpin->setEnabled(isChecked);
+            int pIdx = -1;
+            int fIdx = (height-1) * width * 4;
+            uchar* pixels = new uchar[width * height * 4];
+            for(int j=0; j<height; ++j)
+            {
+                for(int i=0; i<width; ++i)
+                {
+                    pixels[++pIdx] = frags[fIdx+2]; // Blue
+                    pixels[++pIdx] = frags[fIdx+1]; // Green
+                    pixels[++pIdx] = frags[fIdx+0]; // Red
+                    pixels[++pIdx] = 255; // Alpha
+                    fIdx += 4;
+                }
 
-        if(isChecked)
-            updateKernel(_lowpassKernelVar, _lowpassKernelSize);
-        else
-            updateKernel(0.0, 1);
+                fIdx -= 2*width * 4;
+            }
+
+            QImage image(pixels, width, height, QImage::Format_RGB32);
+            image.save(fileName);
+
+            delete frags;
+            delete pixels;
+        }
     }
 
     void QGlPostProdUnit::updateKernel(double variance, int size)
@@ -243,7 +339,12 @@ namespace prop3
 
     float QGlPostProdUnit::computeContrastFactor(int contrast)
     {
-        return ((contrast + 1) / 51.0f);
+        return contrast / 50.0f;
+    }
+
+    float QGlPostProdUnit::computeAdaptativeFactor(int factor)
+    {
+        return factor / 100.0f;
     }
 
     void QGlPostProdUnit::buildLowpassKernel(float kernel[], double variance, int size)
@@ -295,7 +396,9 @@ namespace prop3
         {
             for(int i=0; i<5; ++i)
             {
-                QString cellValue = QString::number(kernel[j*5 + i], 'g', 2);
+                QString cellValue;
+                float value = kernel[j*5 + i];
+                if(value != 0) cellValue = QString::number(value, 'g', 2);
                 widget->setCellWidget(i, j, new QLabel(cellValue));
             }
         }
