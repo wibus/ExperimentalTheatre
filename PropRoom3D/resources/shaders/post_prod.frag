@@ -1,6 +1,5 @@
-#version 430
-
-subroutine vec3 imageFiltering();
+#version 130
+#extension ARB_shader_subroutine: enable
 
 uniform sampler2D ImageTex;
 uniform vec3 TemperatureRgb;
@@ -9,13 +8,13 @@ uniform float LuminosityValue;
 uniform float AdaptationFactor;
 uniform float LowpassKernel[25];
 uniform int   LowpassSize;
-layout(location=0) subroutine uniform imageFiltering ImageFilteringFunc;
 
 in vec2 screenCoord;
 
-layout(location=0) out vec4 FragColor;
+out vec4 FragColor;
 
 
+#ifdef ARB_shader_subroutine
 // Shader constant data
 const int kTop[] = int[](1, 9, 25);
 
@@ -49,6 +48,9 @@ const ivec2 kOff[] = ivec2[](
 
 
 // Filtering subroutines
+subroutine vec3 imageFiltering();
+layout(location=0) subroutine uniform imageFiltering ImageFilteringFunc;
+
 layout(index=0) subroutine(imageFiltering) vec3 diracFiltering()
 {
     return texture(ImageTex, screenCoord).rgb;
@@ -108,6 +110,13 @@ layout(index=2) subroutine(imageFiltering) vec3 lowpassAdaptativeFiltering()
 
     return color / mass;
 }
+
+#else //ARB_shader_subroutine
+vec3 ImageFilteringFunc()
+{
+    return texture(ImageTex, screenCoord).rgb;
+}
+#endif //ARB_shader_subroutine
 
 
 // Fixed fonctions

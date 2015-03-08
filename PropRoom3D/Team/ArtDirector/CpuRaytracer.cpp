@@ -16,7 +16,7 @@
 
 namespace prop3
 {
-    const int CpuRaytracer::WORKER_COUNT = 4;
+    const int CpuRaytracer::WORKER_COUNT = 8;
 
     CpuRaytracer::CpuRaytracer() :
         _sampleCount(0),
@@ -156,6 +156,11 @@ namespace prop3
         {
             w->setProps(_props);
         }
+
+        if(_props.size() == 1)
+        {
+            _postProdUnit->show();
+        }
     }
 
     void CpuRaytracer::unmanageProp(const std::shared_ptr<Prop>& prop)
@@ -173,6 +178,11 @@ namespace prop3
         for(auto& w : _workerObjects)
         {
             w->setProps(_props);
+        }
+
+        if(_props.size() == 0)
+        {
+            _postProdUnit->hide();
         }
     }
 

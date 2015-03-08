@@ -8,7 +8,8 @@
 #include <QFileDialog>
 
 #include <CellarWorkbench/Misc/CellarUtils.h>
-using namespace cellar;
+
+#include <MediaWorkbench/GL/GlInputsOutputs.h>
 
 
 namespace prop3
@@ -40,7 +41,12 @@ namespace prop3
 
     void QGlPostProdUnit::setup()
     {
+        media::GlInputsOutputs attribs;
+        attribs.setInput(0, "position");
+        attribs.setOutput(0, "FragColor");
+
         // Post production program
+        _postProdProgram.setInAndOutLocations(attribs);
         _postProdProgram.addShader(GL_VERTEX_SHADER, ":/Prop3/shaders/clip_space.vert");
         _postProdProgram.addShader(GL_FRAGMENT_SHADER, ":/Prop3/shaders/post_prod.frag");
         _postProdProgram.link();
@@ -115,19 +121,16 @@ namespace prop3
 
         connect(_ui->saveButton, &QPushButton::clicked,
                 this,            &QGlPostProdUnit::saveOutputImage);
-
-
-        // Show up the panel
-        show();
     }
 
     void QGlPostProdUnit::execute()
     {
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
+        glClear(GL_DEPTH_BUFFER_BIT);
 
         _postProdProgram.pushProgram();
 
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
         glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &_filteringFunc);
 
         glDisable(GL_DEPTH_TEST);
@@ -410,7 +413,7 @@ namespace prop3
         prog.setInt("LowpassSize", (size / 2));
         for(int i=0; i<25; ++i)
         {
-            std::string name = "LowpassKernel[" + toString(i) + "]";
+            std::string name = "LowpassKernel[" + cellar::toString(i) + "]";
             prog.setFloat(name, kernel[i]);
         }
         prog.popProgram();
