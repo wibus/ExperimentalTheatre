@@ -32,11 +32,14 @@ namespace scaena
                          this,        SLOT(close()));
 
 
-        // Tweak layout
-        _menuBar->setFixedHeight(26);
         layout->addWidget(_menuBar);
         layout->addWidget(_stage);
         setLayout(layout);
+
+        // Tweaking menu bar size
+        _menuBar->setFixedHeight(26);
+        // Menu bar not showing (Qt's bug)
+        _menuBar->setVisible(true);
 
         resize(800, 600 + _menuBar->height());
     }
