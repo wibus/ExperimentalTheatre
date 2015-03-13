@@ -5,9 +5,9 @@
 #include <vector>
 #include <map>
 
-#include <GL3/gl3w.h>
+#include <GLM/glm.hpp>
 
-#include <CellarWorkbench/DataStructure/Vector.h>
+#include <GL3/gl3w.h>
 
 #include "../libMediaWorkbench_global.h"
 
@@ -29,12 +29,17 @@ namespace media
         std::vector<ELEM_T> dataArray;
     };
 
-    typedef GlVbo<cellar::Vec2i, 2, GL_INT>   GlVbo2Di;
-    typedef GlVbo<cellar::Vec2f, 2, GL_FLOAT> GlVbo2Df;
-    typedef GlVbo<cellar::Vec3i, 3, GL_INT>   GlVbo3Di;
-    typedef GlVbo<cellar::Vec3f, 3, GL_FLOAT> GlVbo3Df;
-    typedef GlVbo<cellar::Vec4i, 4, GL_INT>   GlVbo4Di;
-    typedef GlVbo<cellar::Vec4f, 4, GL_FLOAT> GlVbo4Df;
+    typedef GlVbo<glm::ivec2, 2, GL_INT>    GlVbo2Di;
+    typedef GlVbo<glm::vec2,  2, GL_FLOAT>  GlVbo2Df;
+    typedef GlVbo<glm::dvec2, 2, GL_DOUBLE> GlVbo2Dd;
+
+    typedef GlVbo<glm::ivec3, 3, GL_INT>    GlVbo3Di;
+    typedef GlVbo<glm::vec3,  3, GL_FLOAT>  GlVbo3Df;
+    typedef GlVbo<glm::dvec3, 3, GL_DOUBLE> GlVbo3Dd;
+
+    typedef GlVbo<glm::ivec4, 4, GL_INT>    GlVbo4Di;
+    typedef GlVbo<glm::vec4,  4, GL_FLOAT>  GlVbo4Df;
+    typedef GlVbo<glm::dvec4, 4, GL_DOUBLE> GlVbo4Dd;
 
 
     class MEDIA_EXPORT GlVao
@@ -102,6 +107,10 @@ namespace media
 
         _bufferIds.insert( make_pair(bufferName, (GLuint) 0) );
 
+        int dataSize = sizeof(buff.dataArray.front())
+                       * buff.dataArray.size();
+
+
         glGenBuffers(1,
                      &_bufferIds[bufferName]);
 
@@ -109,7 +118,7 @@ namespace media
                      _bufferIds[bufferName]);
 
         glBufferData(buff.target,
-                     sizeof(ELEM_T) * buff.dataArray.size(),
+                     dataSize,
                      buff.dataArray.data(),
                      buff.usage);
 

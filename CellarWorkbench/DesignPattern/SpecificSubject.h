@@ -24,12 +24,9 @@ namespace cellar
         void commitExternalChanges(Msg& msg);
 
     protected:
-        void setIsChanged(bool is);
-        bool isChanged() const;
         void notifyObservers(Msg& msg);
 
     private:
-        bool _isChanged;
         std::vector< SpecificObserver<Msg>* > _observers;
     };
 
@@ -38,7 +35,6 @@ namespace cellar
     // IMPLEMENTATION //
     template <typename Msg>
     SpecificSubject<Msg>::SpecificSubject() :
-        _isChanged(false),
         _observers()
     {}
 
@@ -74,26 +70,14 @@ namespace cellar
     template <typename Msg>
     inline void SpecificSubject<Msg>::commitExternalChanges(Msg& msg)
     {
-        setIsChanged( true );
         notifyObservers( msg );
     }
 
     template <typename Msg>
-    inline void SpecificSubject<Msg>::setIsChanged(bool is)
-        {_isChanged = is;}
-
-    template <typename Msg>
-    inline bool SpecificSubject<Msg>::isChanged() const
-        {return _isChanged;}
-
-    template <typename Msg>
     void SpecificSubject<Msg>::notifyObservers(Msg& msg)
     {
-        if(_isChanged)
-            for(unsigned int i=0; i < _observers.size(); ++i)
-                _observers[i]->notify(msg);
-
-        setIsChanged( false );
+        for(unsigned int i=0; i < _observers.size(); ++i)
+            _observers[i]->notify(msg);
     }
 }
 

@@ -45,7 +45,6 @@ namespace prop3
         if(_density != density)
         {
             _density = density;
-            setIsChanged(true);
             HardwareUpdate msg(
                 HardwareUpdate::EType::DENSITY,
                 _density,
@@ -59,7 +58,6 @@ namespace prop3
         if(_bounciness != bounciness)
         {
             _bounciness = bounciness;
-            setIsChanged(true);
             HardwareUpdate msg(
                 HardwareUpdate::EType::BOUNCINESS,
                 _bounciness,
@@ -73,7 +71,6 @@ namespace prop3
         if(_staticFrictionCoefficient != us)
         {
             _staticFrictionCoefficient = us;
-            setIsChanged(true);
             HardwareUpdate msg(
                 HardwareUpdate::EType::STATIC_FIRCTION_COEFFICIENT,
                 _staticFrictionCoefficient,
@@ -87,7 +84,6 @@ namespace prop3
         if(_dynamicFrictionCoefficient != ud)
         {
             _dynamicFrictionCoefficient = ud;
-            setIsChanged(true);
             HardwareUpdate msg(
                 HardwareUpdate::EType::DYNAMIC_FIRCTION_COEFFICIENT,
                 _dynamicFrictionCoefficient,

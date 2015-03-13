@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include <GLM/glm.hpp>
+
 #include "../libPropRoom2D_global.h"
 
 
@@ -17,18 +19,18 @@ namespace prop2
         virtual ~AbstractCostume();
 
         // Getters
-        real depth() const;
-        Vec4r colorFilter() const;
+        double depth() const;
+        glm::dvec4 colorFilter() const;
         std::string textureName() const;
 
         // Setters
-        virtual void setDepth(real depth);
-        virtual void setColorFilter(const Vec4r& filter);
+        virtual void setDepth(double depth);
+        virtual void setColorFilter(const glm::dvec4& filter);
         virtual void setTextureName(const std::string& fileName);
 
     private:
-        real _depth;
-        Vec4r _colorFilter;
+        double _depth;
+        glm::dvec4 _colorFilter;
         std::string _textureName;
     };
 
@@ -36,12 +38,12 @@ namespace prop2
 
     // IMPLEMENTATION //
 
-    inline real AbstractCostume::depth() const
+    inline double AbstractCostume::depth() const
     {
         return _depth;
     }
 
-    inline Vec4r AbstractCostume::colorFilter() const
+    inline glm::dvec4 AbstractCostume::colorFilter() const
     {
         return _colorFilter;
     }

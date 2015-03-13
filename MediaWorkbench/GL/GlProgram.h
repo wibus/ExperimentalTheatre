@@ -7,10 +7,9 @@
 #include <stack>
 #include <memory>
 
-#include <GL3/gl3w.h>
+#include <GLM/glm.hpp>
 
-#include <CellarWorkbench/DataStructure/Vector.h>
-#include <CellarWorkbench/DataStructure/Matrix.h>
+#include <GL3/gl3w.h>
 
 #include "GlInputsOutputs.h"
 #include "GlShader.h"
@@ -62,17 +61,17 @@ namespace media
         int getUniformLocation(const std::string& name) const;
 
         bool setInt(const std::string& var, int val);
-        bool setVec2i(const std::string& var, const cellar::Vec2i& vec);
-        bool setVec3i(const std::string& var, const cellar::Vec3i& vec);
-        bool setVec4i(const std::string& var, const cellar::Vec4i& vec);
+        bool setVec2i(const std::string& var, const glm::ivec2& vec);
+        bool setVec3i(const std::string& var, const glm::ivec3& vec);
+        bool setVec4i(const std::string& var, const glm::ivec4& vec);
 
         bool setFloat(const std::string& var, float val);
-        bool setVec2f(const std::string& var, const cellar::Vec2f& vec);
-        bool setVec3f(const std::string& var, const cellar::Vec3f& vec);
-        bool setVec4f(const std::string& var, const cellar::Vec4f& vec);
+        bool setVec2f(const std::string& var, const glm::vec2& vec);
+        bool setVec3f(const std::string& var, const glm::vec3& vec);
+        bool setVec4f(const std::string& var, const glm::vec4& vec);
 
-        bool setMat3f(const std::string& var, const cellar::Mat3f& mat);
-        bool setMat4f(const std::string& var, const cellar::Mat4f& mat);
+        bool setMat3f(const std::string& var, const glm::mat3& mat);
+        bool setMat4f(const std::string& var, const glm::mat4& mat);
 
     private:
         void applyState();

@@ -4,7 +4,6 @@ using namespace std;
 
 #include <GL3/gl3w.h>
 
-#include <CellarWorkbench/DataStructure/VectorSpace.h>
 #include <CellarWorkbench/Misc/CellarUtils.h>
 #include <CellarWorkbench/Misc/Log.h>
 

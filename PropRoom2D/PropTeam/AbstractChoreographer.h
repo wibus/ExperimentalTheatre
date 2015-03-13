@@ -3,6 +3,8 @@
 
 #include <memory>
 
+#include <GLM/glm.hpp>
+
 #include "AbstractTeamMember.h"
 
 
@@ -21,9 +23,9 @@ namespace prop2
     public:
         virtual ~AbstractChoreographer() {}
 
-        virtual void setGravity(const Vec2r& unitsPerSecondSquared) =0;
+        virtual void setGravity(const glm::dvec2& unitsPerSecondSquared) =0;
 
-        virtual void update(real dt) =0;
+        virtual void update(double dt) =0;
 
         virtual void manageCircle(const std::shared_ptr<Circle>& circle) =0;
         virtual void managePolygon(const std::shared_ptr<Polygon>& polygon) =0;

@@ -6,16 +6,10 @@ SET(CELLAR_ALGORITHM_HEADERS
     
 # Data structure
 SET(CELLAR_DATA_STRUCTURE_HEADERS
-    ${CELLAR_SRC_DIR}/DataStructure/Barycenter.h
     ${CELLAR_SRC_DIR}/DataStructure/Grid2D.h
     ${CELLAR_SRC_DIR}/DataStructure/Grid3D.h
-    ${CELLAR_SRC_DIR}/DataStructure/Matrix.h
-    ${CELLAR_SRC_DIR}/DataStructure/MatrixStack.h
-    ${CELLAR_SRC_DIR}/DataStructure/ObservableMatrixStack.h
     ${CELLAR_SRC_DIR}/DataStructure/PGrid2D.h
-    ${CELLAR_SRC_DIR}/DataStructure/PGrid3D.h
-    ${CELLAR_SRC_DIR}/DataStructure/Vector.h
-    ${CELLAR_SRC_DIR}/DataStructure/VectorSpace.h)
+    ${CELLAR_SRC_DIR}/DataStructure/PGrid3D.h)
 
 
 # Date and time
@@ -37,9 +31,7 @@ SET(CELLAR_DESIGN_PATTERN_HEADERS
 
 # Geometry
 SET(CELLAR_GEOMETRY_HEADERS
-    ${CELLAR_SRC_DIR}/Geometry/Plane3D.h
-    ${CELLAR_SRC_DIR}/Geometry/Segment2D.h
-    ${CELLAR_SRC_DIR}/Geometry/Segment3D.h)
+    ${CELLAR_SRC_DIR}/Geometry/Segment2D.h)
 
     
 #Misc
@@ -73,8 +65,7 @@ SET(CELLAR_ALGORITHM_SOURCES
 
     
 # Data structure
-SET(CELLAR_DATA_STRUCTURE_SOURCES
-    ${CELLAR_SRC_DIR}/DataStructure/Barycenter.cpp)
+SET(CELLAR_DATA_STRUCTURE_SOURCES)
 
 
 # Date and time
@@ -91,7 +82,8 @@ SET(CELLAR_DESIGN_PATTERN_SOURCES)
 
 
 # Geometry
-SET(CELLAR_GEOMETRY_SOURCES)
+SET(CELLAR_GEOMETRY_SOURCES
+    ${CELLAR_SRC_DIR}/Geometry/Segment2D.cpp)
 
     
 #Misc

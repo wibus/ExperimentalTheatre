@@ -20,11 +20,10 @@ namespace media
 
         void forward(float dist);
         void sideward(float dist);
-        void turnHorizontaly(float radians);
-        void turnVerticaly(float radians);
+        void pan(float radians);
+        void tilt(float radians);
 
     private:
-        void setupCamera();
 
         Camera* _camera;
     };

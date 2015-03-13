@@ -4,8 +4,8 @@
 namespace prop2
 {
     AbstractCostume::AbstractCostume() :
-        _depth(real(0.0)),
-        _colorFilter(real(1.0), real(1.0), real(1.0), real(1.0)),
+        _depth(0.0),
+        _colorFilter(1.0, 1.0, 1.0, 1.0),
         _textureName("")
     {
     }
@@ -14,12 +14,12 @@ namespace prop2
     {
     }
 
-    void AbstractCostume::setDepth(real depth)
+    void AbstractCostume::setDepth(double depth)
     {
         _depth = depth;
     }
 
-    void AbstractCostume::setColorFilter(const Vec4r& filter)
+    void AbstractCostume::setColorFilter(const glm::dvec4& filter)
     {
         _colorFilter = filter;
     }

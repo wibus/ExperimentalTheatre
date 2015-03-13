@@ -17,52 +17,52 @@ namespace prop2
 
         // Getters        
         virtual std::string imageName() const;
-        virtual Vec2r handlePosition() const;
-        virtual Vec2r size() const;
-        virtual real width() const;
-        virtual real height() const;
-        virtual Vec2r texOrigin() const;
-        virtual Vec2r texExtents() const;
-        Vec4r colorFilter() const;
-        const std::vector<Vec2r>& cornersPositions() const;
-        const std::vector<Vec2r>& cornersTexCoords() const;
+        virtual glm::dvec2 handlePosition() const;
+        virtual glm::dvec2 size() const;
+        virtual double width() const;
+        virtual double height() const;
+        virtual glm::dvec2 texOrigin() const;
+        virtual glm::dvec2 texExtents() const;
+        glm::dvec4 colorFilter() const;
+        const std::vector<glm::dvec2>& cornersPositions() const;
+        const std::vector<glm::dvec2>& cornersTexCoords() const;
 
         // Setters        
         virtual void setImageName(const std::string name);
-        virtual void setHandlePosition(const Vec2r& position);
-        virtual void setSize(const Vec2r& size);
-        virtual void setWidth(real width);
-        virtual void setHeight(real height);
-        virtual void setTexOrigin(const Vec2r& origin);
-        virtual void setTexExtents(const Vec2r& extents);
-        virtual void setColorFilter(const Vec4r& color);
+        virtual void setHandlePosition(const glm::dvec2& position);
+        virtual void setSize(const glm::dvec2& size);
+        virtual void setWidth(double width);
+        virtual void setHeight(double height);
+        virtual void setTexOrigin(const glm::dvec2& origin);
+        virtual void setTexExtents(const glm::dvec2& extents);
+        virtual void setColorFilter(const glm::dvec4& color);
 
     private:
         std::string _imageName;
-        std::vector<Vec2r> _cornersPositions;
-        std::vector<Vec2r> _cornersTexCoords;
-        Vec4r _colorFilter;
+        std::vector<glm::dvec2> _cornersPositions;
+        std::vector<glm::dvec2> _cornersTexCoords;
+        glm::dvec4 _colorFilter;
     };
 
 
 
     // IMPLEMENTATION //
-    inline const std::vector<Vec2r>& ImageHud::cornersPositions() const
+    inline const std::vector<glm::dvec2>& ImageHud::cornersPositions() const
     {
         return _cornersPositions;
     }
 
-    inline const std::vector<Vec2r>& ImageHud::cornersTexCoords() const
+    inline const std::vector<glm::dvec2>& ImageHud::cornersTexCoords() const
     {
         return _cornersTexCoords;
     }
 
-    inline Vec4r ImageHud::colorFilter() const
+    inline glm::dvec4 ImageHud::colorFilter() const
     {
         return _colorFilter;
     }
 
-    inline void ImageHud::setColorFilter(const Vec4r &color)
+    inline void ImageHud::setColorFilter(const glm::dvec4 &color)
     {
         _colorFilter = color;
     }

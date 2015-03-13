@@ -1,6 +1,8 @@
 #ifndef PROPROOM2D_ABSTRACTHUD_H
 #define PROPROOM2D_ABSTRACTHUD_H
 
+#include <GLM/glm.hpp>
+
 #include "../AbstractProp.h"
 
 
@@ -15,15 +17,15 @@ namespace prop2
         virtual ~AbstractHud();
 
         // Getters
-        virtual real width() const =0;
-        virtual real height() const =0;
-        virtual Vec2r handlePosition() const = 0;
+        virtual double width() const =0;
+        virtual double height() const =0;
+        virtual glm::dvec2 handlePosition() const = 0;
         EHorizontalAnchor horizontalAnchor() const;
         EVerticalAnchor   verticalAnchor() const;
 
         // Setters
-        virtual void setHeight(real height) =0;
-        virtual void setHandlePosition(const Vec2r& position) = 0;
+        virtual void setHeight(double height) =0;
+        virtual void setHandlePosition(const glm::dvec2& position) = 0;
         void setHorizontalAnchor(const EHorizontalAnchor& anchor);
         void setVerticalAnchor(const EVerticalAnchor& anchor);
 

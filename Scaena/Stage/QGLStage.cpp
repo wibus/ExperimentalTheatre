@@ -233,6 +233,9 @@ namespace scaena
     void QGLStage::resizeGL(int w, int h)
     {
         glViewport(0,0,w,h);
+        _propTeam2D->resize(w, h);
+
+        // TODO : PropTeam3D own camera
         camera().updateViewport(w, h);
     }
 
@@ -340,8 +343,8 @@ namespace scaena
 
     MouseEvent QGLStage::convertMouseEvent(QMouseEvent* event)
     {
-        Vec2i pos(event->x(), event->y());
-        Vec2i globalPos(event->globalX(), event->globalY());
+        glm::ivec2 pos(event->x(), event->y());
+        glm::ivec2 globalPos(event->globalX(), event->globalY());
 
         EMouseButton button = EMouseButton::NO_BUTTON;
 

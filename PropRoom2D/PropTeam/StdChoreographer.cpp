@@ -3,23 +3,22 @@
 #include <cassert>
 using namespace std;
 
-using namespace cellar;
-
 #include "../Shape/Circle.h"
 #include "../Shape/Polygon.h"
 #include "../Hardware/Hardware.h"
 
+using namespace cellar;
 
 namespace prop2
 {
     StdChoreographer::StdChoreographer() :
-        _dt(real(0)),
-        _gravity(real(0), real(0)),
+        _dt(0),
+        _gravity(0, 0),
         _circles(),
         _polygons(),
-        _maxHandledDeltaTime(real(0.1)),
-        _correctionPercentage(real(0.65)),
-        _correctionSlop(real(0.1))
+        _maxHandledDeltaTime(0.1),
+        _correctionPercentage(0.65),
+        _correctionSlop(0.1)
     {
     }
 
@@ -37,11 +36,11 @@ namespace prop2
         _polygons.clear();
     }
 
-    void StdChoreographer::update(real dt)
+    void StdChoreographer::update(double dt)
     {
         _dt = dt;
 
-        if(_dt == real(0))
+        if(_dt == 0)
         {
             // No time elapsed,
             // no need to update
@@ -165,21 +164,23 @@ namespace prop2
         shape->addAngularVelocity(shape->angularAcceleration() * _dt);
 
         // Reset the accelerations
-        shape->setLinearAcceleration(Vec2r());
-        shape->setAngularAcceleration(real(0.0));
+        shape->setLinearAcceleration(glm::dvec2());
+        shape->setAngularAcceleration(0.0);
 
         // Apply friction
-        Vec3r linearFriction = shape->linearFrictionCoefficients();
-        if(linearFriction)
+        glm::dvec3 linearFriction = shape->linearFrictionCoefficients();
+        if(linearFriction != glm::dvec3(0))
         {
-            Vec2r linearVelocityDir = shape->linearVelocity();
-            if(linearVelocityDir)
+            glm::dvec2 linearVelocityDir = shape->linearVelocity();
+            if(linearVelocityDir != glm::dvec2(0))
             {
-                real  linearVelocityLen2 = linearVelocityDir.length2();
-                real  linearVelocityLen = sqrt(linearVelocityLen2);
+                double  linearVelocityLen2 = glm::dot(linearVelocityDir,
+                                                      linearVelocityDir);
+                double  linearVelocityLen = glm::sqrt(linearVelocityLen2);
+
                 linearVelocityDir /= linearVelocityLen;
 
-                real linearDecelerationMagnitude =
+                double linearDecelerationMagnitude =
                         linearFriction[0] +
                         linearFriction[1] * linearVelocityLen +
                         linearFriction[2] * linearVelocityLen2;
@@ -192,21 +193,22 @@ namespace prop2
                 }
                 else
                 {
-                    shape->setLinearVelocity(Vec2r(real(0), real(0)));
+                    shape->setLinearVelocity(glm::dvec2(0, 0));
                 }
             }
         }
-        Vec3r angularFriction = shape->angularFrictionCoefficients();
-        if(angularFriction)
+
+        glm::dvec3 angularFriction = shape->angularFrictionCoefficients();
+        if(angularFriction != glm::dvec3(0))
         {
-            real angularVelocity = shape->angularVelocity();
+            double angularVelocity = shape->angularVelocity();
             if(angularVelocity)
             {
-                real angularVelocity2 = angularVelocity * angularVelocity;
-                real angularVelocityDir = sign(angularVelocity);
+                double angularVelocity2 = angularVelocity * angularVelocity;
+                double angularVelocityDir = sign(angularVelocity);
                 angularVelocity = absolute(angularVelocity);
 
-                real angularDecelerationMagnitude =
+                double angularDecelerationMagnitude =
                         angularFriction[0] +
                         angularFriction[1] * angularVelocity +
                         angularFriction[2] * angularVelocity2;
@@ -219,7 +221,7 @@ namespace prop2
                 }
                 else
                 {
-                    shape->setAngularVelocity(real(0));
+                    shape->setAngularVelocity(0);
                 }
             }
         }
@@ -235,14 +237,14 @@ namespace prop2
         AbstractShape* shape1 = report->shape1.get();
         AbstractShape* shape2 = report->shape2.get();
 
-        Vec2r n = report->contactNormal;
-        real pen = report->penetrationDepth;
+        glm::dvec2 n = report->contactNormal;
+        double pen = report->penetrationDepth;
 
-        real iM1 = shape1->inverseMass();
-        real iM2 = shape2->inverseMass();
+        double iM1 = shape1->inverseMass();
+        double iM2 = shape2->inverseMass();
 
-        real correction = _correctionPercentage *
-                          maxVal(pen - _correctionSlop, real(0.0)) /
+        double correction = _correctionPercentage *
+                          maxVal(pen - _correctionSlop, 0.0) /
                           (iM1 + iM2);
         shape1->moveBy( n * (iM1 * correction));
         shape2->moveBy(-n * (iM2 * correction));
@@ -255,73 +257,73 @@ namespace prop2
         AbstractShape* shape2 = report->shape2.get();
 
         // Get tangent space coordinate system
-        Vec2r n = report->contactNormal;
-        Vec2r t = perpCW(n);
+        glm::dvec2 n = report->contactNormal;
+        glm::dvec2 t = Segment2D::perpCW(n);
 
         // Get distance of shapes' centroid from contact point
-        Vec2r p = report->contactPoint;
-        Vec2r r1 = p - shape1->centroid();
-        Vec2r r2 = p - shape2->centroid();
+        glm::dvec2 p = report->contactPoint;
+        glm::dvec2 r1 = p - shape1->centroid();
+        glm::dvec2 r2 = p - shape2->centroid();
 
         // Get shapes' inertia
-        real iM1 = shape1->inverseMass();
-        real iM2 = shape2->inverseMass();
-        real iI1 = shape1->inverseMomentOfInertia();
-        real iI2 = shape2->inverseMomentOfInertia();
+        double iM1 = shape1->inverseMass();
+        double iM2 = shape2->inverseMass();
+        double iI1 = shape1->inverseMomentOfInertia();
+        double iI2 = shape2->inverseMomentOfInertia();
 
         // Get shapes' velocities
-        Vec2r v1 = shape1->linearVelocity();
-        Vec2r v2 = shape2->linearVelocity();
-        real w1 = shape1->angularVelocity();
-        real w2 = shape2->angularVelocity();
+        glm::dvec2 v1 = shape1->linearVelocity();
+        glm::dvec2 v2 = shape2->linearVelocity();
+        double w1 = shape1->angularVelocity();
+        double w2 = shape2->angularVelocity();
 
         // Get bounce coefficient
-        real e = minVal(shape1->hardware()->bounciness(),
+        double e = minVal(shape1->hardware()->bounciness(),
                         shape2->hardware()->bounciness());
 
 
         // Compute normal impulse //
-        real vn1 = dot(v1, n);
-        real vn2 = dot(v2, n);
-        real rn1 = cross(r1, n);
-        real rn2 = cross(r2, n);
+        double vn1 = glm::dot(v1, n);
+        double vn2 = glm::dot(v2, n);
+        double rn1 = Segment2D::cross(r1, n);
+        double rn2 = Segment2D::cross(r2, n);
 
-        real jn = (1 + e);
+        double jn = (1 + e);
         jn *= ((vn2 + w2*rn2) - (vn1 + w1*rn1));
         jn /= (iM1 + iM2 + rn1*rn1*iI1 + rn2*rn2*iI2);
 
 
         // A negative impulse means that the shapes are already moving apart
         // No need to apply any impulse in that case
-        if(jn < real(0.0)) return;
+        if(jn < 0.0) return;
 
 
         // Compute tangent impulse //
-        real vt1 = dot(v1, t);
-        real vt2 = dot(v2, t);
-        real rt1 = cross(r1, t);
-        real rt2 = cross(r2, t);
+        double vt1 = glm::dot(v1, t);
+        double vt2 = glm::dot(v2, t);
+        double rt1 = Segment2D::cross(r1, t);
+        double rt2 = Segment2D::cross(r2, t);
 
-        real jt = real(1.0);
+        double jt = 1.0;
         jt *= ((vt2 + w2*rt2) - (vt1 + w1*rt1));
         jt /= (iM1 + iM2 + rt1*rt1*iI1 + rt2*rt2*iI2);
 
 
         // Compute the final tangent impulse assuming the fact that it is
         // limited by the shapes' static coefficients of friction and normal force
-        real us = shape1->hardware()->staticFrictionCoefficient() *
+        double us = shape1->hardware()->staticFrictionCoefficient() *
                   shape2->hardware()->staticFrictionCoefficient();
-        real absoluteJt = absolute(jt);
+        double absoluteJt = absolute(jt);
         if(jn*us < absoluteJt)
         {
-            real ud = shape1->hardware()->dynamicFrictionCoefficient() *
+            double ud = shape1->hardware()->dynamicFrictionCoefficient() *
                       shape2->hardware()->dynamicFrictionCoefficient();
             jt *= (jn / absoluteJt) * ud;
         }
 
 
         // Apply the final impulse
-        Vec2r j = t*jt + n*jn;
+        glm::dvec2 j = t*jt + n*jn;
         shape1->applyImpulseAt( j, p);
         shape2->applyImpulseAt(-j, p);
     }
@@ -332,21 +334,21 @@ namespace prop2
     {
         std::shared_ptr<StdCollisionReport> report(new StdCollisionReport());
 
-        real r1 = circle1->radius();
-        real r2 = circle2->radius();
+        double r1 = circle1->radius();
+        double r2 = circle2->radius();
 
-        real minDistLen = r1 + r2;
-        real minDistLen2 = minDistLen*minDistLen;
+        double minDistLen = r1 + r2;
+        double minDistLen2 = minDistLen*minDistLen;
 
-        Vec2r dist = circle1->centroid() - circle2->centroid();
-        real distLen2 = dist.length2();
+        glm::dvec2 dist = circle1->centroid() - circle2->centroid();
+        double distLen2 = glm::dot(dist, dist);
 
         // Return now if the shapes do not collide
         if(minDistLen2 < distLen2)
             return report;
 
-        real distLen = sqrt(distLen2);
-        real radiusRatio2 = r2 / (r1+r2);
+        double distLen = sqrt(distLen2);
+        double radiusRatio2 = r2 / (r1+r2);
 
         report->areColliding = true;
         report->shape1 = circle1;
@@ -365,18 +367,18 @@ namespace prop2
     {
         std::shared_ptr<StdCollisionReport> report(new StdCollisionReport());
 
-        Vec2r c = circle->centroid();
-        real r = circle->radius();
+        glm::dvec2 c = circle->centroid();
+        double r = circle->radius();
 
-        Vec2r minDist;
-        real minDistLen2 = r*r;
+        glm::dvec2 minDist;
+        double minDistLen2 = r*r;
 
         int nbv = polygon->nbVertices();
-        const std::vector<Segment2Dr>& outline = polygon->outline();
+        const std::vector<Segment2D>& outline = polygon->outline();
         for(int i=0; i < nbv; ++i)
         {
-            Vec2r dist = outline[i].pointMinimalDirection(c);
-            real distLen2 = dist.length2();
+            glm::dvec2 dist = outline[i].pointMinimalDirection(c);
+            double distLen2 = glm::dot(dist, dist);
             if(distLen2 < minDistLen2)
             {
                 minDist = dist;
@@ -388,7 +390,7 @@ namespace prop2
         if(minDistLen2 == r*r)
             return report;
 
-        real minDistLen = sqrt(minDistLen2);
+        double minDistLen = sqrt(minDistLen2);
 
         report->areColliding = true;
         report->shape1 = circle;
@@ -397,7 +399,7 @@ namespace prop2
         report->contactNormal = minDist / minDistLen;
         report->contactPoint = circle->centroid() -
                                report->contactNormal *
-                                    (r - report->penetrationDepth / real(2.0));
+                                    (r - report->penetrationDepth / 2.0);
 
         return report;
     }
@@ -408,28 +410,28 @@ namespace prop2
     {
         std::shared_ptr<StdCollisionReport> report(new StdCollisionReport());
 
-        const std::vector<Segment2Dr>& outline1 = polygon1->outline();
-        const std::vector<Segment2Dr>& outline2 = polygon2->outline();
+        const std::vector<Segment2D>& outline1 = polygon1->outline();
+        const std::vector<Segment2D>& outline2 = polygon2->outline();
 
         int nbv1 = polygon1->nbVertices();
         int nbv2 = polygon2->nbVertices();
 
-        Vec2r weightedNormalsAverage;
-        Vec2r weightedCollisionPointsAverage;
-        real weightsAccumulator = real(0.0);
+        glm::dvec2 weightedNormalsAverage;
+        glm::dvec2 weightedCollisionPointsAverage;
+        double weightsAccumulator = 0.0;
 
         for(int i=0; i < nbv1; ++i)
         {
-            Vec2r pt = outline1[i].begin();
+            glm::dvec2 pt = outline1[i].begin();
             if(!polygon2->contains(pt))
                 continue;
 
-            Vec2r minDist = outline2[0].pointMinimalDirection(pt);
-            real minDistLen2 = minDist.length2();
+            glm::dvec2 minDist = outline2[0].pointMinimalDirection(pt);
+            double minDistLen2 = glm::dot(minDist, minDist);
             for(int j=1; j < nbv2; ++j)
             {
-                Vec2r dist = outline2[j].pointMinimalDirection(pt);
-                real distLen2 = dist.length2();
+                glm::dvec2 dist = outline2[j].pointMinimalDirection(pt);
+                double distLen2 = glm::dot(dist, dist);
                 if(minDistLen2 < distLen2)
                     continue;
 
@@ -437,7 +439,7 @@ namespace prop2
                 minDistLen2 = distLen2;
             }
 
-            real pointContribution = sqrt(minDistLen2);
+            double pointContribution = sqrt(minDistLen2);
             weightsAccumulator += pointContribution;
             weightedNormalsAverage -= pointContribution * minDist;
             weightedCollisionPointsAverage += pointContribution * pt;
@@ -445,16 +447,16 @@ namespace prop2
 
         for(int i=0; i < nbv2; ++i)
         {
-            Vec2r pt = outline2[i].begin();
+            glm::dvec2 pt = outline2[i].begin();
             if(!polygon1->contains(pt))
                 continue;
 
-            Vec2r minDist = outline1[0].pointMinimalDirection(pt);
-            real minDistLen2 = minDist.length2();
+            glm::dvec2 minDist = outline1[0].pointMinimalDirection(pt);
+            double minDistLen2 = glm::dot(minDist, minDist);
             for(int j=1; j < nbv1; ++j)
             {
-                Vec2r dist = outline1[j].pointMinimalDirection(pt);
-                real distLen2 = dist.length2();
+                glm::dvec2 dist = outline1[j].pointMinimalDirection(pt);
+                double distLen2 = glm::dot(dist, dist);
                 if(minDistLen2 < distLen2)
                     continue;
 
@@ -462,19 +464,19 @@ namespace prop2
                 minDistLen2 = distLen2;
             }
 
-            real pointContribution = sqrt(minDistLen2);
+            double pointContribution = sqrt(minDistLen2);
             weightsAccumulator += pointContribution;
             weightedNormalsAverage += pointContribution * minDist;
             weightedCollisionPointsAverage += pointContribution * pt;
         }
 
         // Return now if the shapes do not collide
-        if(weightsAccumulator == real(0.0))
+        if(weightsAccumulator == 0.0)
             return report;
 
-        Vec2r col = weightedCollisionPointsAverage / weightsAccumulator;
-        Vec2r pen = weightedNormalsAverage / weightsAccumulator;
-        real penLen = pen.length();
+        glm::dvec2 col = weightedCollisionPointsAverage / weightsAccumulator;
+        glm::dvec2 pen = weightedNormalsAverage / weightsAccumulator;
+        double penLen = glm::length(pen);
 
         report->areColliding = true;
         report->shape1 = polygon1;

@@ -3,6 +3,8 @@
 
 #include <memory>
 
+#include <GLM/glm.hpp>
+
 #include "../libPropRoom2D_global.h"
 
 
@@ -38,8 +40,8 @@ namespace prop2
 
         virtual void setup();
         virtual void reset();
-        virtual void update(real dt);
-        virtual void draw(real dt);
+        virtual void update(double dt);
+        virtual void draw(double dt);
 
         // Factory methods
         virtual std::shared_ptr<Circle>   createCircle();
@@ -52,8 +54,11 @@ namespace prop2
         virtual void deleteTextHud(std::shared_ptr<TextHud>& textHud);
         virtual void deleteImageHud(std::shared_ptr<ImageHud>& imageHud);
 
-        virtual void setCamera(media::Camera& camera);
-        virtual void setGravity(const Vec2r& unitsPerSecondSquared);
+        virtual void resize(int width, int height);
+        virtual std::shared_ptr<media::Camera> camera() const;
+        virtual void setCamera(const std::shared_ptr<media::Camera>& camera);
+
+        virtual void setGravity(const glm::dvec2& unitsPerSecondSquared);
 
     protected:
         // Getter for prop team members

@@ -11,9 +11,6 @@
 #   define PROP3D_EXPORT
 #endif
 
-// Use GLM to use radians instead of degrees for its parameters
-#define GLM_FORCE_RADIANS
-
 namespace prop3
 {
     // Shapes attributes

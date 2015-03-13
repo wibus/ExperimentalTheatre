@@ -1,79 +1,49 @@
 #include "CameraManBird.h"
 
+#include <GLM/gtc/matrix_transform.hpp>
+
 #include "Camera.h"
 
 
 namespace media
 {
-    CameraManBird::CameraManBird() :
-        _camera(nullptr)
-    {
-    }
-
     CameraManBird::CameraManBird(Camera& camera) :
-        _camera(nullptr)
+        _camera(&camera)
     {
-        setCamera( camera );
+        float w = _camera->viewport().x;
+        float h = _camera->viewport().y;
+
+        _camera->updateProjection(
+            glm::ortho(-w/2, -h/2,
+                        w/2,  h/2,
+                       -1.0f, 1.0f));
+
+        _camera->updateView(
+            glm::lookAt(glm::vec3(w/2.0f, h/2.0f, 1),
+                        glm::vec3(w/2.0f, h/2.0f, 0),
+                        glm::vec3(0,      1,      0)));
     }
 
-    void CameraManBird::setCamera(Camera& camera)
+    void CameraManBird::moveTo(const glm::vec3& destination)
     {
-        _camera = & camera;
-        setupCamera();
+        float x = destination.x;
+        float y = destination.y;
+
+        _camera->updateView(
+            glm::lookAt(glm::vec3(x, y, 1),
+                        glm::vec3(x, y, 0),
+                        glm::vec3(0, 1, 0)));
     }
 
-    void CameraManBird::moveTo(const cellar::Vec3f& destination)
+    void CameraManBird::moveBy(const glm::vec2& displacement)
     {
-        if(_camera == nullptr)
-            return;
-
-        cellar::Vec3f displacement = destination - _camera->tripod().from();
-        _camera->setTripod(destination,
-                           _camera->tripod().to() + displacement,
-                           _camera->tripod().up());
-    }
-
-    void CameraManBird::moveBy(const cellar::Vec2f& displacement)
-    {
-        if(_camera == nullptr)
-            return;
-
-        cellar::Vec3f front = _camera->tripod().to() - _camera->tripod().from();
-        cellar::Vec3f up = _camera->tripod().up();
-        cellar::Vec3f side = cross(front, up);
-
-        cellar::Vec3f move = displacement.x()*side + displacement.y()*up;
-
-        _camera->setTripod(_camera->tripod().from() + move,
-                           _camera->tripod().to() + move,
-                           _camera->tripod().up());
+        glm::mat4 tran = glm::translate(glm::mat4(), glm::vec3(displacement, 0));
+        _camera->updateView(tran * _camera->viewMatrix());
     }
 
     void CameraManBird::rotate(float radians)
     {
-        if(_camera == nullptr)
-            return;
-
-        cellar::Vec3f front = (_camera->tripod().to() - _camera->tripod().from()).normalized();
-        cellar::Vec3f nUp =  cellar::rotate(front.x(), front.y(), front.z(), radians) * 
-                             cellar::Vec4f(_camera->tripod().up(), 0.0);
-        _camera->setTripod(_camera->tripod().from(),
-                           _camera->tripod().to(),
-                           nUp);
-    }
-
-    void CameraManBird::setupCamera()
-    {
-        if(_camera == nullptr)
-            return;
-
-        _camera->setMode(Camera::EMode::FRAME);
-        _camera->setLens(Camera::Lens::EType::ORTHOGRAPHIC);
-        _camera->setLens(-1.0f, 1.0f);
-
-        _camera->setFrame(_camera->viewport(), _camera->viewport() / 2);
-        _camera->setTripod(cellar::Vec3f(_camera->viewport(),  0.0f) / 2.0f,
-                           cellar::Vec3f(_camera->viewport(), -1.0f) / 2.0f,
-                           cellar::Vec3f(0.0f, 1.0f, 0.0f));
+       glm::mat4 rot = glm::rotate(glm::mat4(), radians, glm::vec3(0, 0, 1));
+       _camera->updateView(rot * _camera->viewMatrix());
     }
 }

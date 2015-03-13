@@ -13,27 +13,27 @@ namespace prop2
         virtual ~CircleCostume();
 
         // Getters
-        real textureRadius() const;
-        Vec2r textureCenter() const;
+        double textureRadius() const;
+        glm::dvec2 textureCenter() const;
 
         // Setters
-        virtual void setTextureRadius(real radius);
-        virtual void setTextureCenter(const Vec2r center);
+        virtual void setTextureRadius(double radius);
+        virtual void setTextureCenter(const glm::dvec2 center);
 
     private:
-        real _textureRadius;
-        Vec2r _textureCenter;
+        double _textureRadius;
+        glm::dvec2 _textureCenter;
     };
 
 
 
     // IMPLEMENTATION //
-    inline real CircleCostume::textureRadius() const
+    inline double CircleCostume::textureRadius() const
     {
         return _textureRadius;
     }
 
-    inline Vec2r CircleCostume::textureCenter() const
+    inline glm::dvec2 CircleCostume::textureCenter() const
     {
         return _textureCenter;
     }

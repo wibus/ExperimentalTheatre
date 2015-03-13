@@ -3,10 +3,10 @@
 #include <cassert>
 using namespace std;
 
+#include <GLM/gtc/type_ptr.hpp>
+
 #include <GL3/gl3w.h>
 
-#include <CellarWorkbench/DataStructure/Vector.h>
-#include <CellarWorkbench/DataStructure/Matrix.h>
 #include <CellarWorkbench/Misc/Log.h>
 #include <CellarWorkbench/Misc/CellarUtils.h>
 using namespace cellar;
@@ -284,7 +284,7 @@ namespace media
         return true;
     }
 
-    bool GlProgram::setVec2i(const std::string& var, const cellar::Vec2i& vec)
+    bool GlProgram::setVec2i(const std::string& var, const glm::ivec2& vec)
     {
         if( !isCurrentProgram() )
             return false;
@@ -293,12 +293,12 @@ namespace media
         if(loc == -1)
             return false;
 
-        glUniform2iv(loc, 1, vec.asArray());
+        glUniform2iv(loc, 1, glm::value_ptr(vec));
 
         return true;
     }
 
-    bool GlProgram::setVec3i(const std::string& var, const cellar::Vec3i& vec)
+    bool GlProgram::setVec3i(const std::string& var, const glm::ivec3& vec)
     {
         if( !isCurrentProgram() )
             return false;
@@ -307,12 +307,12 @@ namespace media
         if(loc == -1)
             return false;
 
-        glUniform3iv(loc, 1,  vec.asArray());
+        glUniform3iv(loc, 1,  glm::value_ptr(vec));
 
         return true;
     }
 
-    bool GlProgram::setVec4i(const std::string& var, const cellar::Vec4i& vec)
+    bool GlProgram::setVec4i(const std::string& var, const glm::ivec4& vec)
     {
         if( !isCurrentProgram() )
             return false;
@@ -321,7 +321,7 @@ namespace media
         if(loc == -1)
             return false;
 
-        glUniform4iv(loc, 1,  vec.asArray());
+        glUniform4iv(loc, 1,  glm::value_ptr(vec));
 
         return true;
     }
@@ -340,7 +340,7 @@ namespace media
         return true;
     }
 
-    bool GlProgram::setVec2f(const std::string& var, const cellar::Vec2f& vec)
+    bool GlProgram::setVec2f(const std::string& var, const glm::vec2& vec)
     {
         if( !isCurrentProgram() )
             return false;
@@ -349,12 +349,12 @@ namespace media
         if(loc == -1)
             return false;
 
-        glUniform2fv(loc, 1,  vec.asArray());
+        glUniform2fv(loc, 1,  glm::value_ptr(vec));
 
         return true;
     }
 
-    bool GlProgram::setVec3f(const std::string& var, const cellar::Vec3f& vec)
+    bool GlProgram::setVec3f(const std::string& var, const glm::vec3& vec)
     {
         if( !isCurrentProgram() )
             return false;
@@ -363,12 +363,12 @@ namespace media
         if(loc == -1)
             return false;
 
-        glUniform3fv(loc, 1,  vec.asArray());
+        glUniform3fv(loc, 1,  glm::value_ptr(vec));
 
         return true;
     }
 
-    bool GlProgram::setVec4f(const std::string& var, const cellar::Vec4f& vec)
+    bool GlProgram::setVec4f(const std::string& var, const glm::vec4& vec)
     {
         if( !isCurrentProgram() )
             return false;
@@ -377,12 +377,12 @@ namespace media
         if(loc == -1)
             return false;
 
-        glUniform4fv(loc, 1,  vec.asArray());
+        glUniform4fv(loc, 1,  glm::value_ptr(vec));
 
         return true;
     }
 
-    bool GlProgram::setMat3f(const std::string& var, const cellar::Mat3f& mat)
+    bool GlProgram::setMat3f(const std::string& var, const glm::mat3& mat)
     {
         if( !isCurrentProgram() )
             return false;
@@ -391,12 +391,12 @@ namespace media
         if(loc == -1)
             return false;
 
-        glUniformMatrix3fv(loc, 1, GL_TRUE, mat.asArray());
+        glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
 
         return true;
     }
 
-    bool GlProgram::setMat4f(const std::string& var, const cellar::Mat4f& mat)
+    bool GlProgram::setMat4f(const std::string& var, const glm::mat4& mat)
     {
         if( !isCurrentProgram() )
             return false;
@@ -405,7 +405,7 @@ namespace media
         if(loc == -1)
             return false;
 
-        glUniformMatrix4fv(loc, 1, GL_TRUE, mat.asArray());
+        glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
 
         return true;
     }

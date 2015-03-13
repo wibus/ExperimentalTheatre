@@ -25,12 +25,12 @@ namespace media
 
 	PointLight3D::PointLight3D() :
 		position(0.0f, 0.0f, 0.0f, 1.0f),
-		attenuationCoefs(1.0f, 0.0f, 0.0f)
+        attenuationCoefs(1.0f, 0.0f, 0.0f, 0.0f)
 	{
 	}
 
 	SpotLight3D::SpotLight3D() :
-		direction(1, 0, 0),
+        direction(1, 0, 0, 0),
 		cutoff(1.0f)
 	{
 	}

@@ -4,8 +4,8 @@
 namespace prop2
 {
     CircleCostume::CircleCostume() :
-        _textureRadius(real(1.0)),
-        _textureCenter(real(0.5), real(0.5))
+        _textureRadius(1.0),
+        _textureCenter(0.5, 0.5)
     {
     }
 
@@ -13,12 +13,12 @@ namespace prop2
     {
     }
 
-    void CircleCostume::setTextureRadius(real radius)
+    void CircleCostume::setTextureRadius(double radius)
     {
         _textureRadius = radius;
     }
 
-    void CircleCostume::setTextureCenter(const Vec2r center)
+    void CircleCostume::setTextureCenter(const glm::dvec2 center)
     {
         _textureCenter = center;
     }

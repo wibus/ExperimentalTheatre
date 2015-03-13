@@ -6,7 +6,7 @@
 
 class QFont;
 
-#include <CellarWorkbench/DataStructure/Vector.h>
+#include <GLM/glm.hpp>
 
 #include "../libMediaWorkbench_global.h"
 
@@ -30,8 +30,8 @@ namespace media
 
         int quality() const;
 
-        cellar::Vec2i charPosition(int unicode);
-        cellar::Vec2i charDimensions(int unicode);
+        glm::ivec2 charPosition(int unicode);
+        glm::ivec2 charDimensions(int unicode);
 
     private:
         static const int NB_CHARACTERS;
@@ -39,8 +39,8 @@ namespace media
         std::string _family;
         float _weight;
         int _quality;
-        std::vector<cellar::Vec2i> _positions;
-        std::vector<cellar::Vec2i> _dimensions;
+        std::vector<glm::ivec2> _positions;
+        std::vector<glm::ivec2> _dimensions;
     };
 
 
@@ -66,12 +66,12 @@ namespace media
         return _quality;
     }
 
-    inline cellar::Vec2i DistanceFieldFont::charPosition(int unicode)
+    inline glm::ivec2 DistanceFieldFont::charPosition(int unicode)
     {
         return _positions[unicode];
     }
 
-    inline cellar::Vec2i DistanceFieldFont::charDimensions(int unicode)
+    inline glm::ivec2 DistanceFieldFont::charDimensions(int unicode)
     {
         return _dimensions[unicode];
     }

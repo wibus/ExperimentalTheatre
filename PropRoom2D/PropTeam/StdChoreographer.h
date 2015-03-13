@@ -15,17 +15,17 @@ namespace prop2
     public:
         StdCollisionReport() :
             areColliding(false),
-            contactPoint(Vec2r(real(0.0), real(0.0))),
-            contactNormal(Vec2r(real(1.0), real(0.0))),
-            penetrationDepth(real(0.0)),
+            contactPoint(glm::dvec2(0.0, 0.0)),
+            contactNormal(glm::dvec2(1.0, 0.0)),
+            penetrationDepth(0.0),
             shape1(nullptr),
             shape2(nullptr)
         {}
 
         bool areColliding;
-        Vec2r contactPoint;
-        Vec2r contactNormal;
-        real penetrationDepth;
+        glm::dvec2 contactPoint;
+        glm::dvec2 contactNormal;
+        double penetrationDepth;
         std::shared_ptr<AbstractShape> shape1;
         std::shared_ptr<AbstractShape> shape2;
     };
@@ -36,11 +36,11 @@ namespace prop2
         StdChoreographer();
         virtual ~StdChoreographer();
 
-        virtual void setGravity(const Vec2r& unitsPerSecondSquared);
+        virtual void setGravity(const glm::dvec2& unitsPerSecondSquared);
 
         virtual void setup();
         virtual void reset();
-        virtual void update(real dt);
+        virtual void update(double dt);
 
         virtual void manageCircle(const std::shared_ptr<Circle>& circle);
         virtual void managePolygon(const std::shared_ptr<Polygon>& polygon);
@@ -72,20 +72,20 @@ namespace prop2
             const std::shared_ptr<Polygon>& polygon1,
             const std::shared_ptr<Polygon>& polygon2);
 
-        real _dt;
-        Vec2r _gravity;
+        double _dt;
+        glm::dvec2 _gravity;
         std::vector< std::shared_ptr<Circle> >  _circles;
         std::vector< std::shared_ptr<Polygon> > _polygons;
 
-        real _maxHandledDeltaTime;
-        real _correctionPercentage;
-        real _correctionSlop;
+        double _maxHandledDeltaTime;
+        double _correctionPercentage;
+        double _correctionSlop;
     };
 
 
 
     // IMPLEMENTATION //
-    inline void StdChoreographer::setGravity(const Vec2r& unitsPerSecondSquared)
+    inline void StdChoreographer::setGravity(const glm::dvec2& unitsPerSecondSquared)
     {
         _gravity = unitsPerSecondSquared;
     }

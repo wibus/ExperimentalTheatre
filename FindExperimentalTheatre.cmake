@@ -30,3 +30,6 @@ SET(ExTh_LIBRARIES
     PropRoom3D
     Scaena
     GL3)
+    
+    
+ADD_DEFINITIONS(-DGLM_FORCE_RADIANS)

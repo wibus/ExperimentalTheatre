@@ -55,7 +55,7 @@ namespace prop3
         _postProdProgram.setFloat("AdaptationFactor", _adaptationFactor);
         _postProdProgram.setFloat("LuminosityValue", _luminosityValue);
         _postProdProgram.setFloat("ContrastValue", _contrastValue);
-        _postProdProgram.setVec3f("TemperatureRgb", cellar::Vec3f(
+        _postProdProgram.setVec3f("TemperatureRgb",glm::vec3(
             _temperatureColor.r,
             _temperatureColor.g,
             _temperatureColor.b));
@@ -205,7 +205,7 @@ namespace prop3
         _temperatureColor = kelvinToRgb(kelvin);
 
         _postProdProgram.pushProgram();
-        _postProdProgram.setVec3f("TemperatureRgb", cellar::Vec3f(
+        _postProdProgram.setVec3f("TemperatureRgb",glm::vec3(
             _temperatureColor.r,
             _temperatureColor.g,
             _temperatureColor.b));

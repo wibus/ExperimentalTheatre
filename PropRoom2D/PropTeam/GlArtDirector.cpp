@@ -5,6 +5,8 @@
 #include <algorithm>
 using namespace std;
 
+#include <GLM/gtc/matrix_transform.hpp>
+
 #include <GL3/gl3w.h>
 
 #include <QFile>
@@ -36,13 +38,14 @@ namespace prop2
     }
 
     GlArtDirector::GlArtDirector() :
-        _shadersInitialized(false),
-        _viewportSize(real(1.0), real(1.0)),
+        _isOwnerOfCamera(true),
+        _camera(new Camera()),
         _circles(),
         _polygons(),
         _texts(),
         _images(),
         _fonts(),
+        _shadersInitialized(false),
         _circleShader(),
         _polygonShader(),
         _textHudShader(),
@@ -52,39 +55,58 @@ namespace prop2
         _textHudVao(),
         _imageHudVao()
     {
+        _camera->registerObserver(*this);
     }
 
     GlArtDirector::~GlArtDirector()
     {
     }
 
+    void GlArtDirector::resize(int width, int height)
+    {
+        _camera->updateViewport(width, height);
+    }
+
     void GlArtDirector::notify(media::CameraMsg &msg)
     {
         const Camera& camera = msg.camera;
 
-        Mat4r shapeProjectionMatrix = camera.projectionMatrix() *
-                                      camera.viewMatrix();
-        Vec2r zoom = divide(Vec2r(camera.lens().right() - camera.lens().left(),
-                                  camera.lens().top() - camera.lens().bottom()),
-                            Vec2r(camera.viewport()));
+        if(_isOwnerOfCamera && msg.change == CameraMsg::EChange::VIEWPORT)
+        {
+            _camera->updateProjection(
+                glm::ortho(0.0f, (float)_camera->viewport().x,
+                           0.0f, (float)_camera->viewport().y,
+                           -1.0f, 1.0f));
+            // An other camera message will be dispatched
+            // This next message notifies about projection change
+            return;
+        }
 
-        _circleShader.pushProgram();
-        _circleShader.setMat4f("Projection", shapeProjectionMatrix);
-        _circleShader.setVec2f("Zoom", zoom);
-        _circleShader.popProgram();
+        if(msg.change == CameraMsg::EChange::PROJECTION ||
+           msg.change == CameraMsg::EChange::VIEW)
+        {
+            glm::vec2 zoom = glm::dvec2(1, 1);
+            glm::mat4 shapeViewProjMatrix =
+                    camera.projectionMatrix() *
+                    camera.viewMatrix();
 
-        _polygonShader.pushProgram();
-        _polygonShader.setMat4f("Projection", shapeProjectionMatrix);
-        _polygonShader.setVec2f("Zoom", zoom);
-        _polygonShader.popProgram();
+            _circleShader.pushProgram();
+            _circleShader.setMat4f("Projection", shapeViewProjMatrix);
+            _circleShader.setVec2f("Zoom", zoom);
+            _circleShader.popProgram();
+
+            _polygonShader.pushProgram();
+            _polygonShader.setMat4f("Projection", shapeViewProjMatrix);
+            _polygonShader.setVec2f("Zoom", zoom);
+            _polygonShader.popProgram();
+        }
 
         if(msg.change == CameraMsg::EChange::PROJECTION)
         {
-            _viewportSize = camera.viewport();
-            Mat4r hudProjectionMatrix =
-                    ortho<real>(real(0),  _viewportSize.x(),
-                                real(0),  _viewportSize.y(),
-                                real(-1), real(1));
+            glm::mat4 hudProjectionMatrix =
+                    glm::ortho(0.0f, (float) camera.viewport().x,
+                               0.0f, (float) camera.viewport().y,
+                               -1.0f, 1.0f);
 
             _textHudShader.pushProgram();
             _textHudShader.setMat4f("Projection", hudProjectionMatrix);
@@ -94,6 +116,18 @@ namespace prop2
             _imageHudShader.setMat4f("Projection", hudProjectionMatrix);
             _imageHudShader.popProgram();
         }
+    }
+
+    std::shared_ptr<media::Camera> GlArtDirector::camera() const
+    {
+        return _camera;
+    }
+
+    void GlArtDirector::setCamera(const std::shared_ptr<media::Camera>& camera)
+    {
+        _camera = camera;
+        _isOwnerOfCamera = false;
+        _camera->registerObserver(*this);
     }
 
     void GlArtDirector::setup()
@@ -122,7 +156,7 @@ namespace prop2
         _images.clear();
     }
 
-    void GlArtDirector::draw(real)
+    void GlArtDirector::draw(double)
     {        
         glDepthMask(GL_FALSE);
         glDisable(GL_DEPTH_TEST);
@@ -219,26 +253,29 @@ namespace prop2
         _polygonShader.setMat3f("ModelView",    polygon->transformMatrix());
         _polygonShader.setFloat("Depth",        polygon->costume()->depth());
         _polygonShader.setVec4f("ColorFilter",  polygon->costume()->colorFilter());
-        _polygonShader.setVec2f("TexOffset",    Vec2f(real(0.0), real(0.0)));
-        _polygonShader.setFloat("TexStretch",   real(1.0));
+        _polygonShader.setVec2f("TexOffset",    glm::vec2(0.0f, 0.0f));
+        _polygonShader.setFloat("TexStretch",   1.0f);
 
         _polygonVao.bind();
-        int nbVertices = polygon->nbVertices();
+        int nbVert = polygon->nbVertices();
+        int posSize = nbVert * sizeof(polygon->relVertices().front());
         glBindBuffer(GL_ARRAY_BUFFER, _polygonVao.bufferId("position"));
         glBufferData(GL_ARRAY_BUFFER,
-                     2*4*nbVertices,
+                     posSize,
                      polygon->relVertices().data(),
                      GL_DYNAMIC_DRAW);
 
+        int colSize = nbVert * sizeof(polygon->costume()->verticesColors().front());
         glBindBuffer(GL_ARRAY_BUFFER, _polygonVao.bufferId("color"));
         glBufferData(GL_ARRAY_BUFFER,
-                     4*4*nbVertices,
+                     colSize,
                      polygon->costume()->verticesColors().data(),
                      GL_DYNAMIC_DRAW);
 
+        int texSize = nbVert * sizeof(polygon->costume()->verticesTexCoords().front());
         glBindBuffer(GL_ARRAY_BUFFER, _polygonVao.bufferId("texCoord"));
         glBufferData(GL_ARRAY_BUFFER,
-                     2*4*nbVertices,
+                     texSize,
                      polygon->costume()->verticesTexCoords().data(),
                      GL_DYNAMIC_DRAW);
 
@@ -254,7 +291,7 @@ namespace prop2
             glStencilOp(GL_INVERT, GL_INVERT, GL_INVERT);
             glClearStencil(0);
 
-            glDrawArrays(GL_TRIANGLE_FAN, 0, nbVertices);
+            glDrawArrays(GL_TRIANGLE_FAN, 0, nbVert);
 
             glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
             glStencilFunc(GL_EQUAL, 1, 1);
@@ -262,7 +299,7 @@ namespace prop2
             glEnable(GL_CULL_FACE);
         }
 
-        glDrawArrays(GL_TRIANGLE_FAN, 0, nbVertices);
+        glDrawArrays(GL_TRIANGLE_FAN, 0, nbVert);
 
         if(polygon->isConcave())
         {
@@ -288,65 +325,66 @@ namespace prop2
         const GlFont& font = cit->second;
 
         // Compute texture coords and letters positions in screen coordinate
-        vector<Vec2r> positions;
-        vector<Vec2r> texCoords;
+        vector<glm::dvec2> positions;
+        vector<glm::dvec2> texCoords;
         const char* chars = text->text().c_str();
         size_t nbChars = text->text().size();
 
-        real left = real(0.0);
-        real right;
-        real top = text->height();
-        const real bottom = real(0.0);
+        double left = double(0.0);
+        double right;
+        double top = text->height();
+        const double bottom = double(0.0);
 
-        real texCharWidth;
-        real texCharHeight = font.charsHeight();
+        double texCharWidth;
+        double texCharHeight = font.charsHeight();
 
         for(size_t c=0; c < nbChars; ++c)
         {
             // Texture
             int cid = chars[c] - 32;
             texCharWidth = font.charWidth(cid);
-            real s = ((cid%10)/10.0) * 0.9765625; // Magic Number :0 !!!
-            real t = ((cid/10)/10.0) * 0.9765625; // Proportion correction
-            real ns = s + texCharWidth;
-            real nt = t + texCharHeight;
+            double s = ((cid%10)/10.0) * 0.9765625; // Magic Number :0 !!!
+            double t = ((cid/10)/10.0) * 0.9765625; // Proportion correction
+            double ns = s + texCharWidth;
+            double nt = t + texCharHeight;
 
             // Because normaly image origin is at top left and openGL
             // puts it at bottom left, t texture coordinate must inversed
-            texCoords.push_back(Vec2r(s,  1-t));
-            texCoords.push_back(Vec2r(s,  1-nt));
-            texCoords.push_back(Vec2r(ns, 1-nt));
-            texCoords.push_back(Vec2r(ns, 1-nt));
-            texCoords.push_back(Vec2r(ns, 1-t));
-            texCoords.push_back(Vec2r(s,  1-t));
+            texCoords.push_back(glm::dvec2(s,  1-t));
+            texCoords.push_back(glm::dvec2(s,  1-nt));
+            texCoords.push_back(glm::dvec2(ns, 1-nt));
+            texCoords.push_back(glm::dvec2(ns, 1-nt));
+            texCoords.push_back(glm::dvec2(ns, 1-t));
+            texCoords.push_back(glm::dvec2(s,  1-t));
 
 
             // Positions
-            real charWidth = (texCharWidth / texCharHeight) * top;
+            double charWidth = (texCharWidth / texCharHeight) * top;
             right = left + charWidth;
 
-            positions.push_back(Vec2r(left,  top));
-            positions.push_back(Vec2r(left,  bottom));
-            positions.push_back(Vec2r(right, bottom));
-            positions.push_back(Vec2r(right, bottom));
-            positions.push_back(Vec2r(right, top));
-            positions.push_back(Vec2r(left,  top));
+            positions.push_back(glm::dvec2(left,  top));
+            positions.push_back(glm::dvec2(left,  bottom));
+            positions.push_back(glm::dvec2(right, bottom));
+            positions.push_back(glm::dvec2(right, bottom));
+            positions.push_back(glm::dvec2(right, top));
+            positions.push_back(glm::dvec2(left,  top));
 
             // Move forward to next character's left
             left = right;
         }
 
-        glBindBuffer(GL_ARRAY_BUFFER, _textHudVao.bufferId("position"));
-        glBufferData(GL_ARRAY_BUFFER, 2*4*positions.size(), positions.data(),
-                     GL_DYNAMIC_DRAW);
 
+        int posSize = sizeof(positions.front()) * positions.size();
+        glBindBuffer(GL_ARRAY_BUFFER, _textHudVao.bufferId("position"));
+        glBufferData(GL_ARRAY_BUFFER, posSize, positions.data(), GL_DYNAMIC_DRAW);
+
+        int texSize = sizeof(texCoords.front()) * texCoords.size();
         glBindBuffer(GL_ARRAY_BUFFER, _textHudVao.bufferId("texCoord"));
-        glBufferData(GL_ARRAY_BUFFER, 2*4*texCoords.size(), texCoords.data(),
-                     GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, texSize, texCoords.data(), GL_DYNAMIC_DRAW);
 
         glBindTexture(GL_TEXTURE_2D, font.textureId());
 
-        Vec2r anchorPos = text->handlePosition() +
+        glm::dvec2 anchorPos = text->handlePosition() +
             getAnchor(text->horizontalAnchor(), text->verticalAnchor());
         _textHudShader.setVec2f("Anchor", anchorPos);
         _textHudShader.setVec4f("ColorFilter", text->color());
@@ -362,17 +400,15 @@ namespace prop2
         _imageHudShader.pushProgram();
         _imageHudVao.bind();
 
+        const auto& cornerPos = image->cornersPositions();
+        int posSize = sizeof(cornerPos.front()) * cornerPos.size();
         glBindBuffer(GL_ARRAY_BUFFER, _imageHudVao.bufferId("position"));
-        glBufferData(GL_ARRAY_BUFFER,
-                     2*4*image->cornersPositions().size(),
-                     image->cornersPositions().data(),
-                     GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, posSize, cornerPos.data(), GL_DYNAMIC_DRAW);
 
+        const auto& cornerTex = image->cornersTexCoords();
+        int texSize = sizeof(cornerTex.front()) * cornerTex.size();
         glBindBuffer(GL_ARRAY_BUFFER, _imageHudVao.bufferId("texCoord"));
-        glBufferData(GL_ARRAY_BUFFER,
-                     2*4*image->cornersTexCoords().size(),
-                     image->cornersTexCoords().data(),
-                     GL_DYNAMIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, texSize, cornerTex.data(), GL_DYNAMIC_DRAW);
 
         _imageHudShader.setVec2f("Anchor", getAnchor(image->horizontalAnchor(),
                                                      image->verticalAnchor()));
@@ -464,20 +500,20 @@ namespace prop2
         _circleShader.setInt("Texture", 0);
         _circleShader.popProgram();
 
-        GlVbo2Df positionBuff;
+        GlVbo2Dd positionBuff;
         positionBuff.attribLocation = _circleShader.getAttributeLocation("position");
-		positionBuff.dataArray.push_back(Vec2r(-1.0f, -1.0f));
-        positionBuff.dataArray.push_back(Vec2r( 1.0f, -1.0f));
-        positionBuff.dataArray.push_back(Vec2r( 1.0f,  1.0f));
-		positionBuff.dataArray.push_back(Vec2r(-1.0f,  1.0f));
+		positionBuff.dataArray.push_back(glm::dvec2(-1.0f, -1.0f));
+        positionBuff.dataArray.push_back(glm::dvec2( 1.0f, -1.0f));
+        positionBuff.dataArray.push_back(glm::dvec2( 1.0f,  1.0f));
+		positionBuff.dataArray.push_back(glm::dvec2(-1.0f,  1.0f));
         _circleVao.createBuffer("position", positionBuff);
 
-        GlVbo2Df texCoordBuff;
+        GlVbo2Dd texCoordBuff;
         texCoordBuff.attribLocation = _circleShader.getAttributeLocation("texCoord");
-        texCoordBuff.dataArray.push_back(Vec2r(-0.5f, -0.5f));
-        texCoordBuff.dataArray.push_back(Vec2r( 0.5f, -0.5f));
-        texCoordBuff.dataArray.push_back(Vec2r( 0.5f,  0.5f));
-        texCoordBuff.dataArray.push_back(Vec2r(-0.5f,  0.5f));
+        texCoordBuff.dataArray.push_back(glm::dvec2(-0.5f, -0.5f));
+        texCoordBuff.dataArray.push_back(glm::dvec2( 0.5f, -0.5f));
+        texCoordBuff.dataArray.push_back(glm::dvec2( 0.5f,  0.5f));
+        texCoordBuff.dataArray.push_back(glm::dvec2(-0.5f,  0.5f));
         _circleVao.createBuffer("texCoord", texCoordBuff);
     }
 
@@ -491,15 +527,15 @@ namespace prop2
         _polygonShader.setInt("Texture", 0);
         _polygonShader.popProgram();
 
-        GlVbo2Df positionBuff;
+        GlVbo2Dd positionBuff;
         positionBuff.attribLocation = _polygonShader.getAttributeLocation("position");
         _polygonVao.createBuffer("position", positionBuff);
 
-        GlVbo2Df texCoordBuff;
+        GlVbo2Dd texCoordBuff;
         texCoordBuff.attribLocation = _polygonShader.getAttributeLocation("texCoord");
         _polygonVao.createBuffer("texCoord", texCoordBuff);
 
-        GlVbo4Df colorBuff;
+        GlVbo4Dd colorBuff;
         colorBuff.attribLocation = _polygonShader.getAttributeLocation("color");
         _polygonVao.createBuffer("color", colorBuff);
     }
@@ -514,11 +550,11 @@ namespace prop2
         _textHudShader.setInt("Texture", 0);
         _textHudShader.popProgram();
 
-        GlVbo2Df positionBuff;
+        GlVbo2Dd positionBuff;
         positionBuff.attribLocation = _textHudShader.getAttributeLocation("position");
         _textHudVao.createBuffer("position", positionBuff);
 
-        GlVbo2Df texCoordBuff;
+        GlVbo2Dd texCoordBuff;
         texCoordBuff.attribLocation = _textHudShader.getAttributeLocation("texCoord");
         _textHudVao.createBuffer("texCoord", texCoordBuff);
     }
@@ -533,20 +569,20 @@ namespace prop2
         _imageHudShader.setInt("Texture", 0);
         _imageHudShader.popProgram();
 
-        GlVbo2Df positionBuff;
+        GlVbo2Dd positionBuff;
         positionBuff.attribLocation = _imageHudShader.getAttributeLocation("position");
         _imageHudVao.createBuffer("position", positionBuff);
 
-        GlVbo2Df texCoordBuff;
+        GlVbo2Dd texCoordBuff;
         texCoordBuff.attribLocation = _imageHudShader.getAttributeLocation("texCoord");
         _imageHudVao.createBuffer("texCoord", texCoordBuff);
     }
 
-    Vec2r GlArtDirector::getAnchor(const EHorizontalAnchor& h,
+    glm::dvec2 GlArtDirector::getAnchor(const EHorizontalAnchor& h,
                                    const EVerticalAnchor&   v)
     {
-        return Vec2r(h == EHorizontalAnchor::RIGHT ? _viewportSize.x() : 0,
-                     v == EVerticalAnchor::TOP     ? _viewportSize.y() : 0);
+        return glm::dvec2(h == EHorizontalAnchor::RIGHT ? _camera->viewport().x : 0,
+                          v == EVerticalAnchor::TOP     ? _camera->viewport().y : 0);
     }
 
     GlFont::GlFont(const string& name) :

@@ -10,6 +10,7 @@
 
 namespace media
 {
+    class Camera;
     class CameraMsg;
 }
 
@@ -30,9 +31,12 @@ namespace prop2
     public:
         virtual ~AbstractArtDirector() {}
 
+        virtual void resize(int width, int height) = 0;
         virtual void notify(media::CameraMsg &msg) = 0;
+        virtual std::shared_ptr<media::Camera> camera() const = 0;
+        virtual void setCamera(const std::shared_ptr<media::Camera>& camera) = 0;
 
-        virtual void draw(real dt) =0;
+        virtual void draw(double dt) =0;
 
         virtual void manageCircle(const std::shared_ptr<Circle>& circle) =0;
         virtual void managePolygon(const std::shared_ptr<Polygon>& polygon) =0;

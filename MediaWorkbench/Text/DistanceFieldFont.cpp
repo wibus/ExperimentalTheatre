@@ -5,8 +5,6 @@
 #include <QPixmap>
 #include <QPainter>
 
-using namespace cellar;
-
 
 namespace media
 {
@@ -50,8 +48,8 @@ namespace media
         {
             QChar character(i);
             painter.drawText(0, i*CHAR_HEIGHT, QString(character));
-            _positions[i] = Vec2i(0, i*CHAR_HEIGHT);
-            _dimensions[i] = Vec2i(metrics.width(character), CHAR_HEIGHT);
+            _positions[i] = glm::ivec2(0, i*CHAR_HEIGHT);
+            _dimensions[i] = glm::ivec2(metrics.width(character), CHAR_HEIGHT);
         }
     }
 }

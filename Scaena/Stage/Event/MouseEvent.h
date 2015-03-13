@@ -1,7 +1,7 @@
 #ifndef SCAENA_MOUSE_EVENT_H
 #define SCAENA_MOUSE_EVENT_H
 
-#include <CellarWorkbench/DataStructure/Vector.h>
+#include <GLM/glm.hpp>
 
 #include "../../libScaena_global.h"
 #include "EventTypes.h"
@@ -13,17 +13,17 @@ namespace scaena
     {
     public:
         MouseEvent(EMouseButton button,
-                   const cellar::Vec2i& pos,
-                   const cellar::Vec2i& globalPos);
+                   const glm::ivec2& pos,
+                   const glm::ivec2& globalPos);
 
         EMouseButton button() const;
-        cellar::Vec2i position() const;
-        cellar::Vec2i globalPosition() const;
+        glm::ivec2 position() const;
+        glm::ivec2 globalPosition() const;
 
     private:
         EMouseButton _button;
-        cellar::Vec2i _position;
-        cellar::Vec2i _globalPosition;
+        glm::ivec2 _position;
+        glm::ivec2 _globalPosition;
     };
 
 
@@ -32,10 +32,10 @@ namespace scaena
     inline EMouseButton MouseEvent::button() const
         {return _button;}
 
-    inline cellar::Vec2i MouseEvent::position() const
+    inline glm::ivec2 MouseEvent::position() const
         {return _position;}
 
-    inline cellar::Vec2i MouseEvent::globalPosition() const
+    inline glm::ivec2 MouseEvent::globalPosition() const
         {return _globalPosition;}
 }
 

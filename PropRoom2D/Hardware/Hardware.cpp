@@ -3,14 +3,14 @@
 
 namespace prop2
 {
-    const real Hardware::INFINITE_DENSITY = real(0);
+    const double Hardware::INFINITE_DENSITY = 0;
 
 
     Hardware::Hardware() :
-        _density(real(1)),
-        _bounciness(real(1)),
-        _staticFrictionCoefficient(real(1)),
-        _dynamicFrictionCoefficient(real(1))
+        _density(1),
+        _bounciness(1),
+        _staticFrictionCoefficient(1),
+        _dynamicFrictionCoefficient(1)
     {
 
     }
@@ -20,32 +20,31 @@ namespace prop2
 
     }
 
-    inline real Hardware::density() const
+    inline double Hardware::density() const
     {
         return _density;
     }
 
-    inline real Hardware::bounciness() const
+    inline double Hardware::bounciness() const
     {
         return _bounciness;
     }
 
-    inline real Hardware::staticFrictionCoefficient() const
+    inline double Hardware::staticFrictionCoefficient() const
     {
         return _staticFrictionCoefficient;
     }
 
-    inline real Hardware::dynamicFrictionCoefficient() const
+    inline double Hardware::dynamicFrictionCoefficient() const
     {
         return _dynamicFrictionCoefficient;
     }
 
-    inline void Hardware::setDensity(const real& density)
+    inline void Hardware::setDensity(const double& density)
     {
         if(_density != density)
         {
             _density = density;
-            setIsChanged(true);
             HardwareUpdate msg(
                 HardwareUpdate::EType::DENSITY,
                 _density,
@@ -54,12 +53,11 @@ namespace prop2
         }
     }
 
-    inline void Hardware::setBounciness(const real& bounciness)
+    inline void Hardware::setBounciness(const double& bounciness)
     {
         if(_bounciness != bounciness)
         {
             _bounciness = bounciness;
-            setIsChanged(true);
             HardwareUpdate msg(
                 HardwareUpdate::EType::BOUNCINESS,
                 _bounciness,
@@ -68,12 +66,11 @@ namespace prop2
         }
     }
 
-    inline void Hardware::setStaticFrictionCoefficient(const real& us)
+    inline void Hardware::setStaticFrictionCoefficient(const double& us)
     {
         if(_staticFrictionCoefficient != us)
         {
             _staticFrictionCoefficient = us;
-            setIsChanged(true);
             HardwareUpdate msg(
                 HardwareUpdate::EType::STATIC_FIRCTION_COEFFICIENT,
                 _staticFrictionCoefficient,
@@ -82,12 +79,11 @@ namespace prop2
         }
     }
 
-    inline void Hardware::setDynamicFrictionCoefficient(const real& ud)
+    inline void Hardware::setDynamicFrictionCoefficient(const double& ud)
     {
         if(_dynamicFrictionCoefficient != ud)
         {
             _dynamicFrictionCoefficient = ud;
-            setIsChanged(true);
             HardwareUpdate msg(
                 HardwareUpdate::EType::DYNAMIC_FIRCTION_COEFFICIENT,
                 _dynamicFrictionCoefficient,

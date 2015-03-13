@@ -1,5 +1,7 @@
 #include "Circle.h"
 
+#include <GLM/gtc/matrix_transform.hpp>
+
 #include <CellarWorkbench/Misc/CellarUtils.h>
 using namespace cellar;
 
@@ -35,12 +37,12 @@ namespace prop2
         _costume = costume;
     }
 
-    real Circle::radius() const
+    double Circle::radius() const
     {
         return _radius;
     }
 
-    void Circle::setRadius(const real& radius)
+    void Circle::setRadius(const double& radius)
     {
         _radius = radius;
 
@@ -49,52 +51,56 @@ namespace prop2
         updateInertia();
     }
 
-    Vec2r Circle::center() const
+    glm::dvec2 Circle::center() const
     {
         return _centroid;
     }
 
-    void Circle::setCenter(const Vec2r& position)
+    void Circle::setCenter(const glm::dvec2& position)
     {
        setCentroid(position);
     }
 
-    bool Circle::contains(const Vec2r& point) const
+    bool Circle::contains(const glm::dvec2& point) const
     {
-        return (_centroid - point).length() < _radius;
+        return glm::length(_centroid - point) < _radius;
     }
 
-    Vec2r Circle::nearestSurface(const Vec2r& point) const
+    glm::dvec2 Circle::nearestSurface(const glm::dvec2& point) const
     {
-        Vec2r direction = point - _centroid;
-        real distance = direction.length();
-        return direction.normalize() * (_radius - distance);
+        glm::dvec2 direction = point - _centroid;
+        double distance = glm::length(direction);
+        return normalize(direction) * (_radius - distance);
     }
 
-    real Circle::computeArea() const
+    double Circle::computeArea() const
     {
-        return static_cast<real>(PI) * _radius * _radius;
+        return PI * _radius * _radius;
     }
 
     void Circle::updateTransformMatrix()
     {
-        _tranformMatrix.loadIdentity();
-        _tranformMatrix *= cellar::translate(_centroid);
-        _tranformMatrix *= cellar::scale(_radius, _radius);
-        _tranformMatrix *= cellar::rotate(_angle);
+        double r = _radius;
+        double c = glm::cos(_angle);
+        double s = glm::sin(_angle);
+
+        _tranformMatrix = glm::dmat3();
+        _tranformMatrix[0][0] = c*r;  _tranformMatrix[1][0] = -s*r; _tranformMatrix[2][0] = _centroid.x;
+        _tranformMatrix[0][1] = s*r;  _tranformMatrix[1][1] = c*r;  _tranformMatrix[2][1] = _centroid.y;
+        _tranformMatrix[0][2] = 0.0f; _tranformMatrix[1][2] = 0.0f; _tranformMatrix[2][2] = 1.0f;
     }
 
     void Circle::updateInertia()
     {
         if(_material)
         {
-            _inverseMass = real(1.0) / (_material->density() * computeArea());
+            _inverseMass = 1.0 / (_material->density() * computeArea());
             _inverseMomentOfInertia = (2 * _inverseMass) / (_radius * _radius);
         }
         else
         {
-            _inverseMass = real(0);
-            _inverseMomentOfInertia = real(0);
+            _inverseMass = 0;
+            _inverseMomentOfInertia = 0;
         }
     }
 }

@@ -19,6 +19,7 @@ namespace prop3
     {
     public:
         CpuRaytracer();
+        CpuRaytracer(unsigned int workerCount);
         virtual ~CpuRaytracer();
 
         virtual void setup();
@@ -34,6 +35,11 @@ namespace prop3
         virtual void sendBuffersToGpu();
 
     private:
+        void init();
+
+        static const unsigned int DEFAULT_WORKER_COUNT;
+
+        int _workerCount;
         unsigned int _sampleCount;
         unsigned int _colorBufferTexId;
 
@@ -41,7 +47,6 @@ namespace prop3
         std::vector<float> _colorBuffer;
         std::vector<std::shared_ptr<Prop>> _props;
 
-        static const int WORKER_COUNT;
         friend class CpuRaytracerWorker;
         std::vector<std::thread> _workerThreads;
         std::vector<std::shared_ptr<CpuRaytracerWorker>> _workerObjects;

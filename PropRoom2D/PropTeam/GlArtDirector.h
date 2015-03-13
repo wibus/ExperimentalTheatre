@@ -44,11 +44,14 @@ class AbstractShape;
         GlArtDirector();
         virtual ~GlArtDirector();
 
+        virtual void resize(int width, int height);
         virtual void notify(media::CameraMsg &msg);
+        virtual std::shared_ptr<media::Camera> camera() const;
+        virtual void setCamera(const std::shared_ptr<media::Camera>& camera);
 
         virtual void setup();
         virtual void reset();
-        virtual void draw(real dt);
+        virtual void draw(double dt);
 
         virtual void manageCircle(const std::shared_ptr<Circle>& circle);
         virtual void managePolygon(const std::shared_ptr<Polygon>& polygon);
@@ -71,18 +74,19 @@ class AbstractShape;
         virtual void setupTextHudShader(const media::GlInputsOutputs& loc);
         virtual void setupImageHudShader(const media::GlInputsOutputs& loc);
 
-        virtual Vec2r getAnchor(const EHorizontalAnchor& h,
-                                const EVerticalAnchor&   v);
+        virtual glm::dvec2 getAnchor(const EHorizontalAnchor& h,
+                                     const EVerticalAnchor&   v);
 
 
-        bool _shadersInitialized;
-        Vec2r _viewportSize;
+        bool _isOwnerOfCamera;
+        std::shared_ptr<media::Camera> _camera;
         std::vector< std::shared_ptr<Circle> >  _circles;
         std::vector< std::shared_ptr<Polygon> > _polygons;
         std::vector< std::shared_ptr<TextHud> >  _texts;
         std::vector< std::shared_ptr<ImageHud> > _images;
         std::map<std::string, GlFont> _fonts;
 
+        bool _shadersInitialized;
         media::GlProgram _circleShader;
         media::GlProgram _polygonShader;
         media::GlProgram _textHudShader;

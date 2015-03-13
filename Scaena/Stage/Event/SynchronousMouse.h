@@ -1,7 +1,7 @@
 #ifndef SCAENA_SYNCHRONOUSMOUSE_H
 #define SCAENA_SYNCHRONOUSMOUSE_H
 
-#include <CellarWorkbench/DataStructure/Vector.h>
+#include <GLM/glm.hpp>
 
 #include "../../libScaena_global.h"
 #include "EventTypes.h"
@@ -14,20 +14,20 @@ namespace scaena
     public:
         SynchronousMouse();
 
-        void setPosition(const cellar::Vec2i& position);
+        void setPosition(const glm::ivec2& position);
         void setButtonIsPressed(EMouseButton button, bool isPressed);
 
         int x() const;
         int y() const;
-        cellar::Vec2i position() const;
+        glm::ivec2 position() const;
         int xDisplacement() const;
         int yDisplacement() const;
-        cellar::Vec2i displacement() const;
+        glm::ivec2 displacement() const;
         bool buttonIsPressed(EMouseButton button) const;
 
     private:
-        cellar::Vec2i _position;
-        cellar::Vec2i _displacement;
+        glm::ivec2 _position;
+        glm::ivec2 _displacement;
         bool _buttonPressed[(int)EMouseButton::NB_BUTTONS];
     };
 
@@ -36,12 +36,12 @@ namespace scaena
     // IMPLEMENTATION //
     inline void SynchronousMouse::setButtonIsPressed(EMouseButton button, bool isPressed)
         {_buttonPressed[(int)button] = isPressed;}
-    inline int SynchronousMouse::x() const {return _position.x();}
-    inline int SynchronousMouse::y() const {return _position.y();}
-    inline cellar::Vec2i SynchronousMouse::position() const {return _position;}
-    inline int SynchronousMouse::xDisplacement() const {return _displacement.x();}
-    inline int SynchronousMouse::yDisplacement() const {return _displacement.y();}
-    inline cellar::Vec2i SynchronousMouse::displacement() const {return _displacement;}
+    inline int SynchronousMouse::x() const {return _position.x;}
+    inline int SynchronousMouse::y() const {return _position.y;}
+    inline glm::ivec2 SynchronousMouse::position() const {return _position;}
+    inline int SynchronousMouse::xDisplacement() const {return _displacement.x;}
+    inline int SynchronousMouse::yDisplacement() const {return _displacement.y;}
+    inline glm::ivec2 SynchronousMouse::displacement() const {return _displacement;}
     inline bool SynchronousMouse::buttonIsPressed(EMouseButton button) const {return _buttonPressed[(int)button];}
 }
 

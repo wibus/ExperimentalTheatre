@@ -27,24 +27,24 @@ namespace prop2
 
         // Vertices
         int nbVertices() const;
-        virtual const std::vector<Vec2r>& relVertices() const;
-        virtual const std::vector< Segment2Dr >& outline() const;
-        virtual void setVertices(const std::vector<Vec2r>& absolutePositions);
-        virtual void moveVertexAt(int cIdx, const Vec2r& position);
+        virtual const std::vector<glm::dvec2>& relVertices() const;
+        virtual const std::vector<cellar::Segment2D>& outline() const;
+        virtual void setVertices(const std::vector<glm::dvec2>& absolutePositions);
+        virtual void moveVertexAt(int cIdx, const glm::dvec2& position);
 
         // Tests
-        virtual bool contains(const Vec2r& point) const;
-        virtual Vec2r nearestSurface(const Vec2r& point) const;
+        virtual bool contains(const glm::dvec2& point) const;
+        virtual glm::dvec2 nearestSurface(const glm::dvec2& point) const;
 
         // Area
-        virtual real computeArea() const;
+        virtual double computeArea() const;
 
         // Polygon type
         virtual bool isConcave() const;
 
         // Polygon vertices generation
-        static std::vector<cellar::Vec2f> rectangle(real width, real height);
-        static std::vector<cellar::Vec2f> regularPolygon(real radius, int nbSides);
+        static std::vector<glm::vec2> rectangle(double width, double height);
+        static std::vector<glm::vec2> regularPolygon(double radius, int nbSides);
 
     protected:
         // Computations
@@ -52,13 +52,13 @@ namespace prop2
         virtual void updateInertia();
 
         // Helper methods
-        static Vec2r evaluateCentroid(const std::vector<Vec2r>& vertices);
+        static glm::dvec2 evaluateCentroid(const std::vector<glm::dvec2>& vertices);
 
 
         // Attributes
         std::shared_ptr<PolygonCostume> _costume;
-        std::vector<Vec2r> _relVertices;
-        std::vector< Segment2Dr > _outline;
+        std::vector<glm::dvec2> _relVertices;
+        std::vector<cellar::Segment2D> _outline;
         bool _isConcave;
     };
 }

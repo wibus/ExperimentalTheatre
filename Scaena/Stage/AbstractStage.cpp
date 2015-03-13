@@ -97,10 +97,10 @@ namespace scaena
         if(_play.get() == 0x0)
             throw PlayNotFound("No play to start");
 
+        // TODO wbussiere 2015-03-13 : make PropTeam3D manage their own cameras
         _propTeam3D->setCamera(*_camera);
         _propTeam3D->setup();
 
-        _propTeam2D->setCamera(*_camera);
         _propTeam2D->setup();
 
         _camera->refresh();

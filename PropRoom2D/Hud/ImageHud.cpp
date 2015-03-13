@@ -8,17 +8,17 @@ namespace prop2
         _imageName(""),
         _cornersPositions(4),
         _cornersTexCoords(4),
-        _colorFilter(real(1.0), real(1.0), real(1.0), real(1.0))
+        _colorFilter(1.0, 1.0, 1.0, 1.0)
     {
-        _cornersPositions[0](real(0.0), real(0.0));
-        _cornersPositions[1](real(1.0), real(0.0));
-        _cornersPositions[2](real(1.0), real(1.0));
-        _cornersPositions[3](real(0.0), real(1.0));
+        _cornersPositions[0] = glm::dvec2(0.0, 0.0);
+        _cornersPositions[1] = glm::dvec2(1.0, 0.0);
+        _cornersPositions[2] = glm::dvec2(1.0, 1.0);
+        _cornersPositions[3] = glm::dvec2(0.0, 1.0);
 
-        _cornersTexCoords[0](real(0.0), real(0.0));
-        _cornersTexCoords[1](real(1.0), real(0.0));
-        _cornersTexCoords[2](real(1.0), real(1.0));
-        _cornersTexCoords[3](real(0.0), real(1.0));
+        _cornersTexCoords[0] = glm::dvec2(0.0, 0.0);
+        _cornersTexCoords[1] = glm::dvec2(1.0, 0.0);
+        _cornersTexCoords[2] = glm::dvec2(1.0, 1.0);
+        _cornersTexCoords[3] = glm::dvec2(0.0, 1.0);
     }
 
     ImageHud::~ImageHud()
@@ -30,35 +30,35 @@ namespace prop2
         return _imageName;
     }
 
-    Vec2r ImageHud::handlePosition() const
+    glm::dvec2 ImageHud::handlePosition() const
     {
         return _cornersPositions[0];
     }
 
-    Vec2r ImageHud::size() const
+    glm::dvec2 ImageHud::size() const
     {
-        return Vec2r(width(), height());
+        return glm::dvec2(width(), height());
     }
 
-    real ImageHud::width() const
+    double ImageHud::width() const
     {
-        return _cornersPositions[1].x() - _cornersPositions[0].x();
+        return _cornersPositions[1].x - _cornersPositions[0].x;
     }
 
-    real ImageHud::height() const
+    double ImageHud::height() const
     {
-        return _cornersPositions[3].y() - _cornersPositions[0].y();
+        return _cornersPositions[3].y - _cornersPositions[0].y;
     }
 
-    Vec2r ImageHud::texOrigin() const
+    glm::dvec2 ImageHud::texOrigin() const
     {
         return _cornersTexCoords[0];
     }
 
-    Vec2r ImageHud::texExtents() const
+    glm::dvec2 ImageHud::texExtents() const
     {
-        return Vec2r(_cornersTexCoords[1].x() - _cornersTexCoords[0].x(),
-                     _cornersTexCoords[2].y() - _cornersTexCoords[1].y());
+        return glm::dvec2(_cornersTexCoords[1].x - _cornersTexCoords[0].x,
+                          _cornersTexCoords[2].y - _cornersTexCoords[1].y);
     }
 
     void ImageHud::setImageName(const std::string name)
@@ -66,47 +66,47 @@ namespace prop2
         _imageName = name;
     }
 
-    void ImageHud::setHandlePosition(const Vec2r& position)
+    void ImageHud::setHandlePosition(const glm::dvec2& position)
     {
-        Vec2r displacement = position - handlePosition();
+        glm::dvec2 displacement = position - handlePosition();
         _cornersPositions[0] += displacement;
         _cornersPositions[1] += displacement;
         _cornersPositions[2] += displacement;
         _cornersPositions[3] += displacement;
     }
 
-    void ImageHud::setSize(const Vec2r& size)
+    void ImageHud::setSize(const glm::dvec2& size)
     {
-        setWidth(size.x());
-        setHeight(size.y());
+        setWidth(size.x);
+        setHeight(size.y);
     }
 
-    void ImageHud::setWidth(real width)
+    void ImageHud::setWidth(double width)
     {
-        _cornersPositions[1].setX(_cornersPositions[0].x() + width);
-        _cornersPositions[2].setX(_cornersPositions[0].x() + width);
+        _cornersPositions[1].x =_cornersPositions[0].x + width;
+        _cornersPositions[2].x =_cornersPositions[0].x + width;
     }
 
-    void ImageHud::setHeight(real height)
+    void ImageHud::setHeight(double height)
     {
-        _cornersPositions[2].setY(_cornersPositions[0].y() + height);
-        _cornersPositions[3].setY(_cornersPositions[0].y() + height);
+        _cornersPositions[2].y =_cornersPositions[0].y + height;
+        _cornersPositions[3].y =_cornersPositions[0].y + height;
     }
 
-    void ImageHud::setTexOrigin(const Vec2r& origin)
+    void ImageHud::setTexOrigin(const glm::dvec2& origin)
     {
-        Vec2r extents = texExtents();
-        _cornersTexCoords[0](origin.x(),               origin.y());
-        _cornersTexCoords[1](origin.x() + extents.x(), origin.y());
-        _cornersTexCoords[2](origin.x() + extents.x(), origin.y() + extents.y());
-        _cornersTexCoords[3](origin.x(),               origin.y() + extents.y());
+        glm::dvec2 extents = texExtents();
+        _cornersTexCoords[0] = glm::dvec2(origin.x,             origin.y);
+        _cornersTexCoords[1] = glm::dvec2(origin.x + extents.x, origin.y);
+        _cornersTexCoords[2] = glm::dvec2(origin.x + extents.x, origin.y + extents.y);
+        _cornersTexCoords[3] = glm::dvec2(origin.x,             origin.y + extents.y);
     }
 
-    void ImageHud::setTexExtents(const Vec2r& extents)
+    void ImageHud::setTexExtents(const glm::dvec2& extents)
     {
-        Vec2r origin = texOrigin();
-        _cornersTexCoords[1].setX(origin.x() + extents.x());
-        _cornersTexCoords[2](origin.x() + extents.x(), origin.y() + extents.y());
-        _cornersTexCoords[3].setY( origin.y() + extents.y());
+        glm::dvec2 origin = texOrigin();
+        _cornersTexCoords[1].x = origin.x + extents.x;
+        _cornersTexCoords[2] = glm::dvec2(origin.x + extents.x, origin.y + extents.y);
+        _cornersTexCoords[3].y = origin.y + extents.y;
     }
 }

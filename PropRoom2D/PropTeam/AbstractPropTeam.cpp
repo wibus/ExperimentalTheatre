@@ -37,12 +37,12 @@ namespace prop2
         _choreographer->reset();
     }
 
-    void AbstractPropTeam::update(real dt)
+    void AbstractPropTeam::update(double dt)
     {
         _choreographer->update(dt);
     }
 
-    void AbstractPropTeam::draw(real dt)
+    void AbstractPropTeam::draw(double dt)
     {
         _artDirector->draw(dt);
     }
@@ -115,12 +115,22 @@ namespace prop2
         imageHud.reset();
     }
 
-    void AbstractPropTeam::setCamera(media::Camera& camera)
+    void AbstractPropTeam::resize(int width, int height)
     {
-        camera.registerObserver(*_artDirector);
+        _artDirector->resize(width, height);
     }
 
-    void AbstractPropTeam::setGravity(const Vec2r& unitsPerSecondSquared)
+    std::shared_ptr<media::Camera> AbstractPropTeam::camera() const
+    {
+        return _artDirector->camera();
+    }
+
+    void AbstractPropTeam::setCamera(const std::shared_ptr<media::Camera>& camera)
+    {
+        _artDirector->setCamera(camera);
+    }
+
+    void AbstractPropTeam::setGravity(const glm::dvec2& unitsPerSecondSquared)
     {
         _choreographer->setGravity(unitsPerSecondSquared);
     }

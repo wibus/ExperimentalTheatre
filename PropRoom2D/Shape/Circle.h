@@ -24,19 +24,19 @@ class CircleCostume;
         virtual void setCostume(const std::shared_ptr<CircleCostume>& costume);
 
         // Radius
-        virtual real radius() const;
-        virtual void setRadius(const real& radius);
+        virtual double radius() const;
+        virtual void setRadius(const double& radius);
 
         // Center (centroid
-        virtual Vec2r center() const;
-        virtual void setCenter(const Vec2r& position);
+        virtual glm::dvec2 center() const;
+        virtual void setCenter(const glm::dvec2& position);
 
         // Tests
-        virtual bool contains(const Vec2r& point) const;
-        virtual Vec2r nearestSurface(const Vec2r& point) const;
+        virtual bool contains(const glm::dvec2& point) const;
+        virtual glm::dvec2 nearestSurface(const glm::dvec2& point) const;
 
         // Area
-        virtual real computeArea() const;
+        virtual double computeArea() const;
 
 
     protected:
@@ -47,7 +47,7 @@ class CircleCostume;
 
         // Attributes
         std::shared_ptr<CircleCostume> _costume;
-        real _radius;
+        double _radius;
     };
 }
 

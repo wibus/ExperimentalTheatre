@@ -15,26 +15,26 @@ namespace prop2
         virtual ~TextHud();
 
         // Getters
-        virtual real width() const;
-        virtual real height() const;
-        virtual Vec2r handlePosition() const;
+        virtual double width() const;
+        virtual double height() const;
+        virtual glm::dvec2 handlePosition() const;
         std::string text() const;
         std::string fontName() const;
-        Vec4r color() const;
+        glm::dvec4 color() const;
 
         // Setters
-        virtual void setHeight(real height);
-        virtual void setHandlePosition(const Vec2r& position);
+        virtual void setHeight(double height);
+        virtual void setHandlePosition(const glm::dvec2& position);
         void setText(const std::string text);
         void setFontName(const std::string name);
-        void setColor(const Vec4r& color);
+        void setColor(const glm::dvec4& color);
 
     private:
-        real _height;
-        Vec2r _handlePosition;
+        double _height;
+        glm::dvec2 _handlePosition;
         std::string _text;
         std::string _fontName;
-        Vec4r _color;
+        glm::dvec4 _color;
     };
 
 
@@ -50,7 +50,7 @@ namespace prop2
         return _fontName;
     }
 
-    inline Vec4r TextHud::color() const
+    inline glm::dvec4 TextHud::color() const
     {
         return _color;
     }
@@ -65,7 +65,7 @@ namespace prop2
         _fontName = name;
     }
 
-    inline void TextHud::setColor(const Vec4r& color)
+    inline void TextHud::setColor(const glm::dvec4& color)
     {
         _color = color;
     }

@@ -1,5 +1,6 @@
 #include "CpuRaytracer.h"
 
+#include <iostream>
 #include <algorithm>
 
 #include <CellarWorkbench/Misc/CellarUtils.h>
@@ -16,17 +17,35 @@
 
 namespace prop3
 {
-    const int CpuRaytracer::WORKER_COUNT = 8;
+    const unsigned int CpuRaytracer::DEFAULT_WORKER_COUNT = 4;
 
     CpuRaytracer::CpuRaytracer() :
         _sampleCount(0),
         _colorBufferTexId(0),
-        _workerObjects(WORKER_COUNT),
+        _workerObjects(DEFAULT_WORKER_COUNT),
         _workerThreads(),
         _viewportSize(1, 1),
         _colorBuffer(3)
     {
-        for(int i=0; i < WORKER_COUNT; ++i)
+        init();
+    }
+
+    CpuRaytracer::CpuRaytracer(unsigned int  workerCount) :
+        _sampleCount(0),
+        _colorBufferTexId(0),
+        _workerObjects(workerCount),
+        _workerThreads(),
+        _viewportSize(1, 1),
+        _colorBuffer(3)
+    {
+        init();
+    }
+
+
+    void CpuRaytracer::init()
+    {
+        size_t workerCount = _workerObjects.size();
+        for(size_t i=0; i < workerCount; ++i)
         {
             _workerObjects[i].reset(new CpuRaytracerWorker());
             _workerThreads.push_back(std::thread(
@@ -88,6 +107,17 @@ namespace prop3
     {
         bool updated = false;
 
+
+        // If there's no props, just clear OpenGL buffers
+        // We are assuming that this is the first ArtDirector of the chain
+        if(_props.empty())
+        {
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            return ;
+        }
+
+        // There are some props to render.
+
         for(std::shared_ptr<CpuRaytracerWorker>& w : _workerObjects)
         {
             if(w->tryLockPixels())
@@ -122,15 +152,15 @@ namespace prop3
 
     void CpuRaytracer::notify(media::CameraMsg &msg)
     {
-        if(msg.change == media::CameraMsg::EChange::PROJECTION)
+        if(msg.change != media::CameraMsg::EChange::VIEW)
         {
             for(auto& w : _workerObjects)
             {
                 w->skip();
             }
 
-            int width = msg.camera.viewport().x();
-            int height = msg.camera.viewport().y();
+            int width = msg.camera.viewport().x;
+            int height = msg.camera.viewport().y;
             _viewportSize = glm::ivec2(width, height);
             _colorBuffer.resize(width * height * 3);
             std::fill(_colorBuffer.begin(), _colorBuffer.end(), 0.0f);

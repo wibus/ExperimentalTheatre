@@ -15,29 +15,29 @@ namespace prop2
         virtual ~PolygonCostume();
 
         // Getters
-        std::vector<Vec4r> verticesColors() const;
-        std::vector<Vec2r> verticesTexCoords() const;
+        std::vector<glm::dvec4> verticesColors() const;
+        std::vector<glm::dvec2> verticesTexCoords() const;
 
         // Setters
-        virtual void setVertexColor(int index, const Vec4r& color);
-        virtual void setVerticesColors(const std::vector<Vec4r>& colors);
-        virtual void setVertexTexCoord(int index, const Vec2r& texCoord);
-        virtual void setVerticesTexCoords(const std::vector<Vec2r>& texCoords);
+        virtual void setVertexColor(int index, const glm::dvec4& color);
+        virtual void setVerticesColors(const std::vector<glm::dvec4>& colors);
+        virtual void setVertexTexCoord(int index, const glm::dvec2& texCoord);
+        virtual void setVerticesTexCoords(const std::vector<glm::dvec2>& texCoords);
 
     private:
-        std::vector<Vec4r> _verticesColors;
-        std::vector<Vec2r> _verticesTexCoords;
+        std::vector<glm::dvec4> _verticesColors;
+        std::vector<glm::dvec2> _verticesTexCoords;
     };
 
 
 
     // IMPLEMENTATION //
-    inline std::vector<Vec4r> PolygonCostume::verticesColors() const
+    inline std::vector<glm::dvec4> PolygonCostume::verticesColors() const
     {
         return _verticesColors;
     }
 
-    inline std::vector<Vec2r> PolygonCostume::verticesTexCoords() const
+    inline std::vector<glm::dvec2> PolygonCostume::verticesTexCoords() const
     {
         return _verticesTexCoords;
     }

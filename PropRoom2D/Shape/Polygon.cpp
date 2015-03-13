@@ -46,21 +46,21 @@ namespace prop2
         return static_cast<int>(_relVertices.size());
     }
 
-    const std::vector<Vec2r>& Polygon::relVertices() const
+    const std::vector<glm::dvec2>& Polygon::relVertices() const
     {
         return _relVertices;
     }
 
-    const std::vector<Segment2Dr>& Polygon::outline() const
+    const std::vector<Segment2D>& Polygon::outline() const
     {
         return _outline;
     }
 
-    void Polygon::setVertices(const std::vector<Vec2r>& absolutePositions)
+    void Polygon::setVertices(const std::vector<glm::dvec2>& absolutePositions)
     {
         assert(absolutePositions.size() == (size_t)nbVertices());
 
-        Vec2r proposedCentroid = evaluateCentroid(absolutePositions);
+        glm::dvec2 proposedCentroid = evaluateCentroid(absolutePositions);
 
         // Move vertices' centroid to (0,0)
         int nbv = nbVertices();
@@ -73,10 +73,10 @@ namespace prop2
         _isConcave = false;
         for(int i=0; i<nbv; ++i)
         {
-            Vec2r dir = _relVertices[(i+1)%nbv] - _relVertices[i];
-            Vec2r nextDir = _relVertices[(i+2)%nbv] - _relVertices[(i+1)%nbv];
-            Vec2r nextNormal = perpCCW(nextDir);
-            if(dot(dir, nextNormal) < real(0))
+            glm::dvec2 dir = _relVertices[(i+1)%nbv] - _relVertices[i];
+            glm::dvec2 nextDir = _relVertices[(i+2)%nbv] - _relVertices[(i+1)%nbv];
+            glm::dvec2 nextNormal = glm::dvec2(-nextDir.y, nextDir.x);
+            if(dot(dir, nextNormal) < double(0))
             {
                 _isConcave = true;
                 break;
@@ -84,30 +84,30 @@ namespace prop2
         }
 
         // Update cached attributes
-        _angle = real(0);
+        _angle = double(0);
         _centroid = proposedCentroid;
         updateTransformMatrix();
         updateInertia();
     }
 
-    void Polygon::moveVertexAt(int cIdx, const Vec2r& position)
+    void Polygon::moveVertexAt(int cIdx, const glm::dvec2& position)
     {
         assert(0 <= cIdx && cIdx < nbVertices());
         moveBy(position - _outline[cIdx].begin());
     }
 
-    int getQuadrant(const Vec2r& origin, const Vec2r& pt)
+    int getQuadrant(const glm::dvec2& origin, const glm::dvec2& pt)
     {
-        return pt.x() < origin.x() ?
-                    pt.y() < origin.y() ?
+        return pt.x < origin.x ?
+                    pt.y < origin.y ?
                         3 :
                         2 :
-                    pt.y() < origin.y() ?
+                    pt.y < origin.y ?
                         4 :
                         1;
     }
 
-    bool Polygon::contains(const Vec2r& point) const
+    bool Polygon::contains(const glm::dvec2& point) const
     {
         int movesSum = 0;
         int lastQuadrant = getQuadrant(_outline[0].end(), point);
@@ -138,16 +138,16 @@ namespace prop2
         return movesSum == 4;
     }
 
-    Vec2r Polygon::nearestSurface(const Vec2r& point) const
+    glm::dvec2 Polygon::nearestSurface(const glm::dvec2& point) const
     {
-        Vec2r minDist = _outline[0].pointMinimalDirection(point);
-        real minDistLen2 = minDist.length2();
+        glm::dvec2 minDist = _outline[0].pointMinimalDirection(point);
+        double minDistLen2 = glm::dot(minDist, minDist);
 
         int nbv = nbVertices();
         for(int i=1; i < nbv; ++i)
         {
-            Vec2r dist = _outline[i].pointMinimalDirection(point);
-            real distLen2 = dist.length2();
+            glm::dvec2 dist = _outline[i].pointMinimalDirection(point);
+            double distLen2 = glm::dot(dist, dist);
             if(distLen2 < minDistLen2)
             {
                 minDist = dist;
@@ -158,21 +158,21 @@ namespace prop2
         return -minDist;
     }
 
-    real Polygon::computeArea() const
+    double Polygon::computeArea() const
     {
 
-        real diagonal1 = real(0.0);
-        real diagonal2 = real(0.0);
+        double diagonal1 = double(0.0);
+        double diagonal2 = double(0.0);
 
         int nbSides = nbVertices();
         for(size_t i=0; i < nbSides; ++i)
         {
-            const Segment2Dr& line = _outline[i];
-            diagonal1 += line.begin().x() * line.end().y();
-            diagonal2 += line.begin().y() * line.end().x();
+            const Segment2D& line = _outline[i];
+            diagonal1 += line.begin().x * line.end().y;
+            diagonal2 += line.begin().y * line.end().x;
         }
 
-        return absolute(diagonal1 - diagonal2) / real(2.0);
+        return absolute(diagonal1 - diagonal2) / double(2.0);
     }
 
     bool Polygon::isConcave() const
@@ -180,38 +180,43 @@ namespace prop2
         return _isConcave;
     }
 
-    std::vector<cellar::Vec2f> Polygon::rectangle(real width, real height)
+    std::vector<glm::vec2> Polygon::rectangle(double width, double height)
     {
-        std::vector<cellar::Vec2f> vertices;
-        vertices.push_back(Vec2f(-width/real(2), -height/real(2)));
-        vertices.push_back(Vec2f( width/real(2), -height/real(2)));
-        vertices.push_back(Vec2f( width/real(2),  height/real(2)));
-        vertices.push_back(Vec2f(-width/real(2),  height/real(2)));
+        std::vector<glm::vec2> vertices;
+        vertices.push_back(glm::dvec2(-width/2.0, -height/2.0));
+        vertices.push_back(glm::dvec2( width/2.0, -height/2.0));
+        vertices.push_back(glm::dvec2( width/2.0,  height/2.0));
+        vertices.push_back(glm::dvec2(-width/2.0,  height/2.0));
         return vertices;
     }
-    std::vector<cellar::Vec2f> Polygon::regularPolygon(real radius, int nbSides)
+    std::vector<glm::vec2> Polygon::regularPolygon(double radius, int nbSides)
     {
-        std::vector<cellar::Vec2f> vertices;
+        std::vector<glm::vec2> vertices;
         for(int i=0; i<nbSides; ++i)
         {
             double angle = 2.0*i*cellar::PI/nbSides;
-            vertices.push_back(radius * Vec2r(cos(angle), sin(angle)));
+            vertices.push_back(radius * glm::dvec2(cos(angle), sin(angle)));
         }
         return vertices;
     }
 
     void Polygon::updateTransformMatrix()
     {
-        _tranformMatrix.loadIdentity();
-        _tranformMatrix *= cellar::translate(_centroid);
-        _tranformMatrix *= cellar::rotate(_angle);
+        double c = glm::cos(_angle);
+        double s = glm::sin(_angle);
+
+        _tranformMatrix = glm::dmat3();
+        _tranformMatrix[0][0] = c; _tranformMatrix[1][0] = -s; _tranformMatrix[2][0] = _centroid.x;
+        _tranformMatrix[0][1] = s; _tranformMatrix[1][1] = c;  _tranformMatrix[2][1] = _centroid.y;
+        _tranformMatrix[0][2] = 0; _tranformMatrix[1][2] = 0;  _tranformMatrix[2][2] = 1.0f;
+
 
         // Update outline
         int nbv = nbVertices();
         for(int i=0; i<nbv; ++i)
         {
-            _outline[i].setBegin(_tranformMatrix *
-                                 Vec3r(_relVertices[i], real(1)));
+            _outline[i].setBegin(glm::dvec2(_tranformMatrix *
+                                 glm::dvec3(_relVertices[i], 1)));
         }
         for(int i=0; i<nbv; ++i)
         {
@@ -223,50 +228,50 @@ namespace prop2
     {
         if(_material)
         {
-            real density = _material->density();
-            _inverseMass = real(1.0) / (density * computeArea());
+            double density = _material->density();
+            _inverseMass = double(1.0) / (density * computeArea());
 
-            real Ix = real(0.0);
-            real Iy = real(0.0);
+            double Ix = double(0.0);
+            double Iy = double(0.0);
             int nbv = nbVertices();
             for(int i=0; i < nbv; ++i)
             {
-                Vec2r pb = _relVertices[i];
-                Vec2r pe = _relVertices[(i+1)%nbv];
-                real ai = pb.x()*pe.y() - pe.x()*pb.y();
-                Ix += ai * (pb.y()*pb.y() + pb.y()*pe.y() + pe.y()*pe.y());
-                Iy += ai * (pb.x()*pb.x() + pb.x()*pe.x() + pe.x()*pe.x());
+                glm::dvec2 pb = _relVertices[i];
+                glm::dvec2 pe = _relVertices[(i+1)%nbv];
+                double ai = pb.x*pe.y - pe.x*pb.y;
+                Ix += ai * (pb.y*pb.y + pb.y*pe.y + pe.y*pe.y);
+                Iy += ai * (pb.x*pb.x + pb.x*pe.x + pe.x*pe.x);
             }
             _inverseMomentOfInertia = 12 / ((Ix + Iy) * density);
         }
         else
         {
-            _inverseMass = real(0);
-            _inverseMomentOfInertia = real(0);
+            _inverseMass = double(0);
+            _inverseMomentOfInertia = double(0);
         }
     }
 
-    Vec2r Polygon::evaluateCentroid(const std::vector<Vec2r>& vertices)
+    glm::dvec2 Polygon::evaluateCentroid(const std::vector<glm::dvec2>& vertices)
     {
-        real diagonal1 = real(0.0);
-        real diagonal2 = real(0.0);
-        Vec2r center(real(0), real(0));
+        double diagonal1 = double(0.0);
+        double diagonal2 = double(0.0);
+        glm::dvec2 center(double(0), double(0));
 
         int nbv = static_cast<int>(vertices.size());
         for(int i=0; i < nbv; ++i)
         {
-            const Vec2r& begin = vertices[i];
-            const Vec2r& end = vertices[(i+1)%nbv];
-            real diag1 = begin.x() * end.y();
-            real diag2 = begin.y() * end.x();
-            real diagDiff = diag1 - diag2;
+            const glm::dvec2& begin = vertices[i];
+            const glm::dvec2& end = vertices[(i+1)%nbv];
+            double diag1 = begin.x * end.y;
+            double diag2 = begin.y * end.x;
+            double diagDiff = diag1 - diag2;
             center += (begin + end) * diagDiff;
             diagonal1 += diag1;
             diagonal2 += diag2;
         }
 
-        real area = absolute(diagonal1 - diagonal2) / real(2.0);
+        double area = absolute(diagonal1 - diagonal2) / double(2.0);
 
-        return center / (real(6.0) * area);
+        return center / (double(6.0) * area);
     }
 }

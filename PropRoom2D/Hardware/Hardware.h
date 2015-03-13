@@ -22,11 +22,11 @@ namespace prop2
             NB_TYPES
         };
 
-        HardwareUpdate(EType type, real value, Hardware& material) :
+        HardwareUpdate(EType type, double value, Hardware& material) :
             type(type), value(value), material(material) {}
 
         EType type;
-        real value;
+        double value;
         Hardware& material;
     };
 
@@ -36,24 +36,24 @@ namespace prop2
         Hardware();
         virtual ~Hardware();
 
-        virtual real density() const;
-        virtual real bounciness() const;
-        virtual real staticFrictionCoefficient() const;
-        virtual real dynamicFrictionCoefficient() const;
+        virtual double density() const;
+        virtual double bounciness() const;
+        virtual double staticFrictionCoefficient() const;
+        virtual double dynamicFrictionCoefficient() const;
 
-        virtual void setDensity(const real& density);
-        virtual void setBounciness(const real& bounciness);
-        virtual void setStaticFrictionCoefficient(const real& us);
-        virtual void setDynamicFrictionCoefficient(const real& ud);
+        virtual void setDensity(const double& density);
+        virtual void setBounciness(const double& bounciness);
+        virtual void setStaticFrictionCoefficient(const double& us);
+        virtual void setDynamicFrictionCoefficient(const double& ud);
 
         // Constant attributes
-        static const real INFINITE_DENSITY;
+        static const double INFINITE_DENSITY;
 
     protected:
-        real _density;
-        real _staticFrictionCoefficient;
-        real _dynamicFrictionCoefficient;
-        real _bounciness;
+        double _density;
+        double _staticFrictionCoefficient;
+        double _dynamicFrictionCoefficient;
+        double _bounciness;
     };
 }
 
