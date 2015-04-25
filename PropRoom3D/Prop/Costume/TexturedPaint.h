@@ -20,6 +20,8 @@ namespace prop3
                       const glm::dvec3& defaultColor = glm::dvec3(1.0));
         virtual ~TexturedPaint();
 
+        virtual std::shared_ptr<Costume> clone() const;
+
         // Reflexion model
         virtual glm::dvec3 computeReflectionBrdf(
                 const glm::dvec3& incidentDirection,

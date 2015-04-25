@@ -18,6 +18,8 @@ namespace prop3
     public:
         virtual ~Costume() {}
 
+        virtual std::shared_ptr<Costume> clone() const = 0;
+
         // Medium opacity
         double mediumOpacity() const;
         void setMediumOpacity(double mediumOpacity);
@@ -36,7 +38,7 @@ namespace prop3
                 const glm::dvec3& texCoord = glm::dvec3(0)) const;
 
         // Reflexion model
-        virtual glm::dvec3 computeReflection(
+        virtual glm::dvec3 computeReflectionDirection(
                 const glm::dvec3& incidentDirection,
                 const glm::dvec3& surfaceNormal,
                 const glm::dvec3& texCoord = glm::dvec3(0)) const = 0;
@@ -48,7 +50,7 @@ namespace prop3
                 const glm::dvec3& texCoord = glm::dvec3(0)) const = 0;
 
         // Refraction model
-        virtual glm::dvec3 computeRefraction(
+        virtual glm::dvec3 computeRefractionDirection(
                 const glm::dvec3& incidentDirection,
                 const glm::dvec3& surfaceNormal,
                 const glm::dvec3& texCoord = glm::dvec3(0)) const;
@@ -106,7 +108,7 @@ namespace prop3
         return 1.0;
     }
 
-    inline glm::dvec3 Costume::computeRefraction(
+    inline glm::dvec3 Costume::computeRefractionDirection(
             const glm::dvec3& incidentDirection,
             const glm::dvec3& surfaceNormal,
             const glm::dvec3& texCoord) const

@@ -14,8 +14,10 @@ namespace prop3
         FlatPaint(const glm::dvec3& color);
         virtual ~FlatPaint();
 
+        virtual std::shared_ptr<Costume> clone() const;
+
         // Reflexion model
-        virtual glm::dvec3 computeReflection(
+        virtual glm::dvec3 computeReflectionDirection(
                 const glm::dvec3& incidentDirection,
                 const glm::dvec3& surfaceNormal,
                 const glm::dvec3& texCoord = glm::dvec3(0)) const;

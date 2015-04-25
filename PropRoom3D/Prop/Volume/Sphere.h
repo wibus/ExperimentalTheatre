@@ -13,6 +13,7 @@ namespace prop3
                        double radius = 1.0);
         virtual ~Sphere();
 
+        virtual std::shared_ptr<Volume> clone() const;
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;

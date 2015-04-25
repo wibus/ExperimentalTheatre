@@ -18,6 +18,11 @@ namespace prop3
 
     }
 
+    std::shared_ptr<Volume> Sphere::clone() const
+    {
+        return std::shared_ptr<Volume>(new Sphere(*this));
+    }
+
     void Sphere::transform(const Transform& transform)
     {
         _center = glm::dvec3(transform.mat() * glm::dvec4(_center, 1.0));

@@ -1,6 +1,8 @@
 #ifndef PROPROOM3D_HARDWARE_H
 #define PROPROOM3D_HARDWARE_H
 
+#include <memory>
+
 #include <CellarWorkbench/DesignPattern/SpecificSubject.h>
 
 #include "../../libPropRoom3D_global.h"
@@ -35,6 +37,8 @@ namespace prop3
     public:
         Hardware();
         virtual ~Hardware();
+
+        virtual std::shared_ptr<Hardware> clone() const;
 
         virtual double density() const;
         virtual double bounciness() const;

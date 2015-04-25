@@ -14,6 +14,11 @@ namespace prop3
 
     }
 
+    std::shared_ptr<Costume> Glass::clone() const
+    {
+        return std::shared_ptr<Costume>(new Glass(*this));
+    }
+
     double Glass::computeReflexionRatio(
             const glm::dvec3& incidentDirection,
             const glm::dvec3& surfaceNormal,
@@ -28,7 +33,7 @@ namespace prop3
         return R0 + (1.0 - R0) * cosNV5;
     }
 
-    glm::dvec3 Glass::computeReflection(
+    glm::dvec3 Glass::computeReflectionDirection(
             const glm::dvec3& incidentDirection,
             const glm::dvec3& surfaceNormal,
             const glm::dvec3& texCoord) const
@@ -45,7 +50,7 @@ namespace prop3
         return mediumColor();
     }
 
-     glm::dvec3 Glass::computeRefraction(
+     glm::dvec3 Glass::computeRefractionDirection(
             const glm::dvec3& incidentDirection,
             const glm::dvec3& surfaceNormal,
             const glm::dvec3& texCoord) const

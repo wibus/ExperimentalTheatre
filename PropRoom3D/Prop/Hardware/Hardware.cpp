@@ -20,27 +20,32 @@ namespace prop3
 
     }
 
-    inline double Hardware::density() const
+    std::shared_ptr<Hardware> Hardware::clone() const
+    {
+        return std::shared_ptr<Hardware>(new Hardware(*this));
+    }
+
+    double Hardware::density() const
     {
         return _density;
     }
 
-    inline double Hardware::bounciness() const
+    double Hardware::bounciness() const
     {
         return _bounciness;
     }
 
-    inline double Hardware::staticFrictionCoefficient() const
+    double Hardware::staticFrictionCoefficient() const
     {
         return _staticFrictionCoefficient;
     }
 
-    inline double Hardware::dynamicFrictionCoefficient() const
+    double Hardware::dynamicFrictionCoefficient() const
     {
         return _dynamicFrictionCoefficient;
     }
 
-    inline void Hardware::setDensity(const double& density)
+    void Hardware::setDensity(const double& density)
     {
         if(_density != density)
         {
@@ -53,7 +58,7 @@ namespace prop3
         }
     }
 
-    inline void Hardware::setBounciness(const double& bounciness)
+    void Hardware::setBounciness(const double& bounciness)
     {
         if(_bounciness != bounciness)
         {
@@ -66,7 +71,7 @@ namespace prop3
         }
     }
 
-    inline void Hardware::setStaticFrictionCoefficient(const double& us)
+    void Hardware::setStaticFrictionCoefficient(const double& us)
     {
         if(_staticFrictionCoefficient != us)
         {
@@ -79,7 +84,7 @@ namespace prop3
         }
     }
 
-    inline void Hardware::setDynamicFrictionCoefficient(const double& ud)
+    void Hardware::setDynamicFrictionCoefficient(const double& ud)
     {
         if(_dynamicFrictionCoefficient != ud)
         {

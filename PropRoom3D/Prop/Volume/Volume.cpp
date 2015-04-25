@@ -54,6 +54,11 @@ namespace prop3
 
     }
 
+    std::shared_ptr<Volume> VolumeNot::clone() const
+    {
+        return std::shared_ptr<Volume>(new VolumeNot(_eq->clone()));
+    }
+
     void VolumeNot::transform(const Transform& transform)
     {
         _eq->transform(transform);
@@ -87,6 +92,14 @@ namespace prop3
     VolumeOr::VolumeOr(const std::vector<std::shared_ptr<Volume>>& eqs) :
         _eqs(eqs)
     {
+    }
+
+    std::shared_ptr<Volume> VolumeOr::clone() const
+    {
+        int childCount = (int) _eqs.size();
+        std::vector<std::shared_ptr<Volume>> clones(childCount);
+        for(int i=0; i<childCount; ++i) clones[i] = _eqs[i]->clone();
+        return std::shared_ptr<Volume>(new VolumeOr(clones));
     }
 
     void VolumeOr::transform(const Transform& transform)
@@ -157,6 +170,14 @@ namespace prop3
     VolumeAnd::VolumeAnd(const std::vector<std::shared_ptr<Volume>>& eqs) :
         _eqs(eqs)
     {
+    }
+
+    std::shared_ptr<Volume> VolumeAnd::clone() const
+    {
+        int childCount = (int) _eqs.size();
+        std::vector<std::shared_ptr<Volume>> clones(childCount);
+        for(int i=0; i<childCount; ++i) clones[i] = _eqs[i]->clone();
+        return std::shared_ptr<Volume>(new VolumeOr(clones));
     }
 
     void VolumeAnd::transform(const Transform& transform)

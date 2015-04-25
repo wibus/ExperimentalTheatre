@@ -22,9 +22,16 @@ class Hardware;
     class PROP3D_EXPORT Prop :
             public cellar::SpecificObserver<HardwareUpdate>
     {
+    private:
+        Prop(const Prop& p);
+        Prop& operator=(const Prop& prop) = delete;
+
     public:
         Prop();
         virtual ~Prop();
+
+        // Clonage
+        std::shared_ptr<Prop> clone() const;
 
         // Identification
         PropId id() const;
@@ -120,7 +127,7 @@ class Hardware;
         // Attributes
         std::shared_ptr<Volume> _volume;
         std::shared_ptr<Costume> _costume;
-        std::shared_ptr<Hardware> _material;
+        std::shared_ptr<Hardware> _hardware;
         EBodyType _bodyType;
 
         double _invMass;
@@ -151,6 +158,11 @@ class Hardware;
 
 
     // IMPLEMENTATION //
+    inline std::shared_ptr<Prop> Prop::clone() const
+    {
+        return std::shared_ptr<Prop>(new Prop(*this));
+    }
+
     inline PropId Prop::id() const
     {
         return _id;
@@ -173,7 +185,7 @@ class Hardware;
 
     inline const std::shared_ptr<Hardware>& Prop::hardware() const
     {
-        return _material;
+        return _hardware;
     }
 
     inline EBodyType Prop::bodyType() const

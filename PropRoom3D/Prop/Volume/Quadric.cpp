@@ -48,6 +48,10 @@ namespace prop3
 
     }
 
+    std::shared_ptr<Volume> Quadric::clone() const
+    {
+        return std::shared_ptr<Volume>(new Quadric(*this));
+    }
 
     void Quadric::transform(const Transform& transform)
     {

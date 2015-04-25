@@ -14,8 +14,10 @@ namespace prop3
         Chrome(const glm::dvec3& color = glm::dvec3(1.0));
         virtual ~Chrome();
 
+        virtual std::shared_ptr<Costume> clone() const;
+
         // Reflexion model
-        virtual glm::dvec3 computeReflection(
+        virtual glm::dvec3 computeReflectionDirection(
                 const glm::dvec3& incidentDirection,
                 const glm::dvec3& surfaceNormal,
                 const glm::dvec3& texCoord = glm::dvec3(0)) const;

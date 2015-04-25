@@ -19,6 +19,11 @@ namespace prop3
 
     }
 
+    std::shared_ptr<Costume> TexturedPaint::clone() const
+    {
+        return std::shared_ptr<Costume>(new TexturedPaint(*this));
+    }
+
     glm::dvec3 TexturedPaint::computeReflectionBrdf(
             const glm::dvec3& incidentDirection,
             const glm::dvec3& surfaceNormal,

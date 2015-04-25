@@ -13,7 +13,12 @@ namespace prop3
 
     }
 
-    glm::dvec3 Chrome::computeReflection(
+    std::shared_ptr<Costume> Chrome::clone() const
+    {
+        return std::shared_ptr<Costume>(new Chrome(*this));
+    }
+
+    glm::dvec3 Chrome::computeReflectionDirection(
             const glm::dvec3& incidentDirection,
             const glm::dvec3& surfaceNormal,
             const glm::dvec3& texCoord) const

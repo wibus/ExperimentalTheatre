@@ -22,6 +22,11 @@ namespace prop3
 
     }
 
+    std::shared_ptr<Volume> Plane::clone() const
+    {
+        return std::shared_ptr<Volume>(new Plane(*this));
+    }
+
     void Plane::transform(const Transform& transform)
     {
         glm::dvec4 pt((-_d) * _normal, 1.0);
@@ -64,6 +69,11 @@ namespace prop3
     {
     }
 
+    std::shared_ptr<Volume> PlaneGhost::clone() const
+    {
+        return std::shared_ptr<Volume>(new PlaneGhost(*this));
+    }
+
     void PlaneGhost::raycast(const Ray&, std::vector<RaycastReport>&) const
     {
     }
@@ -90,6 +100,11 @@ namespace prop3
         _u(u), _v(v)
     {
 
+    }
+
+    std::shared_ptr<Volume> PlaneTexture::clone() const
+    {
+        return std::shared_ptr<Volume>(new PlaneTexture(*this));
     }
 
     void PlaneTexture::raycast(const Ray& ray, std::vector<RaycastReport>& reports) const

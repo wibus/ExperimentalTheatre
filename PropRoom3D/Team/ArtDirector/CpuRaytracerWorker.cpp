@@ -83,7 +83,11 @@ namespace prop3
         skip();
 
         std::lock_guard<std::mutex> lk(_flowMutex);
-        _props = props;
+
+        int propCount = (int) props.size();
+        _props.resize(propCount);
+        for(int i=0; i<propCount; ++i)
+            _props[i] = props[i]->clone();
     }
 
     bool CpuRaytracerWorker::tryLockPixels()
@@ -229,7 +233,7 @@ namespace prop3
                                           reportMin.texCoord);
 
             // Reflection
-            glm::dvec3 reflect = costume->computeReflection(
+            glm::dvec3 reflect = costume->computeReflectionDirection(
                                      ray.direction,
                                      reportMin.normal,
                                      reportMin.texCoord);
@@ -241,7 +245,7 @@ namespace prop3
             // Refraction
             if(reflectionRation != 1.0)
             {
-                glm::dvec3 refract = costume->computeRefraction(
+                glm::dvec3 refract = costume->computeRefractionDirection(
                                          ray.direction,
                                          reportMin.normal,
                                          reportMin.texCoord);

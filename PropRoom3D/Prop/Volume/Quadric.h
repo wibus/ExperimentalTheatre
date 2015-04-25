@@ -27,6 +27,7 @@ namespace prop3
 
         virtual ~Quadric();
 
+        virtual std::shared_ptr<Volume> clone() const;
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;

@@ -16,6 +16,7 @@ namespace prop3
         Plane(double a, double b, double c, double d);
         virtual ~Plane();
 
+        virtual std::shared_ptr<Volume> clone() const;
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
@@ -35,6 +36,7 @@ namespace prop3
         // From the equation : a*x + b*y + c*z + d = 0
         PlaneGhost(double a, double b, double c, double d);
 
+        virtual std::shared_ptr<Volume> clone() const;
         virtual void raycast(const Ray& ray, std::vector<RaycastReport>& reports) const;
     };
 
@@ -51,6 +53,7 @@ namespace prop3
                    const glm::dvec3& u, const glm::dvec3& v,
                    const glm::dvec3& origin);
 
+        virtual std::shared_ptr<Volume> clone() const;
         virtual void raycast(const Ray& ray, std::vector<RaycastReport>& reports) const;
 
     private:

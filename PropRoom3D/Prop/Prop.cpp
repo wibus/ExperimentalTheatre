@@ -19,10 +19,10 @@ namespace prop3
     Prop::Prop() :
         _id(_assigneId_()),
         _isVisible(true),
+        _volume(),
         _costume(new FlatPaint(glm::vec3(1))),
-        _material(),
+        _hardware(),
         _bodyType(EBodyType::GRAPHIC),
-        _transformMatrix(1.0),
         _invMass(INFINITE_INERTIA),
         _invMomentOfInertia(INFINITE_MOMENT_OF_INERTIA),
         _centroid(0.0),
@@ -32,15 +32,40 @@ namespace prop3
         _angle(glm::vec3(0.0)),
         _angularVelocity(glm::vec3(0.0)),
         _angularAcceleration(glm::vec3(0.0)),
-        _angularFirctionCoefficients(0.0)
+        _angularFirctionCoefficients(0.0),
+        _transformMatrix(1.0),
+        _transformMatrixInv(1.0)
     {
+    }
+
+    Prop::Prop(const Prop& p) :
+        _id(_assigneId_()),
+        _isVisible(p._isVisible),
+        _volume(p._volume ? p._volume->clone() : nullptr),
+        _costume(p._costume ? p._costume->clone() : nullptr),
+        _hardware(p._hardware ? p._hardware->clone() : nullptr),
+        _bodyType(p._bodyType),
+        _invMass(p._invMass),
+        _invMomentOfInertia(p._invMomentOfInertia),
+        _centroid(p._centroid),
+        _linearVelocity(p._linearVelocity),
+        _linearAcceleration(p._linearAcceleration),
+        _linearFirctionCoefficients(p._linearFirctionCoefficients),
+        _angle(p._angle),
+        _angularVelocity(p._angularVelocity),
+        _angularAcceleration(p._angularAcceleration),
+        _angularFirctionCoefficients(p._angularFirctionCoefficients),
+        _transformMatrix(p._transformMatrix),
+        _transformMatrixInv(p._transformMatrixInv)
+    {
+
     }
 
     Prop::~Prop()
     {
-        if(_material)
+        if(_hardware)
         {
-            _material->unregisterObserver(*this);
+            _hardware->unregisterObserver(*this);
         }
     }
 
@@ -61,16 +86,16 @@ namespace prop3
 
     void Prop::setHardware(const std::shared_ptr<Hardware>& material)
     {
-        if(_material)
+        if(_hardware)
         {
-            _material->unregisterObserver(*this);
+            _hardware->unregisterObserver(*this);
         }
 
-        _material = material;
+        _hardware = material;
 
-        if(_material)
+        if(_hardware)
         {
-            _material->registerObserver(*this);
+            _hardware->registerObserver(*this);
         }
     }
 

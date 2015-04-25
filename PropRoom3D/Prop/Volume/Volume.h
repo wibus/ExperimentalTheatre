@@ -50,6 +50,8 @@ class RaycastReport;
     public:
         virtual ~Volume();
 
+        virtual std::shared_ptr<Volume> clone() const = 0;
+
         virtual void transform(const Transform& transform) = 0;
 
         EPointPosition isIn(double x, double y, double z) const;
@@ -67,9 +69,14 @@ class RaycastReport;
     {
         friend std::shared_ptr<Volume> operator!(
                 const std::shared_ptr<Volume>&);
+
+        VolumeNot(const VolumeNot& v) = delete;
+        VolumeNot& operator=(const VolumeNot&) = delete;
+
     public:
         VolumeNot(const std::shared_ptr<Volume>& eq);
 
+        virtual std::shared_ptr<Volume> clone() const;
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
@@ -86,9 +93,14 @@ class RaycastReport;
         friend std::shared_ptr<Volume> operator| (
                 const std::shared_ptr<Volume>&,
                 const std::shared_ptr<Volume>&);
+
+        VolumeOr(const VolumeOr& v) = delete;
+        VolumeOr& operator=(const VolumeOr&) = delete;
+
     public:
         VolumeOr(const std::vector<std::shared_ptr<Volume>>& eqs);
 
+        virtual std::shared_ptr<Volume> clone() const;
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
@@ -107,9 +119,14 @@ class RaycastReport;
         friend std::shared_ptr<Volume> operator& (
                 const std::shared_ptr<Volume>&,
                 const std::shared_ptr<Volume>&);
+
+        VolumeAnd(const VolumeAnd& v) = delete;
+        VolumeAnd& operator=(const VolumeAnd&) = delete;
+
     public:
         VolumeAnd(const std::vector<std::shared_ptr<Volume>>& eqs);
 
+        virtual std::shared_ptr<Volume> clone() const;
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;

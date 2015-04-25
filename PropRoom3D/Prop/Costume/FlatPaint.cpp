@@ -15,7 +15,12 @@ namespace prop3
 
     }
 
-    glm::dvec3 FlatPaint::computeReflection(
+    std::shared_ptr<Costume> FlatPaint::clone() const
+    {
+        return std::shared_ptr<Costume>(new FlatPaint(*this));
+    }
+
+    glm::dvec3 FlatPaint::computeReflectionDirection(
             const glm::dvec3& incidentDirection,
             const glm::dvec3& surfaceNormal,
             const glm::dvec3& texCoord) const
