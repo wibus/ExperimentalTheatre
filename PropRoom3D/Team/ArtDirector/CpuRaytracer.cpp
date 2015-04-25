@@ -60,7 +60,6 @@ namespace prop3
     {
         for(auto& w : _workerObjects)
         {
-            w->skip();
             w->terminate();
         }
         for(std::thread& t : _workerThreads)
@@ -90,11 +89,6 @@ namespace prop3
 
     void CpuRaytracer::reset()
     {
-        for(auto& w : _workerObjects)
-        {
-            w->skip();
-        }
-
         _props.clear();
 
         for(auto& w : _workerObjects)
@@ -152,19 +146,12 @@ namespace prop3
 
     void CpuRaytracer::notify(media::CameraMsg &msg)
     {
-        for(auto& w : _workerObjects)
-        {
-            w->skip();
-        }
-
         if(msg.change == media::CameraMsg::EChange::VIEWPORT)
         {
             int width = msg.camera.viewport().x;
             int height = msg.camera.viewport().y;
-            _viewportSize = glm::ivec2(width, height);
             _colorBuffer.resize(width * height * 3);
-            std::fill(_colorBuffer.begin(), _colorBuffer.end(), 0.0f);
-            _sampleCount = 0;
+            _viewportSize = glm::ivec2(width, height);
 
             for(auto& w : _workerObjects)
             {
@@ -185,15 +172,14 @@ namespace prop3
                 w->updateView(msg.camera.viewMatrix());
             }
         }
+
+        // Reset buffers
+        std::fill(_colorBuffer.begin(), _colorBuffer.end(), 0.0f);
+        _sampleCount = 0;
     }
 
     void CpuRaytracer::manageProp(const std::shared_ptr<Prop>& prop)
     {
-        for(auto& w : _workerObjects)
-        {
-            w->skip();
-        }
-
         _props.push_back(prop);
 
         for(auto& w : _workerObjects)
@@ -209,11 +195,6 @@ namespace prop3
 
     void CpuRaytracer::unmanageProp(const std::shared_ptr<Prop>& prop)
     {
-        for(auto& w : _workerObjects)
-        {
-            w->skip();
-        }
-
         std::remove_if(_props.begin(), _props.end(),
             [&prop](const std::shared_ptr<Prop>& p) {
                 return p == prop;

@@ -44,6 +44,8 @@ namespace prop3
 
     void CpuRaytracerWorker::terminate()
     {
+        skip();
+
         std::lock_guard<std::mutex> lk(_terminateMutex);
         _terminatePredicate = true;
         _cv.notify_one();
@@ -51,6 +53,8 @@ namespace prop3
 
     void CpuRaytracerWorker::resize(int width, int height)
     {
+        skip();
+
         std::lock_guard<std::mutex> lk(_flowMutex);
         _viewportSize.x = width;
         _viewportSize.y = height;
@@ -59,6 +63,8 @@ namespace prop3
 
     void CpuRaytracerWorker::updateView(const glm::dmat4& view)
     {
+        skip();
+
         _viewInvMatrix = glm::inverse(view);
         _viewProjInverse = _viewInvMatrix * _projInvMatrix;
         _camPos = glm::dvec3(_viewInvMatrix * glm::dvec4(0, 0, 0, 1));
@@ -66,12 +72,16 @@ namespace prop3
 
     void CpuRaytracerWorker::updateProjection(const glm::dmat4& proj)
     {
+        skip();
+
         _projInvMatrix = glm::inverse(proj);
         _viewProjInverse = _viewInvMatrix * _projInvMatrix;
     }
 
     void CpuRaytracerWorker::setProps(const std::vector<std::shared_ptr<Prop>>& props)
     {
+        skip();
+
         std::lock_guard<std::mutex> lk(_flowMutex);
         _props = props;
     }

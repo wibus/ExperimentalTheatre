@@ -25,7 +25,6 @@ namespace prop3
         CpuRaytracerWorker();
 
         virtual void nextFrame();
-        virtual void skip();
         virtual void terminate();
 
         virtual void resize(int width, int height);
@@ -39,6 +38,7 @@ namespace prop3
         virtual void unlockPixels();
 
     protected:
+        virtual void skip();
         virtual void execute();
         virtual void resizeBuffers();
         virtual void shootFromLights();
