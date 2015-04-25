@@ -29,6 +29,8 @@ namespace prop3
         virtual void terminate();
 
         virtual void resize(int width, int height);
+        virtual void updateView(const glm::dmat4& view);
+        virtual void updateProjection(const glm::dmat4& proj);
         virtual void setProps(const std::vector<std::shared_ptr<Prop>>& props);
 
         virtual bool tryLockPixels();
@@ -59,7 +61,8 @@ namespace prop3
         int _screenRaysBounceCount;
 
         glm::ivec2 _viewportSize;
-        glm::dmat4 _viewMatrix;
+        glm::dmat4 _viewInvMatrix;
+        glm::dmat4 _projInvMatrix;
         glm::dmat4 _viewProjInverse;
         glm::dvec3 _camPos;
 

@@ -152,13 +152,13 @@ namespace prop3
 
     void CpuRaytracer::notify(media::CameraMsg &msg)
     {
-        if(msg.change != media::CameraMsg::EChange::VIEW)
+        for(auto& w : _workerObjects)
         {
-            for(auto& w : _workerObjects)
-            {
-                w->skip();
-            }
+            w->skip();
+        }
 
+        if(msg.change == media::CameraMsg::EChange::VIEWPORT)
+        {
             int width = msg.camera.viewport().x;
             int height = msg.camera.viewport().y;
             _viewportSize = glm::ivec2(width, height);
@@ -169,6 +169,20 @@ namespace prop3
             for(auto& w : _workerObjects)
             {
                 w->resize(width, height);
+            }
+        }
+        else if(msg.change == media::CameraMsg::EChange::PROJECTION)
+        {
+            for(auto& w : _workerObjects)
+            {
+                w->updateProjection(msg.camera.projectionMatrix());
+            }
+        }
+        else if(msg.change == media::CameraMsg::EChange::VIEW)
+        {
+            for(auto& w : _workerObjects)
+            {
+                w->updateView(msg.camera.viewMatrix());
             }
         }
     }

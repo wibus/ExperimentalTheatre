@@ -1,6 +1,5 @@
 #include "CpuRaytracerWorker.h"
 
-#include <GLM/gtc/matrix_transform.hpp>
 #include <GLM/gtc/random.hpp>
 
 #include "../../Prop/Prop.h"
@@ -27,10 +26,6 @@ namespace prop3
         _viewportSize(1, 1),
         _colorBuffer(3)
     {
-        glm::dvec3 upVec(0, 0, 1);
-        glm::dvec3 focusPos = glm::dvec3(-1.2, -1.2, 5.25);
-        _camPos = focusPos + glm::dvec3(25, -40, 14) * 2.0;
-        _viewMatrix = glm::lookAt(_camPos, focusPos, upVec);
     }
 
     void CpuRaytracerWorker::nextFrame()
@@ -60,6 +55,19 @@ namespace prop3
         _viewportSize.x = width;
         _viewportSize.y = height;
         resizeBuffers();
+    }
+
+    void CpuRaytracerWorker::updateView(const glm::dmat4& view)
+    {
+        _viewInvMatrix = glm::inverse(view);
+        _viewProjInverse = _viewInvMatrix * _projInvMatrix;
+        _camPos = glm::dvec3(_viewInvMatrix * glm::dvec4(0, 0, 0, 1));
+    }
+
+    void CpuRaytracerWorker::updateProjection(const glm::dmat4& proj)
+    {
+        _projInvMatrix = glm::inverse(proj);
+        _viewProjInverse = _viewInvMatrix * _projInvMatrix;
     }
 
     void CpuRaytracerWorker::setProps(const std::vector<std::shared_ptr<Prop>>& props)
@@ -124,13 +132,6 @@ namespace prop3
 
     void CpuRaytracerWorker::resizeBuffers()
     {
-        glm::dmat4 proj = glm::perspectiveFov(
-            glm::pi<double>() / 9.0,
-            (double) _viewportSize.x,
-            (double) _viewportSize.y,
-            1.0, 2.0);
-
-        _viewProjInverse = glm::inverse(proj * _viewMatrix);
         _colorBuffer.resize(_viewportSize.x * _viewportSize.y * 3);
     }
 
