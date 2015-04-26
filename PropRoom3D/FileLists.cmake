@@ -123,7 +123,8 @@ SET(PROP3_RCC_FILES
     ${PROP3_SRC_DIR}/resources/PropRoom3D_Resources.qrc)
 SET(PROP3_SHADER_FILES
     ${PROP3_SRC_DIR}/resources/shaders/clip_space.vert
-    ${PROP3_SRC_DIR}/resources/shaders/post_prod.frag)
+    ${PROP3_SRC_DIR}/resources/shaders/post_prod_gl130.frag
+    ${PROP3_SRC_DIR}/resources/shaders/post_prod_gl440.frag)
 SET(PROP3_RESOURCE_FILES
     ${PROP3_RCC_FILES}
     ${PROP3_SHADER_FILES})

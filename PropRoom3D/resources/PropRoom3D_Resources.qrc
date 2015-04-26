@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/Prop3">
-        <file>shaders/post_prod.frag</file>
         <file>shaders/clip_space.vert</file>
+        <file>shaders/post_prod_gl440.frag</file>
+        <file>shaders/post_prod_gl130.frag</file>
     </qresource>
 </RCC>

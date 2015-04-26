@@ -7,6 +7,7 @@
 
 #include <QFileDialog>
 
+#include <CellarWorkbench/Misc/Log.h>
 #include <CellarWorkbench/Misc/CellarUtils.h>
 
 #include <MediaWorkbench/GL/GlInputsOutputs.h>
@@ -15,6 +16,8 @@
 namespace prop3
 {
     const int QGlPostProdUnit::DEFAULT_WHITE_TEMPERATURE = 6500;
+    const std::string POST_PROD_FRAG_GL130 = ":/Prop3/shaders/post_prod_gl130.frag";
+    const std::string POST_PROD_FRAG_GL440 = ":/Prop3/shaders/post_prod_gl440.frag";
 
     QGlPostProdUnit::QGlPostProdUnit() :
         _ui(new Ui::QGlPostProdUnit()),
@@ -45,10 +48,23 @@ namespace prop3
         attribs.setInput(0, "position");
         attribs.setOutput(0, "FragColor");
 
+        GLint major, minor;
+        glGetIntegerv(GL_MAJOR_VERSION, &major);
+        glGetIntegerv(GL_MINOR_VERSION, &minor);
+        std::string postProdShaderSrc = "undefined";
+        if(major >= 4 && minor >= 4)
+            postProdShaderSrc = POST_PROD_FRAG_GL440;
+        else
+            postProdShaderSrc = POST_PROD_FRAG_GL130;
+
+        cellar::getLog().postMessage(new cellar::Message('I', false,
+            "Choosing " + postProdShaderSrc + " fragment shader for post production.",
+            "QGlPostProdUnit"));
+
         // Post production program
         _postProdProgram.setInAndOutLocations(attribs);
         _postProdProgram.addShader(GL_VERTEX_SHADER, ":/Prop3/shaders/clip_space.vert");
-        _postProdProgram.addShader(GL_FRAGMENT_SHADER, ":/Prop3/shaders/post_prod.frag");
+        _postProdProgram.addShader(GL_FRAGMENT_SHADER, postProdShaderSrc);
         _postProdProgram.link();
         _postProdProgram.pushProgram();
         _postProdProgram.setInt("ImageTex", 0);
@@ -81,8 +97,8 @@ namespace prop3
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 
-        // Setup signal and slots
 
+        // Setup signal and slots
         lowpassSizeChanged(_ui->lowpassSizeCombo->currentIndex());
         connect(_ui->lowpassSizeCombo, (void (QComboBox::*)(int)) &QComboBox::currentIndexChanged,
                 this,                  &QGlPostProdUnit::lowpassSizeChanged);
@@ -99,6 +115,8 @@ namespace prop3
         connect(_ui->useAdaptativeFilteringCheck, &QCheckBox::stateChanged,
                 this,                             &QGlPostProdUnit::useAdaptativeFilteringChecked);
 
+        // LowPassChecked must be done after low pass properties to make sur it
+        // overwrites those properties in case low pass is deactivated.
         activateLowPassChecked(_ui->activateLowpassCheck->checkState());
         connect(_ui->activateLowpassCheck, &QCheckBox::stateChanged,
                 this,                      &QGlPostProdUnit::activateLowPassChecked);
@@ -142,15 +160,6 @@ namespace prop3
         _postProdProgram.popProgram();
     }
 
-    void QGlPostProdUnit::lowpassSizeChanged(int sizeIndex)
-    {
-        if(sizeIndex == 0) _lowpassKernelSize = 3;
-        else if(sizeIndex == 1) _lowpassKernelSize = 5;
-        else assert(false /* Unsupported kernel size */);
-
-        updateKernel(_lowpassKernelVar, _lowpassKernelSize);
-    }
-
     void QGlPostProdUnit::activateLowPassChecked(int state)
     {
         bool isChecked = state;
@@ -159,11 +168,23 @@ namespace prop3
         if(isChecked)
         {
             _filteringFunc = _ui->adaptativeWidget->isEnabled() ? 2 : 1;
+            updateKernel(_lowpassKernelVar, _lowpassKernelSize);
         }
         else
         {
             _filteringFunc = 0;
+            buildLowpassKernel(_lowpassKernel, 0, 1);
+            updateLowpassKernelUniform(_postProdProgram, _lowpassKernel, 1);
         }
+    }
+
+    void QGlPostProdUnit::lowpassSizeChanged(int sizeIndex)
+    {
+        if(sizeIndex == 0) _lowpassKernelSize = 3;
+        else if(sizeIndex == 1) _lowpassKernelSize = 5;
+        else assert(false /* Unsupported kernel size */);
+
+        updateKernel(_lowpassKernelVar, _lowpassKernelSize);
     }
 
     void QGlPostProdUnit::lowpassVarianceChanged(double variance)
@@ -182,10 +203,18 @@ namespace prop3
         if(isChecked)
         {
             _filteringFunc = 2;
+
+            _postProdProgram.pushProgram();
+            _postProdProgram.setFloat("AdaptationFactor", _adaptationFactor);
+            _postProdProgram.popProgram();
         }
         else
         {
             _filteringFunc = 1;
+
+            _postProdProgram.pushProgram();
+            _postProdProgram.setFloat("AdaptationFactor", 0);
+            _postProdProgram.popProgram();
         }
     }
 
@@ -355,9 +384,9 @@ namespace prop3
         int halfSize = size /2;
         float mass = 0.0;
 
-        for(int j=-2; j<3; ++j)
+        for(int j=-2; j<=2; ++j)
         {
-            for(int i=-2; i<3; ++i)
+            for(int i=-2; i<=2; ++i)
             {
                 int idx = (j+2)*5+i+2;
 
