@@ -4,8 +4,8 @@
 #include <vector>
 #include <map>
 
-#include <MediaWorkbench/GL/GlProgram.h>
-#include <MediaWorkbench/GL/GlVao.h>
+#include <CellarWorkbench/GL/GlProgram.h>
+#include <CellarWorkbench/GL/GlVao.h>
 
 #include "AbstractArtDirector.h"
 
@@ -45,9 +45,9 @@ class AbstractShape;
         virtual ~GlArtDirector();
 
         virtual void resize(int width, int height);
-        virtual void notify(media::CameraMsg &msg);
-        virtual std::shared_ptr<media::Camera> camera() const;
-        virtual void setCamera(const std::shared_ptr<media::Camera>& camera);
+        virtual void notify(cellar::CameraMsg &msg);
+        virtual std::shared_ptr<cellar::Camera> camera() const;
+        virtual void setCamera(const std::shared_ptr<cellar::Camera>& camera);
 
         virtual void setup();
         virtual void reset();
@@ -69,17 +69,17 @@ class AbstractShape;
         virtual void drawTextHud(const std::shared_ptr<TextHud>& text);
         virtual void drawImageHud(const std::shared_ptr<ImageHud>& image);
 
-        virtual void setupCircleShader(const media::GlInputsOutputs& loc);
-        virtual void setupPolygonShader(const media::GlInputsOutputs& loc);
-        virtual void setupTextHudShader(const media::GlInputsOutputs& loc);
-        virtual void setupImageHudShader(const media::GlInputsOutputs& loc);
+        virtual void setupCircleShader(const cellar::GlInputsOutputs& loc);
+        virtual void setupPolygonShader(const cellar::GlInputsOutputs& loc);
+        virtual void setupTextHudShader(const cellar::GlInputsOutputs& loc);
+        virtual void setupImageHudShader(const cellar::GlInputsOutputs& loc);
 
         virtual glm::dvec2 getAnchor(const EHorizontalAnchor& h,
                                      const EVerticalAnchor&   v);
 
 
         bool _isOwnerOfCamera;
-        std::shared_ptr<media::Camera> _camera;
+        std::shared_ptr<cellar::Camera> _camera;
         std::vector< std::shared_ptr<Circle> >  _circles;
         std::vector< std::shared_ptr<Polygon> > _polygons;
         std::vector< std::shared_ptr<TextHud> >  _texts;
@@ -87,15 +87,15 @@ class AbstractShape;
         std::map<std::string, GlFont> _fonts;
 
         bool _shadersInitialized;
-        media::GlProgram _circleShader;
-        media::GlProgram _polygonShader;
-        media::GlProgram _textHudShader;
-        media::GlProgram _imageHudShader;
+        cellar::GlProgram _circleShader;
+        cellar::GlProgram _polygonShader;
+        cellar::GlProgram _textHudShader;
+        cellar::GlProgram _imageHudShader;
 
-        media::GlVao _circleVao;
-        media::GlVao _polygonVao;
-        media::GlVao _textHudVao;
-        media::GlVao _imageHudVao;
+        cellar::GlVao _circleVao;
+        cellar::GlVao _polygonVao;
+        cellar::GlVao _textHudVao;
+        cellar::GlVao _imageHudVao;
     };
 
 

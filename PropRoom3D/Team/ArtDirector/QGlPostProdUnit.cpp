@@ -7,10 +7,10 @@
 
 #include <QFileDialog>
 
+#include <CellarWorkbench/Misc/StringUtils.h>
 #include <CellarWorkbench/Misc/Log.h>
-#include <CellarWorkbench/Misc/CellarUtils.h>
 
-#include <MediaWorkbench/GL/GlInputsOutputs.h>
+#include <CellarWorkbench/GL/GlInputsOutputs.h>
 
 
 namespace prop3
@@ -44,7 +44,7 @@ namespace prop3
 
     void QGlPostProdUnit::setup()
     {
-        media::GlInputsOutputs attribs;
+        cellar::GlInputsOutputs attribs;
         attribs.setInput(0, "position");
         attribs.setOutput(0, "FragColor");
 
@@ -436,7 +436,7 @@ namespace prop3
         }
     }
 
-    void QGlPostProdUnit::updateLowpassKernelUniform(media::GlProgram& prog, float kernel[], int size)
+    void QGlPostProdUnit::updateLowpassKernelUniform(cellar::GlProgram& prog, float kernel[], int size)
     {
         prog.pushProgram();
         prog.setInt("LowpassSize", (size / 2));

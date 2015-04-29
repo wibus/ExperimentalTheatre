@@ -7,7 +7,7 @@
 #include <QObject>
 
 #include <CellarWorkbench/DesignPattern/Singleton.h>
-#include <CellarWorkbench/DateAndTime/Timer.h>
+#include <CellarWorkbench/DateAndTime/Clock.h>
 
 #include "../ScaenaException/PlayNotFound.h"
 #include "../ScaenaException/StageNotFound.h"
@@ -71,7 +71,7 @@ namespace scaena
         std::string _chosenStageName;
         std::map< std::string, std::shared_ptr< AbstractStage > > _stages;
         typedef std::map< std::string, std::shared_ptr< AbstractStage > >::iterator StageIt;
-        cellar::Timer _totalTime;
+        cellar::Clock _totalTime;
     };
 
     SCAENA_EXPORT Application& getApplication();

@@ -2,11 +2,9 @@
 
 using namespace std;
 
-#include <CellarWorkbench/DateAndTime/CClock.h>
+#include <CellarWorkbench/Camera/Camera.h>
+#include <CellarWorkbench/DateAndTime/Clock.h>
 using namespace cellar;
-
-#include <MediaWorkbench/Camera/Camera.h>
-using namespace media;
 
 #include <PropRoom2D/PropTeam/AbstractPropTeam.h>
 #include <PropRoom3D/Team/AbstractTeam.h>
@@ -31,8 +29,8 @@ namespace scaena
         _propTeam3D(nullptr),
         _synchronousKeyboard(new SynchronousKeyboard()),
         _synchronousMouse(new SynchronousMouse()),
-        _updateClock(new CClock()),
-        _drawClock(new CClock()),
+        _updateClock(new Clock()),
+        _drawClock(new Clock()),
         _isRunning(false)
     {
     }

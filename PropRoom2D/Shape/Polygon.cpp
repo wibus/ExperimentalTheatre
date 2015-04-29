@@ -3,7 +3,9 @@
 #include <cassert>
 using namespace std;
 
-#include <CellarWorkbench/Misc/CellarUtils.h>
+#include <GLM/gtc/constants.hpp>
+
+
 using namespace cellar;
 
 #include "../Costume/PolygonCostume.h"
@@ -172,7 +174,7 @@ namespace prop2
             diagonal2 += line.begin().y * line.end().x;
         }
 
-        return absolute(diagonal1 - diagonal2) / double(2.0);
+        return glm::abs(diagonal1 - diagonal2) / double(2.0);
     }
 
     bool Polygon::isConcave() const
@@ -194,7 +196,7 @@ namespace prop2
         std::vector<glm::vec2> vertices;
         for(int i=0; i<nbSides; ++i)
         {
-            double angle = 2.0*i*cellar::PI/nbSides;
+            double angle = 2.0*i*glm::pi<double>()/nbSides;
             vertices.push_back(radius * glm::dvec2(cos(angle), sin(angle)));
         }
         return vertices;
@@ -270,7 +272,7 @@ namespace prop2
             diagonal2 += diag2;
         }
 
-        double area = absolute(diagonal1 - diagonal2) / double(2.0);
+        double area = glm::abs(diagonal1 - diagonal2) / double(2.0);
 
         return center / (double(6.0) * area);
     }

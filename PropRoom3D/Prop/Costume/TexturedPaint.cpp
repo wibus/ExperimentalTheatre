@@ -2,15 +2,16 @@
 
 #include <GLM/gtc/random.hpp>
 
-#include <MediaWorkbench/Image/Image.h>
-#include <MediaWorkbench/Image/ImageBank.h>
+#include <CellarWorkbench/Image/Image.h>
+#include <CellarWorkbench/Image/ImageBank.h>
+
 
 namespace prop3
 {
     TexturedPaint::TexturedPaint(const std::string& texName,
                                  const glm::dvec3& defaultColor) :
         FlatPaint(defaultColor),
-        _texture(media::getImageBank().getImage(texName))
+        _texture(cellar::getImageBank().getImage(texName))
     {
     }
 

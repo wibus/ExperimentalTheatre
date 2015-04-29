@@ -6,7 +6,7 @@
 #include <QWidget>
 #include <QTableWidget>
 
-#include <MediaWorkbench/GL/GlProgram.h>
+#include <CellarWorkbench/GL/GlProgram.h>
 
 #include "../../libPropRoom3D_global.h"
 
@@ -53,14 +53,14 @@ namespace prop3
         static float computeAdaptativeFactor(int factor);
         static void buildLowpassKernel(float kernel[], double variance, int size);
         static void updateLowpassKernelTable(QTableWidget* widget, float kernel[]);
-        static void updateLowpassKernelUniform(media::GlProgram& prog, float kernel[], int size);
+        static void updateLowpassKernelUniform(cellar::GlProgram& prog, float kernel[], int size);
 
 
     private:
         std::shared_ptr<Ui::QGlPostProdUnit> _ui;
         unsigned int _colorBufferTexId;
 
-        media::GlProgram _postProdProgram;
+        cellar::GlProgram _postProdProgram;
         unsigned int _fullscreenVao;
         unsigned int _fullscreenVbo;
 

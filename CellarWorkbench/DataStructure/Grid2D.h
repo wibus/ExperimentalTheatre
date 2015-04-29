@@ -3,7 +3,7 @@
 
 #include <cassert>
 
-#include "Vector.h"
+#include <GLM/glm.hpp>
 
 
 namespace cellar
@@ -78,12 +78,12 @@ public:
     /// Element access with grid initialization and bound checks
     /// \param[in] pos Row and Column of the element
     /// \return Reference to the specified element
-    T& get(const Vec2i& pos);
+    T& get(const glm::ivec2& pos);
 
     /// Element access with grid initialization and bound checks (const version)
     /// \param[in] pos Row and Column of the element
     /// \return Const reference to the specified element
-    const T& get(const Vec2i& pos) const;
+    const T& get(const glm::ivec2& pos) const;
 
     /// Modification of an element
     /// \param[in] x Column index of the element
@@ -96,7 +96,7 @@ public:
     /// \param[in] pos Row and Column of the element
     /// \param[in] value New value of the element
     /// \note Equivalent to "grid.get(pos) = value;"
-    void set(const Vec2i& pos, const T& value);
+    void set(const glm::ivec2& pos, const T& value);
 
 
 protected:
@@ -216,15 +216,15 @@ const T& Grid2D<T>::get(int x, int y) const
 }
 
 template <typename T>
-inline T& Grid2D<T>::get(const Vec2i &pos)
+inline T& Grid2D<T>::get(const glm::ivec2 &pos)
 {
-    return get(pos.x(), pos.y());
+    return get(pos.x, pos.y);
 }
 
 template <typename T>
-inline const T& Grid2D<T>::get(const Vec2i &pos) const
+inline const T& Grid2D<T>::get(const glm::ivec2 &pos) const
 {
-    return get(pos.x(), pos.y());
+    return get(pos.x, pos.y);
 }
 
 template <typename T>
@@ -234,9 +234,9 @@ inline void Grid2D<T>::set(int x, int y, const T& value)
 }
 
 template <typename T>
-inline void Grid2D<T>::set(const Vec2i &pos, const T &value)
+inline void Grid2D<T>::set(const glm::ivec2 &pos, const T &value)
 {
-    set(pos.x(), pos.y(), value);
+    set(pos.x, pos.y, value);
 }
 }
 

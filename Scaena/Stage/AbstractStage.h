@@ -6,11 +6,7 @@
 
 namespace cellar
 {
-    class AbstractClock;
-}
-
-namespace media
-{
+    class Clock;
     class Camera;
 }
 
@@ -73,7 +69,7 @@ namespace scaena
         const std::string     id()           const;
         AbstractPlay&         play()         const;
         bool                  isRunning()    const;
-        media::Camera&        camera();
+        cellar::Camera&        camera();
         prop2::AbstractPropTeam&    propTeam2D()  const;
         prop3::AbstractTeam&    propTeam3D()  const;
         const SynchronousKeyboard&  synchronousKeyboard() const;
@@ -92,13 +88,13 @@ namespace scaena
     protected:
         std::string _id;
         std::shared_ptr<AbstractPlay> _play;
-        std::shared_ptr<media::Camera> _camera;
+        std::shared_ptr<cellar::Camera> _camera;
         std::shared_ptr<prop2::AbstractPropTeam> _propTeam2D;
         std::shared_ptr<prop3::AbstractTeam> _propTeam3D;
         std::shared_ptr<SynchronousKeyboard> _synchronousKeyboard;
         std::shared_ptr<SynchronousMouse> _synchronousMouse;
-        std::shared_ptr<cellar::AbstractClock> _updateClock;
-        std::shared_ptr<cellar::AbstractClock> _drawClock;
+        std::shared_ptr<cellar::Clock> _updateClock;
+        std::shared_ptr<cellar::Clock> _drawClock;
         bool _isRunning;
     };
 
@@ -113,7 +109,7 @@ namespace scaena
     inline bool AbstractStage::isRunning() const
         {return _isRunning;}
 
-    inline media::Camera& AbstractStage::camera()
+    inline cellar::Camera& AbstractStage::camera()
         {return *_camera;}
 
     inline prop2::AbstractPropTeam& AbstractStage::propTeam2D()  const

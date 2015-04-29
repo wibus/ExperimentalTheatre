@@ -4,7 +4,7 @@
 #include <vector>
 #include <thread>
 
-#include <MediaWorkbench/GL/GlProgram.h>
+#include <CellarWorkbench/GL/GlProgram.h>
 
 #include "AbstractArtDirector.h"
 
@@ -26,7 +26,7 @@ namespace prop3
         virtual void reset();
         virtual void draw(double dt);
 
-        virtual void notify(media::CameraMsg &msg);
+        virtual void notify(cellar::CameraMsg &msg);
 
         virtual void manageProp(const std::shared_ptr<Prop>& prop);
         virtual void unmanageProp(const std::shared_ptr<Prop>& prop);

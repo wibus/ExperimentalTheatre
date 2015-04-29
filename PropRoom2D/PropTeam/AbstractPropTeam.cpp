@@ -1,6 +1,6 @@
 #include "AbstractPropTeam.h"
 
-#include <MediaWorkbench/Camera/Camera.h>
+#include <CellarWorkbench/Camera/Camera.h>
 
 #include "AbstractPropDesigner.h"
 #include "AbstractArtDirector.h"
@@ -120,12 +120,12 @@ namespace prop2
         _artDirector->resize(width, height);
     }
 
-    std::shared_ptr<media::Camera> AbstractPropTeam::camera() const
+    std::shared_ptr<cellar::Camera> AbstractPropTeam::camera() const
     {
         return _artDirector->camera();
     }
 
-    void AbstractPropTeam::setCamera(const std::shared_ptr<media::Camera>& camera)
+    void AbstractPropTeam::setCamera(const std::shared_ptr<cellar::Camera>& camera)
     {
         _artDirector->setCamera(camera);
     }

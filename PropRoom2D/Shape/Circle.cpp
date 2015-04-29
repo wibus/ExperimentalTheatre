@@ -2,7 +2,7 @@
 
 #include <GLM/gtc/matrix_transform.hpp>
 
-#include <CellarWorkbench/Misc/CellarUtils.h>
+
 using namespace cellar;
 
 #include "../Costume/CircleCostume.h"
@@ -75,7 +75,7 @@ namespace prop2
 
     double Circle::computeArea() const
     {
-        return PI * _radius * _radius;
+        return glm::pi<double>() * _radius * _radius;
     }
 
     void Circle::updateTransformMatrix()

@@ -3,7 +3,6 @@
 #include <cassert>
 
 #include <algorithm>
-using namespace std;
 
 #include <GLM/gtc/matrix_transform.hpp>
 
@@ -11,14 +10,11 @@ using namespace std;
 
 #include <QFile>
 
+#include <CellarWorkbench/Camera/Camera.h>
+#include <CellarWorkbench/GL/GlToolkit.h>
+#include <CellarWorkbench/Image/Image.h>
+#include <CellarWorkbench/Image/ImageBank.h>
 #include <CellarWorkbench/Misc/Log.h>
-using namespace cellar;
-
-#include <MediaWorkbench/Camera/Camera.h>
-#include <MediaWorkbench/Image/Image.h>
-#include <MediaWorkbench/Image/ImageBank.h>
-#include <MediaWorkbench/GL/GlToolkit.h>
-using namespace media;
 
 #include "../Shape/Circle.h"
 #include "../Shape/Polygon.h"
@@ -26,6 +22,9 @@ using namespace media;
 #include "../Costume/PolygonCostume.h"
 #include "../Hud/TextHud.h"
 #include "../Hud/ImageHud.h"
+
+using namespace std;
+using namespace cellar;
 
 
 namespace prop2
@@ -67,7 +66,7 @@ namespace prop2
         _camera->updateViewport(width, height);
     }
 
-    void GlArtDirector::notify(media::CameraMsg &msg)
+    void GlArtDirector::notify(cellar::CameraMsg &msg)
     {
         const Camera& camera = msg.camera;
 
@@ -118,12 +117,12 @@ namespace prop2
         }
     }
 
-    std::shared_ptr<media::Camera> GlArtDirector::camera() const
+    std::shared_ptr<cellar::Camera> GlArtDirector::camera() const
     {
         return _camera;
     }
 
-    void GlArtDirector::setCamera(const std::shared_ptr<media::Camera>& camera)
+    void GlArtDirector::setCamera(const std::shared_ptr<cellar::Camera>& camera)
     {
         _camera = camera;
         _isOwnerOfCamera = false;

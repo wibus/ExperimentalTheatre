@@ -9,15 +9,15 @@
 
 #include <CellarWorkbench/DesignPattern/SpecificObserver.h>
 
-#include "Volume/Volume.h"
+#include "PropRoom3D/libPropRoom3D_global.h"
 
 
 namespace prop3
 {
-class AbstractTeam;
 class Costume;
 class HardwareUpdate;
 class Hardware;
+class Volume;
 
     class PROP3D_EXPORT Prop :
             public cellar::SpecificObserver<HardwareUpdate>

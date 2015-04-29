@@ -8,7 +8,7 @@
 #include "../libPropRoom3D_global.h"
 
 
-namespace media
+namespace cellar
 {
     class Camera;
 }
@@ -40,7 +40,7 @@ class Prop;
         virtual std::shared_ptr<Prop>   createProp();
         virtual void deleteProp(std::shared_ptr<Prop>& prop);
 
-        virtual void setCamera(media::Camera& camera);
+        virtual void setCamera(cellar::Camera& camera);
         virtual void setGravity(const glm::dvec3& unitsPerSecondSquared);
 
     protected:

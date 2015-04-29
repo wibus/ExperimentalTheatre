@@ -2,8 +2,7 @@
 
 #include <cassert>
 
-#include <CellarWorkbench/Geometry/Segment2D.h>
-
+#include "Segment2D.h"
 #include "../Hardware/Hardware.h"
 
 
@@ -265,7 +264,7 @@ namespace prop2
     void AbstractShape::addForceAt(const glm::dvec2& force, const glm::dvec2& at)
     {
         glm::dvec2 radius = at - _centroid;
-        addAngularForce(cellar::Segment2D::cross(radius, force));
+        addAngularForce(Segment2D::cross(radius, force));
         addLinearForce(force);
     }
 
@@ -284,7 +283,7 @@ namespace prop2
     void AbstractShape::applyImpulseAt(const glm::dvec2& impulse, const glm::dvec2& at)
     {
         glm::dvec2 radius = at - _centroid;
-        applyAngularImpulse(cellar::Segment2D::cross(radius, impulse));
+        applyAngularImpulse(Segment2D::cross(radius, impulse));
         applyLinearImpulse(impulse);
     }
 }

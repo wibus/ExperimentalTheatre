@@ -3,9 +3,8 @@
 
 #include <vector>
 
-#include <CellarWorkbench/Geometry/Segment2D.h>
-
 #include "AbstractShape.h"
+#include "Segment2D.h"
 
 
 namespace prop2
@@ -28,7 +27,7 @@ namespace prop2
         // Vertices
         int nbVertices() const;
         virtual const std::vector<glm::dvec2>& relVertices() const;
-        virtual const std::vector<cellar::Segment2D>& outline() const;
+        virtual const std::vector<Segment2D>& outline() const;
         virtual void setVertices(const std::vector<glm::dvec2>& absolutePositions);
         virtual void moveVertexAt(int cIdx, const glm::dvec2& position);
 
@@ -58,7 +57,7 @@ namespace prop2
         // Attributes
         std::shared_ptr<PolygonCostume> _costume;
         std::vector<glm::dvec2> _relVertices;
-        std::vector<cellar::Segment2D> _outline;
+        std::vector<Segment2D> _outline;
         bool _isConcave;
     };
 }

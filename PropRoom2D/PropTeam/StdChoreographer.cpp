@@ -3,11 +3,12 @@
 #include <cassert>
 using namespace std;
 
+
 #include "../Shape/Circle.h"
 #include "../Shape/Polygon.h"
+#include "../Shape/Segment2D.h"
 #include "../Hardware/Hardware.h"
 
-using namespace cellar;
 
 namespace prop2
 {
@@ -205,8 +206,8 @@ namespace prop2
             if(angularVelocity)
             {
                 double angularVelocity2 = angularVelocity * angularVelocity;
-                double angularVelocityDir = sign(angularVelocity);
-                angularVelocity = absolute(angularVelocity);
+                double angularVelocityDir = glm::sign(angularVelocity);
+                angularVelocity = glm::abs(angularVelocity);
 
                 double angularDecelerationMagnitude =
                         angularFriction[0] +
@@ -244,7 +245,7 @@ namespace prop2
         double iM2 = shape2->inverseMass();
 
         double correction = _correctionPercentage *
-                          maxVal(pen - _correctionSlop, 0.0) /
+                          glm::max(pen - _correctionSlop, 0.0) /
                           (iM1 + iM2);
         shape1->moveBy( n * (iM1 * correction));
         shape2->moveBy(-n * (iM2 * correction));
@@ -278,7 +279,7 @@ namespace prop2
         double w2 = shape2->angularVelocity();
 
         // Get bounce coefficient
-        double e = minVal(shape1->hardware()->bounciness(),
+        double e = glm::min(shape1->hardware()->bounciness(),
                         shape2->hardware()->bounciness());
 
 
@@ -313,7 +314,7 @@ namespace prop2
         // limited by the shapes' static coefficients of friction and normal force
         double us = shape1->hardware()->staticFrictionCoefficient() *
                   shape2->hardware()->staticFrictionCoefficient();
-        double absoluteJt = absolute(jt);
+        double absoluteJt = glm::abs(jt);
         if(jn*us < absoluteJt)
         {
             double ud = shape1->hardware()->dynamicFrictionCoefficient() *

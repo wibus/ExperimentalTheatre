@@ -8,7 +8,7 @@
 #include "../libPropRoom2D_global.h"
 
 
-namespace media
+namespace cellar
 {
     class Camera;
 }
@@ -55,8 +55,8 @@ namespace prop2
         virtual void deleteImageHud(std::shared_ptr<ImageHud>& imageHud);
 
         virtual void resize(int width, int height);
-        virtual std::shared_ptr<media::Camera> camera() const;
-        virtual void setCamera(const std::shared_ptr<media::Camera>& camera);
+        virtual std::shared_ptr<cellar::Camera> camera() const;
+        virtual void setCamera(const std::shared_ptr<cellar::Camera>& camera);
 
         virtual void setGravity(const glm::dvec2& unitsPerSecondSquared);
 

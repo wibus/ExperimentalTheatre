@@ -7,13 +7,11 @@ using namespace std;
 #include <QApplication>
 #include <QDesktopWidget>
 
-#include <CellarWorkbench/DateAndTime/QtClock.h>
+#include <CellarWorkbench/Camera/Camera.h>
+#include <CellarWorkbench/DateAndTime/Clock.h>
+#include <CellarWorkbench/GL/GlToolkit.h>
 #include <CellarWorkbench/Misc/Log.h>
 using namespace cellar;
-
-#include <MediaWorkbench/Camera/Camera.h>
-#include <MediaWorkbench/GL/GlToolkit.h>
-using namespace media;
 
 #include <PropRoom2D/PropTeam/StdGlPropTeam.h>
 #include <PropRoom3D/Team/StdGlTeam.h>
@@ -57,9 +55,6 @@ namespace scaena
 
         setPropTeam2D(new prop2::StdGlPropTeam());
         setPropTeam3D(new prop3::StdGlTeam());
-
-        _updateClock.reset( new QtClock() );
-        _drawClock.reset( new QtClock() );
 
         connect(&_updateTimer, SIGNAL(timeout()), this, SLOT(update()));
         connect(&_drawTimer,   SIGNAL(timeout()), this, SLOT(updateGL()));

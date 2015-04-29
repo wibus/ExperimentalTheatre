@@ -8,7 +8,7 @@
 #include "AbstractTeamMember.h"
 
 
-namespace media
+namespace cellar
 {
     class Camera;
     class CameraMsg;
@@ -22,7 +22,7 @@ namespace prop2
     class ImageHud;
 
     class PROP2D_EXPORT AbstractArtDirector :
-            public cellar::SpecificObserver<media::CameraMsg>,
+            public cellar::SpecificObserver<cellar::CameraMsg>,
             public AbstractTeamMember
     {
     protected:
@@ -32,9 +32,9 @@ namespace prop2
         virtual ~AbstractArtDirector() {}
 
         virtual void resize(int width, int height) = 0;
-        virtual void notify(media::CameraMsg &msg) = 0;
-        virtual std::shared_ptr<media::Camera> camera() const = 0;
-        virtual void setCamera(const std::shared_ptr<media::Camera>& camera) = 0;
+        virtual void notify(cellar::CameraMsg &msg) = 0;
+        virtual std::shared_ptr<cellar::Camera> camera() const = 0;
+        virtual void setCamera(const std::shared_ptr<cellar::Camera>& camera) = 0;
 
         virtual void draw(double dt) =0;
 

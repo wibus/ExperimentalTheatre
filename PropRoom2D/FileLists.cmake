@@ -31,7 +31,8 @@ SET(PROP2_PROP_TEAM_HEADERS
 SET(PROP2_SHAPE_HEADERS
     ${PROP2_SRC_DIR}/Shape/AbstractShape.h
     ${PROP2_SRC_DIR}/Shape/Circle.h
-    ${PROP2_SRC_DIR}/Shape/Polygon.h)
+    ${PROP2_SRC_DIR}/Shape/Polygon.h
+    ${PROP2_SRC_DIR}/Shape/Segment2D.h)
 
 # All the header files #
 SET(PROP2_HEADERS
@@ -73,7 +74,8 @@ SET(PROP2_PROP_TEAM_SOURCES
 SET(PROP2_SHAPE_SOURCES
     ${PROP2_SRC_DIR}/Shape/AbstractShape.cpp
     ${PROP2_SRC_DIR}/Shape/Circle.cpp
-    ${PROP2_SRC_DIR}/Shape/Polygon.cpp)
+    ${PROP2_SRC_DIR}/Shape/Polygon.cpp
+    ${PROP2_SRC_DIR}/Shape/Segment2D.cpp)
 
 # All the source files #
 SET(PROP2_SOURCES

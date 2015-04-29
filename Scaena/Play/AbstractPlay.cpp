@@ -1,14 +1,13 @@
 #include "AbstractPlay.h"
 
-using namespace std;
-
+#include <CellarWorkbench/Misc/StringUtils.h>
 #include <CellarWorkbench/Misc/Log.h>
-#include <CellarWorkbench/Misc/CellarUtils.h>
-using namespace cellar;
 
 #include "../Character/AbstractCharacter.h"
 #include "../Act/AbstractAct.h"
 
+using namespace std;
+using namespace cellar;
 
 namespace scaena
 {

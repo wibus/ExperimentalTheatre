@@ -1,6 +1,6 @@
 #include "AbstractTeam.h"
 
-#include <MediaWorkbench/Camera/Camera.h>
+#include <CellarWorkbench/Camera/Camera.h>
 
 #include "ArtDirector/AbstractArtDirector.h"
 #include "Choreographer/AbstractChoreographer.h"
@@ -63,7 +63,7 @@ namespace prop3
         prop.reset();
     }
 
-    void AbstractTeam::setCamera(media::Camera& camera)
+    void AbstractTeam::setCamera(cellar::Camera& camera)
     {
         camera.registerObserver(*_artDirector);
     }

@@ -245,7 +245,7 @@ inline T& Grid3D<T>::get(const Vec3i& pos)
 template<typename T>
 inline const T& Grid3D<T>::get(const Vec3i& pos) const
 {
-    return get(pos.x(), pos.y(), pos.z());
+    return get(pos.x, pos.y, pos.z());
 }
 
 template<typename T>
@@ -257,7 +257,7 @@ inline void Grid3D<T>::set(int x, int y, int z, const T& value)
 template<typename T>
 inline void Grid3D<T>::set(const Vec3i& pos, const T& value)
 {
-    set(pos.x(), pos.y(), pos.z(), value);
+    set(pos.x, pos.y, pos.z(), value);
 }
 
 }

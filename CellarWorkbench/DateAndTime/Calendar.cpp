@@ -1,13 +1,27 @@
 #include "Calendar.h"
 
 #include <sstream>
-using namespace std;
 
-#include "../Misc/CellarUtils.h"
+using namespace std;
 
 
 namespace cellar
 {
+    template <typename T>
+    inline bool inRange(T val, T min, T max)
+    {
+        return val < min ? false : (val > max ? false : true);
+    }
+
+    int modulateInt(int& value, int minVal, int maxVal)
+    {
+        int amplitude = maxVal - minVal;
+        int offset = value - minVal;
+        int rounds = 0 <= offset ? offset/amplitude : (offset+1)/amplitude - 1;
+
+        value -= rounds * amplitude;
+        return rounds;
+    }
 
     const string  Date::MONTH_NAMES[Date::NB_MONTHS_IN_YEAR] = {
         "January",  "February", "March",    "April",

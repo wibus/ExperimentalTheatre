@@ -4,7 +4,7 @@
 #include "FlatPaint.h"
 
 
-namespace media
+namespace cellar
 {
     class Image;
 }
@@ -28,7 +28,7 @@ namespace prop3
                 const glm::dvec3& texCoord = glm::dvec3(0)) const;
 
     private:
-        media::Image& _texture;
+        cellar::Image& _texture;
     };
 }
 

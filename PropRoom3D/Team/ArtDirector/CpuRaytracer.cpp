@@ -3,10 +3,9 @@
 #include <iostream>
 #include <algorithm>
 
-#include <CellarWorkbench/Misc/CellarUtils.h>
-#include <CellarWorkbench/Misc/Log.h>
+#include <CellarWorkbench/Camera/Camera.h>
 
-#include <MediaWorkbench/Camera/Camera.h>
+#include <CellarWorkbench/Misc/Log.h>
 
 #include "../../Prop/Prop.h"
 #include "../../Prop/Costume/Costume.h"
@@ -144,9 +143,9 @@ namespace prop3
         _postProdUnit->execute();
     }
 
-    void CpuRaytracer::notify(media::CameraMsg &msg)
+    void CpuRaytracer::notify(cellar::CameraMsg &msg)
     {
-        if(msg.change == media::CameraMsg::EChange::VIEWPORT)
+        if(msg.change == cellar::CameraMsg::EChange::VIEWPORT)
         {
             int width = msg.camera.viewport().x;
             int height = msg.camera.viewport().y;
@@ -158,14 +157,14 @@ namespace prop3
                 w->resize(width, height);
             }
         }
-        else if(msg.change == media::CameraMsg::EChange::PROJECTION)
+        else if(msg.change == cellar::CameraMsg::EChange::PROJECTION)
         {
             for(auto& w : _workerObjects)
             {
                 w->updateProjection(msg.camera.projectionMatrix());
             }
         }
-        else if(msg.change == media::CameraMsg::EChange::VIEW)
+        else if(msg.change == cellar::CameraMsg::EChange::VIEW)
         {
             for(auto& w : _workerObjects)
             {

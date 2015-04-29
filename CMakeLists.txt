@@ -37,7 +37,6 @@ ADD_SUBDIRECTORY(${EXTH_OTS_DIR}/GLM)
 
 # Experimental Theatre's libraries
 ADD_SUBDIRECTORY(CellarWorkbench)
-ADD_SUBDIRECTORY(MediaWorkbench)
 ADD_SUBDIRECTORY(PropRoom2D)
 ADD_SUBDIRECTORY(PropRoom3D)
 ADD_SUBDIRECTORY(Scaena)
