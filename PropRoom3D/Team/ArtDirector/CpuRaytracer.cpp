@@ -113,25 +113,30 @@ namespace prop3
 
         for(std::shared_ptr<CpuRaytracerWorker>& w : _workerObjects)
         {
-            if(w->tryLockPixels())
+            while(w->completedFrameCount() != 0)
             {
-                if(w->frameIsComplete())
+                const float* pixels = w->readNextFrame();
+
+                ++_sampleCount;
+                _convergenceValue = 0.0;
+                float alpha = 1.0f / _sampleCount;
+                int cc = (int) _colorBuffer.size();
+                for(int i=0; i < cc; ++i)
                 {
-                    const std::vector<float> pixels = w->pixels();
+                    float lastValue = _colorBuffer[i];
 
-                    ++_sampleCount;
-                    float alpha = 1.0f / _sampleCount;
-                    int cc = (int) _colorBuffer.size();
-                    for(int i=0; i < cc; ++i)
-                    {
-                        _colorBuffer[i] = glm::mix(_colorBuffer[i], pixels[i], alpha);
-                    }
+                    _colorBuffer[i] = glm::mix(
+                        lastValue,
+                        pixels[i],
+                        alpha);
 
-                    updated = true;
+                    float currentValue = _colorBuffer[i];
+                    float meanShift = glm::abs(currentValue - lastValue);
+                    _convergenceValue += meanShift * meanShift;
                 }
 
-                w->unlockPixels();
-                w->nextFrame();
+                w->popReadFrame();
+                updated = true;
             }
         }
 
@@ -221,6 +226,6 @@ namespace prop3
         for(float c : _colorBuffer)
             sum += c;
         std::cout << "Sample count = " << _sampleCount <<
-                     " (sum = " << sum << ")" << std::endl;
+                     " (convergence = " << _convergenceValue << ")" << std::endl;
     }
 }

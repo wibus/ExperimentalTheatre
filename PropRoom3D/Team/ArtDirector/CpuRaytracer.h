@@ -40,6 +40,7 @@ namespace prop3
         static const unsigned int DEFAULT_WORKER_COUNT;
 
         int _workerCount;
+        double _convergenceValue;
         unsigned int _sampleCount;
         unsigned int _colorBufferTexId;
 

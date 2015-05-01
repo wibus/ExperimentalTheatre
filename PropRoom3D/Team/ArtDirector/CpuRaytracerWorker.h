@@ -3,8 +3,13 @@
 
 #include <memory>
 #include <vector>
+#include <queue>
+
+#include <atomic>
 #include <mutex>
 #include <condition_variable>
+
+#include <functional>
 
 #include <GLM/glm.hpp>
 
@@ -23,8 +28,10 @@ namespace prop3
             const std::shared_ptr<CpuRaytracerWorker>& worker);
 
         CpuRaytracerWorker();
+        virtual ~CpuRaytracerWorker();
 
-        virtual void nextFrame();
+        virtual void start();
+        virtual void stop();
         virtual void terminate();
 
         virtual void resize(int width, int height);
@@ -32,13 +39,13 @@ namespace prop3
         virtual void updateProjection(const glm::dmat4& proj);
         virtual void setProps(const std::vector<std::shared_ptr<Prop>>& props);
 
-        virtual bool tryLockPixels();
-        virtual bool frameIsComplete();
-        virtual const std::vector<float>& pixels() const;
-        virtual void unlockPixels();
+        virtual unsigned int completedFrameCount();
+        virtual const float* readNextFrame();
+        virtual void popReadFrame();
 
     protected:
-        virtual void skip();
+        virtual void skipAndExecute(const std::function<void()>& func);
+
         virtual void execute();
         virtual void resizeBuffers();
         virtual void shootFromLights();
@@ -48,14 +55,15 @@ namespace prop3
                 int depth);
 
     private:
-        std::mutex _skipMutex;
-        bool _skipPredicate;
-        std::mutex _flowMutex;
-        bool _readyPredicate;
-        std::mutex _terminateMutex;
-        bool _terminatePredicate;
-        std::condition_variable _cv;
+        void destroyBuffers();
+        void generateWorkingBuffer();
 
+
+    private:
+        std::atomic<bool> _runningPredicate;
+        std::atomic<bool> _terminatePredicate;
+        std::condition_variable _cv;
+        std::mutex _flowMutex;
 
         int _lightRaysBounceCount;
         int _screenRaysBounceCount;
@@ -66,8 +74,10 @@ namespace prop3
         glm::dmat4 _viewProjInverse;
         glm::dvec3 _camPos;
 
-        bool _frameIsComplete;
-        std::vector<float> _colorBuffer;
+        std::atomic<unsigned int> _completedFrameCount;
+        std::queue<float*> _completedColorBuffers;
+        float* _workingColorBuffer;
+        std::mutex _framesMutex;
 
         std::vector<std::shared_ptr<Prop>> _props;
     };

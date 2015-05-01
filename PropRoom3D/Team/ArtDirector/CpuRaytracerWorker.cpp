@@ -17,93 +17,119 @@ namespace prop3
     }
 
     CpuRaytracerWorker::CpuRaytracerWorker() :
-        _skipPredicate(false),
-        _readyPredicate(false),
+        _runningPredicate(false),
         _terminatePredicate(false),
-        _frameIsComplete(false),
         _lightRaysBounceCount(0),
         _screenRaysBounceCount(5),
         _viewportSize(1, 1),
-        _colorBuffer(3)
+        _completedFrameCount(0),
+        _workingColorBuffer(nullptr)
     {
+        int bufferSize = _viewportSize.x * _viewportSize.y * 3;
+        _workingColorBuffer = new float[bufferSize];
     }
 
-    void CpuRaytracerWorker::nextFrame()
+    CpuRaytracerWorker::~CpuRaytracerWorker()
     {
-        std::lock_guard<std::mutex> lk(_flowMutex);
-        _readyPredicate = true;
-        _cv.notify_one();
+        destroyBuffers();
     }
 
-    void CpuRaytracerWorker::skip()
+    void CpuRaytracerWorker::start()
     {
-        std::lock_guard<std::mutex> lk(_skipMutex);
-        _frameIsComplete = false;
-        _skipPredicate = true;
+        if(!_runningPredicate)
+        {
+            _runningPredicate = true;
+            _cv.notify_one();
+        }
+    }
+
+    void CpuRaytracerWorker::stop()
+    {
+        if(_runningPredicate)
+        {
+            _runningPredicate = false;
+        }
     }
 
     void CpuRaytracerWorker::terminate()
     {
-        skip();
-
-        std::lock_guard<std::mutex> lk(_terminateMutex);
         _terminatePredicate = true;
+
+        if(_runningPredicate)
+        {
+            // Skip current frame
+            _runningPredicate = false;
+            std::lock_guard<std::mutex> lk(_flowMutex);
+        }
+
         _cv.notify_one();
     }
 
     void CpuRaytracerWorker::resize(int width, int height)
     {
-        skip();
-
-        std::lock_guard<std::mutex> lk(_flowMutex);
-        _viewportSize.x = width;
-        _viewportSize.y = height;
-        resizeBuffers();
+        skipAndExecute([this, &width, &height](){
+            _viewportSize.x = width;
+            _viewportSize.y = height;
+            resizeBuffers();
+        });
     }
 
     void CpuRaytracerWorker::updateView(const glm::dmat4& view)
     {
-        skip();
-
-        _viewInvMatrix = glm::inverse(view);
-        _viewProjInverse = _viewInvMatrix * _projInvMatrix;
-        _camPos = glm::dvec3(_viewInvMatrix * glm::dvec4(0, 0, 0, 1));
+        skipAndExecute([this, &view](){
+            _viewInvMatrix = glm::inverse(view);
+            _viewProjInverse = _viewInvMatrix * _projInvMatrix;
+            _camPos = glm::dvec3(_viewInvMatrix * glm::dvec4(0, 0, 0, 1));
+        });
     }
 
     void CpuRaytracerWorker::updateProjection(const glm::dmat4& proj)
     {
-        skip();
-
-        _projInvMatrix = glm::inverse(proj);
-        _viewProjInverse = _viewInvMatrix * _projInvMatrix;
+        skipAndExecute([this, &proj](){
+            _projInvMatrix = glm::inverse(proj);
+            _viewProjInverse = _viewInvMatrix * _projInvMatrix;
+        });
     }
 
     void CpuRaytracerWorker::setProps(const std::vector<std::shared_ptr<Prop>>& props)
     {
-        skip();
+        skipAndExecute([this, &props](){
+            _props = props;
+        });
+    }
 
+    unsigned int CpuRaytracerWorker::completedFrameCount()
+    {
+        return _completedFrameCount;
+    }
+
+    const float* CpuRaytracerWorker::readNextFrame()
+    {
+        _framesMutex.lock();
+        return _completedColorBuffers.front();
+    }
+
+    void CpuRaytracerWorker::popReadFrame()
+    {
+        delete[] _completedColorBuffers.front();
+        _completedColorBuffers.pop();
+        _framesMutex.unlock();
+
+        --_completedFrameCount;
+    }
+
+    void CpuRaytracerWorker::skipAndExecute(const std::function<void()>& func)
+    {
+        // Skip current frame
+        _runningPredicate = false;
+
+        // Lock and execute
         std::lock_guard<std::mutex> lk(_flowMutex);
-        _props = props;
-    }
+        func();
 
-    bool CpuRaytracerWorker::tryLockPixels()
-    {
-        return _flowMutex.try_lock();
-    }
-
-    bool CpuRaytracerWorker::frameIsComplete()
-    {
-        return _frameIsComplete;
-    }
-
-    const std::vector<float>& CpuRaytracerWorker::pixels() const
-    {
-        return _colorBuffer;
-    }
-
-    void CpuRaytracerWorker::unlockPixels()
-    {
-        _flowMutex.unlock();
+        // Begin next frame
+        _runningPredicate = true;
+        _cv.notify_one();
     }
 
     void CpuRaytracerWorker::execute()
@@ -111,38 +137,40 @@ namespace prop3
         while(true)
         {
             std::unique_lock<std::mutex> lk(_flowMutex);
-            _cv.wait(lk, [this]{return _readyPredicate || _terminatePredicate;});
-            _frameIsComplete = false;
-            _readyPredicate = false;
+            _cv.wait(lk, [this]{
+                return (_runningPredicate && !_props.empty()) ||
+                        _terminatePredicate;
+            });
 
             // Verify if we are supposed to terminate
+            if(_terminatePredicate)
+                return;
+
+            // Shoot rays
+            if(_lightRaysBounceCount != 0)
+                shootFromLights();
+
+            if(_screenRaysBounceCount != 0)
+                shootFromScreen();
+
+            // Verify that stop or skip was not called
+            if(_runningPredicate)
             {
-                std::lock_guard<std::mutex> lk(_terminateMutex);
-                if(_terminatePredicate) return;
-            }
+                _framesMutex.lock();
+                _completedColorBuffers.push(_workingColorBuffer);
+                generateWorkingBuffer();
+                _framesMutex.unlock();
 
-            if(!_props.empty())
-            {
-                if(_lightRaysBounceCount != 0)
-                    shootFromLights();
-
-                if(_screenRaysBounceCount != 0)
-                    shootFromScreen();
-
-                {
-                    std::lock_guard<std::mutex> lk(_skipMutex);
-                    if(_skipPredicate)
-                        _skipPredicate = false;
-                    else
-                        _frameIsComplete = true;
-                }
+                ++_completedFrameCount;
             }
         }
     }
 
     void CpuRaytracerWorker::resizeBuffers()
     {
-        _colorBuffer.resize(_viewportSize.x * _viewportSize.y * 3);
+        std::lock_guard<std::mutex> lk(_framesMutex);
+        destroyBuffers();
+        generateWorkingBuffer();
     }
 
     void CpuRaytracerWorker::shootFromLights()
@@ -172,16 +200,15 @@ namespace prop3
 
                 glm::dvec3 color = fireScreenRay(ray, _screenRaysBounceCount);
 
-                _colorBuffer[++idx] = color.r;
-                _colorBuffer[++idx] = color.g;
-                _colorBuffer[++idx] = color.b;
+                _workingColorBuffer[++idx] = color.r;
+                _workingColorBuffer[++idx] = color.g;
+                _workingColorBuffer[++idx] = color.b;
             }
 
             // Verify if this frame must be skipped
-            {
-                std::lock_guard<std::mutex> lk(_skipMutex);
-                if(_skipPredicate) return;
-            }
+            // This verification is only done by line
+            if(!_runningPredicate)
+                return;
         }
     }
 
@@ -200,6 +227,10 @@ namespace prop3
         for(const auto& prop : _props)
         {
             const std::shared_ptr<Volume>& volume = prop->volume();
+
+            if(volume.get() == nullptr)
+                continue;
+
             std::vector<RaycastReport> reports;
             volume->raycast(ray, reports);
 
@@ -255,7 +286,7 @@ namespace prop3
                         -reflectedRay.direction,
                         reportMin.normal,
                         -ray.direction,
-                         reportMin.texCoord);
+                        reportMin.texCoord);
         }
         else if(depth != _screenRaysBounceCount)
         {
@@ -282,5 +313,28 @@ namespace prop3
         }
 
         return color;
+    }
+
+    void CpuRaytracerWorker::destroyBuffers()
+    {
+        if(_workingColorBuffer != nullptr)
+        {
+            delete[] _workingColorBuffer;
+            _workingColorBuffer = nullptr;
+        }
+
+        while(!_completedColorBuffers.empty())
+        {
+            delete[] _completedColorBuffers.front();
+            _completedColorBuffers.pop();
+        }
+
+        _completedFrameCount = 0;
+    }
+
+    void CpuRaytracerWorker::generateWorkingBuffer()
+    {
+        int bufferSize = _viewportSize.x * _viewportSize.y * 3;
+        _workingColorBuffer = new float[bufferSize];
     }
 }
