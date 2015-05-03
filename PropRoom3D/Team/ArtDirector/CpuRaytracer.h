@@ -4,46 +4,80 @@
 #include <vector>
 #include <thread>
 
-#include <CellarWorkbench/GL/GlProgram.h>
+#include <GLM/glm.hpp>
 
-#include "AbstractArtDirector.h"
+#include "../../libPropRoom3D_global.h"
 
 
 namespace prop3
 {
-    class Ray;
-    class QGlPostProdUnit;
+    class Prop;
     class CpuRaytracerWorker;
 
-    class PROP3D_EXPORT CpuRaytracer : public AbstractArtDirector
+    class PROP3D_EXPORT CpuRaytracer
     {
     public:
         CpuRaytracer();
         CpuRaytracer(unsigned int workerCount);
         virtual ~CpuRaytracer();
 
-        virtual void setup();
         virtual void reset();
-        virtual void draw(double dt);
 
-        virtual void notify(cellar::CameraMsg &msg);
+        virtual bool isDrafter() const;
+        virtual bool isDrafting() const;
+        virtual void setDraftParams(
+                int levelCount,
+                int levelSizeRatio,
+                int threadBatchPerLevel);
 
+        virtual bool isUpdated();
+        virtual bool onUpdateConsumed();
+        virtual float convergenceValue() const;
+        virtual unsigned int sampleCount() const;
+        virtual const glm::ivec2& viewportSize() const;
+        virtual const std::vector<float>& colorBuffer() const;
+
+        virtual void gatherWorkerFrames();
+        virtual void pourFramesIn(
+            const std::vector<float>& colorBuffer,
+            unsigned int sampleCount);
+        virtual void pourFramesOut(
+            std::vector<float>& colorBuffer,
+            unsigned int& sampleCount);
+
+        virtual void resize(int width, int height);
+        virtual void updateView(const glm::dmat4& view);
+        virtual void updateProjection(const glm::dmat4& proj);
+
+        virtual unsigned int propCount() const;
         virtual void manageProp(const std::shared_ptr<Prop>& prop);
         virtual void unmanageProp(const std::shared_ptr<Prop>& prop);
 
     protected:
-        virtual void sendBuffersToGpu();
+        virtual void nextDraftSize();
+        virtual void abortDrafting();
+        virtual void restartDrafting();
+        virtual void bufferSoftReset();
+        virtual void bufferHardReset();
+        virtual void incorporateFrames(
+            const float* colorBuffer,
+            unsigned int sampleCount);
 
     private:
         void init();
 
         static const unsigned int DEFAULT_WORKER_COUNT;
 
-        int _workerCount;
-        double _convergenceValue;
+        float _convergenceValue;
         unsigned int _sampleCount;
-        unsigned int _colorBufferTexId;
 
+        int _draftLevel;
+        int _draftLevelCount;
+        int _draftLevelSizeRatio;
+        int _draftThreadBatchPerLevel;
+        glm::ivec2 _draftViewport;
+
+        bool _isUpdated;
         glm::ivec2 _viewportSize;
         std::vector<float> _colorBuffer;
         std::vector<std::shared_ptr<Prop>> _props;
@@ -51,8 +85,6 @@ namespace prop3
         friend class CpuRaytracerWorker;
         std::vector<std::thread> _workerThreads;
         std::vector<std::shared_ptr<CpuRaytracerWorker>> _workerObjects;
-
-        std::shared_ptr<QGlPostProdUnit> _postProdUnit;
     };
 }
 

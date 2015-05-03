@@ -3,15 +3,10 @@
 #include <iostream>
 #include <algorithm>
 
-#include <CellarWorkbench/Camera/Camera.h>
-
-#include <CellarWorkbench/Misc/Log.h>
-
 #include "../../Prop/Prop.h"
 #include "../../Prop/Costume/Costume.h"
 #include "../../Prop/Volume/Raycast.h"
 #include "CpuRaytracerWorker.h"
-#include "QGlPostProdUnit.h"
 
 
 namespace prop3
@@ -20,22 +15,28 @@ namespace prop3
 
     CpuRaytracer::CpuRaytracer() :
         _sampleCount(0),
-        _colorBufferTexId(0),
-        _workerObjects(DEFAULT_WORKER_COUNT),
-        _workerThreads(),
+        _draftLevel(0),
+        _draftLevelCount(0),
+        _draftThreadBatchPerLevel(0),
+        _draftViewport(1, 1),
+        _isUpdated(false),
         _viewportSize(1, 1),
-        _colorBuffer(3)
+        _workerThreads(),
+        _workerObjects(DEFAULT_WORKER_COUNT)
     {
         init();
     }
 
     CpuRaytracer::CpuRaytracer(unsigned int  workerCount) :
         _sampleCount(0),
-        _colorBufferTexId(0),
-        _workerObjects(workerCount),
-        _workerThreads(),
+        _draftLevel(0),
+        _draftLevelCount(0),
+        _draftThreadBatchPerLevel(0),
+        _draftViewport(1, 1),
+        _isUpdated(false),
         _viewportSize(1, 1),
-        _colorBuffer(3)
+        _workerThreads(),
+        _workerObjects(workerCount)
     {
         init();
     }
@@ -52,7 +53,7 @@ namespace prop3
                 _workerObjects[i]));
         }
 
-        _postProdUnit.reset(new QGlPostProdUnit());
+        bufferHardReset();
     }
 
     CpuRaytracer::~CpuRaytracer()
@@ -65,25 +66,6 @@ namespace prop3
         {
             t.join();
         }
-
-        glDeleteTextures(1, &_colorBufferTexId);
-        _colorBufferTexId = 0;
-    }
-
-    void CpuRaytracer::setup()
-    {
-        const float black[] = {0, 0, 0};
-
-        // Color texture
-        glGenTextures(1, &_colorBufferTexId);
-        glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_FLOAT, black);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        _postProdUnit->setColorBufferTexId(_colorBufferTexId);
-        _postProdUnit->setup();
     }
 
     void CpuRaytracer::reset()
@@ -94,106 +76,162 @@ namespace prop3
         {
             w->setProps(_props);
         }
+
+        bufferSoftReset();
     }
 
-    void CpuRaytracer::draw(double dt)
+    bool CpuRaytracer::isDrafter() const
     {
-        bool updated = false;
+        return _draftLevelCount != 0 && _draftThreadBatchPerLevel != 0;
+    }
 
+    bool CpuRaytracer::isDrafting() const
+    {
+        return isDrafter() && _draftLevel < _draftLevelCount;
+    }
 
-        // If there's no props, just clear OpenGL buffers
-        // We are assuming that this is the first ArtDirector of the chain
+    void CpuRaytracer::setDraftParams(
+            int levelCount,
+            int levelSizeRatio,
+            int threadBatchPerLevel)
+    {
+        if(isDrafting())
+            abortDrafting();
+
+        _draftLevelCount = levelCount;
+        _draftLevelSizeRatio = levelSizeRatio;
+        _draftThreadBatchPerLevel = threadBatchPerLevel;
+
+        if(isDrafter())
+            restartDrafting();
+    }
+
+    void CpuRaytracer::gatherWorkerFrames()
+    {
         if(_props.empty())
-        {
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            return ;
-        }
-
-        // There are some props to render.
+            return;
 
         for(std::shared_ptr<CpuRaytracerWorker>& w : _workerObjects)
         {
             while(w->completedFrameCount() != 0)
             {
                 const float* pixels = w->readNextFrame();
-
-                ++_sampleCount;
-                _convergenceValue = 0.0;
-                float alpha = 1.0f / _sampleCount;
-                int cc = (int) _colorBuffer.size();
-                for(int i=0; i < cc; ++i)
-                {
-                    float lastValue = _colorBuffer[i];
-
-                    _colorBuffer[i] = glm::mix(
-                        lastValue,
-                        pixels[i],
-                        alpha);
-
-                    float currentValue = _colorBuffer[i];
-                    float meanShift = glm::abs(currentValue - lastValue);
-                    _convergenceValue += meanShift * meanShift;
-                }
-
+                incorporateFrames(pixels, 1);
                 w->popReadFrame();
-                updated = true;
             }
         }
-
-        if(updated)
-        {
-            sendBuffersToGpu();
-        }
-
-        _postProdUnit->execute();
     }
 
-    void CpuRaytracer::notify(cellar::CameraMsg &msg)
+    void CpuRaytracer::pourFramesIn(
+            const std::vector<float>& colorBuffer,
+            unsigned int sampleCount)
     {
-        if(msg.change == cellar::CameraMsg::EChange::VIEWPORT)
-        {
-            int width = msg.camera.viewport().x;
-            int height = msg.camera.viewport().y;
-            _colorBuffer.resize(width * height * 3);
-            _viewportSize = glm::ivec2(width, height);
+        abortDrafting();
+        incorporateFrames(colorBuffer.data(), sampleCount);
+    }
 
+    void CpuRaytracer::pourFramesOut(
+            std::vector<float>& colorBuffer,
+            unsigned int& sampleCount)
+    {
+        sampleCount = _sampleCount;
+        colorBuffer.resize(_colorBuffer.size());
+        std::copy(_colorBuffer.begin(), _colorBuffer.end(), colorBuffer.begin());
+
+        _isUpdated = false;
+        bufferSoftReset();
+    }
+
+    bool CpuRaytracer::isUpdated()
+    {
+        return _isUpdated;
+    }
+
+    bool CpuRaytracer::onUpdateConsumed()
+    {
+        _isUpdated = false;
+
+        if(isDrafting())
+        {
+            if(_sampleCount >= _draftThreadBatchPerLevel * _workerThreads.size())
+            {
+                nextDraftSize();
+            }
+        }
+    }
+
+    float CpuRaytracer::convergenceValue() const
+    {
+        return _convergenceValue;
+    }
+
+    unsigned int CpuRaytracer::sampleCount() const
+    {
+        return _sampleCount;
+    }
+
+    const glm::ivec2& CpuRaytracer::viewportSize() const
+    {
+        if(isDrafting())
+            return _draftViewport;
+        return _viewportSize;
+    }
+
+    const std::vector<float>& CpuRaytracer::colorBuffer() const
+    {
+        return _colorBuffer;
+    }
+
+    void CpuRaytracer::resize(int width, int height)
+    {
+        _viewportSize = glm::ivec2(width, height);
+        _colorBuffer.resize(width * height * 3);
+
+        bufferSoftReset();
+
+        if(!isDrafting())
+        {
             for(auto& w : _workerObjects)
             {
                 w->resize(width, height);
             }
         }
-        else if(msg.change == cellar::CameraMsg::EChange::PROJECTION)
-        {
-            for(auto& w : _workerObjects)
-            {
-                w->updateProjection(msg.camera.projectionMatrix());
-            }
-        }
-        else if(msg.change == cellar::CameraMsg::EChange::VIEW)
-        {
-            for(auto& w : _workerObjects)
-            {
-                w->updateView(msg.camera.viewMatrix());
-            }
-        }
+    }
 
-        // Reset buffers
-        std::fill(_colorBuffer.begin(), _colorBuffer.end(), 0.0f);
-        _sampleCount = 0;
+    void CpuRaytracer::updateView(const glm::dmat4& view)
+    {
+        bufferSoftReset();
+
+        for(auto& w : _workerObjects)
+        {
+            w->updateView(view);
+        }
+    }
+
+    void CpuRaytracer::updateProjection(const glm::dmat4& proj)
+    {
+        bufferSoftReset();
+
+        for(auto& w : _workerObjects)
+        {
+            w->updateProjection(proj);
+        }
+    }
+
+    unsigned int CpuRaytracer::propCount() const
+    {
+        return _props.size();
     }
 
     void CpuRaytracer::manageProp(const std::shared_ptr<Prop>& prop)
     {
         _props.push_back(prop);
 
+        bufferSoftReset();
+
         for(auto& w : _workerObjects)
         {
             w->setProps(_props);
-        }
-
-        if(_props.size() == 1)
-        {
-            _postProdUnit->show();
         }
     }
 
@@ -204,28 +242,101 @@ namespace prop3
                 return p == prop;
         });
 
+        bufferSoftReset();
+
         for(auto& w : _workerObjects)
         {
             w->setProps(_props);
         }
+    }
 
-        if(_props.size() == 0)
+    void CpuRaytracer::nextDraftSize()
+    {
+        if(!isDrafting())
+            return;
+
+        ++_draftLevel;
+        _sampleCount = 0;
+        _convergenceValue = 0;
+
+        if(_draftLevel < _draftLevelCount)
         {
-            _postProdUnit->hide();
+            int ratioPower = (_draftLevelCount - (_draftLevel+1));
+            int ratio = glm::pow(2, ratioPower) * _draftLevelSizeRatio;
+
+            _draftViewport = _viewportSize / glm::ivec2(ratio);
+            _draftViewport = glm::max(_draftViewport, glm::ivec2(1));
+        }
+        else
+        {
+            _draftViewport = _viewportSize;
+        }
+
+        // Update worker buffers' size
+        for(auto& w : _workerObjects)
+        {
+            w->resize(_draftViewport.x, _draftViewport.y);
         }
     }
 
-    void CpuRaytracer::sendBuffersToGpu()
+    void CpuRaytracer::abortDrafting()
     {
-        glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
-        glTexImage2D(GL_TEXTURE_2D,     0,  GL_RGB,
-                     _viewportSize.x,       _viewportSize.y,
-                     0, GL_RGB, GL_FLOAT,   _colorBuffer.data());
+        if(!isDrafting())
+            return;
 
-        float sum = 0.0f;
-        for(float c : _colorBuffer)
-            sum += c;
-        std::cout << "Sample count = " << _sampleCount <<
-                     " (convergence = " << _convergenceValue << ")" << std::endl;
+        _draftLevel = _draftLevelCount-1;
+        nextDraftSize();
+    }
+
+    void CpuRaytracer::restartDrafting()
+    {
+        if(!isDrafter())
+            return;
+
+        _draftLevel = -1;
+        nextDraftSize();
+    }
+
+    void CpuRaytracer::bufferSoftReset()
+    {
+        _sampleCount = 0;
+        restartDrafting();
+    }
+
+    void CpuRaytracer::bufferHardReset()
+    {
+        _sampleCount = 0;
+        restartDrafting();
+
+        _colorBuffer.resize(_viewportSize.x * _viewportSize.y * 3);
+        std::fill(_colorBuffer.begin(), _colorBuffer.end(), 0.0f);
+    }
+
+    void CpuRaytracer::incorporateFrames(
+        const float* colorBuffer,
+        unsigned int sampleCount)
+    {
+        _convergenceValue = 0.0;
+        _sampleCount += sampleCount;
+        float alpha = sampleCount / (float) _sampleCount;
+
+        const glm::ivec2& viewport = viewportSize();
+        int cc = viewport.x * viewport.y * 3;
+        for(int i=0; i < cc; ++i)
+        {
+            float lastValue = _colorBuffer[i];
+            float newValue = _colorBuffer[i] =
+                glm::mix(
+                    _colorBuffer[i],
+                    colorBuffer[i],
+                    alpha);
+
+            float meanShift = glm::abs(newValue - lastValue);
+            _convergenceValue += (meanShift * meanShift);
+        }
+
+        _convergenceValue = glm::sqrt(_convergenceValue) * sampleCount;
+        _convergenceValue = 1.0f / (1.0f + _convergenceValue);
+        _isUpdated = true;
     }
 }

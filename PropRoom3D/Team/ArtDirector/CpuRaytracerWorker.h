@@ -47,7 +47,6 @@ namespace prop3
         virtual void skipAndExecute(const std::function<void()>& func);
 
         virtual void execute();
-        virtual void resizeBuffers();
         virtual void shootFromLights();
         virtual void shootFromScreen();
         virtual glm::dvec3 fireScreenRay(
@@ -55,8 +54,10 @@ namespace prop3
                 int depth);
 
     private:
+        void resetBuffers();
         void destroyBuffers();
-        void generateWorkingBuffer();
+        void getNewWorkingBuffers();
+        void commitWorkingBuffers();
 
 
     private:
@@ -74,8 +75,8 @@ namespace prop3
         glm::dmat4 _viewProjInverse;
         glm::dvec3 _camPos;
 
-        std::atomic<unsigned int> _completedFrameCount;
         std::queue<float*> _completedColorBuffers;
+        std::vector<float*> _framePool;
         float* _workingColorBuffer;
         std::mutex _framesMutex;
 

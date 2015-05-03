@@ -2,9 +2,11 @@
 # Art Director
 SET(PROP3_ART_DIRECTOR_HEADERS
     ${PROP3_SRC_DIR}/Team/ArtDirector/AbstractArtDirector.h
+    ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracer.h
+    ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerClient.h
+    ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerServer.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerWorker.h
-    ${PROP3_SRC_DIR}/Team/ArtDirector/QGlPostProdUnit.h
-    ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracer.h)
+    ${PROP3_SRC_DIR}/Team/ArtDirector/QGlPostProdUnit.h)
 
 # Choreographer
 SET(PROP3_CHOREOGRAPHER_HEADERS
@@ -67,9 +69,11 @@ SET(PROP3_HEADERS
 ## Sources ##
 # Art Director
 SET(PROP3_ART_DIRECTOR_SOURCES
+    ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracer.cpp
+    ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerClient.cpp
+    ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerServer.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerWorker.cpp
-    ${PROP3_SRC_DIR}/Team/ArtDirector/QGlPostProdUnit.cpp
-    ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracer.cpp)
+    ${PROP3_SRC_DIR}/Team/ArtDirector/QGlPostProdUnit.cpp)
 
 # Choreographer
 SET(PROP3_CHOREOGRAPHER_SOURCES
