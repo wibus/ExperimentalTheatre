@@ -29,6 +29,7 @@ namespace prop3
                 int levelCount,
                 int levelSizeRatio,
                 int threadBatchPerLevel);
+        virtual void enableFastDraft(bool enable);
 
         virtual bool isUpdated();
         virtual bool onUpdateConsumed();
@@ -49,9 +50,9 @@ namespace prop3
         virtual void updateView(const glm::dmat4& view);
         virtual void updateProjection(const glm::dmat4& proj);
 
-        virtual unsigned int propCount() const;
         virtual void manageProp(const std::shared_ptr<Prop>& prop);
         virtual void unmanageProp(const std::shared_ptr<Prop>& prop);
+        virtual unsigned int propCount() const;
 
     protected:
         virtual void nextDraftSize();
@@ -62,6 +63,8 @@ namespace prop3
         virtual void incorporateFrames(
             const float* colorBuffer,
             unsigned int sampleCount);
+
+        virtual void performNonStochasticSyncronousDraf();
 
     private:
         void init();
@@ -75,7 +78,9 @@ namespace prop3
         int _draftLevelCount;
         int _draftLevelSizeRatio;
         int _draftThreadBatchPerLevel;
-        glm::ivec2 _draftViewport;
+        glm::ivec2 _draftViewportSize;
+        bool _fastDraftEnabled;
+        bool _fastDraftDone;
 
         bool _isUpdated;
         glm::ivec2 _viewportSize;
@@ -83,6 +88,7 @@ namespace prop3
         std::vector<std::shared_ptr<Prop>> _props;
 
         friend class CpuRaytracerWorker;
+        bool _workersInterrupted;
         std::vector<std::thread> _workerThreads;
         std::vector<std::shared_ptr<CpuRaytracerWorker>> _workerObjects;
     };

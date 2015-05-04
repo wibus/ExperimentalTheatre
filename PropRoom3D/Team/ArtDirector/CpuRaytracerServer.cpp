@@ -14,7 +14,7 @@ namespace prop3
 {
     CpuRaytracerServer::CpuRaytracerServer() :
         _colorBufferTexId(0),
-        _localRaytracer(new CpuRaytracer()),
+        _localRaytracer(new CpuRaytracer(4)),
         _postProdUnit(new QGlPostProdUnit())
     {
     }
@@ -30,12 +30,15 @@ namespace prop3
         // Color texture
         glGenTextures(1, &_colorBufferTexId);
         glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glBindTexture(GL_TEXTURE_2D, 0);
 
         clearColorTexture();
 
+        _localRaytracer->enableFastDraft(true);
         _localRaytracer->setDraftParams(2, 4, 1);
         _postProdUnit->setColorBufferTexId(_colorBufferTexId);
         _postProdUnit->setup();
@@ -43,7 +46,7 @@ namespace prop3
 
     void CpuRaytracerServer::reset()
     {
-        _localRaytracer.reset();
+        _localRaytracer->reset();
 
         // TODO wbussiere 2015-05-01 : reset clients
     }

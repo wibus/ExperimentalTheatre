@@ -17,8 +17,11 @@ namespace prop3
     }
 
     CpuRaytracerWorker::CpuRaytracerWorker() :
+        _isSingleShot(false),
         _runningPredicate(false),
         _terminatePredicate(false),
+        _usePixelJittering(true),
+        _useStochasticTracing(true),
         _lightRaysBounceCount(0),
         _screenRaysBounceCount(5),
         _viewportSize(1, 1),
@@ -33,8 +36,9 @@ namespace prop3
         destroyBuffers();
     }
 
-    void CpuRaytracerWorker::start()
+    void CpuRaytracerWorker::start(bool singleShot)
     {
+        _isSingleShot = singleShot;
         if(!_runningPredicate)
         {
             _runningPredicate = true;
@@ -64,18 +68,9 @@ namespace prop3
         _cv.notify_one();
     }
 
-    void CpuRaytracerWorker::resize(int width, int height)
+    bool CpuRaytracerWorker::isRunning()
     {
-        if(width != _viewportSize.x || height != _viewportSize.y)
-        {
-            skipAndExecute([this, &width, &height](){
-                _viewportSize.x = width;
-                _viewportSize.y = height;
-
-                destroyBuffers();
-                getNewWorkingBuffers();
-            });
-        }
+        return _runningPredicate;
     }
 
     void CpuRaytracerWorker::updateView(const glm::dmat4& view)
@@ -95,11 +90,38 @@ namespace prop3
         });
     }
 
+    void CpuRaytracerWorker::updateViewport(
+            const glm::ivec2& resolution,
+            const glm::ivec2& origin,
+            const glm::ivec2& size)
+    {
+            skipAndExecute([this, &resolution, &origin, &size](){
+                _viewportOrig = origin;
+                if(size != _viewportSize)
+                {
+                    _resolution = resolution;
+                    _viewportSize = size;
+                    destroyBuffers();
+                    getNewWorkingBuffers();
+                }
+            });
+    }
+
     void CpuRaytracerWorker::setProps(const std::vector<std::shared_ptr<Prop>>& props)
     {
         skipAndExecute([this, &props](){
             _props = props;
         });
+    }
+
+    void CpuRaytracerWorker::useStochasticTracing(bool use)
+    {
+        _useStochasticTracing = use;
+    }
+
+    void CpuRaytracerWorker::usePixelJittering(bool use)
+    {
+        _usePixelJittering = use;
     }
 
     unsigned int CpuRaytracerWorker::completedFrameCount()
@@ -124,7 +146,11 @@ namespace prop3
     void CpuRaytracerWorker::skipAndExecute(const std::function<void()>& func)
     {
         // Skip current frame
-        _runningPredicate = false;
+        bool isRunning = _runningPredicate;
+        if(isRunning)
+        {
+            _runningPredicate = false;
+        }
 
         // Lock and execute
         std::lock_guard<std::mutex> lk(_flowMutex);
@@ -132,8 +158,11 @@ namespace prop3
         func();
 
         // Begin next frame
-        _runningPredicate = true;
-        _cv.notify_one();
+        if(isRunning)
+        {
+            _runningPredicate = true;
+            _cv.notify_one();
+        }
     }
 
     void CpuRaytracerWorker::execute()
@@ -165,6 +194,11 @@ namespace prop3
             if(_runningPredicate)
             {
                 commitWorkingBuffers();
+
+                if(_isSingleShot)
+                {
+                    _runningPredicate = false;
+                }
             }
         }
     }
@@ -175,19 +209,25 @@ namespace prop3
 
     void CpuRaytracerWorker::shootFromScreen()
     {
-        double pixelWidth = 2.0 / _viewportSize.x;
-        double pixelHeight = 2.0 / _viewportSize.y;
-        glm::dvec4 screenPos(-1, -1, 0, 1);
-        glm::dvec2 offset = glm::dvec2(pixelWidth, pixelWidth) *
-                            (glm::dvec2(0.5) + glm::circularRand(0.5));
+        double pixelWidth = 2.0 / _resolution.x;
+        double pixelHeight = 2.0 / _resolution.y;
+        glm::dvec2 pixelSize(pixelWidth, pixelHeight);
+        glm::dvec2 imgOrig = -glm::dvec2(_resolution) / 2.0;
+        glm::dvec2 orig =  (imgOrig + glm::dvec2(_viewportOrig)) * pixelSize;
+
+        if(_usePixelJittering)
+        {
+            orig += (glm::dvec2(0.5) + glm::circularRand(0.5)) * pixelSize;
+        }
 
         int idx = -1;
         Ray ray(_camPos, glm::dvec3(0));
+        glm::dvec4 screenPos(-1, -1, 0, 1);
 
-        screenPos.y = -1.0 + offset.y;
+        screenPos.y = orig.y;
         for(int j=0; j<_viewportSize.y; ++j, screenPos.y += pixelHeight)
         {
-            screenPos.x = -1.0 + offset.x;
+            screenPos.x = orig.x;
             for(int i=0; i<_viewportSize.x; ++i, screenPos.x += pixelWidth)
             {
                 glm::dvec4 dirH = _viewProjInverse * screenPos;
@@ -207,16 +247,10 @@ namespace prop3
         }
     }
 
-    glm::dvec3 CpuRaytracerWorker::fireScreenRay(const Ray& ray, int depth)
+    std::shared_ptr<Prop> CpuRaytracerWorker::findNearestProp(
+            const Ray& ray, RaycastReport& reportMin)
     {
-        if(depth < 0)
-        {
-            return glm::dvec3(0);
-        }
-
-        RaycastReport reportMin(INFINITY, glm::dvec3(), glm::dvec3());
         std::shared_ptr<Prop> propMin;
-        glm::dvec3 color(0);
 
 
         for(const auto& prop : _props)
@@ -239,10 +273,33 @@ namespace prop3
             }
         }
 
+        return propMin;
+    }
+
+    glm::dvec3 CpuRaytracerWorker::fireScreenRay(const Ray& ray, int depth)
+    {
+        if(depth < 0)
+        {
+            return glm::dvec3(0);
+        }
+
+        RaycastReport reportMin(INFINITY, glm::dvec3(), glm::dvec3());
+        std::shared_ptr<Prop> propMin = findNearestProp(ray, reportMin);
+        glm::dvec3 color(0);
+
         if(propMin)
         {
             // Surface color
             const std::shared_ptr<Costume>& costume = propMin->costume();
+
+            if(!_useStochasticTracing)
+            {
+                return propMin->costume()->computeReflectionBrdf(
+                            -glm::reflect(ray.direction, reportMin.normal),
+                            reportMin.normal,
+                            -ray.direction,
+                            reportMin.texCoord);
+            }
 
             const glm::dvec3& interPt = reportMin.position;
             bool isEntering = glm::dot(ray.direction, reportMin.normal) < 0.0;

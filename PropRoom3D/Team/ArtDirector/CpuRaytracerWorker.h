@@ -19,6 +19,7 @@
 namespace prop3
 {
     class Ray;
+    class RaycastReport;
     class Prop;
 
     class PROP3D_EXPORT CpuRaytracerWorker
@@ -30,14 +31,22 @@ namespace prop3
         CpuRaytracerWorker();
         virtual ~CpuRaytracerWorker();
 
-        virtual void start();
+        virtual void start(bool singleShot = false);
         virtual void stop();
         virtual void terminate();
+        virtual bool isRunning();
 
-        virtual void resize(int width, int height);
         virtual void updateView(const glm::dmat4& view);
         virtual void updateProjection(const glm::dmat4& proj);
+        virtual void updateViewport(
+                const glm::ivec2& resolution,
+                const glm::ivec2& origin,
+                const glm::ivec2& size);
         virtual void setProps(const std::vector<std::shared_ptr<Prop>>& props);
+
+        // TODO
+        virtual void useStochasticTracing(bool use);
+        virtual void usePixelJittering(bool use);
 
         virtual unsigned int completedFrameCount();
         virtual const float* readNextFrame();
@@ -49,9 +58,14 @@ namespace prop3
         virtual void execute();
         virtual void shootFromLights();
         virtual void shootFromScreen();
+
+        virtual std::shared_ptr<Prop> findNearestProp(
+                const Ray& ray,
+                prop3::RaycastReport& reportMin);
         virtual glm::dvec3 fireScreenRay(
                 const Ray& ray,
                 int depth);
+
 
     private:
         void resetBuffers();
@@ -61,14 +75,20 @@ namespace prop3
 
 
     private:
+        std::atomic<bool> _isSingleShot;
         std::atomic<bool> _runningPredicate;
         std::atomic<bool> _terminatePredicate;
         std::condition_variable _cv;
         std::mutex _flowMutex;
 
+        std::atomic<bool> _usePixelJittering;
+        std::atomic<bool> _useStochasticTracing;
+
         int _lightRaysBounceCount;
         int _screenRaysBounceCount;
 
+        glm::ivec2 _resolution;
+        glm::ivec2 _viewportOrig;
         glm::ivec2 _viewportSize;
         glm::dmat4 _viewInvMatrix;
         glm::dmat4 _projInvMatrix;
