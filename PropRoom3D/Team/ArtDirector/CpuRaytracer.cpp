@@ -93,15 +93,14 @@ namespace prop3
 
     void CpuRaytracer::reset()
     {
+        abortRendering();
+
         _props.clear();
 
         for(auto& w : _workerObjects)
         {
-            w->stop();
             w->setProps(_props);
         }
-
-        bufferSoftReset();
     }
 
     bool CpuRaytracer::isDrafter() const
@@ -119,15 +118,10 @@ namespace prop3
             int levelSizeRatio,
             int threadBatchPerLevel)
     {
-        if(isDrafting())
-            abortDrafting();
-
+        abortRendering();
         _draftLevelCount = levelCount;
         _draftLevelSizeRatio = levelSizeRatio;
         _draftThreadBatchPerLevel = threadBatchPerLevel;
-
-        if(isDrafter())
-            restartDrafting();
     }
 
     void CpuRaytracer::enableFastDraft(bool enable)
@@ -180,7 +174,8 @@ namespace prop3
             const std::vector<float>& colorBuffer,
             unsigned int sampleCount)
     {
-        abortDrafting();
+        skipDrafting();
+
         incorporateFrames(colorBuffer.data(), sampleCount);
     }
 
@@ -239,6 +234,8 @@ namespace prop3
 
     void CpuRaytracer::resize(int width, int height)
     {
+        abortRendering();
+
         _viewportSize = glm::ivec2(width, height);
         _colorBuffer.resize(width * height * 3);
 
@@ -246,58 +243,50 @@ namespace prop3
         {
             for(auto& w : _workerObjects)
             {
-                w->stop();
                 w->updateViewport(
                     _viewportSize,
                     glm::ivec2(0, 0),
                     _viewportSize);
             }
         }
-
-        _workersInterrupted = true;
-        bufferSoftReset();
     }
 
     void CpuRaytracer::updateView(const glm::dmat4& view)
     {
+        abortRendering();
+
         for(auto& w : _workerObjects)
         {
-            w->stop();
             w->updateView(view);
         }
-
-        _workersInterrupted = true;
-        bufferSoftReset();
     }
 
     void CpuRaytracer::updateProjection(const glm::dmat4& proj)
     {
+        abortRendering();
+
         for(auto& w : _workerObjects)
         {
-            w->stop();
             w->updateProjection(proj);
         }
-
-        _workersInterrupted = true;
-        bufferSoftReset();
     }
 
     void CpuRaytracer::manageProp(const std::shared_ptr<Prop>& prop)
     {
+        abortRendering();
+
         _props.push_back(prop);
 
         for(auto& w : _workerObjects)
         {
-            w->stop();
             w->setProps(_props);
         }
-
-        _workersInterrupted = true;
-        bufferSoftReset();
     }
 
     void CpuRaytracer::unmanageProp(const std::shared_ptr<Prop>& prop)
     {
+        abortRendering();
+
         std::remove_if(_props.begin(), _props.end(),
             [&prop](const std::shared_ptr<Prop>& p) {
                 return p == prop;
@@ -305,17 +294,23 @@ namespace prop3
 
         for(auto& w : _workerObjects)
         {
-            w->stop();
             w->setProps(_props);
         }
-
-        _workersInterrupted = true;
-        bufferSoftReset();
     }
 
     unsigned int CpuRaytracer::propCount() const
     {
         return _props.size();
+    }
+
+    void CpuRaytracer::skipDrafting()
+    {
+        if(!isDrafting())
+            return;
+
+        _fastDraftDone = true;
+        _draftLevel = _draftLevelCount-1;
+        nextDraftSize();
     }
 
     void CpuRaytracer::nextDraftSize()
@@ -350,36 +345,35 @@ namespace prop3
         }
     }
 
-    void CpuRaytracer::abortDrafting()
+    void CpuRaytracer::abortRendering()
     {
-        if(!isDrafting())
-            return;
+        // Reset buffers
+        bufferSoftReset();
 
-        _fastDraftDone = true;
-        _draftLevel = _draftLevelCount-1;
-        nextDraftSize();
-    }
+        // Stop workers
+        _workersInterrupted = true;
+        for(auto& w : _workerObjects)
+        {
+            w->stop();
+        }
 
-    void CpuRaytracer::restartDrafting()
-    {
-        if(!isDrafter())
-            return;
-
-        _fastDraftDone = false;
-        _draftLevel = -1;
-        nextDraftSize();
+        // Reset draft state
+        if(isDrafter())
+        {
+            _fastDraftDone = false;
+            _draftLevel = -1;
+            nextDraftSize();
+        }
     }
 
     void CpuRaytracer::bufferSoftReset()
     {
         _sampleCount = 0;
-        restartDrafting();
     }
 
     void CpuRaytracer::bufferHardReset()
     {
         _sampleCount = 0;
-        restartDrafting();
 
         _colorBuffer.resize(_viewportSize.x * _viewportSize.y * 3);
         std::fill(_colorBuffer.begin(), _colorBuffer.end(), 0.0f);

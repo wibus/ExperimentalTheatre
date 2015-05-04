@@ -55,9 +55,9 @@ namespace prop3
         virtual unsigned int propCount() const;
 
     protected:
+        virtual void skipDrafting();
         virtual void nextDraftSize();
-        virtual void abortDrafting();
-        virtual void restartDrafting();
+        virtual void abortRendering();
         virtual void bufferSoftReset();
         virtual void bufferHardReset();
         virtual void incorporateFrames(

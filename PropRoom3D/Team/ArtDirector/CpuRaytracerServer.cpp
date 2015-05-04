@@ -14,7 +14,7 @@ namespace prop3
 {
     CpuRaytracerServer::CpuRaytracerServer() :
         _colorBufferTexId(0),
-        _localRaytracer(new CpuRaytracer(4)),
+        _localRaytracer(new CpuRaytracer()),
         _postProdUnit(new QGlPostProdUnit())
     {
     }
