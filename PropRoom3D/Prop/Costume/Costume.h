@@ -1,5 +1,5 @@
-#ifndef PROPROOM3D_ABSTRACTCOSTUME_H
-#define PROPROOM3D_ABSTRACTCOSTUME_H
+#ifndef PROPROOM3D_COSTUME_H
+#define PROPROOM3D_COSTUME_H
 
 #include <memory>
 
@@ -124,4 +124,4 @@ namespace prop3
     }
 }
 
-#endif // PROPROOM3D_ABSTRACTCOSTUME_H
+#endif // PROPROOM3D_COSTUME_H

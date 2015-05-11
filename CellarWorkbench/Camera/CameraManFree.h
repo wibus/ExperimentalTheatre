@@ -1,25 +1,28 @@
 #ifndef CELLARWORKBENCH_CAMERAMANFREE_H
 #define CELLARWORKBENCH_CAMERAMANFREE_H
 
+#include <memory>
+
 #include <GLM/glm.hpp>
 
-
 #include "../libCellarWorkbench_global.h"
+#include "../DesignPattern/SpecificObserver.h"
 
 
 namespace cellar
 {
     class Camera;
+    class CameraMsg;
 
 
-    class CELLAR_EXPORT CameraManFree
+    class CELLAR_EXPORT CameraManFree : private SpecificObserver<CameraMsg>
     {
     public:
-        CameraManFree();
-        CameraManFree(Camera& camera);
+        CameraManFree(const std::shared_ptr<Camera>& camera);
 
-        void setCamera(Camera& camera);
-        void setFov(float radians, float nearPlane, float farPlane);
+        void setFieldOfView(float radians);
+        void setCliPlanes(float nearPlane, float farPlane);
+        void setProjection(float fovRad, float nearPlane, float farPlane);
 
         void forward(float dist);
         void sideward(float dist);
@@ -30,14 +33,20 @@ namespace cellar
         void setOrientation(float panRadians, double tiltRadians);
 
     private:
-        void updateCamera();
-        void updateOrientation();
+        virtual void notify(CameraMsg& msg);
 
-        Camera* _camera;
+        void updateView();
+        void updateOrientation();
+        void updateProjection();
+
+        std::shared_ptr<Camera> _camera;
         float _panAngle;
         float _tiltAngle;
         glm::vec3 _position;
         glm::mat4 _orientation;
+        float _fieldOfView;
+        float _nearPlane;
+        float _farPlane;
     };
 }
 

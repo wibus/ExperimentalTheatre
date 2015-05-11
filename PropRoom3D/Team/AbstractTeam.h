@@ -1,6 +1,7 @@
 #ifndef PROPROOM3D_ABSTRACTTEAM_H
 #define PROPROOM3D_ABSTRACTTEAM_H
 
+#include <vector>
 #include <memory>
 
 #include <GLM/glm.hpp>
@@ -15,18 +16,24 @@ namespace cellar
 
 namespace prop3
 {
+    class Prop;
     class AbstractDesigner;
     class AbstractArtDirector;
     class AbstractChoreographer;
 
-class Prop;
 
     class PROP3D_EXPORT AbstractTeam
     {
+    private:
+        // Removed
+        AbstractTeam(const AbstractTeam&) = delete;
+        AbstractTeam& operator=(const AbstractTeam&) = delete;
+
+
     protected:
         AbstractTeam(AbstractDesigner*  propDesigner,
-                         AbstractArtDirector*   artDirector,
-                         AbstractChoreographer* choreographer);
+                     AbstractChoreographer* choreographer);
+
 
     public:
         virtual ~AbstractTeam();
@@ -34,49 +41,21 @@ class Prop;
         virtual void setup();
         virtual void reset();
         virtual void update(double dt);
-        virtual void draw(double dt);
+
+        // Team accessors/modifiers
+        virtual void addArtDirector(
+            const std::shared_ptr<AbstractArtDirector>& artDirector);
 
         // Factory methods
-        virtual std::shared_ptr<Prop>   createProp();
+        virtual std::shared_ptr<Prop> createProp();
         virtual void deleteProp(std::shared_ptr<Prop>& prop);
 
-        virtual void setCamera(cellar::Camera& camera);
-        virtual void setGravity(const glm::dvec3& unitsPerSecondSquared);
-
-    protected:
-        // Getter for prop team members
-        AbstractDesigner&  propDesigner() const;
-        AbstractArtDirector&   artDirector() const;
-        AbstractChoreographer& choreographer() const;
 
     private:
-        // Removed
-        AbstractTeam(const AbstractTeam&);
-        AbstractTeam& operator=(const AbstractTeam&);
-
-    private:
-        std::unique_ptr<AbstractDesigner>  _propDesigner;
-        std::unique_ptr<AbstractArtDirector>   _artDirector;
+        std::unique_ptr<AbstractDesigner> _propDesigner;
         std::unique_ptr<AbstractChoreographer> _choreographer;
+        std::vector<std::shared_ptr<AbstractArtDirector>> _artDirectors;
     };
-
-
-
-    // IMPLEMENTATION //
-    inline AbstractDesigner& AbstractTeam::propDesigner() const
-    {
-        return *_propDesigner;
-    }
-
-    inline AbstractArtDirector& AbstractTeam::artDirector() const
-    {
-        return *_artDirector;
-    }
-
-    inline AbstractChoreographer& AbstractTeam::choreographer() const
-    {
-        return *_choreographer;
-    }
 }
 
 #endif // PROPROOM3D_ABSTRACTTEAM_H

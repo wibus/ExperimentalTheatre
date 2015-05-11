@@ -7,7 +7,7 @@
 #include <CellarWorkbench/Misc/Log.h>
 
 #include "CpuRaytracer.h"
-#include "QGlPostProdUnit.h"
+#include "GlPostProdUnit.h"
 
 
 namespace prop3
@@ -15,7 +15,7 @@ namespace prop3
     CpuRaytracerServer::CpuRaytracerServer() :
         _colorBufferTexId(0),
         _localRaytracer(new CpuRaytracer()),
-        _postProdUnit(new QGlPostProdUnit())
+        _postProdUnit(new GlPostProdUnit())
     {
     }
 
@@ -40,23 +40,39 @@ namespace prop3
 
         _localRaytracer->enableFastDraft(true);
         _localRaytracer->setDraftParams(2, 4, 1);
-        _postProdUnit->setColorBufferTexId(_colorBufferTexId);
-        _postProdUnit->setup();
+
+        if(_postProdUnit)
+        {
+            _postProdUnit->setColorBufferTexId(_colorBufferTexId);
+            _postProdUnit->setup();
+        }
+
+        if(_postProdmanager)
+        {
+            _postProdmanager->setPostProdUnit(_postProdUnit);
+            _postProdmanager->setup();
+        }
     }
 
     void CpuRaytracerServer::reset()
     {
         _localRaytracer->reset();
+        clearColorTexture();
 
         // TODO wbussiere 2015-05-01 : reset clients
     }
 
     void CpuRaytracerServer::draw(double dt)
     {
+        _postProdUnit->execute();
+    }
+
+    void CpuRaytracerServer::update(double dt)
+    {
         _localRaytracer->gatherWorkerFrames();
 
         // TODO wbussiere 2015-05-01 : retreive client frames
-
+        //_localRaytracer->pourFramesIn();
 
         if(_localRaytracer->isUpdated())
         {
@@ -64,8 +80,6 @@ namespace prop3
             // Let raytracer manage its drafts
             _localRaytracer->onUpdateConsumed();
         }
-
-        _postProdUnit->execute();
     }
 
     void CpuRaytracerServer::notify(cellar::CameraMsg &msg)
@@ -89,18 +103,18 @@ namespace prop3
         // TODO wbussiere 2015-05-01 : notify clients
     }
 
+    void CpuRaytracerServer::setPostProdManager(
+            const std::shared_ptr<PostProdManager>& manager)
+    {
+        _postProdmanager = manager;
+    }
+
     void CpuRaytracerServer::manageProp(const std::shared_ptr<Prop>& prop)
     {
         clearColorTexture();
         _localRaytracer->manageProp(prop);
 
         // TODO wbussiere 2015-05-01 : notify clients
-
-
-        if(_localRaytracer->propCount() > 0)
-        {
-            _postProdUnit->show();
-        }
     }
 
     void CpuRaytracerServer::unmanageProp(const std::shared_ptr<Prop>& prop)
@@ -109,12 +123,6 @@ namespace prop3
         _localRaytracer->unmanageProp(prop);
 
         // TODO wbussiere 2015-05-01 : notify clients
-
-
-        if(_localRaytracer->propCount() == 0)
-        {
-            _postProdUnit->hide();
-        }
     }
 
     void CpuRaytracerServer::sendBuffersToGpu()

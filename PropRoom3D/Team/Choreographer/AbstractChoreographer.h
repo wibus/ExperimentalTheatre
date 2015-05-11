@@ -5,12 +5,15 @@
 
 #include <GLM/glm.hpp>
 
-#include "../AbstractTeamMember.h"
+#include "../../libPropRoom3D_global.h"
 
 
 namespace prop3
 {
-    class PROP3D_EXPORT AbstractChoreographer : public AbstractTeamMember
+    class Prop;
+
+
+    class PROP3D_EXPORT AbstractChoreographer
     {
     protected:
         AbstractChoreographer() {}
@@ -18,6 +21,8 @@ namespace prop3
     public:
         virtual ~AbstractChoreographer() {}
 
+        virtual void setup() =0;
+        virtual void reset() =0;
         virtual void update(double dt) =0;
 
         virtual void setGravity(const glm::dvec3& unitsPerSecondSquared) =0;

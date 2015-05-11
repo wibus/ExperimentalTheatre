@@ -9,8 +9,7 @@
 #include <CellarWorkbench/DesignPattern/Singleton.h>
 #include <CellarWorkbench/DateAndTime/Clock.h>
 
-#include "../ScaenaException/PlayNotFound.h"
-#include "../ScaenaException/StageNotFound.h"
+#include "../libScaena_global.h"
 
 
 class QApplication;
@@ -19,10 +18,7 @@ class QApplication;
 namespace scaena
 {
     class AbstractStage;
-    class AbstractPlay;
-
-    const std::string NO_STAGE = "";
-
+    class Play;
 
     class SCAENA_EXPORT Application :
             public QObject,
@@ -32,59 +28,46 @@ namespace scaena
 
         friend class cellar::Singleton<Application>;
 
-    private: Application();
+    private:
+        Application();
+
     public:
-
-        QApplication& getQApplication() const;
-
         void init(int argc, char** argv);
 
-        void setPlay(const std::shared_ptr<AbstractPlay>& play);
-
-        bool addCustomStage(AbstractStage* stage);
-        void chooseStage(const std::string& stageName);
-        std::string userChooseStage();
+        void setPlay(const std::shared_ptr<Play>& play);
 
         int execute();
-        int execute(const std::string& stageId);
         void terminate();
 
         // Getters
-        const std::string&  chosenStageName()   const;
-        AbstractStage&      stage()             const; //throw(StageNotFound)
-        AbstractPlay&       play()              const; //throw(PlayNotFound)
+        QApplication& getQApplication() const;
+        Play& play()const;
 
 
-    signals:        void aboutToQuitSignal();
-    private slots:  void aboutToQuitSlot();
+    signals:
+        void aboutToQuitSignal();
+    private slots:
+        void aboutToQuitSlot();
 
 
     private:
-        void setupDefaultStages();
-        void findChosenStage();
-
         int _argc;
         char** _argv;
         std::shared_ptr< QApplication > _qApp;
-        std::shared_ptr< AbstractPlay > _play;
-        std::shared_ptr< AbstractStage > _chosenStage;
-        std::string _chosenStageName;
-        std::map< std::string, std::shared_ptr< AbstractStage > > _stages;
-        typedef std::map< std::string, std::shared_ptr< AbstractStage > >::iterator StageIt;
+        std::shared_ptr< Play > _play;
         cellar::Clock _totalTime;
     };
 
     SCAENA_EXPORT Application& getApplication();
 
 
+
+
     // IMPLEMENTATION //
-    inline const std::string& Application::chosenStageName() const
-        {return _chosenStageName;}
+    inline QApplication& Application::getQApplication() const
+        {return *_qApp;}
 
-    inline AbstractStage& Application::stage() const
-        {return *_chosenStage;}
-
-    inline AbstractPlay& Application::play() const
+    inline Play& Application::play() const
         {return *_play;}
 }
 

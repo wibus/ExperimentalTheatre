@@ -1,5 +1,5 @@
-#ifndef PROPROOM3D_FLAT_PAINT_H
-#define PROPROOM3D_FLAT_PAINT_H
+#ifndef PROPROOM3D_FLATPAINT_H
+#define PROPROOM3D_FLATPAINT_H
 
 #include "Costume.h"
 
@@ -30,4 +30,4 @@ namespace prop3
     };
 }
 
-#endif // PROPROOM3D_FLAT_PAINT_H
+#endif // PROPROOM3D_FLATPAINT_H

@@ -1,5 +1,5 @@
-#ifndef CELLARWORKBENCH_GRID_2D_H
-#define CELLARWORKBENCH_GRID_2D_H
+#ifndef CELLARWORKBENCH_GRID2D_H
+#define CELLARWORKBENCH_GRID2D_H
 
 #include <cassert>
 
@@ -240,4 +240,4 @@ inline void Grid2D<T>::set(const glm::ivec2 &pos, const T &value)
 }
 }
 
-#endif // CELLARWORKBENCH_GRID_2D_H
+#endif // CELLARWORKBENCH_GRID2D_H

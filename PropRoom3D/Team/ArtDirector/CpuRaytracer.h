@@ -52,7 +52,6 @@ namespace prop3
 
         virtual void manageProp(const std::shared_ptr<Prop>& prop);
         virtual void unmanageProp(const std::shared_ptr<Prop>& prop);
-        virtual unsigned int propCount() const;
 
     protected:
         virtual void skipDrafting();

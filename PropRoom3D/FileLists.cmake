@@ -6,7 +6,7 @@ SET(PROP3_ART_DIRECTOR_HEADERS
     ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerClient.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerServer.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerWorker.h
-    ${PROP3_SRC_DIR}/Team/ArtDirector/QGlPostProdUnit.h)
+    ${PROP3_SRC_DIR}/Team/ArtDirector/GlPostProdUnit.h)
 
 # Choreographer
 SET(PROP3_CHOREOGRAPHER_HEADERS
@@ -24,8 +24,7 @@ SET(PROP3_TEAM_HEADERS
     ${PROP3_CHOREOGRAPHER_HEADERS}
     ${PROP3_DESIGNER_HEADERS}
     ${PROP3_SRC_DIR}/Team/AbstractTeam.h
-    ${PROP3_SRC_DIR}/Team/AbstractTeamMember.h
-    ${PROP3_SRC_DIR}/Team/StdGlTeam.h)
+    ${PROP3_SRC_DIR}/Team/StdTeam.h)
 
 # Costumes
 SET(PROP3_COSTUME_HEADERS
@@ -73,7 +72,7 @@ SET(PROP3_ART_DIRECTOR_SOURCES
     ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerClient.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerServer.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerWorker.cpp
-    ${PROP3_SRC_DIR}/Team/ArtDirector/QGlPostProdUnit.cpp)
+    ${PROP3_SRC_DIR}/Team/ArtDirector/GlPostProdUnit.cpp)
 
 # Choreographer
 SET(PROP3_CHOREOGRAPHER_SOURCES
@@ -89,7 +88,7 @@ SET(PROP3_TEAM_SOURCES
     ${PROP3_CHOREOGRAPHER_SOURCES}
     ${PROP3_DESIGNER_SOURCES}
     ${PROP3_SRC_DIR}/Team/AbstractTeam.cpp
-    ${PROP3_SRC_DIR}/Team/StdGlTeam.cpp)
+    ${PROP3_SRC_DIR}/Team/StdTeam.cpp)
 
 # Costumes
 SET(PROP3_COSTUME_SOURCES
@@ -125,12 +124,6 @@ SET(PROP3_PROP_SOURCES
 SET(PROP3_SOURCES
     ${PROP3_TEAM_SOURCES}
     ${PROP3_PROP_SOURCES})
-    
-## UI
-SET(PROP3_UI_FILES
-    ${PROP3_SRC_DIR}/Team/ArtDirector/QGlPostProdUnit.ui)
-
-QT5_WRAP_UI(PROP3_UI_SRCS ${PROP3_UI_FILES})
 
 ## Resources
 SET(PROP3_RCC_FILES
@@ -156,8 +149,6 @@ SET(PROP3_SRC_FILES
     ${PROP3_HEADERS}
     ${PROP3_SOURCES}
     ${PROP3_CONFIG_FILES}
-    ${PROP3_UI_FILES}
-    ${PROP3_UI_SRCS}
     ${PROP3_RESOURCE_FILES}
     ${PROP3_RCC_SRCS})
 

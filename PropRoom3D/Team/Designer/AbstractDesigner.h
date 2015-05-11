@@ -3,18 +3,24 @@
 
 #include <memory>
 
-#include "../AbstractTeamMember.h"
+#include "../../libPropRoom3D_global.h"
 
 
 namespace prop3
 {
-    class PROP3D_EXPORT AbstractDesigner : public AbstractTeamMember
+    class Prop;
+
+
+    class PROP3D_EXPORT AbstractDesigner
     {
     protected:
         AbstractDesigner() {}
 
     public:
         virtual ~AbstractDesigner() {}
+
+        virtual void setup() =0;
+        virtual void reset() =0;
 
         virtual std::shared_ptr<Prop> createProp() = 0;
     };

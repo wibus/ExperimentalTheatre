@@ -9,71 +9,70 @@
 
 namespace cellar
 {
-    CameraManFree::CameraManFree() :
-        _camera(nullptr),
+    CameraManFree::CameraManFree(const std::shared_ptr<Camera>& camera) :
+        _camera(camera),
         _tiltAngle(0),
         _panAngle(0),
-        _position()
+        _position(),
+        _fieldOfView(0.78f),
+        _nearPlane(0.1f),
+        _farPlane(300.0f)
     {
+        _camera->registerObserver(*this);
+        updateProjection();
     }
 
-    CameraManFree::CameraManFree(Camera& camera) :
-        _camera(&camera),
-        _tiltAngle(0),
-        _panAngle(0),
-        _position()
+    void CameraManFree::setFieldOfView(float radians)
     {
-        setFov(0.78f, 0.3f, 300.0f);
+        _fieldOfView = radians;
+        updateProjection();
     }
 
-    void CameraManFree::setCamera(Camera& camera)
+    void CameraManFree::setCliPlanes(float nearPlane, float farPlane)
     {
-        _camera = &camera;
-        setFov(0.78f, 0.3f, 300.0f);
+        _nearPlane = nearPlane;
+        _farPlane = farPlane;
+        updateProjection();
     }
 
-    void CameraManFree::setFov(float radians, float nearPlane, float farPlane)
+    void CameraManFree::setProjection(float fovRad, float nearPlane, float farPlane)
     {
-        if(_camera == nullptr)
-            return;
-
-        float w = _camera->viewport().x;
-        float h = _camera->viewport().y;
-
-        _camera->updateProjection(
-            glm::perspectiveFov(radians, w, h, nearPlane, farPlane));
+        _fieldOfView = fovRad;
+        _nearPlane = nearPlane;
+        _farPlane = farPlane;
+        updateProjection();
     }
 
     void CameraManFree::forward(float dist)
     {
         _position += glm::vec3(_orientation * glm::vec4(0, dist, 0, 0));
-        updateCamera();
+        updateView();
     }
 
     void CameraManFree::sideward(float dist)
     {
         _position += glm::vec3(_orientation * glm::vec4(dist, 0, 0, 0));
-        updateCamera();
+        updateView();
     }
 
     void CameraManFree::pan(float radians)
     {
         _panAngle += radians;
         updateOrientation();
-        updateCamera();
+        updateView();
     }
 
     void CameraManFree::tilt(float radians)
     {
         _tiltAngle += radians;
         updateOrientation();
-        updateCamera();
+        updateView();
     }
 
     void CameraManFree::setPosition(const glm::vec3& position)
     {
         _position = position;
-        updateCamera();
+        updateView();
     }
 
     void CameraManFree::setOrientation(float panRadians, double tiltRadians)
@@ -81,10 +80,10 @@ namespace cellar
         _tiltAngle = tiltRadians;
         _panAngle = panRadians;
         updateOrientation();
-        updateCamera();
+        updateView();
     }
 
-    void CameraManFree::updateCamera()
+    void CameraManFree::updateView()
     {
         glm::mat4 view;
         view = glm::rotate(view, -glm::pi<float>()/2.0f - _tiltAngle, glm::vec3(1, 0, 0));
@@ -97,5 +96,29 @@ namespace cellar
         _orientation = glm::mat4();
         _orientation = glm::rotate(_orientation, _panAngle,  glm::vec3(0, 0, 1));
         _orientation = glm::rotate(_orientation, _tiltAngle, glm::vec3(1, 0, 0));
+    }
+
+    void CameraManFree::updateProjection()
+    {
+        if(_camera == nullptr)
+            return;
+
+        float width = _camera->viewport().x;
+        float height = _camera->viewport().y;
+        _camera->updateProjection(
+                    glm::perspectiveFov(
+                        _fieldOfView,
+                        width,
+                        height,
+                        _nearPlane,
+                        _farPlane));
+    }
+
+    void CameraManFree::notify(CameraMsg& msg)
+    {
+        if(msg.change == CameraMsg::EChange::VIEWPORT)
+        {
+            updateProjection();
+        }
     }
 }

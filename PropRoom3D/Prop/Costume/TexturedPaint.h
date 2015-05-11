@@ -1,5 +1,5 @@
-#ifndef PROPROOM3D_TEXTURED_PAINT_H
-#define PROPROOM3D_TEXTURED_PAINT_H
+#ifndef PROPROOM3D_TEXTUREDPAINT_H
+#define PROPROOM3D_TEXTUREDPAINT_H
 
 #include "FlatPaint.h"
 
@@ -32,4 +32,4 @@ namespace prop3
     };
 }
 
-#endif // PROPROOM3D_TEXTURED_PAINT_H
+#endif // PROPROOM3D_TEXTUREDPAINT_H

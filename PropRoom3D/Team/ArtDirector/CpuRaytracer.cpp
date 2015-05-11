@@ -298,11 +298,6 @@ namespace prop3
         }
     }
 
-    unsigned int CpuRaytracer::propCount() const
-    {
-        return _props.size();
-    }
-
     void CpuRaytracer::skipDrafting()
     {
         if(!isDrafting())

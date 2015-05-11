@@ -1,90 +1,121 @@
 ## Headers ##
 # Costumes
 SET(PROP2_COSTUME_HEADERS
-    ${PROP2_SRC_DIR}/Costume/AbstractCostume.h
-    ${PROP2_SRC_DIR}/Costume/CircleCostume.h
-    ${PROP2_SRC_DIR}/Costume/PolygonCostume.h)
-   
-# Huds
-SET(PROP2_HUD_HEADERS
-    ${PROP2_SRC_DIR}/Hud/AbstractHud.h
-    ${PROP2_SRC_DIR}/Hud/ImageHud.h
-    ${PROP2_SRC_DIR}/Hud/TextHud.h)
+    ${PROP2_SRC_DIR}/Prop/Costume/AbstractCostume.h
+    ${PROP2_SRC_DIR}/Prop/Costume/CircleCostume.h
+    ${PROP2_SRC_DIR}/Prop/Costume/PolygonCostume.h)
 
 # Hardwares
 SET(PROP2_HARDWARE_HEADERS
-    ${PROP2_SRC_DIR}/Hardware/Hardware.h)
-  
-# Prop team
-SET(PROP2_PROP_TEAM_HEADERS
-    ${PROP2_SRC_DIR}/PropTeam/AbstractArtDirector.h
-    ${PROP2_SRC_DIR}/PropTeam/AbstractChoreographer.h
-    ${PROP2_SRC_DIR}/PropTeam/AbstractPropDesigner.h
-    ${PROP2_SRC_DIR}/PropTeam/AbstractPropTeam.h
-    ${PROP2_SRC_DIR}/PropTeam/AbstractTeamMember.h
-    ${PROP2_SRC_DIR}/PropTeam/GlArtDirector.h
-    ${PROP2_SRC_DIR}/PropTeam/StdChoreographer.h
-    ${PROP2_SRC_DIR}/PropTeam/StdGlPropTeam.h
-    ${PROP2_SRC_DIR}/PropTeam/StdPropDesigner.h)
-    
+    ${PROP2_SRC_DIR}/Prop/Hardware/Hardware.h)
+
+# Huds
+SET(PROP2_HUD_HEADERS
+    ${PROP2_SRC_DIR}/Prop/Hud/AbstractHud.h
+    ${PROP2_SRC_DIR}/Prop/Hud/ImageHud.h
+    ${PROP2_SRC_DIR}/Prop/Hud/TextHud.h)
+
 # Shape
 SET(PROP2_SHAPE_HEADERS
-    ${PROP2_SRC_DIR}/Shape/AbstractShape.h
-    ${PROP2_SRC_DIR}/Shape/Circle.h
-    ${PROP2_SRC_DIR}/Shape/Polygon.h
-    ${PROP2_SRC_DIR}/Shape/Segment2D.h)
+    ${PROP2_SRC_DIR}/Prop/Shape/AbstractShape.h
+    ${PROP2_SRC_DIR}/Prop/Shape/Circle.h
+    ${PROP2_SRC_DIR}/Prop/Shape/Polygon.h
+    ${PROP2_SRC_DIR}/Prop/Shape/Segment2D.h)
+
+# Props
+SET(PROP2_PROP_HEADERS
+    ${PROP2_SRC_DIR}/Prop/AbstractProp.h)
+
+# Art Director
+SET(PROP2_ART_DIRECTOR_HEADERS
+    ${PROP2_SRC_DIR}/Team/ArtDirector/AbstractArtDirector.h
+    ${PROP2_SRC_DIR}/Team/ArtDirector/GlArtDirector.h)
+
+# Choreographer
+SET(PROP2_CHOREOGRAPHER_HEADERS
+    ${PROP2_SRC_DIR}/Team/Choreographer/AbstractChoreographer.h
+    ${PROP2_SRC_DIR}/Team/Choreographer/StdChoreographer.h)
+
+# Designer
+SET(PROP2_DESIGNER_HEADERS
+    ${PROP2_SRC_DIR}/Team/Designer/AbstractDesigner.h
+    ${PROP2_SRC_DIR}/Team/Designer/StdDesigner.h)
+  
+# Prop team
+SET(PROP2_TEAM_HEADERS
+    ${PROP2_SRC_DIR}/Team/AbstractTeam.h
+    ${PROP2_SRC_DIR}/Team/StdTeam.h)
 
 # All the header files #
 SET(PROP2_HEADERS
     ${PROP2_COSTUME_HEADERS}
-    ${PROP2_HUD_HEADERS}
     ${PROP2_HARDWARE_HEADERS}
-    ${PROP2_PROP_TEAM_HEADERS}
+    ${PROP2_HUD_HEADERS}
     ${PROP2_SHAPE_HEADERS}
-    ${PROP2_SRC_DIR}/AbstractProp.h  
+    ${PROP2_PROP_HEADERS}
+    ${PROP2_ART_DIRECTOR_HEADERS}
+    ${PROP2_CHOREOGRAPHER_HEADERS}
+    ${PROP2_DESIGNER_HEADERS}
+    ${PROP2_TEAM_HEADERS}
     ${PROP2_SRC_DIR}/libPropRoom2D_global.h)
     
 
 ## Sources ##
 # Costumes
 SET(PROP2_COSTUME_SOURCES
-    ${PROP2_SRC_DIR}/Costume/AbstractCostume.cpp
-    ${PROP2_SRC_DIR}/Costume/CircleCostume.cpp
-    ${PROP2_SRC_DIR}/Costume/PolygonCostume.cpp)
-
-# Huds
-SET(PROP2_HUD_SOURCES
-    ${PROP2_SRC_DIR}/Hud/AbstractHud.cpp
-    ${PROP2_SRC_DIR}/Hud/ImageHud.cpp
-    ${PROP2_SRC_DIR}/Hud/TextHud.cpp)
+    ${PROP2_SRC_DIR}/Prop/Costume/AbstractCostume.cpp
+    ${PROP2_SRC_DIR}/Prop/Costume/CircleCostume.cpp
+    ${PROP2_SRC_DIR}/Prop/Costume/PolygonCostume.cpp)
 
 # Hardwares
 SET(PROP2_HARDWARE_SOURCES
-    ${PROP2_SRC_DIR}/Hardware/Hardware.cpp)
-    
-# Prop Team
-SET(PROP2_PROP_TEAM_SOURCES
-    ${PROP2_SRC_DIR}/PropTeam/AbstractPropTeam.cpp
-    ${PROP2_SRC_DIR}/PropTeam/GlArtDirector.cpp
-    ${PROP2_SRC_DIR}/PropTeam/StdChoreographer.cpp
-    ${PROP2_SRC_DIR}/PropTeam/StdGlPropTeam.cpp
-    ${PROP2_SRC_DIR}/PropTeam/StdPropDesigner.cpp)
-    
+    ${PROP2_SRC_DIR}/Prop/Hardware/Hardware.cpp)
+
+# Huds
+SET(PROP2_HUD_SOURCES
+    ${PROP2_SRC_DIR}/Prop/Hud/AbstractHud.cpp
+    ${PROP2_SRC_DIR}/Prop/Hud/ImageHud.cpp
+    ${PROP2_SRC_DIR}/Prop/Hud/TextHud.cpp)
+
 # Shape
 SET(PROP2_SHAPE_SOURCES
-    ${PROP2_SRC_DIR}/Shape/AbstractShape.cpp
-    ${PROP2_SRC_DIR}/Shape/Circle.cpp
-    ${PROP2_SRC_DIR}/Shape/Polygon.cpp
-    ${PROP2_SRC_DIR}/Shape/Segment2D.cpp)
+    ${PROP2_SRC_DIR}/Prop/Shape/AbstractShape.cpp
+    ${PROP2_SRC_DIR}/Prop/Shape/Circle.cpp
+    ${PROP2_SRC_DIR}/Prop/Shape/Polygon.cpp
+    ${PROP2_SRC_DIR}/Prop/Shape/Segment2D.cpp)
+
+# Props
+SET(PROP2_PROP_SOURCES
+    ${PROP2_SRC_DIR}/Prop/AbstractProp.cpp)
+
+# Art Director
+SET(PROP2_ART_DIRECTOR_SOURCES
+    ${PROP2_SRC_DIR}/Team/ArtDirector/GlArtDirector.cpp)
+
+# Choreographer
+SET(PROP2_CHOREOGRAPHER_SOURCES
+    ${PROP2_SRC_DIR}/Team/Choreographer/StdChoreographer.cpp)
+
+# Designer
+SET(PROP2_DESIGNER_SOURCES
+    ${PROP2_SRC_DIR}/Team/Designer/StdDesigner.cpp)
+    
+# Prop Team
+SET(PROP2_TEAM_SOURCES
+    ${PROP2_SRC_DIR}/Team/AbstractTeam.cpp
+    ${PROP2_SRC_DIR}/Team/StdTeam.cpp)
 
 # All the source files #
 SET(PROP2_SOURCES
     ${PROP2_COSTUME_SOURCES}
-    ${PROP2_HUD_SOURCES}
     ${PROP2_HARDWARE_SOURCES}
-    ${PROP2_PROP_TEAM_SOURCES}
+    ${PROP2_HUD_SOURCES}
     ${PROP2_SHAPE_SOURCES}
-    ${PROP2_SRC_DIR}/AbstractProp.cpp)
+    ${PROP2_PROP_SOURCES}
+    ${PROP2_ART_DIRECTOR_SOURCES}
+    ${PROP2_CHOREOGRAPHER_SOURCES}
+    ${PROP2_DESIGNER_SOURCES}
+    ${PROP2_TEAM_SOURCES})
     
 
 ## Resources
@@ -124,18 +155,20 @@ SET(PROP2_SRC_FILES
 
 ## Source groups ##
 SOURCE_GROUP("Header Files" FILES ${PROP2_HEADERS_FILTER})
-SOURCE_GROUP("Header Files\\Costume" FILES ${PROP2_COSTUME_HEADERS})
-SOURCE_GROUP("Header Files\\Hud" FILES ${PROP2_HUD_HEADERS})
-SOURCE_GROUP("Header Files\\Hardware" FILES ${PROP2_HARDWARE_HEADERS})
-SOURCE_GROUP("Header Files\\Prop Team" FILES ${PROP2_PROP_TEAM_HEADERS})
-SOURCE_GROUP("Header Files\\Shape" FILES ${PROP2_SHAPE_HEADERS})
+SOURCE_GROUP("Header Files\\Prop\\Costume" FILES ${PROP2_COSTUME_HEADERS})
+SOURCE_GROUP("Header Files\\Prop\\Hardware" FILES ${PROP2_HARDWARE_HEADERS})
+SOURCE_GROUP("Header Files\\Prop\\Hud" FILES ${PROP2_HUD_HEADERS})
+SOURCE_GROUP("Header Files\\Prop\\Shape" FILES ${PROP2_SHAPE_HEADERS})
+SOURCE_GROUP("Header Files\\Prop" FILES ${PROP2_PROP_HEADERS})
+SOURCE_GROUP("Header Files\\Team" FILES ${PROP2_TEAM_HEADERS})
 
 SOURCE_GROUP("Source Files" FILES ${PROP2_SOURCES_FILTER})
-SOURCE_GROUP("Source Files\\Costume" FILES ${PROP2_COSTUME_SOURCES})
-SOURCE_GROUP("Source Files\\Hud" FILES ${PROP2_HUD_SOURCES})
-SOURCE_GROUP("Source Files\\Hardware" FILES ${PROP2_HARDWARE_SOURCES})
-SOURCE_GROUP("Source Files\\Prop Team" FILES ${PROP2_PROP_TEAM_SOURCES})
-SOURCE_GROUP("Source Files\\Shape" FILES ${PROP2_SHAPE_SOURCES})
+SOURCE_GROUP("Source Files\\Prop\\Costume" FILES ${PROP2_COSTUME_SOURCES})
+SOURCE_GROUP("Source Files\\Prop\\Hardware" FILES ${PROP2_HARDWARE_SOURCES})
+SOURCE_GROUP("Source Files\\Prop\\Hud" FILES ${PROP2_HUD_SOURCES})
+SOURCE_GROUP("Source Files\\Prop\\Shape" FILES ${PROP2_SHAPE_SOURCES})
+SOURCE_GROUP("Source Files\\Prop" FILES ${PROP2_PROP_SOURCES})
+SOURCE_GROUP("Source Files\\Team" FILES ${PROP2_TEAM_SOURCES})
 
 SOURCE_GROUP("Config" FILES ${PROP2_CONFIG_FILES})
 
