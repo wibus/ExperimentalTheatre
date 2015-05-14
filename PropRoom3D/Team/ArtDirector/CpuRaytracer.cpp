@@ -379,22 +379,45 @@ namespace prop3
         unsigned int sampleCount)
     {
         _convergenceValue = 0.0;
+
+        int lastSampleCount = _sampleCount;
         _sampleCount += sampleCount;
-        float alpha = sampleCount / (float) _sampleCount;
+        int nextSampleCount = _sampleCount;
 
         const glm::ivec2& viewport = viewportSize();
         int cc = viewport.x * viewport.y * 3;
-        for(int i=0; i < cc; ++i)
+        for(int i=0; i < cc; i+=3)
         {
-            float lastValue = _colorBuffer[i];
-            float newValue = _colorBuffer[i] =
-                glm::mix(
-                    _colorBuffer[i],
-                    colorBuffer[i],
-                    alpha);
+            glm::vec3 lastValue(
+                _colorBuffer[i],
+                _colorBuffer[i+1],
+                _colorBuffer[i+2]);
 
-            float meanShift = glm::abs(newValue - lastValue);
-            _convergenceValue += (meanShift * meanShift);
+            glm::vec3 newValue(
+                colorBuffer[i]   * sampleCount,
+                colorBuffer[i+1] * sampleCount,
+                colorBuffer[i+2] * sampleCount);
+
+            int oldSampleBatch = sampleCount * 8;
+            int oldSampleStock = lastSampleCount;
+            while(oldSampleStock > oldSampleBatch)
+            {
+                newValue += lastValue * (float) oldSampleBatch;
+                oldSampleStock -= oldSampleBatch;
+                oldSampleBatch *= 8;
+            }
+            if(oldSampleStock != 0)
+            {
+                newValue += lastValue * (float) oldSampleStock;
+            }
+
+            newValue /= (float) nextSampleCount;
+            glm::vec3 meanShift = glm::abs(newValue - lastValue);
+            _convergenceValue += glm::dot(meanShift, meanShift);
+
+            _colorBuffer[i] = newValue.r;
+            _colorBuffer[i+1] = newValue.g;
+            _colorBuffer[i+2] = newValue.b;
         }
 
         _convergenceValue = glm::sqrt(_convergenceValue) * sampleCount;
