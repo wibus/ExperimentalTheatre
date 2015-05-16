@@ -26,7 +26,7 @@ namespace prop3
         virtual void execute();
 
         virtual void activateLowPassFilter(bool activate);
-        virtual void enableAdaptativeFiltering(bool enable);
+        virtual void activateAdaptativeFiltering(bool enable);
         virtual void setLowpassKernelSize(KernelSize size);
         virtual void setLowpassVariance(double variance);
         virtual void setAdaptativeFilteringFactor(float zeroToOne);
@@ -52,15 +52,18 @@ namespace prop3
         unsigned int _fullscreenVao;
         unsigned int _fullscreenVbo;
 
+        bool _lowpassActivated;
+        unsigned int _filteringFunc;
+        float _lowpassKernel[25];
+        double _lowpassKernelVar;
+        int _lowpassKernelSize;
+        bool _adaptationActivated;
+        float _adaptationFactor;
         glm::vec3 _temperatureColor;
         float _luminosityValue;
         float _contrastValue;
-        float _lowpassKernel[25];
-        int _lowpassKernelSize;
-        double _lowpassKernelVar;
-        unsigned int _filteringFunc;
-        float _adaptationFactor;
-        bool _adaptationEnabled;
+
+        bool _isSetup;
     };
 }
 

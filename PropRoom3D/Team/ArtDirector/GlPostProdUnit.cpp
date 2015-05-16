@@ -22,7 +22,16 @@ namespace prop3
     GlPostProdUnit::GlPostProdUnit() :
         _colorBufferTexId(0),
         _fullscreenVao(0),
-        _fullscreenVbo(0)
+        _fullscreenVbo(0),
+        _lowpassActivated(false),
+        _filteringFunc(0),
+        _lowpassKernelVar(0.0),
+        _lowpassKernelSize(3),
+        _adaptationActivated(false),
+        _adaptationFactor(1.0f),
+        _temperatureColor(DEFAULT_WHITE_TEMPERATURE),
+        _contrastValue(1.0f),
+        _luminosityValue(0.0f)
     {
     }
 
@@ -71,19 +80,17 @@ namespace prop3
         _postProdProgram.link();
         _postProdProgram.pushProgram();
         _postProdProgram.setInt("ImageTex", 0);
+        _postProdProgram.setFloat("AdaptationFactor", _adaptationFactor);
+        _postProdProgram.setFloat("ContrastValue",    _contrastValue);
+        _postProdProgram.setFloat("LuminosityValue",  _luminosityValue);
+        _postProdProgram.setVec3f("TemperatureRgb",   glm::vec3(
+            _temperatureColor.r,
+            _temperatureColor.g,
+            _temperatureColor.b));
         _postProdProgram.popProgram();
 
-        // Default Values
-        setLowpassVariance(0.0);
-        setLowpassKernelSize(KernelSize::SIZE_3x3);
-        setAdaptativeFilteringFactor(1.0f);
-        enableAdaptativeFiltering(false);
-        activateLowPassFilter(false);
-
-        setImageTemperature(DEFAULT_WHITE_TEMPERATURE);
-        setImageLuminosity(0.0f);
-        setImageContrast(1.0);
-
+        activateAdaptativeFiltering(_adaptationActivated);
+        activateLowPassFilter(_lowpassActivated);
 
         // Full screen triangle VAO
         const float vertices [][3] =  {
@@ -126,37 +133,43 @@ namespace prop3
 
     void GlPostProdUnit::activateLowPassFilter(bool activate)
     {
-        if(activate)
+        _lowpassActivated = activate;
+        if(_lowpassActivated)
         {
-            _filteringFunc = _adaptationEnabled ? 2 : 1;
+            _filteringFunc = _adaptationActivated ? 2 : 1;
             updateKernel(_lowpassKernelVar, _lowpassKernelSize);
         }
         else
         {
             _filteringFunc = 0;
-            buildLowpassKernel(_lowpassKernel, 0, 1);
-            updateLowpassKernelUniform(_postProdProgram, _lowpassKernel, 1);
+            updateKernel(0, 1);
         }
     }
 
-    void GlPostProdUnit::enableAdaptativeFiltering(bool enable)
+    void GlPostProdUnit::activateAdaptativeFiltering(bool enable)
     {
-        _adaptationEnabled = enable;
-        if(_adaptationEnabled)
+        _adaptationActivated = enable;
+        if(_adaptationActivated)
         {
             _filteringFunc = 2;
 
-            _postProdProgram.pushProgram();
-            _postProdProgram.setFloat("AdaptationFactor", _adaptationFactor);
-            _postProdProgram.popProgram();
+            if(_isSetup)
+            {
+                _postProdProgram.pushProgram();
+                _postProdProgram.setFloat("AdaptationFactor", _adaptationFactor);
+                _postProdProgram.popProgram();
+            }
         }
         else
         {
             _filteringFunc = 1;
 
-            _postProdProgram.pushProgram();
-            _postProdProgram.setFloat("AdaptationFactor", 0);
-            _postProdProgram.popProgram();
+            if(_isSetup)
+            {
+                _postProdProgram.pushProgram();
+                _postProdProgram.setFloat("AdaptationFactor", 0);
+                _postProdProgram.popProgram();
+            }
         }
     }
 
@@ -181,39 +194,48 @@ namespace prop3
     {
         _adaptationFactor = zeroToOne;
 
-        _postProdProgram.pushProgram();
-        _postProdProgram.setFloat("AdaptationFactor", _adaptationFactor);
-        _postProdProgram.popProgram();
+        if(_isSetup)
+        {
+            _postProdProgram.pushProgram();
+            _postProdProgram.setFloat("AdaptationFactor", _adaptationFactor);
+            _postProdProgram.popProgram();
+        }
     }
 
     void GlPostProdUnit::setImageTemperature(int kelvin)
     {
         _temperatureColor = kelvinToRgb(kelvin);
 
-        _postProdProgram.pushProgram();
-        _postProdProgram.setVec3f("TemperatureRgb",glm::vec3(
-            _temperatureColor.r,
-            _temperatureColor.g,
-            _temperatureColor.b));
-        _postProdProgram.popProgram();
+        if(_isSetup)
+        {
+            _postProdProgram.pushProgram();
+            _postProdProgram.setVec3f("TemperatureRgb", _temperatureColor);
+            _postProdProgram.popProgram();
+        }
     }
 
     void GlPostProdUnit::setImageContrast(float minusOneToOne)
     {
         _contrastValue = minusOneToOne;
 
-        _postProdProgram.pushProgram();
-        _postProdProgram.setFloat("ContrastValue", _contrastValue);
-        _postProdProgram.popProgram();
+        if(_isSetup)
+        {
+            _postProdProgram.pushProgram();
+            _postProdProgram.setFloat("ContrastValue", _contrastValue);
+            _postProdProgram.popProgram();
+        }
     }
 
     void GlPostProdUnit::setImageLuminosity(float zeroToOne)
     {
         _luminosityValue = zeroToOne;
 
-        _postProdProgram.pushProgram();
-        _postProdProgram.setFloat("LuminosityValue", _luminosityValue);
-        _postProdProgram.popProgram();
+        if(_isSetup)
+        {
+            _postProdProgram.pushProgram();
+            _postProdProgram.setFloat("LuminosityValue", _luminosityValue);
+            _postProdProgram.popProgram();
+        }
     }
 
     void GlPostProdUnit::saveOutputImage()
@@ -304,7 +326,11 @@ namespace prop3
     void GlPostProdUnit::updateKernel(double variance, int size)
     {
         buildLowpassKernel(_lowpassKernel, variance, size);
-        updateLowpassKernelUniform(_postProdProgram, _lowpassKernel, size);
+
+        if(_isSetup)
+        {
+            updateLowpassKernelUniform(_postProdProgram, _lowpassKernel, size);
+        }
     }
 
     void GlPostProdUnit::buildLowpassKernel(float kernel[], double variance, int size)
