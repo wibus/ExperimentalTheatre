@@ -14,7 +14,6 @@
 namespace prop3
 {
     class Prop;
-    class PostProdManager;
     class GlPostProdUnit;
 
 
@@ -41,8 +40,6 @@ namespace prop3
         virtual const std::shared_ptr<cellar::Camera>& camera() const;
         virtual void setCamera(const std::shared_ptr<cellar::Camera>& camera);
 
-        virtual void setPostProdManager(
-            const std::shared_ptr<prop3::PostProdManager>& manager) =0;
         virtual void manageProp(const std::shared_ptr<Prop>& prop) =0;
         virtual void unmanageProp(const std::shared_ptr<Prop>& prop) =0;
 

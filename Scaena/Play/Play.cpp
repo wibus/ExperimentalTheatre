@@ -54,9 +54,6 @@ namespace scaena
 
         QObject::connect(&_drawTimer, &QTimer::timeout, this, &Play::draw);
         QObject::connect(&_updateTimer, &QTimer::timeout, this, &Play::update);
-
-        _propTeam2D.reset(new prop2::StdTeam());
-        _propTeam3D.reset(new prop3::StdTeam());
     }
 
     Play::~Play()
@@ -76,7 +73,6 @@ namespace scaena
         else
         {
             _currentAct = _acts.begin();
-            (*_currentAct)->openCurtain();
 
             _drawClock.reset();
             _drawClock.start();
@@ -92,18 +88,24 @@ namespace scaena
                 _updateTimer.start();
             }
 
-            _lastForcedUpdate = std::chrono::high_resolution_clock::now();
+            using std::chrono::high_resolution_clock;
+            _lastForcedUpdate = high_resolution_clock::now();
+
+            _propTeam2D.reset(new prop2::StdTeam());
+            _propTeam3D.reset(new prop3::StdTeam());
+
+            for(auto& view : _views)
+            {
+                view->setup(*this);
+            }
 
             _propTeam2D->setup();
             _propTeam3D->setup();
+
+            (*_currentAct)->openCurtain();
+
             _isPlaying = true;
         }
-    }
-
-    void Play::restart()
-    {
-        terminate();
-        start();
     }
 
     void Play::terminate()
@@ -124,6 +126,12 @@ namespace scaena
             (*_currentAct)->closeCurtain();
             _currentAct = _acts.begin();
         }
+    }
+
+    void Play::restart()
+    {
+        terminate();
+        start();
     }
 
     void Play::setDrawRate(int targetedFps)
@@ -215,7 +223,6 @@ namespace scaena
                 return false;
         }
 
-        view->lookAt(*this);
         _views.push_back(view);
 
         return true;
@@ -423,7 +430,6 @@ namespace scaena
         // Set displacement to zero
         _synchronousMouse->setPosition(
             _synchronousMouse->position());
-
     }
 
     void Play::draw()
@@ -439,10 +445,12 @@ namespace scaena
 
         for(auto& view : _views)
         {
-            view->draw(dt, [this, view, time]() {
-                DrawCaller drawCaller(view, time);
-                (*_currentAct)->welcome( drawCaller );
-            });
+            view->beginDraw( dt );
+
+            DrawCaller drawCaller(view, time);
+            (*_currentAct)->welcome( drawCaller );
+
+            view->endDraw( dt );
         }
     }
 }

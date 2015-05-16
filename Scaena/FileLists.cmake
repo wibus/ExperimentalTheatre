@@ -9,7 +9,6 @@ SET(SCAENA_PLAY_HEADERS
 # Application
 SET(SCAENA_SCAENA_APPLICATION_HEADERS
     ${SCAENA_SRC_DIR}/ScaenaApplication/Application.h
-    ${SCAENA_SRC_DIR}/ScaenaApplication/GlMainWindow.h
     ${SCAENA_SRC_DIR}/ScaenaApplication/QGlWidgetView.h)
 
 # Events
@@ -58,7 +57,6 @@ SET(SCAENA_PLAY_SOURCES
 # Scaena application
 SET(SCAENA_SCAENA_APPLICATION_SOURCES
     ${SCAENA_SRC_DIR}/ScaenaApplication/Application.cpp
-    ${SCAENA_SRC_DIR}/ScaenaApplication/GlMainWindow.cpp
     ${SCAENA_SRC_DIR}/ScaenaApplication/QGlWidgetView.cpp)
 
 # Events

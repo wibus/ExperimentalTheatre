@@ -46,12 +46,6 @@ namespace prop3
             _postProdUnit->setColorBufferTexId(_colorBufferTexId);
             _postProdUnit->setup();
         }
-
-        if(_postProdmanager)
-        {
-            _postProdmanager->setPostProdUnit(_postProdUnit);
-            _postProdmanager->setup();
-        }
     }
 
     void CpuRaytracerServer::reset()
@@ -103,12 +97,6 @@ namespace prop3
         // TODO wbussiere 2015-05-01 : notify clients
     }
 
-    void CpuRaytracerServer::setPostProdManager(
-            const std::shared_ptr<PostProdManager>& manager)
-    {
-        _postProdmanager = manager;
-    }
-
     void CpuRaytracerServer::manageProp(const std::shared_ptr<Prop>& prop)
     {
         clearColorTexture();
@@ -123,6 +111,11 @@ namespace prop3
         _localRaytracer->unmanageProp(prop);
 
         // TODO wbussiere 2015-05-01 : notify clients
+    }
+
+    std::shared_ptr<GlPostProdUnit> CpuRaytracerServer::postProdUnit() const
+    {
+        return _postProdUnit;
     }
 
     void CpuRaytracerServer::sendBuffersToGpu()

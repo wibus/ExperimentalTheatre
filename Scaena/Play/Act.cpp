@@ -8,8 +8,7 @@ using namespace std;
 
 namespace scaena
 {
-    Act::Act(Play& play, const string& id) :
-        _play(play),
+    Act::Act(const string& id) :
         _id(id),
         _position(0),
         _isPlaying(false)

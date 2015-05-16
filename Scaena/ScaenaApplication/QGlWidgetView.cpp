@@ -2,10 +2,22 @@
 
 #include <sstream>
 
+#include <QKeyEvent>
+#include <QMouseEvent>
+#include <QApplication>
+#include <QDesktopWidget>
+
 #include <CellarWorkbench/Misc/Log.h>
 
+#include <PropRoom2D/Team/AbstractTeam.h>
 #include <PropRoom2D/Team/ArtDirector/GlArtDirector.h>
+
+#include <PropRoom3D/Team/AbstractTeam.h>
 #include <PropRoom3D/Team/ArtDirector/CpuRaytracerServer.h>
+
+#include "../Play/Play.h"
+#include "../StageManagement/Event/MouseEvent.h"
+#include "../StageManagement/Event/KeyboardEvent.h"
 
 using namespace cellar;
 
@@ -26,14 +38,7 @@ namespace scaena
         QGLWidget(getGLFormat(), parent),
         View(id)
     {
-        _dt = 0;
-        _customDrawFunc = [](){};
-
-        setArtDirector2D(std::shared_ptr<prop2::AbstractArtDirector>(
-            new prop2::GlArtDirector()));
-
-        setArtDirector3D(std::shared_ptr<prop3::AbstractArtDirector>(
-            new prop3::CpuRaytracerServer()));
+        setMouseTracking(true);
     }
 
     QGlWidgetView::~QGlWidgetView()
@@ -41,16 +46,60 @@ namespace scaena
 
     }
 
-    void QGlWidgetView::draw(double dt, const std::function<void()>& customDrawFunc)
-    {
-        _dt = dt;
-        _customDrawFunc = customDrawFunc;
-        updateGL();
-    }
-
     glm::ivec2 QGlWidgetView::viewport() const
     {
         return glm::ivec2(width(), height());
+    }
+
+    std::shared_ptr<cellar::Camera> QGlWidgetView::camera2D() const
+    {
+        return _artDirector2D->camera();
+    }
+
+    std::shared_ptr<cellar::Camera> QGlWidgetView::camera3D() const
+    {
+        return _artDirector3D->camera();
+    }
+
+    void QGlWidgetView::keyPressEvent(QKeyEvent* event)
+    {
+        QGLWidget::keyPressEvent(event);
+        _keyPressAction(event);
+    }
+
+    void QGlWidgetView::keyReleaseEvent(QKeyEvent* event)
+    {
+        QGLWidget::keyReleaseEvent(event);
+        _keyReleaseAction(event);
+    }
+
+    void QGlWidgetView::mouseMoveEvent(QMouseEvent* event)
+    {
+        QGLWidget::mouseMoveEvent(event);
+        _mouseMoveAction(event);
+    }
+
+    void QGlWidgetView::mousePressEvent(QMouseEvent* event)
+    {
+        QGLWidget::mousePressEvent(event);
+        _mousePressAction(event);
+    }
+
+    void QGlWidgetView::mouseReleaseEvent(QMouseEvent* event)
+    {
+        QGLWidget::mouseReleaseEvent(event);
+        _mouseReleaseAction(event);
+    }
+
+    void QGlWidgetView::centerOnScreen()
+    {
+        QPoint center = QApplication::desktop()->availableGeometry(this).center();
+        move(center.x()-width()*0.5, center.y()-height()*0.5);
+    }
+
+    void QGlWidgetView::setGlWindowSpace(int w, int h)
+    {
+        resize(w, h);
     }
 
     // QGLWidget interface
@@ -87,15 +136,99 @@ namespace scaena
 
     void QGlWidgetView::resizeGL(int w, int h)
     {
-        glViewport(0,0,w,h);
-        artDirector2D()->resize(w, h);
-        artDirector3D()->resize(w, h);
+        glViewport(0, 0, w, h);
+
+        if(_artDirector2D)
+            _artDirector2D->resize(w, h);
+
+        if(_artDirector3D)
+            _artDirector3D->resize(w, h);
     }
 
     void QGlWidgetView::paintGL()
     {
-        artDirector3D()->draw(_dt);
-        _customDrawFunc();
-        artDirector2D()->draw(_dt);
+        beginDraw(0);
+        endDraw(0);
+    }
+
+    void QGlWidgetView::beginDraw(double dt)
+    {
+        if(!isVisible())
+            return;
+
+        if(dt > 0.0)
+        {
+            makeCurrent();
+        }
+
+        _artDirector3D->draw(glm::max(dt, 0.0));
+    }
+
+    void QGlWidgetView::endDraw(double dt)
+    {
+        if(!isVisible())
+            return;
+
+        _artDirector2D->draw(glm::max(dt, 0.0));
+
+        if(dt > 0.0)
+        {
+            swapBuffers();
+        }
+    }
+
+    void QGlWidgetView::setup(Play& play)
+    {
+        makeCurrent();
+        setupArtDirectors(play);
+        setupEventListeners(play);
+    }
+
+    void QGlWidgetView::setupArtDirectors(Play& play)
+    {
+        _artDirector2D.reset(new prop2::GlArtDirector());
+        play.propTeam2D()->addArtDirector(_artDirector2D);
+        _artDirector2D->resize(width(), height());
+
+        _artDirector3D.reset(new prop3::CpuRaytracerServer());
+        play.propTeam3D()->addArtDirector(_artDirector3D);
+        _artDirector3D->resize(width(), height());
+    }
+
+    void QGlWidgetView::setupEventListeners(Play& play)
+    {
+        _keyPressAction = [&play](QKeyEvent* event)
+        {
+            if(event->isAutoRepeat())
+                return;
+            if(play.keyPressEvent(KeyboardEvent::convertQKeyEvent(event)))
+                event->accept();
+        };
+
+        _keyReleaseAction = [&play](QKeyEvent* event)
+        {
+            if(event->isAutoRepeat())
+                return;
+            if(play.keyReleaseEvent(KeyboardEvent::convertQKeyEvent(event)))
+                event->accept();
+        };
+
+        _mouseMoveAction = [&play](QMouseEvent* event)
+        {
+            if(play.mouseMoveEvent(MouseEvent::convertQMouseEvent(event)))
+                event->accept();
+        };
+
+        _mousePressAction = [&play](QMouseEvent* event)
+        {
+            if(play.mousePressEvent(MouseEvent::convertQMouseEvent(event)))
+                event->accept();
+        };
+
+        _mouseReleaseAction = [&play](QMouseEvent* event)
+        {
+            if(play.mouseReleaseEvent(MouseEvent::convertQMouseEvent(event)))
+                event->accept();
+        };
     }
 }

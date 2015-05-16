@@ -18,7 +18,7 @@ namespace scaena
     class SCAENA_EXPORT Act
     {
     public:
-        Act(Play& play, const std::string& id);
+        Act(const std::string& id);
         virtual ~Act();
 
         // Open close
@@ -32,7 +32,6 @@ namespace scaena
         virtual bool deleteCharacter(const std::string& id);
 
         // Attributs getters
-        Play& play() const;
         const std::string id() const;
         bool isPlaying() const;
         int position() const;
@@ -49,7 +48,6 @@ namespace scaena
 
 
     protected :
-        Play& _play;
         std::string _id;
         int _position;
         bool _isPlaying;
@@ -62,9 +60,6 @@ namespace scaena
     // IMPLEMENTATION //
     inline const std::string Act::id() const
         {return _id;}
-
-    inline Play& Act::play() const
-        {return _play;}
 
     inline bool Act::isPlaying() const
         {return _isPlaying;}

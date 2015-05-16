@@ -20,9 +20,8 @@ namespace scaena
 
     class SCAENA_EXPORT Character
     {
-    protected: Character(Play& play,
-                                 const std::string& id,
-                                 float priority = 0.0);
+    protected: Character(const std::string& id,
+                         float priority = 0.0);
 
     public:
         virtual ~Character();
@@ -45,9 +44,8 @@ namespace scaena
         virtual void welcome(StageManager& manager);
 
         // Getters
-        Play&               play()     const;
-        float               priority()  const;
         const std::string&  id()        const;
+        float               priority()  const;
         bool                updates()   const;
         bool                visible()   const;
 
@@ -60,8 +58,11 @@ namespace scaena
         bool operator< (const Character& character) const;
 
 
+    protected:
+        Play& play() const;
+
+
     private :
-        Play& _play;
         std::string _id;
         float _priority;
 
@@ -73,14 +74,11 @@ namespace scaena
 
     // IMPLEMENTATION //
     // Getters
-    inline Play& Character::play() const
-        {return _play;}
+    inline const std::string& Character::id() const
+        {return _id;}
 
     inline float Character::priority() const
         {return _priority;}
-
-    inline const std::string& Character::id() const
-        {return _id;}
 
     inline bool Character::updates() const
         {return _updates;}

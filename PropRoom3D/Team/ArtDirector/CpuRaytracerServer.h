@@ -25,11 +25,11 @@ namespace prop3
         virtual void update(double dt);
 
         virtual void notify(cellar::CameraMsg &msg);
-        virtual void setPostProdManager(
-            const std::shared_ptr<prop3::PostProdManager>& manager);
 
         virtual void manageProp(const std::shared_ptr<Prop>& prop);
         virtual void unmanageProp(const std::shared_ptr<Prop>& prop);
+
+        std::shared_ptr<GlPostProdUnit> postProdUnit() const;
 
 
     protected:
@@ -40,7 +40,6 @@ namespace prop3
         unsigned int _colorBufferTexId;
         std::shared_ptr<CpuRaytracer> _localRaytracer;
         std::shared_ptr<GlPostProdUnit> _postProdUnit;
-        std::shared_ptr<PostProdManager> _postProdmanager;
     };
 }
 

@@ -44,8 +44,8 @@ namespace scaena
 
         // Life cycle
         virtual void start();
-        virtual void restart();
         virtual void terminate();
+        virtual void restart();
 
         // Refresh Rates
         void setDrawRate(int targetedFps);

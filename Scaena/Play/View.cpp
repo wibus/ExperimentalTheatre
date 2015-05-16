@@ -20,33 +20,4 @@ namespace scaena
     {
 
     }
-
-    void View::setPostProdManager(const std::shared_ptr<prop3::PostProdManager>& manager)
-    {
-        _artDirector3D->setPostProdManager(manager);
-    }
-
-    void View::lookAt(const Play& play)
-    {
-        if(play.propTeam2D())
-            play.propTeam2D()->addArtDirector(artDirector2D());
-
-        if(play.propTeam3D())
-            play.propTeam3D()->addArtDirector(artDirector3D());
-    }
-
-    glm::ivec2 View::viewport() const
-    {
-        return _artDirector2D->camera()->viewport();
-    }
-
-    std::shared_ptr<cellar::Camera> View::camera2D() const
-    {
-        return _artDirector2D->camera();
-    }
-
-    std::shared_ptr<cellar::Camera> View::camera3D() const
-    {
-        return _artDirector3D->camera();
-    }
 }

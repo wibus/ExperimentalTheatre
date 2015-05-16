@@ -10,15 +10,6 @@
 
 namespace prop3
 {
-    class GlPostProdUnit;
-    class PROP3D_EXPORT PostProdManager
-    {
-    public:
-        virtual void setup() =0;
-        virtual void setPostProdUnit(std::shared_ptr<GlPostProdUnit> unit) =0;
-    };
-
-
     enum class KernelSize {SIZE_3x3, SIZE_5x5};
 
     class PROP3D_EXPORT GlPostProdUnit
@@ -45,6 +36,7 @@ namespace prop3
         virtual void saveOutputImage();
 
         static const int DEFAULT_WHITE_TEMPERATURE;
+
 
     private:
         static glm::vec3 kelvinToRgb(int kelvin);

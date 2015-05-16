@@ -1,5 +1,6 @@
 #include "Character.h"
 
+#include "../ScaenaApplication/Application.h"
 #include "../StageManagement/Manager/StageManager.h"
 
 using namespace std;
@@ -7,8 +8,7 @@ using namespace std;
 
 namespace scaena
 {
-    Character::Character(Play& play, const string& id, float priority) :
-            _play(play),
+    Character::Character(const string& id, float priority) :
             _id(id),
             _priority(priority),
             _updates(true),
@@ -63,11 +63,16 @@ namespace scaena
         manager.visit(*this);
     }
 
-    inline bool Character::operator==(const Character& character) const
+    bool Character::operator==(const Character& character) const
     {
         if(_id == "" && character._id == "")
             return this == &character;      //if they are anonym characters
         else
             return _id == character._id;    //if one of them is named
+    }
+
+    Play& Character::play() const
+    {
+        return getApplication().play();
     }
 }
