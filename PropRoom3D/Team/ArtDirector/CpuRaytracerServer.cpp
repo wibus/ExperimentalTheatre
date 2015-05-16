@@ -58,6 +58,13 @@ namespace prop3
 
     void CpuRaytracerServer::draw(double dt)
     {
+        if(_localRaytracer->isUpdated())
+        {
+            sendBuffersToGpu();
+            // Let raytracer manage its drafts
+            _localRaytracer->onUpdateConsumed();
+        }
+
         _postProdUnit->execute();
     }
 
@@ -67,13 +74,6 @@ namespace prop3
 
         // TODO wbussiere 2015-05-01 : retreive client frames
         //_localRaytracer->pourFramesIn();
-
-        if(_localRaytracer->isUpdated())
-        {
-            sendBuffersToGpu();
-            // Let raytracer manage its drafts
-            _localRaytracer->onUpdateConsumed();
-        }
     }
 
     void CpuRaytracerServer::notify(cellar::CameraMsg &msg)

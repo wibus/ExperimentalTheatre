@@ -51,6 +51,7 @@ namespace prop3
         cellar::GlProgram _postProdProgram;
         unsigned int _fullscreenVao;
         unsigned int _fullscreenVbo;
+        bool _subroutineAvailable;
 
         bool _lowpassActivated;
         unsigned int _filteringFunc;

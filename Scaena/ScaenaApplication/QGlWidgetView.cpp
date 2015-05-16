@@ -2,10 +2,13 @@
 
 #include <sstream>
 
+#include <GL/glu.h>
+
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QWindow>
 
 #include <CellarWorkbench/Misc/Log.h>
 
@@ -147,13 +150,14 @@ namespace scaena
 
     void QGlWidgetView::paintGL()
     {
-        beginDraw(0);
-        endDraw(0);
+        beginDraw(-1);
+        endDraw(-1);
     }
 
     void QGlWidgetView::beginDraw(double dt)
     {
-        if(!isVisible())
+        QWindow* window = windowHandle();
+        if(!window || !window->isExposed() || !isVisible())
             return;
 
         if(dt > 0.0)
@@ -166,7 +170,8 @@ namespace scaena
 
     void QGlWidgetView::endDraw(double dt)
     {
-        if(!isVisible())
+        QWindow* window = windowHandle();
+        if(!window || !window->isExposed() || !isVisible())
             return;
 
         _artDirector2D->draw(glm::max(dt, 0.0));
@@ -174,6 +179,17 @@ namespace scaena
         if(dt > 0.0)
         {
             swapBuffers();
+        }
+
+        GLenum errCode = glGetError();
+        if(errCode)
+        {
+            const GLubyte* errString = gluErrorString(errCode);
+            std::string msg = (const char*) errString;
+            msg = "OpenGL error: " + msg;
+
+            getLog().postMessage(
+                new Message('E', false, msg, "QGlWidgetView"));
         }
     }
 

@@ -60,6 +60,9 @@ namespace prop2
 
     void GlArtDirector::notify(cellar::CameraMsg &msg)
     {
+        if(!_shadersInitialized)
+            return;
+
         if(msg.change == CameraMsg::EChange::VIEWPORT)
         {
             glm::mat4 hudProjectionMatrix =
@@ -111,6 +114,7 @@ namespace prop2
             setupImageHudShader(locations);
 
             _shadersInitialized = true;
+            camera()->refresh();
         }
     }
 
@@ -123,73 +127,71 @@ namespace prop2
     }
 
     void GlArtDirector::draw(double)
-    {        
+    {
+        int nbShapes = static_cast<int>(_circles.size() + _polygons.size());
+        int nbHuds = static_cast<int>(_images.size() + _texts.size());
+        if(nbShapes == 0 && nbHuds == 0)
+            return;
+
         glDepthMask(GL_FALSE);
         glDisable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        int nbShapes = static_cast<int>(_circles.size() + _polygons.size());
-        std::vector< std::shared_ptr<AbstractShape> > shapes(nbShapes);
-        int shapeIdx = 0;
+        if(nbShapes != 0)
+        {
+            // Depth sort shapes
+            std::vector< std::shared_ptr<AbstractShape> > shapes(nbShapes);
 
-        auto circlesEnd = _circles.end();
-        for(auto it = _circles.begin(); it != circlesEnd; ++it)
-        {
-            shapes[shapeIdx++] = *it;
-        }
-        auto polygonsEnd = _polygons.end();
-        for(auto it = _polygons.begin(); it != polygonsEnd; ++it)
-        {
-            shapes[shapeIdx++] = *it;
-        }
-        std::sort(shapes.begin(), shapes.end(), DepthOrderer);
+            int shapeIdx = 0;
+            for(const auto& c : _circles)
+                shapes[shapeIdx++] = c;
+            for(const auto& p : _polygons)
+                shapes[shapeIdx++] = p;
 
-        // Draw shapes under HUDs
-        for(int i=0; i < nbShapes; ++i)
-        {
-            const std::shared_ptr<AbstractShape>& shape = shapes[i];
-            switch(shape->propType())
+            std::sort(shapes.begin(), shapes.end(), DepthOrderer);
+
+
+            // Draw shapes under HUDs
+            for(int i=0; i < nbShapes; ++i)
             {
-            case EPropType::CIRCLE:
-                drawCircle(static_pointer_cast<Circle>(shape));
-                break;
+                const std::shared_ptr<AbstractShape>& shape = shapes[i];
+                switch(shape->propType())
+                {
+                case EPropType::CIRCLE:
+                    drawCircle(static_pointer_cast<Circle>(shape));
+                    break;
 
-            case EPropType::POLYGON:
-                drawPolygon(static_pointer_cast<Polygon>(shape));
-                break;
+                case EPropType::POLYGON:
+                    drawPolygon(static_pointer_cast<Polygon>(shape));
+                    break;
 
-            default:
-                assert(false /* Not a shape */);
+                default:
+                    assert(false /* Not a shape */);
+                }
             }
         }
 
-        glDisable(GL_MULTISAMPLE);
-
-        // Draw images HUD before text because its usualy what we want
-        auto imagesEnd = _images.end();
-        for(auto it = _images.begin(); it != imagesEnd; ++it)
+        if(nbHuds != 0)
         {
-            if((*it)->isVisible())
-            {
-                drawImageHud(*it);
-            }
-        }
+            glDisable(GL_MULTISAMPLE);
 
-        // Draw texts on top of images HUD
-        auto textsEnd = _texts.end();
-        for(auto it = _texts.begin(); it != textsEnd; ++it)
-        {
-            if((*it)->isVisible())
-            {
-                drawTextHud(*it);
-            }
+            // Draw images HUD before text because its usualy what we want
+            for(const auto& i : _images)
+                if(i->isVisible())
+                    drawImageHud(i);
+
+            // Draw texts on top of images HUD
+            for(const auto& t : _texts)
+                if(t->isVisible())
+                    drawTextHud(t);
+
+            glEnable(GL_MULTISAMPLE);
         }
 
         glDepthMask(GL_TRUE);
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
-        glEnable(GL_MULTISAMPLE);
     }
 
     void GlArtDirector::update(double dt)

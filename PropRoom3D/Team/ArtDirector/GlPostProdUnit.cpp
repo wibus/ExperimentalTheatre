@@ -23,6 +23,7 @@ namespace prop3
         _colorBufferTexId(0),
         _fullscreenVao(0),
         _fullscreenVbo(0),
+        _subroutineAvailable(false),
         _lowpassActivated(false),
         _filteringFunc(0),
         _lowpassKernelVar(0.0),
@@ -56,42 +57,6 @@ namespace prop3
 
     void GlPostProdUnit::setup()
     {
-        cellar::GlInputsOutputs attribs;
-        attribs.setInput(0, "position");
-        attribs.setOutput(0, "FragColor");
-
-        GLint major, minor;
-        glGetIntegerv(GL_MAJOR_VERSION, &major);
-        glGetIntegerv(GL_MINOR_VERSION, &minor);
-        std::string postProdShaderSrc = "undefined";
-        if(major >= 4 && minor >= 4)
-            postProdShaderSrc = POST_PROD_FRAG_GL440;
-        else
-            postProdShaderSrc = POST_PROD_FRAG_GL130;
-
-        cellar::getLog().postMessage(new cellar::Message('I', false,
-            "Choosing " + postProdShaderSrc + " fragment shader for post production.",
-            "QGlPostProdUnit"));
-
-        // Post production program
-        _postProdProgram.setInAndOutLocations(attribs);
-        _postProdProgram.addShader(GL_VERTEX_SHADER, ":/Prop3/shaders/clip_space.vert");
-        _postProdProgram.addShader(GL_FRAGMENT_SHADER, postProdShaderSrc);
-        _postProdProgram.link();
-        _postProdProgram.pushProgram();
-        _postProdProgram.setInt("ImageTex", 0);
-        _postProdProgram.setFloat("AdaptationFactor", _adaptationFactor);
-        _postProdProgram.setFloat("ContrastValue",    _contrastValue);
-        _postProdProgram.setFloat("LuminosityValue",  _luminosityValue);
-        _postProdProgram.setVec3f("TemperatureRgb",   glm::vec3(
-            _temperatureColor.r,
-            _temperatureColor.g,
-            _temperatureColor.b));
-        _postProdProgram.popProgram();
-
-        activateAdaptativeFiltering(_adaptationActivated);
-        activateLowPassFilter(_lowpassActivated);
-
         // Full screen triangle VAO
         const float vertices [][3] =  {
             {-1, -1, 1},
@@ -110,6 +75,50 @@ namespace prop3
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
+
+
+        // Compile Post Prod Shader
+        cellar::GlInputsOutputs attribs;
+        attribs.setInput(0, "position");
+        attribs.setOutput(0, "FragColor");
+
+        GLint major, minor;
+        glGetIntegerv(GL_MAJOR_VERSION, &major);
+        glGetIntegerv(GL_MINOR_VERSION, &minor);
+        std::string postProdShaderSrc = "undefined";
+        if(major >= 4 && minor >= 4)
+        {
+            postProdShaderSrc = POST_PROD_FRAG_GL440;
+            _subroutineAvailable = true;
+        }
+        else
+        {
+            postProdShaderSrc = POST_PROD_FRAG_GL130;
+            _subroutineAvailable = false;
+        }
+
+        cellar::getLog().postMessage(new cellar::Message('I', false,
+            "Choosing " + postProdShaderSrc + " fragment shader for post production.",
+            "QGlPostProdUnit"));
+
+        _postProdProgram.setInAndOutLocations(attribs);
+        _postProdProgram.addShader(GL_VERTEX_SHADER, ":/Prop3/shaders/clip_space.vert");
+        _postProdProgram.addShader(GL_FRAGMENT_SHADER, postProdShaderSrc);
+        _postProdProgram.link();
+        _postProdProgram.pushProgram();
+        _postProdProgram.setInt("ImageTex", 0);
+        _postProdProgram.setFloat("AdaptationFactor", _adaptationFactor);
+        _postProdProgram.setFloat("ContrastValue",    _contrastValue);
+        _postProdProgram.setFloat("LuminosityValue",  _luminosityValue);
+        _postProdProgram.setVec3f("TemperatureRgb",   glm::vec3(
+            _temperatureColor.r,
+            _temperatureColor.g,
+            _temperatureColor.b));
+        _postProdProgram.popProgram();
+
+        _isSetup = true;
+        activateAdaptativeFiltering(_adaptationActivated);
+        activateLowPassFilter(_lowpassActivated);
     }
 
     void GlPostProdUnit::execute()
@@ -120,7 +129,11 @@ namespace prop3
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
-        glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &_filteringFunc);
+
+        if(_subroutineAvailable)
+        {
+            glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &_filteringFunc);
+        }
 
         glDisable(GL_DEPTH_TEST);
         glBindVertexArray(_fullscreenVao);
