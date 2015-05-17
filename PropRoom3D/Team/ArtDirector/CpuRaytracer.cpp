@@ -29,7 +29,7 @@ namespace prop3
         _viewportSize(1, 1),
         _workersInterrupted(false)
     {
-        // hardware_concurrency is defined as a hint on the number of cores
+        // hardware_concurrency is only a hint on the number of cores
         unsigned int coreCount =
             std::thread::hardware_concurrency();
 

@@ -42,6 +42,7 @@ namespace scaena
         View(id)
     {
         setMouseTracking(true);
+        setFocusPolicy(Qt::ClickFocus);
     }
 
     QGlWidgetView::~QGlWidgetView()
