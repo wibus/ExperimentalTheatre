@@ -18,7 +18,7 @@ namespace cellar
     class CELLAR_EXPORT CameraManFree : private SpecificObserver<CameraMsg>
     {
     public:
-        CameraManFree(const std::shared_ptr<Camera>& camera);
+        CameraManFree(const std::shared_ptr<Camera>& camera, bool manageProjection = true);
 
         void setFieldOfView(float radians);
         void setCliPlanes(float nearPlane, float farPlane);
@@ -40,6 +40,7 @@ namespace cellar
         void updateProjection();
 
         std::shared_ptr<Camera> _camera;
+        bool _manageProjection;
         float _panAngle;
         float _tiltAngle;
         glm::vec3 _position;

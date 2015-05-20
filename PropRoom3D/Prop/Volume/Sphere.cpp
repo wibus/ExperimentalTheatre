@@ -44,12 +44,8 @@ namespace prop3
 
     void Sphere::raycast(const Ray& ray, std::vector<RaycastReport>& reports) const
     {
-        glm::dvec3 dist = ray.origin - _center;
-
-        double a = glm::dot(ray.direction, ray.direction);
-        double b = 2 * glm::dot(ray.direction, dist);
-        double c = glm::dot(dist, dist) - _radius2;
-
+        double a, b, c;
+        params(ray, a, b, c);
         double discr = b*b - 4*a*c;
         if(discr > 0.0)
         {
@@ -72,5 +68,21 @@ namespace prop3
             glm::dvec3 n = glm::normalize(pt - _center);
             reports.push_back(RaycastReport(t, pt, n));
         }
+    }
+
+    bool Sphere::intersects(const Ray& ray)
+    {
+        double a, b, c;
+        params(ray, a, b, c);
+        return b*b - 4*a*c >= 0.0;
+    }
+
+    void Sphere::params(const Ray& ray, double& a, double& b, double& c) const
+    {
+        glm::dvec3 dist = ray.origin - _center;
+
+        a = glm::dot(ray.direction, ray.direction);
+        b = 2 * glm::dot(ray.direction, dist);
+        c = glm::dot(dist, dist) - _radius2;
     }
 }

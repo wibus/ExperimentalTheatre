@@ -1,5 +1,6 @@
 #include "CpuRaytracerServer.h"
 
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 
@@ -132,13 +133,32 @@ namespace prop3
 
 
         // Output image stats
-        std::stringstream ss;
-        bool isDraft = _localRaytracer->isDrafting();
-        float convergence = _localRaytracer->convergenceValue();
+        unsigned int sampleCount = _localRaytracer->sampleCount();
 
-        ss << "Sample count = " << _localRaytracer->sampleCount() <<
-              " -> convergence = " << std::scientific << convergence <<
-              (isDraft ? "[Draft]" : "");
+        std::stringstream ss;
+        ss << "Frame " << sampleCount;
+
+        if(!_localRaytracer->isDrafting())
+        {
+            float renderTime = _localRaytracer->renderTime();
+            float secPerFrame = renderTime / sampleCount;
+            float divergence = _localRaytracer->divergenceValue();
+
+            ss << "\t(";
+            ss.precision(3);
+            ss << std::fixed << std::setw(10) << renderTime << " sec";
+            ss << ", ";
+            ss.precision(3);
+            ss << std::fixed << std::setw(10)  << secPerFrame << " sec/frame";
+            ss << ", ";
+            ss.precision(3);
+            ss << std::scientific << std::setw(10) << divergence << " div";
+            ss << ")";
+        }
+        else
+        {
+            ss << " [Draft]";
+        }
 
         cellar::getLog().postMessage(new cellar::Message(
             'I', false, ss.str(), "CpuRaytracerServer"));

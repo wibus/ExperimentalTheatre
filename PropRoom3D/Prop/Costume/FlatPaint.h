@@ -25,8 +25,6 @@ namespace prop3
                 const glm::dvec3& surfaceNormal,
                 const glm::dvec3& viewDirection,
                 const glm::dvec3& texCoord = glm::dvec3(0)) const;
-
-    private:
     };
 }
 

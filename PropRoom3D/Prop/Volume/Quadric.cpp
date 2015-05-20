@@ -72,11 +72,8 @@ namespace prop3
     // ref : http://marctenbosch.com/photon/mbosch_intersection.pdf
     void Quadric::raycast(const Ray& ray, std::vector<RaycastReport>& reports) const
     {
-        glm::dvec4 homoDir = glm::dvec4(ray.direction, 0.0);
-        glm::dvec4 homoOrg = glm::dvec4(ray.origin,    1.0);
-        double a = glm::dot(homoDir, _q * homoDir);
-        double b = glm::dot(homoDir, _q * homoOrg) * 2.0;
-        double c = glm::dot(homoOrg, _q * homoOrg);
+        double a, b, c;
+        params(ray, a, b, c);
 
         if(a != 0.0)
         {
@@ -117,5 +114,34 @@ namespace prop3
                 reports.push_back(RaycastReport(t, pt, n));
             }
         }
+    }
+
+    bool Quadric::intersects(const Ray& ray)
+    {
+        double a, b, c;
+        params(ray, a, b, c);
+
+        if(a != 0.0)
+        {
+            return (b*b - 4*a*c) >= 0.0;
+        }
+        else if(b != 0.0)
+        {
+            return true;
+        }
+    }
+
+    void Quadric::params(
+            const Ray& ray,
+            double& a,
+            double& b,
+            double& c) const
+    {
+        glm::dvec4 homoDir = glm::dvec4(ray.direction, 0.0);
+        glm::dvec4 homoOrg = glm::dvec4(ray.origin,    1.0);
+
+        a = glm::dot(homoDir, _q * homoDir);
+        b = glm::dot(homoDir, _q * homoOrg) * 2.0;
+        c = glm::dot(homoOrg, _q * homoOrg);
     }
 }

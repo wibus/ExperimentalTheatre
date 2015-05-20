@@ -36,12 +36,12 @@ namespace prop3
         virtual void terminate();
         virtual bool isRunning();
 
-        virtual void updateView(const glm::dmat4& view);
-        virtual void updateProjection(const glm::dmat4& proj);
         virtual void updateViewport(
                 const glm::ivec2& resolution,
                 const glm::ivec2& origin,
                 const glm::ivec2& size);
+        virtual void updateView(const glm::dmat4& view);
+        virtual void updateProjection(const glm::dmat4& proj);
         virtual void setProps(const std::vector<std::shared_ptr<Prop>>& props);
 
         // TODO
@@ -64,7 +64,11 @@ namespace prop3
                 prop3::RaycastReport& reportMin);
         virtual glm::dvec3 fireScreenRay(
                 const Ray& ray,
-                int depth);
+                double rayIntensity);
+        virtual glm::dvec3 draft(
+                const Ray& ray,
+                const RaycastReport& report,
+                const std::shared_ptr<Prop>& prop);
 
 
     private:
@@ -84,8 +88,8 @@ namespace prop3
         std::atomic<bool> _usePixelJittering;
         std::atomic<bool> _useStochasticTracing;
 
-        int _lightRaysBounceCount;
-        int _screenRaysBounceCount;
+        double _lightRayIntensityThreshold;
+        double _screenRayIntensityThreshold;
 
         glm::ivec2 _resolution;
         glm::ivec2 _viewportOrig;

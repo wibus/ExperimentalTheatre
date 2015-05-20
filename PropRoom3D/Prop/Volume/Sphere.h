@@ -17,6 +17,10 @@ namespace prop3
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
         virtual void raycast(const Ray& ray, std::vector<RaycastReport>& reports) const;
+        virtual bool intersects(const Ray& ray);
+
+protected:
+        void params(const Ray& ray, double& a, double& b, double& c) const;
 
     private:
         double _radius;

@@ -12,8 +12,11 @@
 
 namespace prop3
 {
-class Ray;
-class RaycastReport;
+    class Ray;
+    class RaycastReport;
+
+    class Volume;
+    typedef std::shared_ptr<Volume> pVol;
 
     enum class EPointPosition
     {
@@ -22,12 +25,23 @@ class RaycastReport;
         IN
     };
 
+
+    // Logical operators overloading
+    // Ghost surface
+    pVol operator~ (const pVol& eq);
+    // Invert sides
+    pVol operator! (const pVol& eq);
+    // Volume union
+    pVol operator| (const pVol& eq1, const pVol& eq2);
+    // Volume intersection
+    pVol operator& (const pVol& eq1, const pVol& eq2);
+
+
     struct PROP3D_EXPORT Transform
     {
-        Transform(const glm::dmat4& transform);
         Transform(double scale ,
-                  const glm::dquat rotation,
-                  const glm::dvec3 translation);
+                  const glm::dquat& rotation,
+                  const glm::dvec3& translation);
 
         const glm::dmat4& mat() const { return _mat; }
         const glm::dmat4& inv() const
@@ -41,6 +55,8 @@ class RaycastReport;
         mutable glm::dmat4 _inv;
         bool _isInvComputed;
     };
+
+
 
     class PROP3D_EXPORT Volume
     {
@@ -59,80 +75,84 @@ class RaycastReport;
         virtual double signedDistance(const glm::dvec3& point) const = 0;
 
         virtual void raycast(const Ray& ray, std::vector<RaycastReport>& reports) const =0;
+        virtual bool intersects(const Ray& ray) = 0;
     };
 
+
+    // Logical volumes
+    class PROP3D_EXPORT VolumeGhost : public Volume
+    {
+        friend pVol operator~ (const pVol&);
+        VolumeGhost(const pVol& eq);
+
+    public:
+        virtual void transform(const Transform& transform);
+        virtual EPointPosition isIn(const glm::dvec3& point) const;
+        virtual double signedDistance(const glm::dvec3& point) const;
+        virtual void raycast(const Ray& ray, std::vector<RaycastReport>& reports) const;
+        virtual bool intersects(const Ray& ray);
+
+    private:
+        pVol _eq;
+    };
 
 
     class PROP3D_EXPORT VolumeNot : public Volume
     {
-        friend std::shared_ptr<Volume> operator!(
-                const std::shared_ptr<Volume>&);
-    public:
-        VolumeNot(const std::shared_ptr<Volume>& eq);
+        friend pVol operator! (const pVol&);
+        VolumeNot(const pVol& eq);
 
+    public:
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
         virtual void raycast(const Ray& ray, std::vector<RaycastReport>& reports) const;
+        virtual bool intersects(const Ray& ray);
 
     private:
-        std::shared_ptr<Volume> _eq;
+        pVol _eq;
     };
-
 
 
     class PROP3D_EXPORT VolumeOr : public Volume
     {
-        friend std::shared_ptr<Volume> operator| (
-                const std::shared_ptr<Volume>&,
-                const std::shared_ptr<Volume>&);
-    public:
-        VolumeOr(const std::vector<std::shared_ptr<Volume>>& eqs);
+        friend pVol operator| (const pVol&, const pVol&);
+        VolumeOr(const std::vector<pVol>& eqs);
 
+    public:
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
         virtual void raycast(const Ray& ray, std::vector<RaycastReport>& reports) const;
+        virtual bool intersects(const Ray& ray);
 
     private:
-        void addVolume(const std::shared_ptr<Volume>& volume);
+        void add(const pVol& volume);
+        virtual bool raycast(const Ray& ray, std::vector<RaycastReport>& reports, bool isTest) const;
 
-        std::vector<std::shared_ptr<Volume>> _eqs;
+        std::vector<pVol> _eqs;
     };
-
 
 
     class PROP3D_EXPORT VolumeAnd : public Volume
     {
-        friend std::shared_ptr<Volume> operator& (
-                const std::shared_ptr<Volume>&,
-                const std::shared_ptr<Volume>&);
-    public:
-        VolumeAnd(const std::vector<std::shared_ptr<Volume>>& eqs);
+        friend pVol operator& (const pVol&, const pVol&);
+        VolumeAnd(const std::vector<pVol>& eqs);
 
+    public:
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
         virtual void raycast(const Ray& ray, std::vector<RaycastReport>& reports) const;
+        virtual bool intersects(const Ray& ray);
 
     private:
-        void addVolume(const std::shared_ptr<Volume>& volume);
+        void add(const pVol& volume);
+        virtual bool raycast(const Ray& ray, std::vector<RaycastReport>& reports, bool isTest) const;
 
-        std::vector<std::shared_ptr<Volume>> _eqs;
+        std::vector<pVol> _eqs;
     };
 
-
-    // Logical operators overloading
-    std::shared_ptr<Volume> operator!(
-            const std::shared_ptr<Volume>& eq);
-
-    std::shared_ptr<Volume> operator| (
-            const std::shared_ptr<Volume>& eq1,
-            const std::shared_ptr<Volume>& eq2);
-
-    std::shared_ptr<Volume> operator& (
-            const std::shared_ptr<Volume>& eq1,
-            const std::shared_ptr<Volume>& eq2);
 
 
 
@@ -147,12 +167,12 @@ class RaycastReport;
         return signedDistance(glm::dvec3(x, y, z));
     }
 
-    inline void VolumeOr::addVolume(const std::shared_ptr<Volume>& volume)
+    inline void VolumeOr::add(const pVol& volume)
     {
         _eqs.push_back(volume);
     }
 
-    inline void VolumeAnd::addVolume(const std::shared_ptr<Volume>& volume)
+    inline void VolumeAnd::add(const pVol& volume)
     {
         _eqs.push_back(volume);
     }

@@ -30,6 +30,7 @@ namespace prop3
         glm::dvec3 mediumColor() const;
         void setMediumColor(const glm::dvec3& mediumColor);
 
+
         virtual double computeReflexionRatio(
                 const glm::dvec3& incidentDirection,
                 const glm::dvec3& surfaceNormal,

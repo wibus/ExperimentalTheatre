@@ -19,6 +19,8 @@ class HardwareUpdate;
 class Hardware;
 class Volume;
 
+typedef std::shared_ptr<Volume> pVol;
+
     class PROP3D_EXPORT Prop :
             public cellar::SpecificObserver<HardwareUpdate>
     {
@@ -34,8 +36,12 @@ class Volume;
         virtual void setIsVisible(bool isVisible);
 
         // Volume
-        std::shared_ptr<Volume> volume() const;
-        virtual void setVolume(const std::shared_ptr<Volume>& volume);
+        pVol volume() const;
+        virtual void setVolume(const pVol& volume);
+
+        // Bounding volume
+        pVol boundingVolume() const;
+        virtual void setBoundingVolume(const pVol& volume);
 
         // Costume
         const std::shared_ptr<Costume>& costume() const;
@@ -118,7 +124,8 @@ class Volume;
 
 
         // Attributes
-        std::shared_ptr<Volume> _volume;
+        pVol _volume;
+        pVol _boundingVolume;
         std::shared_ptr<Costume> _costume;
         std::shared_ptr<Hardware> _material;
         EBodyType _bodyType;
@@ -161,9 +168,14 @@ class Volume;
         return _isVisible;
     }
 
-    inline std::shared_ptr<Volume> Prop::volume() const
+    inline pVol Prop::volume() const
     {
         return _volume;
+    }
+
+    inline pVol Prop::boundingVolume() const
+    {
+        return _boundingVolume;
     }
 
     inline const std::shared_ptr<Costume>& Prop::costume() const

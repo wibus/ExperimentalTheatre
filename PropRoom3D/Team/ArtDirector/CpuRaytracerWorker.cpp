@@ -22,8 +22,8 @@ namespace prop3
         _terminatePredicate(false),
         _usePixelJittering(true),
         _useStochasticTracing(true),
-        _lightRaysBounceCount(0),
-        _screenRaysBounceCount(5),
+        _lightRayIntensityThreshold(1.0),
+        _screenRayIntensityThreshold(1.0 / 128.0),
         _viewportSize(1, 1),
         _workingColorBuffer(nullptr)
     {
@@ -73,23 +73,6 @@ namespace prop3
         return _runningPredicate;
     }
 
-    void CpuRaytracerWorker::updateView(const glm::dmat4& view)
-    {
-        skipAndExecute([this, &view](){
-            _viewInvMatrix = glm::inverse(view);
-            _viewProjInverse = _viewInvMatrix * _projInvMatrix;
-            _camPos = glm::dvec3(_viewInvMatrix * glm::dvec4(0, 0, 0, 1));
-        });
-    }
-
-    void CpuRaytracerWorker::updateProjection(const glm::dmat4& proj)
-    {
-        skipAndExecute([this, &proj](){
-            _projInvMatrix = glm::inverse(proj);
-            _viewProjInverse = _viewInvMatrix * _projInvMatrix;
-        });
-    }
-
     void CpuRaytracerWorker::updateViewport(
             const glm::ivec2& resolution,
             const glm::ivec2& origin,
@@ -105,6 +88,23 @@ namespace prop3
                     getNewWorkingBuffers();
                 }
             });
+    }
+
+    void CpuRaytracerWorker::updateView(const glm::dmat4& view)
+    {
+        skipAndExecute([this, &view](){
+            _viewInvMatrix = glm::inverse(view);
+            _viewProjInverse = _viewInvMatrix * _projInvMatrix;
+            _camPos = glm::dvec3(_viewInvMatrix * glm::dvec4(0, 0, 0, 1));
+        });
+    }
+
+    void CpuRaytracerWorker::updateProjection(const glm::dmat4& proj)
+    {
+        skipAndExecute([this, &proj](){
+            _projInvMatrix = glm::inverse(proj);
+            _viewProjInverse = _viewInvMatrix * _projInvMatrix;
+        });
     }
 
     void CpuRaytracerWorker::setProps(const std::vector<std::shared_ptr<Prop>>& props)
@@ -183,10 +183,10 @@ namespace prop3
 
 
             // Shoot rays
-            if(_lightRaysBounceCount != 0)
+            if(_lightRayIntensityThreshold != 0)
                 shootFromLights();
 
-            if(_screenRaysBounceCount != 0)
+            if(_screenRayIntensityThreshold != 0)
                 shootFromScreen();
 
 
@@ -233,7 +233,7 @@ namespace prop3
                 glm::dvec4 dirH = _viewProjInverse * screenPos;
                 ray.direction = glm::normalize(glm::dvec3(dirH / dirH.w) - _camPos);
 
-                glm::dvec3 color = fireScreenRay(ray, _screenRaysBounceCount);
+                glm::dvec3 color = fireScreenRay(ray, 1.0);
 
                 _workingColorBuffer[++idx] = color.r;
                 _workingColorBuffer[++idx] = color.g;
@@ -255,9 +255,13 @@ namespace prop3
 
         for(const auto& prop : _props)
         {
-            const std::shared_ptr<Volume>& volume = prop->volume();
+            const pVol& volume = prop->volume();
 
             if(volume.get() == nullptr)
+                continue;
+
+            const pVol& bounds = prop->boundingVolume();
+            if(bounds.get() != nullptr && !bounds->intersects(ray))
                 continue;
 
             std::vector<RaycastReport> reports;
@@ -276,9 +280,9 @@ namespace prop3
         return propMin;
     }
 
-    glm::dvec3 CpuRaytracerWorker::fireScreenRay(const Ray& ray, int depth)
+    glm::dvec3 CpuRaytracerWorker::fireScreenRay(const Ray& ray, double rayIntensity)
     {
-        if(depth < 0)
+        if(rayIntensity < _screenRayIntensityThreshold)
         {
             return glm::dvec3(0);
         }
@@ -289,17 +293,12 @@ namespace prop3
 
         if(propMin)
         {
-            // Surface color
-            const std::shared_ptr<Costume>& costume = propMin->costume();
-
             if(!_useStochasticTracing)
             {
-                return propMin->costume()->computeReflectionBrdf(
-                            -glm::reflect(ray.direction, reportMin.normal),
-                            reportMin.normal,
-                            -ray.direction,
-                            reportMin.texCoord);
+                return draft(ray, reportMin, propMin);
             }
+
+            const std::shared_ptr<Costume>& costume = propMin->costume();
 
             const glm::dvec3& interPt = reportMin.position;
             bool isEntering = glm::dot(ray.direction, reportMin.normal) < 0.0;
@@ -307,40 +306,60 @@ namespace prop3
             glm::dvec3 offset = reportMin.normal * offSetDist;
 
             double reflectionRation = costume->computeReflexionRatio(
-                                          ray.direction,
-                                          reportMin.normal,
-                                          reportMin.texCoord);
+                ray.direction, reportMin.normal, reportMin.texCoord);
+            double refractionRation = 1.0 - reflectionRation;
 
             // Reflection
-            glm::dvec3 reflect = costume->computeReflection(
-                                     ray.direction,
-                                     reportMin.normal,
-                                     reportMin.texCoord);
-
-            Ray reflectedRay(interPt + offset, reflect);
-            color += fireScreenRay(reflectedRay, depth-1) *
-                     reflectionRation;
-
-            // Refraction
-            if(reflectionRation != 1.0)
+            if(reflectionRation)
             {
-                glm::dvec3 refract = costume->computeRefraction(
-                                         ray.direction,
-                                         reportMin.normal,
-                                         reportMin.texCoord);
+                glm::dvec3 reflect = costume->computeReflection(
+                    ray.direction,
+                    reportMin.normal,
+                    reportMin.texCoord);
 
-                Ray refractedRay(interPt - offset, refract);
-                color += fireScreenRay(refractedRay, depth-1) *
-                         (1.0 - reflectionRation);
+                glm::dvec3 reflectBrdf = costume->computeReflectionBrdf(
+                    -reflect,
+                    reportMin.normal,
+                    -ray.direction,
+                    reportMin.texCoord);
+
+                double colorIntensity = glm::max(glm::max(
+                        reflectBrdf.r, reflectBrdf.g), reflectBrdf.b);
+                double reflectIntensity = rayIntensity *
+                    reflectionRation * colorIntensity;
+
+                Ray reflectedRay(interPt + offset, reflect);
+
+                color += fireScreenRay(reflectedRay, reflectIntensity) *
+                            reflectBrdf * reflectionRation;
             }
 
-            color *= propMin->costume()->computeReflectionBrdf(
-                        -reflectedRay.direction,
-                        reportMin.normal,
-                        -ray.direction,
-                        reportMin.texCoord);
+            // Refraction
+            if(refractionRation)
+            {
+                glm::dvec3 refract = costume->computeRefraction(
+                    ray.direction,
+                    reportMin.normal,
+                    reportMin.texCoord);
+
+                glm::dvec3 refractBrdf = costume->computeRefractionBrdf(
+                    -refract,
+                    reportMin.normal,
+                    -ray.direction,
+                    reportMin.texCoord);
+
+                double colorIntensity = glm::max(glm::max(
+                        refractBrdf.r, refractBrdf.g), refractBrdf.b);
+                double refractIntensity = rayIntensity *
+                    refractionRation * colorIntensity;
+
+                Ray refractedRay(interPt - offset, refract);
+
+                color += fireScreenRay(refractedRay, refractIntensity) *
+                            refractBrdf * refractionRation;
+            }
         }
-        else if(depth != _screenRaysBounceCount)
+        else if(rayIntensity != 1.0)
         {
             // Background color
             const glm::dvec3 blueSkyColor = glm::dvec3(0.25, 0.60, 1.00) * 2.0;
@@ -348,23 +367,38 @@ namespace prop3
             const glm::dvec3 sunColor = glm::dvec3(1.00, 0.7725, 0.5608) * 20.0;
 
             const glm::dvec3 blueSkyDir = glm::dvec3(0, 0, 1);
-            const glm::dvec3 sunDir = glm::dvec3(0.4082, 0.4082, 0.8165);
+            const glm::dvec3 sunDir = glm::dvec3(0.8017, 0.5345, 0.2673);
 
             double upDot = glm::dot(blueSkyDir, ray.direction);
             glm::dvec3 blueSky = blueSkyColor * glm::max(0.0, upDot);
 
             double a = 1.0 - glm::abs(upDot);
-            a *= a *= a *= a *= a;
+            a *= a *= a *= a;
             glm::dvec3 skyline = skylineColor * a;
 
             double s = glm::max(0.0, glm::dot(sunDir, ray.direction));
             s *= s *= s *= s *= s *= s;
             glm::dvec3 sun = sunColor * s;
 
-            color = blueSky + skyline + sun;
+            color = (blueSky + skyline + sun);
         }
 
         return color;
+    }
+
+    glm::dvec3 CpuRaytracerWorker::draft(
+        const Ray& ray,
+        const RaycastReport& report,
+        const std::shared_ptr<Prop>& prop)
+    {
+        const glm::dvec3 sunDir(0.5345, 0.2673, 0.8017);
+        double attenuation = glm::dot(report.normal, sunDir);
+        attenuation = 0.125 + (attenuation/2 + 0.5) * 0.875;
+
+        glm::dvec3 reflect = glm::reflect(ray.direction, report.normal);
+        return prop->costume()->computeReflectionBrdf(
+            -reflect, report.normal, -ray.direction,
+            report.texCoord) * attenuation;
     }
 
     void CpuRaytracerWorker::resetBuffers()

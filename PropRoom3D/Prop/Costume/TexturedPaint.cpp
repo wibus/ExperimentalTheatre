@@ -26,17 +26,21 @@ namespace prop3
             const glm::dvec3& viewDirection,
             const glm::dvec3& texCoord) const
     {
-        if(texCoord == glm::dvec3())
-            return mediumColor();
+        glm::dvec3 color = mediumColor();
 
-        unsigned char* pixel = _texture.pixel(
-                glm::clamp((int)(texCoord.s * _texture.width()), 0, _texture.width()-1),
-                glm::clamp((int)(texCoord.t * _texture.height()), 0, _texture.height()-1));
+        if(texCoord != glm::dvec3())
+        {
+            int i = texCoord.s * _texture.width();
+            int j = texCoord.t * _texture.height();
+            unsigned char* pixel = _texture.pixel(
+                glm::clamp(i, 0,  _texture.width()-1),
+                glm::clamp(j, 0, _texture.height()-1));
 
-        glm::dvec3 color(
-                pixel[0] / 255.0,
-                pixel[1] / 255.0,
-                pixel[2] / 255.0);
+            // Not blended with default color
+            color.x = pixel[0] / 255.0;
+            color.y = pixel[1] / 255.0;
+            color.z = pixel[2] / 255.0;
+        }
 
         return color * glm::max(0.0,
             -glm::dot(incidentDirection, surfaceNormal));

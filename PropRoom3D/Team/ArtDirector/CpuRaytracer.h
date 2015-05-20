@@ -33,7 +33,8 @@ namespace prop3
 
         virtual bool isUpdated();
         virtual bool onUpdateConsumed();
-        virtual float convergenceValue() const;
+        virtual float renderTime() const;
+        virtual float divergenceValue() const;
         virtual unsigned int sampleCount() const;
         virtual const glm::ivec2& viewportSize() const;
         virtual const std::vector<float>& colorBuffer() const;
@@ -70,8 +71,9 @@ namespace prop3
 
         static const unsigned int DEFAULT_WORKER_COUNT;
 
-        float _convergenceValue;
+        float _divergenceValue;
         unsigned int _sampleCount;
+        std::chrono::steady_clock::time_point _startTime;
 
         int _draftLevel;
         int _draftLevelCount;

@@ -52,25 +52,13 @@ namespace prop3
         }
     }
 
-
-    // Ghost
-    PlaneGhost::PlaneGhost(const glm::dvec3& normal, const glm::dvec3& point) :
-        Plane(normal, point)
+    bool Plane::intersects(const Ray& ray)
     {
-    }
-
-    PlaneGhost::PlaneGhost(double a, double b, double c, double d) :
-        Plane(a, b, c, d)
-    {
-    }
-
-    void PlaneGhost::raycast(const Ray&, std::vector<RaycastReport>&) const
-    {
+        return glm::dot(ray.direction, _normal) != 0.0;
     }
 
 
     // Textures
-    // Where normal is (a, b, c) and point is on the plane
     PlaneTexture::PlaneTexture(const glm::dvec3& normal, const glm::dvec3& point,
                                const glm::dvec3& u, const glm::dvec3& v,
                                const glm::dvec3& origin) :
@@ -81,7 +69,6 @@ namespace prop3
 
     }
 
-    // From the equation : a*x + b*y + c*z + d = 0
     PlaneTexture::PlaneTexture(double a, double b, double c, double d,
                                const glm::dvec3& u, const glm::dvec3& v,
                                const glm::dvec3& origin) :

@@ -49,9 +49,14 @@ namespace prop3
         _isVisible = isVisible;
     }
 
-    void Prop::setVolume(const std::shared_ptr<Volume>& volume)
+    void Prop::setVolume(const pVol& volume)
     {
         _volume = volume;
+    }
+
+    void Prop::setBoundingVolume(const pVol& volume)
+    {
+        _boundingVolume = volume;
     }
 
     const void Prop::setCostume(const std::shared_ptr<Costume>& costume)

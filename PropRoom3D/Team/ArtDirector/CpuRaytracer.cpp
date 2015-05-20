@@ -149,6 +149,7 @@ namespace prop3
         if(_workersInterrupted)
         {
             _workersInterrupted = false;
+            _startTime = std::chrono::steady_clock::now();
             for(auto& w : _workerObjects)
             {
                 if(!w->isRunning())
@@ -210,9 +211,19 @@ namespace prop3
         }
     }
 
-    float CpuRaytracer::convergenceValue() const
+    float CpuRaytracer::renderTime() const
     {
-        return _convergenceValue;
+        if(isDrafting() || _sampleCount == 0)
+            return 0;
+
+        std::chrono::duration<double> dt =
+            std::chrono::steady_clock::now() - _startTime;
+        return dt.count();
+    }
+
+    float CpuRaytracer::divergenceValue() const
+    {
+        return _divergenceValue;
     }
 
     unsigned int CpuRaytracer::sampleCount() const
@@ -315,7 +326,7 @@ namespace prop3
 
         ++_draftLevel;
         _sampleCount = 0;
-        _convergenceValue = 0;
+        _divergenceValue = 0;
 
         if(_draftLevel < _draftLevelCount)
         {
@@ -378,7 +389,7 @@ namespace prop3
         const float* colorBuffer,
         unsigned int sampleCount)
     {
-        _convergenceValue = 0.0;
+        _divergenceValue = 0.0;
 
         int lastSampleCount = _sampleCount;
         _sampleCount += sampleCount;
@@ -413,15 +424,14 @@ namespace prop3
 
             newValue /= (float) nextSampleCount;
             glm::vec3 meanShift = glm::abs(newValue - lastValue);
-            _convergenceValue += glm::dot(meanShift, meanShift);
+            _divergenceValue += glm::dot(meanShift, meanShift);
 
             _colorBuffer[i] = newValue.r;
             _colorBuffer[i+1] = newValue.g;
             _colorBuffer[i+2] = newValue.b;
         }
 
-        _convergenceValue = glm::sqrt(_convergenceValue) * sampleCount;
-        _convergenceValue = 1.0f / (1.0f + _convergenceValue);
+        _divergenceValue = glm::sqrt(_divergenceValue) * sampleCount / (cc/3);
         _isUpdated = true;
     }
 

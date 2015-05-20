@@ -7,18 +7,9 @@
 
 namespace prop3
 {
-
-    Transform::Transform(const glm::dmat4& transform) :
-        _mat(transform),
-        _inv(),
-        _isInvComputed(false)
-    {
-
-    }
-
     Transform::Transform(double scale,
-                         const glm::dquat rotation,
-                         const glm::dvec3 translation) :
+                         const glm::dquat& rotation,
+                         const glm::dvec3& translation) :
         _mat(1.0),
         _inv(1.0),
         _isInvComputed(true)
@@ -48,10 +39,44 @@ namespace prop3
 
     }
 
-    VolumeNot::VolumeNot(const std::shared_ptr<Volume>& eq) :
+
+    // VolumeGhost
+    VolumeGhost::VolumeGhost(const pVol& eq) :
         _eq(eq)
     {
+    }
 
+    void VolumeGhost::transform(const Transform& transform)
+    {
+        _eq->transform(transform);
+    }
+
+    EPointPosition VolumeGhost::isIn(const glm::dvec3& point) const
+    {
+        return _eq->isIn(point);
+    }
+
+    double VolumeGhost::signedDistance(const glm::dvec3& point) const
+    {
+        return _eq->signedDistance(point);
+    }
+
+    void VolumeGhost::raycast(const Ray&,
+        std::vector<RaycastReport>&) const
+    {
+        // Never generates intersection points
+    }
+
+    bool VolumeGhost::intersects(const Ray& ray)
+    {
+        return false;
+    }
+
+
+    // VolumeNot
+    VolumeNot::VolumeNot(const pVol& eq) :
+        _eq(eq)
+    {
     }
 
     void VolumeNot::transform(const Transform& transform)
@@ -84,7 +109,14 @@ namespace prop3
         }
     }
 
-    VolumeOr::VolumeOr(const std::vector<std::shared_ptr<Volume>>& eqs) :
+    bool VolumeNot::intersects(const Ray& ray)
+    {
+        return _eq->intersects(ray);
+    }
+
+
+    // VolumeOr
+    VolumeOr::VolumeOr(const std::vector<pVol>& eqs) :
         _eqs(eqs)
     {
     }
@@ -124,6 +156,19 @@ namespace prop3
     void VolumeOr::raycast(const Ray& ray,
                            std::vector<RaycastReport>& reports) const
     {
+        raycast(ray, reports, false);
+    }
+
+    bool VolumeOr::intersects(const Ray& ray)
+    {
+        std::vector<RaycastReport> reports;
+        return raycast(ray, reports, true);
+    }
+
+    bool VolumeOr::raycast(const Ray& ray,
+                           std::vector<RaycastReport>& reports,
+                           bool isTest) const
+    {
         std::vector<RaycastReport> eqReports;
         for(const auto& eq : _eqs)
         {
@@ -148,13 +193,20 @@ namespace prop3
 
                 if(!isIn)
                 {
+                    if(isTest)
+                        return true;
+
                     reports.push_back(report);
                 }
             }
         }
+
+        return false;
     }
 
-    VolumeAnd::VolumeAnd(const std::vector<std::shared_ptr<Volume>>& eqs) :
+
+    // VolumeAnd
+    VolumeAnd::VolumeAnd(const std::vector<pVol>& eqs) :
         _eqs(eqs)
     {
     }
@@ -192,7 +244,20 @@ namespace prop3
     }
 
     void VolumeAnd::raycast(const Ray& ray,
-                            std::vector<RaycastReport>& reports) const
+                           std::vector<RaycastReport>& reports) const
+    {
+        raycast(ray, reports, false);
+    }
+
+    bool VolumeAnd::intersects(const Ray& ray)
+    {
+        std::vector<RaycastReport> reports;
+        return raycast(ray, reports, true);
+    }
+
+    bool VolumeAnd::raycast(const Ray& ray,
+                            std::vector<RaycastReport>& reports,
+                            bool isTest) const
     {
         std::vector<RaycastReport> eqReports;
         for(const auto& eq : _eqs)
@@ -218,58 +283,70 @@ namespace prop3
 
                 if(isIn)
                 {
+                    if(isTest)
+                        return true;
+
                     reports.push_back(report);
                 }
             }
         }
+
+        return false;
     }
 
 
-    std::shared_ptr<Volume> operator!(
-            const std::shared_ptr<Volume>& eq)
+    // Operators
+    pVol operator~ (
+            const pVol& eq)
     {
-        return std::shared_ptr<Volume>(new VolumeNot(eq));
+        return pVol(new VolumeGhost(eq));
     }
 
-    std::shared_ptr<Volume> operator| (
-            const std::shared_ptr<Volume>& eq1,
-            const std::shared_ptr<Volume>& eq2)
+    pVol operator!(
+            const pVol& eq)
+    {
+        return pVol(new VolumeNot(eq));
+    }
+
+    pVol operator| (
+            const pVol& eq1,
+            const pVol& eq2)
     {
         std::shared_ptr<VolumeOr> cast1;
         if(cast1 = std::dynamic_pointer_cast<VolumeOr>(eq1))
         {
-            cast1->addVolume(eq2);
+            cast1->add(eq2);
             return cast1;
         }
 
         std::shared_ptr<VolumeOr> cast2;
         if(cast2 = std::dynamic_pointer_cast<VolumeOr>(eq2))
         {
-            cast2->addVolume(eq1);
+            cast2->add(eq1);
             return cast2;
         }
 
-        return std::shared_ptr<Volume>(new VolumeOr({eq1, eq2}));
+        return pVol(new VolumeOr({eq1, eq2}));
     }
 
-    std::shared_ptr<Volume> operator& (
-            const std::shared_ptr<Volume>& eq1,
-            const std::shared_ptr<Volume>& eq2)
+    pVol operator& (
+            const pVol& eq1,
+            const pVol& eq2)
     {
         std::shared_ptr<VolumeAnd> cast1;
         if(cast1 = std::dynamic_pointer_cast<VolumeAnd>(eq1))
         {
-            cast1->addVolume(eq2);
+            cast1->add(eq2);
             return cast1;
         }
 
         std::shared_ptr<VolumeAnd> cast2;
         if(cast2 = std::dynamic_pointer_cast<VolumeAnd>(eq2))
         {
-            cast2->addVolume(eq1);
+            cast2->add(eq1);
             return cast2;
         }
 
-        return std::shared_ptr<Volume>(new VolumeAnd({eq1, eq2}));
+        return pVol(new VolumeAnd({eq1, eq2}));
     }
 }
