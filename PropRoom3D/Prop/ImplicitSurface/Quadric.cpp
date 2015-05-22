@@ -1,6 +1,6 @@
 #include "Quadric.h"
 
-#include "Raycast.h"
+#include "../Ray/RayHitReport.h"
 
 
 namespace prop3
@@ -26,7 +26,8 @@ namespace prop3
     }
 
     Quadric::Quadric(const glm::dmat4& Q) :
-        _q(Q)
+        _q(Q),
+        _coating(ImplicitSurface::NO_COATING)
     {
 
     }
@@ -38,7 +39,8 @@ namespace prop3
         _q(A, B, C, D,
                   B, E, F, G,
                   C, F, H, I,
-                  D, G, I, J)
+                  D, G, I, J),
+        _coating(ImplicitSurface::NO_COATING)
     {
 
     }
@@ -70,7 +72,7 @@ namespace prop3
     }
 
     // ref : http://marctenbosch.com/photon/mbosch_intersection.pdf
-    void Quadric::raycast(const Ray& ray, std::vector<RaycastReport>& reports) const
+    void Quadric::raycast(const Ray& ray, std::vector<RayHitReport>& reports) const
     {
         double a, b, c;
         params(ray, a, b, c);
@@ -86,14 +88,14 @@ namespace prop3
                     double t1 = (-b - dsrcSqrt) / (2 * a);
                     glm::dvec3 pt1 = ray.origin + ray.direction*t1;
                     glm::dvec3 n1 =  computeNormal(_q, pt1);
-                    reports.push_back(RaycastReport(t1, pt1, n1));
+                    reports.push_back(RayHitReport(ray, t1, pt1, n1, _coating));
                 }
 
                 {
                     double t2 = (-b + dsrcSqrt) / (2 * a);
                     glm::dvec3 pt2 = ray.origin + ray.direction*t2;
                     glm::dvec3 n2 =  computeNormal(_q, pt2);
-                    reports.push_back(RaycastReport(t2, pt2, n2));
+                    reports.push_back(RayHitReport(ray, t2, pt2, n2, _coating));
                 }
             }
             else if (dscr == 0.0)
@@ -101,7 +103,7 @@ namespace prop3
                 double t = -b / (2 * a);
                 glm::dvec3 pt = ray.origin + ray.direction*t;
                 glm::dvec3 n =  computeNormal(_q, pt);
-                reports.push_back(RaycastReport(t, pt, n));
+                reports.push_back(RayHitReport(ray, t, pt, n, _coating));
             }
         }
         else
@@ -111,7 +113,7 @@ namespace prop3
                 double t = -c / b;
                 glm::dvec3 pt = ray.origin + ray.direction * t;
                 glm::dvec3 n =  computeNormal(_q, pt);
-                reports.push_back(RaycastReport(t, pt, n));
+                reports.push_back(RayHitReport(ray, t, pt, n, _coating));
             }
         }
     }
@@ -143,5 +145,10 @@ namespace prop3
         a = glm::dot(homoDir, _q * homoDir);
         b = glm::dot(homoDir, _q * homoOrg) * 2.0;
         c = glm::dot(homoOrg, _q * homoOrg);
+    }
+
+    void Quadric::setCoating(const std::shared_ptr<Coating>& coating)
+    {
+        _coating = coating;
     }
 }

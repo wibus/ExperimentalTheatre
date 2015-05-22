@@ -1,8 +1,9 @@
-#include "Volume.h"
+#include "ImplicitSurface.h"
 
 #include <GLM/gtc/matrix_transform.hpp>
 
-#include "Raycast.h"
+#include "../Ray/RayHitReport.h"
+#include "../Coating/NoCoating.h"
 
 
 namespace prop3
@@ -29,62 +30,68 @@ namespace prop3
         _inv = invScale * _inv;
     }
 
-    Volume::Volume()
+    const std::shared_ptr<Coating> ImplicitSurface::NO_COATING(new NoCoating());
+
+    ImplicitSurface::ImplicitSurface()
     {
 
     }
 
-    Volume::~Volume()
+    ImplicitSurface::~ImplicitSurface()
     {
 
     }
 
 
-    // VolumeGhost
-    VolumeGhost::VolumeGhost(const pVol& eq) :
+    // SurfaceGhost
+    SurfaceGhost::SurfaceGhost(const std::shared_ptr<ImplicitSurface>& eq) :
         _eq(eq)
     {
     }
 
-    void VolumeGhost::transform(const Transform& transform)
+    void SurfaceGhost::transform(const Transform& transform)
     {
         _eq->transform(transform);
     }
 
-    EPointPosition VolumeGhost::isIn(const glm::dvec3& point) const
+    EPointPosition SurfaceGhost::isIn(const glm::dvec3& point) const
     {
         return _eq->isIn(point);
     }
 
-    double VolumeGhost::signedDistance(const glm::dvec3& point) const
+    double SurfaceGhost::signedDistance(const glm::dvec3& point) const
     {
         return _eq->signedDistance(point);
     }
 
-    void VolumeGhost::raycast(const Ray&,
-        std::vector<RaycastReport>&) const
+    void SurfaceGhost::raycast(const Ray&,
+        std::vector<RayHitReport>&) const
     {
         // Never generates intersection points
     }
 
-    bool VolumeGhost::intersects(const Ray& ray)
+    bool SurfaceGhost::intersects(const Ray& ray)
     {
         return false;
     }
 
+    void SurfaceGhost::setCoating(const std::shared_ptr<Coating>& coating)
+    {
+    }
 
-    // VolumeNot
-    VolumeNot::VolumeNot(const pVol& eq) :
+
+    // SurfaceNot
+    SurfaceInverse::SurfaceInverse(const std::shared_ptr<ImplicitSurface>& eq) :
         _eq(eq)
     {
     }
 
-    void VolumeNot::transform(const Transform& transform)
+    void SurfaceInverse::transform(const Transform& transform)
     {
         _eq->transform(transform);
     }
 
-    EPointPosition VolumeNot::isIn(const glm::dvec3& point) const
+    EPointPosition SurfaceInverse::isIn(const glm::dvec3& point) const
     {
         EPointPosition pos = _eq->isIn(point);
         return pos != EPointPosition::IN ?
@@ -94,40 +101,45 @@ namespace prop3
                     EPointPosition::OUT;
     }
 
-    double VolumeNot::signedDistance(const glm::dvec3& point) const
+    double SurfaceInverse::signedDistance(const glm::dvec3& point) const
     {
         return -_eq->signedDistance(point);
     }
 
-    void VolumeNot::raycast(const Ray& ray,
-                        std::vector<RaycastReport>& reports) const
+    void SurfaceInverse::raycast(const Ray& ray,
+                        std::vector<RayHitReport>& reports) const
     {
         _eq->raycast(ray, reports);
-        for(RaycastReport& report : reports)
+        for(RayHitReport& report : reports)
         {
             report.normal = -report.normal;
         }
     }
 
-    bool VolumeNot::intersects(const Ray& ray)
+    bool SurfaceInverse::intersects(const Ray& ray)
     {
         return _eq->intersects(ray);
     }
 
+    void SurfaceInverse::setCoating(const std::shared_ptr<Coating>& coating)
+    {
+        _eq->setCoating(coating);
+    }
 
-    // VolumeOr
-    VolumeOr::VolumeOr(const std::vector<pVol>& eqs) :
+
+    // SurfaceOr
+    SurfaceOr::SurfaceOr(const std::vector<std::shared_ptr<ImplicitSurface>>& eqs) :
         _eqs(eqs)
     {
     }
 
-    void VolumeOr::transform(const Transform& transform)
+    void SurfaceOr::transform(const Transform& transform)
     {
         for(auto& eq : _eqs)
             eq->transform(transform);
     }
 
-    EPointPosition VolumeOr::isIn(const glm::dvec3& point) const
+    EPointPosition SurfaceOr::isIn(const glm::dvec3& point) const
     {
         EPointPosition pos = EPointPosition::OUT;
         for(const auto& eq : _eqs)
@@ -141,7 +153,7 @@ namespace prop3
         return pos;
     }
 
-    double VolumeOr::signedDistance(const glm::dvec3& point) const
+    double SurfaceOr::signedDistance(const glm::dvec3& point) const
     {
         static_assert(std::numeric_limits<double>::is_iec559, "IEEE 754 required");
         double minDist = std::numeric_limits<double>::infinity();
@@ -153,29 +165,29 @@ namespace prop3
         return minDist;
     }
 
-    void VolumeOr::raycast(const Ray& ray,
-                           std::vector<RaycastReport>& reports) const
+    void SurfaceOr::raycast(const Ray& ray,
+                           std::vector<RayHitReport>& reports) const
     {
         raycast(ray, reports, false);
     }
 
-    bool VolumeOr::intersects(const Ray& ray)
+    bool SurfaceOr::intersects(const Ray& ray)
     {
-        std::vector<RaycastReport> reports;
+        std::vector<RayHitReport> reports;
         return raycast(ray, reports, true);
     }
 
-    bool VolumeOr::raycast(const Ray& ray,
-                           std::vector<RaycastReport>& reports,
+    bool SurfaceOr::raycast(const Ray& ray,
+                           std::vector<RayHitReport>& reports,
                            bool isTest) const
     {
-        std::vector<RaycastReport> eqReports;
+        std::vector<RayHitReport> eqReports;
         for(const auto& eq : _eqs)
         {
             eqReports.clear();
             eq->raycast(ray, eqReports);
 
-            for(RaycastReport& report : eqReports)
+            for(RayHitReport& report : eqReports)
             {
                 bool isIn = false;
                 for(const auto& eqTest : _eqs)
@@ -204,20 +216,26 @@ namespace prop3
         return false;
     }
 
+    void SurfaceOr::setCoating(const std::shared_ptr<Coating>& coating)
+    {
+        for(auto& eq : _eqs)
+            eq->setCoating(coating);
+    }
 
-    // VolumeAnd
-    VolumeAnd::VolumeAnd(const std::vector<pVol>& eqs) :
+
+    // SurfaceAnd
+    SurfaceAnd::SurfaceAnd(const std::vector<std::shared_ptr<ImplicitSurface>>& eqs) :
         _eqs(eqs)
     {
     }
 
-    void VolumeAnd::transform(const Transform& transform)
+    void SurfaceAnd::transform(const Transform& transform)
     {
         for(auto& eq : _eqs)
             eq->transform(transform);
     }
 
-    EPointPosition VolumeAnd::isIn(const glm::dvec3& point) const
+    EPointPosition SurfaceAnd::isIn(const glm::dvec3& point) const
     {
         EPointPosition pos = EPointPosition::IN;
         for(const auto& eq : _eqs)
@@ -231,7 +249,7 @@ namespace prop3
         return pos;
     }
 
-    double VolumeAnd::signedDistance(const glm::dvec3& point) const
+    double SurfaceAnd::signedDistance(const glm::dvec3& point) const
     {
         static_assert(std::numeric_limits<double>::is_iec559, "IEEE 754 required");
         double maxDist = -std::numeric_limits<double>::infinity();
@@ -243,29 +261,29 @@ namespace prop3
         return maxDist;
     }
 
-    void VolumeAnd::raycast(const Ray& ray,
-                           std::vector<RaycastReport>& reports) const
+    void SurfaceAnd::raycast(const Ray& ray,
+                           std::vector<RayHitReport>& reports) const
     {
         raycast(ray, reports, false);
     }
 
-    bool VolumeAnd::intersects(const Ray& ray)
+    bool SurfaceAnd::intersects(const Ray& ray)
     {
-        std::vector<RaycastReport> reports;
+        std::vector<RayHitReport> reports;
         return raycast(ray, reports, true);
     }
 
-    bool VolumeAnd::raycast(const Ray& ray,
-                            std::vector<RaycastReport>& reports,
+    bool SurfaceAnd::raycast(const Ray& ray,
+                            std::vector<RayHitReport>& reports,
                             bool isTest) const
     {
-        std::vector<RaycastReport> eqReports;
+        std::vector<RayHitReport> eqReports;
         for(const auto& eq : _eqs)
         {
             eqReports.clear();
             eq->raycast(ray, eqReports);
 
-            for(RaycastReport& report : eqReports)
+            for(RayHitReport& report : eqReports)
             {
                 bool isIn = true;
                 for(const auto& eqTest : _eqs)
@@ -294,59 +312,65 @@ namespace prop3
         return false;
     }
 
+    void SurfaceAnd::setCoating(const std::shared_ptr<Coating>& coating)
+    {
+        for(auto& eq : _eqs)
+            eq->setCoating(coating);
+    }
+
 
     // Operators
-    pVol operator~ (
-            const pVol& eq)
+    std::shared_ptr<ImplicitSurface> operator~ (
+            const std::shared_ptr<ImplicitSurface>& eq)
     {
-        return pVol(new VolumeGhost(eq));
+        return std::shared_ptr<ImplicitSurface>(new SurfaceGhost(eq));
     }
 
-    pVol operator!(
-            const pVol& eq)
+    std::shared_ptr<ImplicitSurface> operator!(
+            const std::shared_ptr<ImplicitSurface>& eq)
     {
-        return pVol(new VolumeNot(eq));
+        return std::shared_ptr<ImplicitSurface>(new SurfaceInverse(eq));
     }
 
-    pVol operator| (
-            const pVol& eq1,
-            const pVol& eq2)
+    std::shared_ptr<ImplicitSurface> operator| (
+            const std::shared_ptr<ImplicitSurface>& eq1,
+            const std::shared_ptr<ImplicitSurface>& eq2)
     {
-        std::shared_ptr<VolumeOr> cast1;
-        if(cast1 = std::dynamic_pointer_cast<VolumeOr>(eq1))
+        std::shared_ptr<SurfaceOr> cast1;
+        if(cast1 = std::dynamic_pointer_cast<SurfaceOr>(eq1))
         {
             cast1->add(eq2);
             return cast1;
         }
 
-        std::shared_ptr<VolumeOr> cast2;
-        if(cast2 = std::dynamic_pointer_cast<VolumeOr>(eq2))
+        std::shared_ptr<SurfaceOr> cast2;
+        if(cast2 = std::dynamic_pointer_cast<SurfaceOr>(eq2))
         {
             cast2->add(eq1);
             return cast2;
         }
 
-        return pVol(new VolumeOr({eq1, eq2}));
+        return std::shared_ptr<ImplicitSurface>(new SurfaceOr({eq1, eq2}));
     }
 
-    pVol operator& (
-            const pVol& eq1,
-            const pVol& eq2)
+    std::shared_ptr<ImplicitSurface> operator& (
+            const std::shared_ptr<ImplicitSurface>& eq1,
+            const std::shared_ptr<ImplicitSurface>& eq2)
     {
-        std::shared_ptr<VolumeAnd> cast1;
-        if(cast1 = std::dynamic_pointer_cast<VolumeAnd>(eq1))
+        std::shared_ptr<SurfaceAnd> cast1;
+        if(cast1 = std::dynamic_pointer_cast<SurfaceAnd>(eq1))
         {
             cast1->add(eq2);
             return cast1;
         }
 
-        std::shared_ptr<VolumeAnd> cast2;
-        if(cast2 = std::dynamic_pointer_cast<VolumeAnd>(eq2))
+        std::shared_ptr<SurfaceAnd> cast2;
+        if(cast2 = std::dynamic_pointer_cast<SurfaceAnd>(eq2))
         {
             cast2->add(eq1);
             return cast2;
         }
 
-        return pVol(new VolumeAnd({eq1, eq2}));
+        return std::shared_ptr<ImplicitSurface>(new SurfaceAnd({eq1, eq2}));
     }
 }

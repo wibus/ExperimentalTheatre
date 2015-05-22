@@ -1,19 +1,21 @@
 #include "Plane.h"
 
-#include "Raycast.h"
+#include "../Ray/RayHitReport.h"
 
 
 namespace prop3
 {
     Plane::Plane(const glm::dvec3& normal, const glm::dvec3& point) :
         _normal(glm::normalize(normal)),
-        _d(-glm::dot(_normal, point))
+        _d(-glm::dot(_normal, point)),
+        _coating(ImplicitSurface::NO_COATING)
     {
     }
 
     Plane::Plane(double a, double b, double c, double d) :
         _normal(a, b, c),
-        _d(d)
+        _d(d),
+        _coating(ImplicitSurface::NO_COATING)
     {
     }
 
@@ -41,14 +43,14 @@ namespace prop3
         return glm::dot(_normal, point) + _d;
     }
 
-    void Plane::raycast(const Ray& ray, std::vector<RaycastReport>& reports) const
+    void Plane::raycast(const Ray& ray, std::vector<RayHitReport>& reports) const
     {
         double dirDotNorm = glm::dot(_normal, ray.direction);
         if(dirDotNorm != 0.0)
         {
             double t = -(glm::dot(_normal, ray.origin) + _d) / dirDotNorm;
             glm::dvec3 pt = ray.origin + ray.direction * t;
-            reports.push_back(RaycastReport(t, pt, _normal));
+            reports.push_back(RayHitReport(ray, t, pt, _normal, _coating));
         }
     }
 
@@ -57,11 +59,16 @@ namespace prop3
         return glm::dot(ray.direction, _normal) != 0.0;
     }
 
+    void Plane::setCoating(const std::shared_ptr<Coating>& coating)
+    {
+        _coating = coating;
+    }
+
 
     // Textures
-    PlaneTexture::PlaneTexture(const glm::dvec3& normal, const glm::dvec3& point,
-                               const glm::dvec3& u, const glm::dvec3& v,
-                               const glm::dvec3& origin) :
+    PlaneTexture::PlaneTexture(
+            const glm::dvec3& normal, const glm::dvec3& point,
+            const glm::dvec3& u, const glm::dvec3& v, const glm::dvec3& origin) :
         Plane(normal, point),
         _origin(origin),
         _u(u), _v(v)
@@ -69,9 +76,9 @@ namespace prop3
 
     }
 
-    PlaneTexture::PlaneTexture(double a, double b, double c, double d,
-                               const glm::dvec3& u, const glm::dvec3& v,
-                               const glm::dvec3& origin) :
+    PlaneTexture::PlaneTexture(
+            double a, double b, double c, double d,
+            const glm::dvec3& u, const glm::dvec3& v, const glm::dvec3& origin) :
         Plane(a, b, c, d),
         _origin(origin),
         _u(u), _v(v)
@@ -79,12 +86,12 @@ namespace prop3
 
     }
 
-    void PlaneTexture::raycast(const Ray& ray, std::vector<RaycastReport>& reports) const
+    void PlaneTexture::raycast(const Ray& ray, std::vector<RayHitReport>& reports) const
     {
-        std::vector<RaycastReport> planeReports;
+        std::vector<RayHitReport> planeReports;
         Plane::raycast(ray, planeReports);
 
-        for(RaycastReport& r : planeReports)
+        for(RayHitReport& r : planeReports)
         {
             glm::dvec3 dist = r.position - _origin;
             r.texCoord.s = glm::dot(dist, _u) / glm::dot(_u, _u);

@@ -1,12 +1,12 @@
 #ifndef PROPROOM3D_QUADRIC_H
 #define PROPROOM3D_QUADRIC_H
 
-#include "Volume.h"
+#include "ImplicitSurface.h"
 
 
 namespace prop3
 {
-    class PROP3D_EXPORT Quadric : public Volume
+    class PROP3D_EXPORT Quadric : public ImplicitSurface
     {
     public:
         // Constructing a quadric from the equation :
@@ -30,14 +30,17 @@ namespace prop3
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
-        virtual void raycast(const Ray& ray, std::vector<RaycastReport>& reports) const;
+        virtual void raycast(const Ray& ray, std::vector<RayHitReport>& reports) const;
         virtual bool intersects(const Ray& ray);
+
+        virtual void setCoating(const std::shared_ptr<Coating>& coating);
 
     protected:
         void params(const Ray& ray, double& a, double& b, double& c) const;
 
     private:
         glm::dmat4 _q;
+        std::shared_ptr<Coating> _coating;
     };
 }
 

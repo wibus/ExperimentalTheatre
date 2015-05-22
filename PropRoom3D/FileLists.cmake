@@ -26,36 +26,49 @@ SET(PROP3_TEAM_HEADERS
     ${PROP3_SRC_DIR}/Team/AbstractTeam.h
     ${PROP3_SRC_DIR}/Team/StdTeam.h)
 
-# Costumes
-SET(PROP3_COSTUME_HEADERS
-    ${PROP3_SRC_DIR}/Prop/Costume/Costume.h
-    ${PROP3_SRC_DIR}/Prop/Costume/Glass.h
-    ${PROP3_SRC_DIR}/Prop/Costume/Chrome.h
-    ${PROP3_SRC_DIR}/Prop/Costume/FlatPaint.h
-    ${PROP3_SRC_DIR}/Prop/Costume/TexturedPaint.h)
+# Coatings
+SET(PROP3_COATING_HEADERS
+    ${PROP3_SRC_DIR}/Prop/Coating/Coating.h
+    ${PROP3_SRC_DIR}/Prop/Coating/NoCoating.h
+    ${PROP3_SRC_DIR}/Prop/Coating/FlatPaint.h
+    ${PROP3_SRC_DIR}/Prop/Coating/GlossyPaint.h
+    ${PROP3_SRC_DIR}/Prop/Coating/TexturedFlatPaint.h
+    ${PROP3_SRC_DIR}/Prop/Coating/TexturedGlossyPaint.h)
 
-# Hardwares
-SET(PROP3_HARDWARE_HEADERS
-    ${PROP3_SRC_DIR}/Prop/Hardware/Hardware.h)
+# Implicit Surfaces
+SET(PROP3_IMPLICIT_SURFACE_HEADERS
+    ${PROP3_SRC_DIR}/Prop/ImplicitSurface/ImplicitSurface.h
+    ${PROP3_SRC_DIR}/Prop/ImplicitSurface/Plane.h
+    ${PROP3_SRC_DIR}/Prop/ImplicitSurface/Quadric.h
+    ${PROP3_SRC_DIR}/Prop/ImplicitSurface/Sphere.h)
 
 # Lighting
 SET(PROP3_LIGHTING_HEADERS
     ${PROP3_SRC_DIR}/Prop/Lighting/Light3D.h)
 
-# Volumes
-SET(PROP3_VOLUME_HEADERS
-    ${PROP3_SRC_DIR}/Prop/Volume/Raycast.h
-    ${PROP3_SRC_DIR}/Prop/Volume/Volume.h
-    ${PROP3_SRC_DIR}/Prop/Volume/Plane.h
-    ${PROP3_SRC_DIR}/Prop/Volume/Quadric.h
-    ${PROP3_SRC_DIR}/Prop/Volume/Sphere.h)
+# Materials
+SET(PROP3_MATERIAL_HEADERS
+    ${PROP3_SRC_DIR}/Prop/Material/Material.h
+    ${PROP3_SRC_DIR}/Prop/Material/Air.h
+    ${PROP3_SRC_DIR}/Prop/Material/Chrome.h
+    ${PROP3_SRC_DIR}/Prop/Material/Concrete.h
+    ${PROP3_SRC_DIR}/Prop/Material/Glass.h)
+
+# Rays
+SET(PROP3_RAY_HEADERS
+    ${PROP3_SRC_DIR}/Prop/Ray/Ray.h
+    ${PROP3_SRC_DIR}/Prop/Ray/Raycast.h
+    ${PROP3_SRC_DIR}/Prop/Ray/RayHitReport.h
+    ${PROP3_SRC_DIR}/Prop/Ray/RayUtils.h)
 
 # Prop
 SET(PROP3_PROP_HEADERS
-    ${PROP3_COSTUME_HEADERS}
+    ${PROP3_COATING_HEADERS}
+    ${PROP3_IMPLICIT_SURFACE_HEADERS}
     ${PROP3_HARDWARE_HEADERS}
     ${PROP3_LIGHTING_HEADERS}
-    ${PROP3_VOLUME_HEADERS}
+    ${PROP3_MATERIAL_HEADERS}
+    ${PROP3_RAY_HEADERS}
     ${PROP3_SRC_DIR}/Prop/Prop.h)
 
 # All the header files #
@@ -90,34 +103,49 @@ SET(PROP3_TEAM_SOURCES
     ${PROP3_SRC_DIR}/Team/AbstractTeam.cpp
     ${PROP3_SRC_DIR}/Team/StdTeam.cpp)
 
-# Costumes
-SET(PROP3_COSTUME_SOURCES
-    ${PROP3_SRC_DIR}/Prop/Costume/Glass.cpp
-    ${PROP3_SRC_DIR}/Prop/Costume/Chrome.cpp
-    ${PROP3_SRC_DIR}/Prop/Costume/FlatPaint.cpp
-    ${PROP3_SRC_DIR}/Prop/Costume/TexturedPaint.cpp)
+# Coatings
+SET(PROP3_COATING_SOURCES
+    ${PROP3_SRC_DIR}/Prop/Coating/Coating.cpp
+    ${PROP3_SRC_DIR}/Prop/Coating/NoCoating.cpp
+    ${PROP3_SRC_DIR}/Prop/Coating/FlatPaint.cpp
+    ${PROP3_SRC_DIR}/Prop/Coating/GlossyPaint.cpp
+    ${PROP3_SRC_DIR}/Prop/Coating/TexturedFlatPaint.cpp
+    ${PROP3_SRC_DIR}/Prop/Coating/TexturedGlossyPaint.cpp)
 
-# Hardwares
-SET(PROP3_HARDWARE_SOURCES
-    ${PROP3_SRC_DIR}/Prop/Hardware/Hardware.cpp)
+# Implicit Surfaces
+SET(PROP3_IMPLICIT_SURFACE_SOURCES
+    ${PROP3_SRC_DIR}/Prop/ImplicitSurface/ImplicitSurface.cpp
+    ${PROP3_SRC_DIR}/Prop/ImplicitSurface/Plane.cpp
+    ${PROP3_SRC_DIR}/Prop/ImplicitSurface/Quadric.cpp
+    ${PROP3_SRC_DIR}/Prop/ImplicitSurface/Sphere.cpp)
 
 # Lighting
 SET(PROP3_LIGHTING_SOURCES
     ${PROP3_SRC_DIR}/Prop/Lighting/Light3D.cpp)
 
-# Volumes
-SET(PROP3_VOLUME_SOURCES
-    ${PROP3_SRC_DIR}/Prop/Volume/Volume.cpp
-    ${PROP3_SRC_DIR}/Prop/Volume/Plane.cpp
-    ${PROP3_SRC_DIR}/Prop/Volume/Quadric.cpp
-    ${PROP3_SRC_DIR}/Prop/Volume/Sphere.cpp)
+# Materials
+SET(PROP3_MATERIAL_SOURCES
+    ${PROP3_SRC_DIR}/Prop/Material/Material.cpp
+    ${PROP3_SRC_DIR}/Prop/Material/Air.cpp
+    ${PROP3_SRC_DIR}/Prop/Material/Chrome.cpp
+    ${PROP3_SRC_DIR}/Prop/Material/Concrete.cpp
+    ${PROP3_SRC_DIR}/Prop/Material/Glass.cpp)
+
+# Rays
+SET(PROP3_RAY_SOURCES
+    ${PROP3_SRC_DIR}/Prop/Ray/Ray.cpp
+    ${PROP3_SRC_DIR}/Prop/Ray/Raycast.cpp
+    ${PROP3_SRC_DIR}/Prop/Ray/RayHitReport.cpp
+    ${PROP3_SRC_DIR}/Prop/Ray/RayUtils.cpp)
 
 # Props
 SET(PROP3_PROP_SOURCES
-    ${PROP3_COSTUME_SOURCES}
+    ${PROP3_COATING_SOURCES}
+    ${PROP3_IMPLICIT_SURFACE_SOURCES}
     ${PROP3_HARDWARE_SOURCES}
     ${PROP3_LIGHTING_SOURCES}
-    ${PROP3_VOLUME_SOURCES}
+    ${PROP3_MATERIAL_SOURCES}
+    ${PROP3_RAY_SOURCES}
     ${PROP3_SRC_DIR}/Prop/Prop.cpp)
 
 # All the source files #
@@ -151,23 +179,3 @@ SET(PROP3_SRC_FILES
     ${PROP3_CONFIG_FILES}
     ${PROP3_RESOURCE_FILES}
     ${PROP3_RCC_SRCS})
-
-
-
-## Source groups ##
-SOURCE_GROUP("Header Files" FILES ${PROP3_HEADERS_FILTER})
-SOURCE_GROUP("Header Files\\Costume" FILES ${PROP3_COSTUME_HEADERS})
-SOURCE_GROUP("Header Files\\Hardware" FILES ${PROP3_HARDWARE_HEADERS})
-SOURCE_GROUP("Header Files\\Prop Team" FILES ${PROP3_TEAM_HEADERS})
-SOURCE_GROUP("Header Files\\Shape" FILES ${PROP3_SHAPE_HEADERS})
-
-SOURCE_GROUP("Source Files" FILES ${PROP3_SOURCES_FILTER})
-SOURCE_GROUP("Source Files\\Costume" FILES ${PROP3_COSTUME_SOURCES})
-SOURCE_GROUP("Source Files\\Hardware" FILES ${PROP3_HARDWARE_SOURCES})
-SOURCE_GROUP("Source Files\\Prop Team" FILES ${PROP3_TEAM_SOURCES})
-SOURCE_GROUP("Source Files\\Shape" FILES ${PROP3_SHAPE_SOURCES})
-
-SOURCE_GROUP("Config" FILES ${PROP3_CONFIG_FILES})
-
-SOURCE_GROUP("Resources" FILES ${PROP3_RCC_FILES})
-SOURCE_GROUP("Resources\\Shaders" FILES ${PROP3_SHADER_FILES})

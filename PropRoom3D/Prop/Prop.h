@@ -7,22 +7,16 @@
 #include <GLM/glm.hpp>
 #include <GLM/gtc/quaternion.hpp>
 
-#include <CellarWorkbench/DesignPattern/SpecificObserver.h>
-
 #include "PropRoom3D/libPropRoom3D_global.h"
 
 
 namespace prop3
 {
-class Costume;
-class HardwareUpdate;
-class Hardware;
-class Volume;
+    class Material;
+    class ImplicitSurface;
 
-typedef std::shared_ptr<Volume> pVol;
 
-    class PROP3D_EXPORT Prop :
-            public cellar::SpecificObserver<HardwareUpdate>
+    class PROP3D_EXPORT Prop
     {
     public:
         Prop();
@@ -35,22 +29,17 @@ typedef std::shared_ptr<Volume> pVol;
         bool isVisible() const;
         virtual void setIsVisible(bool isVisible);
 
-        // Volume
-        pVol volume() const;
-        virtual void setVolume(const pVol& volume);
+        // Surface
+        std::shared_ptr<ImplicitSurface> surface() const;
+        virtual void setSurface(const std::shared_ptr<ImplicitSurface>& surface);
 
-        // Bounding volume
-        pVol boundingVolume() const;
-        virtual void setBoundingVolume(const pVol& volume);
-
-        // Costume
-        const std::shared_ptr<Costume>& costume() const;
-        virtual const void setCostume(const std::shared_ptr<Costume>& costume);
+        // Bounding Surface
+        std::shared_ptr<ImplicitSurface> boundingSurface() const;
+        virtual void setBoundingSurface(const std::shared_ptr<ImplicitSurface>& surface);
 
         // Material
-        const std::shared_ptr<Hardware>& hardware() const;
-        virtual void setHardware(const std::shared_ptr<Hardware>& hardware);
-        virtual void notify(HardwareUpdate& msg);
+        const std::shared_ptr<Material>& material() const;
+        virtual const void setMaterial(const std::shared_ptr<Material>& material);
 
         // Body type
         EBodyType bodyType() const;
@@ -124,10 +113,9 @@ typedef std::shared_ptr<Volume> pVol;
 
 
         // Attributes
-        pVol _volume;
-        pVol _boundingVolume;
-        std::shared_ptr<Costume> _costume;
-        std::shared_ptr<Hardware> _material;
+        std::shared_ptr<ImplicitSurface> _surface;
+        std::shared_ptr<ImplicitSurface> _boundingSurface;
+        std::shared_ptr<Material> _material;
         EBodyType _bodyType;
 
         double _invMass;
@@ -168,22 +156,17 @@ typedef std::shared_ptr<Volume> pVol;
         return _isVisible;
     }
 
-    inline pVol Prop::volume() const
+    inline std::shared_ptr<ImplicitSurface> Prop::surface() const
     {
-        return _volume;
+        return _surface;
     }
 
-    inline pVol Prop::boundingVolume() const
+    inline std::shared_ptr<ImplicitSurface> Prop::boundingSurface() const
     {
-        return _boundingVolume;
+        return _boundingSurface;
     }
 
-    inline const std::shared_ptr<Costume>& Prop::costume() const
-    {
-        return _costume;
-    }
-
-    inline const std::shared_ptr<Hardware>& Prop::hardware() const
+    inline const std::shared_ptr<Material>& Prop::material() const
     {
         return _material;
     }
@@ -209,9 +192,10 @@ typedef std::shared_ptr<Volume> pVol;
 
     inline glm::dmat3 Prop::momentOfInertia() const
     {
-        return _bodyType ==  EBodyType::DYNAMIC && _invMomentOfInertia[0][0] != 0.0?
-            glm::inverse(_invMomentOfInertia) :
-            INFINITE_MOMENT_OF_INERTIA;
+        return _bodyType == EBodyType::DYNAMIC &&
+                _invMomentOfInertia[0][0] != 0.0 ?
+                    glm::inverse(_invMomentOfInertia) :
+                    INFINITE_MOMENT_OF_INERTIA;
     }
 
     inline glm::dmat3 Prop::inverseMomentOfInertia() const

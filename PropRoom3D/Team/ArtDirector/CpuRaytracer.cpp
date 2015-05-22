@@ -8,8 +8,7 @@
 #include <CellarWorkbench/Misc/Log.h>
 
 #include "../../Prop/Prop.h"
-#include "../../Prop/Costume/Costume.h"
-#include "../../Prop/Volume/Raycast.h"
+#include "../../Prop/Material/Material.h"
 #include "CpuRaytracerWorker.h"
 
 

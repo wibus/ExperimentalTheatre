@@ -3,14 +3,6 @@
 
 namespace prop3
 {
-	Material::Material() :
-		diffuse(0.5f, 0.5f, 0.5f, 1.0f),
-		specular(0.1f, 0.1f, 0.1f, 1.0f),
-		shininess(64),
-		fresnel(0.05f)
-	{
-	}
-
 	Light3D::Light3D() :
 		ambient( 0.2f, 0.2f, 0.2f, 1.0f),
 		diffuse( 0.8f, 0.8f, 0.8f, 1.0f),

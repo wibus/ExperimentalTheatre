@@ -2,8 +2,7 @@
 
 #include <cassert>
 
-#include "Hardware/Hardware.h"
-#include "Costume/FlatPaint.h"
+#include "Material/Concrete.h"
 
 
 namespace prop3
@@ -19,8 +18,7 @@ namespace prop3
     Prop::Prop() :
         _id(_assigneId_()),
         _isVisible(true),
-        _costume(new FlatPaint(glm::vec3(1))),
-        _material(),
+        _material(new Concrete(glm::vec3(1))),
         _bodyType(EBodyType::GRAPHIC),
         _transformMatrix(1.0),
         _invMass(INFINITE_INERTIA),
@@ -38,10 +36,6 @@ namespace prop3
 
     Prop::~Prop()
     {
-        if(_material)
-        {
-            _material->unregisterObserver(*this);
-        }
     }
 
     void Prop::setIsVisible(bool isVisible)
@@ -49,42 +43,19 @@ namespace prop3
         _isVisible = isVisible;
     }
 
-    void Prop::setVolume(const pVol& volume)
+    void Prop::setSurface(const std::shared_ptr<ImplicitSurface>& surface)
     {
-        _volume = volume;
+        _surface = surface;
     }
 
-    void Prop::setBoundingVolume(const pVol& volume)
+    void Prop::setBoundingSurface(const std::shared_ptr<ImplicitSurface>& surface)
     {
-        _boundingVolume = volume;
+        _boundingSurface = surface;
     }
 
-    const void Prop::setCostume(const std::shared_ptr<Costume>& costume)
+    const void Prop::setMaterial(const std::shared_ptr<Material>& material)
     {
-        _costume = costume;
-    }
-
-    void Prop::setHardware(const std::shared_ptr<Hardware>& material)
-    {
-        if(_material)
-        {
-            _material->unregisterObserver(*this);
-        }
-
         _material = material;
-
-        if(_material)
-        {
-            _material->registerObserver(*this);
-        }
-    }
-
-    void Prop::notify(HardwareUpdate& msg)
-    {
-        if(msg.type == HardwareUpdate::EType::DENSITY)
-        {
-            updateInertia();
-        }
     }
 
     void Prop::setBodyType(const EBodyType& type)

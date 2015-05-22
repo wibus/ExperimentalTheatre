@@ -8,16 +8,6 @@
 
 namespace prop3
 {
-    struct PROP3D_EXPORT Material
-    {
-        Material();
-
-        glm::vec4 diffuse;
-        glm::vec4 specular;
-        float shininess;
-        float fresnel;
-    };
-
     struct PROP3D_EXPORT Light3D
     {
         Light3D();

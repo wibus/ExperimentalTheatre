@@ -1,6 +1,6 @@
 #include "Sphere.h"
 
-#include "Raycast.h"
+#include "../Ray/RayHitReport.h"
 
 
 namespace prop3
@@ -8,7 +8,8 @@ namespace prop3
     Sphere::Sphere(const glm::dvec3& center, double radius) :
         _radius(radius),
         _radius2(radius*radius),
-        _center(center)
+        _center(center),
+        _coating(ImplicitSurface::NO_COATING)
     {
 
     }
@@ -42,7 +43,7 @@ namespace prop3
         return glm::length(dist) -  _radius;
     }
 
-    void Sphere::raycast(const Ray& ray, std::vector<RaycastReport>& reports) const
+    void Sphere::raycast(const Ray& ray, std::vector<RayHitReport>& reports) const
     {
         double a, b, c;
         params(ray, a, b, c);
@@ -54,19 +55,19 @@ namespace prop3
             double t1 = (-b - disrcSqrt) / (2 * a);
             glm::dvec3 pt = ray.origin + ray.direction*t1;
             glm::dvec3 n = glm::normalize(pt - _center);
-            reports.push_back(RaycastReport(t1, pt, n));
+            reports.push_back(RayHitReport(ray, t1, pt, n, _coating));
 
             double t2 = (-b + disrcSqrt) / (2 * a);
             pt = ray.origin + ray.direction*t2;
             n = glm::normalize(pt - _center);
-            reports.push_back(RaycastReport(t2, pt, n));
+            reports.push_back(RayHitReport(ray, t2, pt, n, _coating));
         }
         else if(discr == 0.0)
         {
             double t = -b / (2 * a);
             glm::dvec3 pt = ray.origin + ray.direction*t;
             glm::dvec3 n = glm::normalize(pt - _center);
-            reports.push_back(RaycastReport(t, pt, n));
+            reports.push_back(RayHitReport(ray, t, pt, n, _coating));
         }
     }
 
@@ -84,5 +85,10 @@ namespace prop3
         a = glm::dot(ray.direction, ray.direction);
         b = 2 * glm::dot(ray.direction, dist);
         c = glm::dot(dist, dist) - _radius2;
+    }
+
+    void Sphere::setCoating(const std::shared_ptr<Coating>& coating)
+    {
+        _coating = coating;
     }
 }

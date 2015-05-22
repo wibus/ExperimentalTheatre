@@ -19,8 +19,11 @@
 namespace prop3
 {
     class Ray;
-    class RaycastReport;
+    class Raycast;
+    class RayHitReport;
+    class Material;
     class Prop;
+
 
     class PROP3D_EXPORT CpuRaytracerWorker
     {
@@ -59,15 +62,19 @@ namespace prop3
         virtual void shootFromLights();
         virtual void shootFromScreen();
 
+        virtual std::shared_ptr<Material> findAmbientMaterial(
+                glm::dvec3 position);
+
         virtual std::shared_ptr<Prop> findNearestProp(
                 const Ray& ray,
-                prop3::RaycastReport& reportMin);
+                prop3::RayHitReport& reportMin);
+
         virtual glm::dvec3 fireScreenRay(
-                const Ray& ray,
-                double rayIntensity);
+                const Raycast& raycast);
+
         virtual glm::dvec3 draft(
-                const Ray& ray,
-                const RaycastReport& report,
+                const Raycast& raycast,
+                const RayHitReport& report,
                 const std::shared_ptr<Prop>& prop);
 
 
@@ -90,6 +97,7 @@ namespace prop3
 
         double _lightRayIntensityThreshold;
         double _screenRayIntensityThreshold;
+        unsigned int _diffuseRayCount;
 
         glm::ivec2 _resolution;
         glm::ivec2 _viewportOrig;

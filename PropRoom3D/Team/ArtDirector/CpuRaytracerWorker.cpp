@@ -3,9 +3,12 @@
 #include <GLM/gtc/random.hpp>
 
 #include "../../Prop/Prop.h"
-#include "../../Prop/Volume/Volume.h"
-#include "../../Prop/Volume/Raycast.h"
-#include "../../Prop/Costume/Costume.h"
+#include "../../Prop/Ray/Raycast.h"
+#include "../../Prop/Ray/RayHitReport.h"
+#include "../../Prop/ImplicitSurface/ImplicitSurface.h"
+#include "../../Prop/Coating/Coating.h"
+#include "../../Prop/Material/Material.h"
+#include "../../Prop/Material/Air.h"
 
 
 namespace prop3
@@ -24,6 +27,7 @@ namespace prop3
         _useStochasticTracing(true),
         _lightRayIntensityThreshold(1.0),
         _screenRayIntensityThreshold(1.0 / 128.0),
+        _diffuseRayCount(1),
         _viewportSize(1, 1),
         _workingColorBuffer(nullptr)
     {
@@ -220,20 +224,27 @@ namespace prop3
             orig += (glm::dvec2(0.5) + glm::circularRand(0.5)) * pixelSize;
         }
 
-        int idx = -1;
-        Ray ray(_camPos, glm::dvec3(0));
-        glm::dvec4 screenPos(-1, -1, 0, 1);
 
+        std::shared_ptr<Material> ambientMaterial =
+                findAmbientMaterial(_camPos);
+        Raycast raycast(
+            Ray(_camPos, glm::dvec3(0)),
+            glm::dvec3(1.0),
+            ambientMaterial);
+
+        glm::dvec4 screenPos(-1, -1, 0, 1);
         screenPos.y = orig.y;
+        int idx = -1;
         for(int j=0; j<_viewportSize.y; ++j, screenPos.y += pixelHeight)
         {
             screenPos.x = orig.x;
             for(int i=0; i<_viewportSize.x; ++i, screenPos.x += pixelWidth)
             {
                 glm::dvec4 dirH = _viewProjInverse * screenPos;
-                ray.direction = glm::normalize(glm::dvec3(dirH / dirH.w) - _camPos);
+                raycast.ray.direction = glm::normalize(glm::dvec3(dirH / dirH.w) - _camPos);
 
-                glm::dvec3 color = fireScreenRay(ray, 1.0);
+
+                glm::dvec3 color = fireScreenRay(raycast);
 
                 _workingColorBuffer[++idx] = color.r;
                 _workingColorBuffer[++idx] = color.g;
@@ -247,29 +258,52 @@ namespace prop3
         }
     }
 
+    std::shared_ptr<Material> CpuRaytracerWorker::findAmbientMaterial(
+            glm::dvec3 position)
+    {
+        for(const auto& prop : _props)
+        {
+            const std::shared_ptr<ImplicitSurface>& surface = prop->surface();
+
+            if(surface.get() == nullptr)
+                continue;
+
+            const std::shared_ptr<ImplicitSurface>& bounds = prop->boundingSurface();
+            if(bounds.get() != nullptr && bounds->isIn(position) == EPointPosition::OUT)
+                continue;
+
+            if(surface->isIn(position) == EPointPosition::IN)
+            {
+                return prop->material();
+            }
+        }
+
+        return std::shared_ptr<Material>(new Air());
+    }
+
     std::shared_ptr<Prop> CpuRaytracerWorker::findNearestProp(
-            const Ray& ray, RaycastReport& reportMin)
+            const Ray& ray, RayHitReport& reportMin)
     {
         std::shared_ptr<Prop> propMin;
 
 
         for(const auto& prop : _props)
         {
-            const pVol& volume = prop->volume();
+            const std::shared_ptr<ImplicitSurface>& surface = prop->surface();
 
-            if(volume.get() == nullptr)
+            if(surface.get() == nullptr)
                 continue;
 
-            const pVol& bounds = prop->boundingVolume();
+            const std::shared_ptr<ImplicitSurface>& bounds = prop->boundingSurface();
             if(bounds.get() != nullptr && !bounds->intersects(ray))
                 continue;
 
-            std::vector<RaycastReport> reports;
-            volume->raycast(ray, reports);
+            std::vector<RayHitReport> reports;
+            surface->raycast(ray, reports);
 
-            for(const RaycastReport& report : reports)
+            for(const RayHitReport& report : reports)
             {
-                if(0.0 < report.t && report.t < reportMin.t )
+                if(0.0 < report.distance && report.distance < reportMin.distance )
                 {
                     reportMin = report;
                     propMin = prop;
@@ -280,94 +314,80 @@ namespace prop3
         return propMin;
     }
 
-    glm::dvec3 CpuRaytracerWorker::fireScreenRay(const Ray& ray, double rayIntensity)
+    glm::dvec3 CpuRaytracerWorker::fireScreenRay(
+            const Raycast& raycast)
     {
-        if(rayIntensity < _screenRayIntensityThreshold)
+        const Ray& ray = raycast.ray;
+        const glm::dvec3& intensity = raycast.color;
+        double maxIntensity = glm::max(glm::max(
+            intensity.r, intensity.g), intensity.b);
+        if(maxIntensity < _screenRayIntensityThreshold)
         {
-            return glm::dvec3(0);
+            return glm::dvec3(0.0);
         }
 
-        RaycastReport reportMin(INFINITY, glm::dvec3(), glm::dvec3());
-        std::shared_ptr<Prop> propMin = findNearestProp(ray, reportMin);
-        glm::dvec3 color(0);
+        double maxDist = raycast.material->lightFreePathLength(ray);
 
-        if(propMin)
+        glm::dvec3 dummyVec = glm::dvec3();
+        std::shared_ptr<Coating> dummyCoat;
+        RayHitReport reportMin(ray, maxDist, dummyVec, dummyVec, dummyCoat);
+        std::shared_ptr<Prop> propMin = findNearestProp(ray, reportMin);
+
+        if(propMin || maxDist != INFINITY)
         {
             if(!_useStochasticTracing)
             {
-                return draft(ray, reportMin, propMin);
+                return draft(raycast, reportMin, propMin);
             }
 
-            const std::shared_ptr<Costume>& costume = propMin->costume();
+            unsigned int outRayCountHint = glm::ceil(_diffuseRayCount * maxIntensity);
+            glm::dvec3 matAtt = raycast.material->lightAttenuation(ray, reportMin.distance);
+            glm::dvec3 totalAttenuation = matAtt * raycast.color;
+            std::vector<Raycast> outRaycasts;
+            glm::dvec3 color(0.0);
 
-            const glm::dvec3& interPt = reportMin.position;
-            bool isEntering = glm::dot(ray.direction, reportMin.normal) < 0.0;
-            double offSetDist = (0.000001 * (isEntering ? 1.0 : -1.0));
-            glm::dvec3 offset = reportMin.normal * offSetDist;
-
-            double reflectionRation = costume->computeReflexionRatio(
-                ray.direction, reportMin.normal, reportMin.texCoord);
-            double refractionRation = 1.0 - reflectionRation;
-
-            // Reflection
-            if(reflectionRation)
+            // TODO: optimise reports generation
+            // by skipping intersection past maxDist
+            if(reportMin.distance > maxDist)
             {
-                glm::dvec3 reflect = costume->computeReflection(
-                    ray.direction,
-                    reportMin.normal,
-                    reportMin.texCoord);
-
-                glm::dvec3 reflectBrdf = costume->computeReflectionBrdf(
-                    -reflect,
-                    reportMin.normal,
-                    -ray.direction,
-                    reportMin.texCoord);
-
-                double colorIntensity = glm::max(glm::max(
-                        reflectBrdf.r, reflectBrdf.g), reflectBrdf.b);
-                double reflectIntensity = rayIntensity *
-                    reflectionRation * colorIntensity;
-
-                Ray reflectedRay(interPt + offset, reflect);
-
-                color += fireScreenRay(reflectedRay, reflectIntensity) *
-                            reflectBrdf * reflectionRation;
+                raycast.material->scatterLight(
+                        outRaycasts,
+                        ray,
+                        maxDist,
+                        raycast.material,
+                        outRayCountHint);
             }
-
-            // Refraction
-            if(refractionRation)
+            else
             {
-                glm::dvec3 refract = costume->computeRefraction(
-                    ray.direction,
-                    reportMin.normal,
-                    reportMin.texCoord);
+                reportMin.compile();
+                std::shared_ptr<Material> enteredMaterial =
+                        findAmbientMaterial(reportMin.refractionOrigin);
 
-                glm::dvec3 refractBrdf = costume->computeRefractionBrdf(
-                    -refract,
-                    reportMin.normal,
-                    -ray.direction,
-                    reportMin.texCoord);
-
-                double colorIntensity = glm::max(glm::max(
-                        refractBrdf.r, refractBrdf.g), refractBrdf.b);
-                double refractIntensity = rayIntensity *
-                    refractionRation * colorIntensity;
-
-                Ray refractedRay(interPt - offset, refract);
-
-                color += fireScreenRay(refractedRay, refractIntensity) *
-                            refractBrdf * refractionRation;
+                reportMin.coating->brdf(
+                        outRaycasts,
+                        reportMin,
+                        raycast.material,
+                        enteredMaterial,
+                        outRayCountHint);
             }
+
+            for(Raycast cast : outRaycasts)
+            {
+                cast.color *= totalAttenuation;
+                color += fireScreenRay(cast) * cast.color;
+            }
+
+            return color;
         }
-        else if(rayIntensity != 1.0)
+        else if(intensity != glm::dvec3(1.0))
         {
             // Background color
-            const glm::dvec3 blueSkyColor = glm::dvec3(0.25, 0.60, 1.00) * 2.0;
-            const glm::dvec3 skylineColor = glm::dvec3(1.00, 1.00, 1.00) * 2.0;
-            const glm::dvec3 sunColor = glm::dvec3(1.00, 0.7725, 0.5608) * 20.0;
+            const glm::dvec3 blueSkyColor = glm::dvec3(0.25, 0.60, 1.00) * 3.2;
+            const glm::dvec3 skylineColor = glm::dvec3(1.00, 1.00, 1.00) * 3.2;
+            const glm::dvec3 sunColor = glm::dvec3(1.00, 0.7725, 0.5608) * 25.0;
 
             const glm::dvec3 blueSkyDir = glm::dvec3(0, 0, 1);
-            const glm::dvec3 sunDir = glm::dvec3(0.8017, 0.5345, 0.2673);
+            const glm::dvec3 sunDir = glm::dvec3(0.8017, 0.2673, 0.5345);
 
             double upDot = glm::dot(blueSkyDir, ray.direction);
             glm::dvec3 blueSky = blueSkyColor * glm::max(0.0, upDot);
@@ -377,28 +397,25 @@ namespace prop3
             glm::dvec3 skyline = skylineColor * a;
 
             double s = glm::max(0.0, glm::dot(sunDir, ray.direction));
-            s *= s *= s *= s *= s *= s;
+            s *= s *= s *= s *= s;
             glm::dvec3 sun = sunColor * s;
 
-            color = (blueSky + skyline + sun);
+            return (blueSky + skyline + sun);
         }
 
-        return color;
+        return glm::dvec3(0.0);
     }
 
     glm::dvec3 CpuRaytracerWorker::draft(
-        const Ray& ray,
-        const RaycastReport& report,
+        const Raycast& raycast,
+        const RayHitReport& report,
         const std::shared_ptr<Prop>& prop)
     {
         const glm::dvec3 sunDir(0.5345, 0.2673, 0.8017);
         double attenuation = glm::dot(report.normal, sunDir);
         attenuation = 0.125 + (attenuation/2 + 0.5) * 0.875;
 
-        glm::dvec3 reflect = glm::reflect(ray.direction, report.normal);
-        return prop->costume()->computeReflectionBrdf(
-            -reflect, report.normal, -ray.direction,
-            report.texCoord) * attenuation;
+        return glm::dvec3(attenuation);
     }
 
     void CpuRaytracerWorker::resetBuffers()
