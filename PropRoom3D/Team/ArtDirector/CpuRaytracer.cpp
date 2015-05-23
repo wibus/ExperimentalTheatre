@@ -388,7 +388,8 @@ namespace prop3
         const float* colorBuffer,
         unsigned int sampleCount)
     {
-        _divergenceValue = 0.0;
+        glm::vec3 lineVariance(0);
+        glm::vec3 totalVariance(0);
 
         int lastSampleCount = _sampleCount;
         _sampleCount += sampleCount;
@@ -396,6 +397,8 @@ namespace prop3
 
         const glm::ivec2& viewport = viewportSize();
         int cc = viewport.x * viewport.y * 3;
+        double lineWidth = viewport.x * 3;
+        double endLineAt = lineWidth - 3;
         for(int i=0; i < cc; i+=3)
         {
             glm::vec3 lastValue(
@@ -410,7 +413,7 @@ namespace prop3
 
             int oldSampleBatch = sampleCount * 8;
             int oldSampleStock = lastSampleCount;
-            while(oldSampleStock > oldSampleBatch)
+            while(oldSampleBatch < oldSampleStock)
             {
                 newValue += lastValue * (float) oldSampleBatch;
                 oldSampleStock -= oldSampleBatch;
@@ -423,14 +426,22 @@ namespace prop3
 
             newValue /= (float) nextSampleCount;
             glm::vec3 meanShift = glm::abs(newValue - lastValue);
-            _divergenceValue += glm::dot(meanShift, meanShift);
+            lineVariance += meanShift * meanShift;
+
+            if(i == endLineAt)
+            {
+                totalVariance += lineVariance / (float)viewport.x;
+                lineVariance = glm::dvec3(0);
+                endLineAt += lineWidth;
+            }
 
             _colorBuffer[i] = newValue.r;
             _colorBuffer[i+1] = newValue.g;
             _colorBuffer[i+2] = newValue.b;
         }
 
-        _divergenceValue = glm::sqrt(_divergenceValue) * sampleCount / (cc/3);
+        totalVariance /= (float) viewport.y;
+        _divergenceValue = glm::length(glm::sqrt(totalVariance)) * sampleCount;
         _isUpdated = true;
     }
 

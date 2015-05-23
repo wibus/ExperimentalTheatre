@@ -51,8 +51,6 @@ namespace prop3
             color.z = pixel[2] / 255.0;
         }
 
-        color *= glm::max(0.0, -glm::dot(report.ray.direction, report.normal));
-
         for(size_t i=preSize; i<postSize; ++i)
         {
             raycasts[i].color *= color;

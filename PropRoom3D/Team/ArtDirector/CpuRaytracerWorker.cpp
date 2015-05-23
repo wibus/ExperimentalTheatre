@@ -282,10 +282,10 @@ namespace prop3
     }
 
     std::shared_ptr<Prop> CpuRaytracerWorker::findNearestProp(
-            const Ray& ray, RayHitReport& reportMin)
+            const Ray& rayPrototype, RayHitReport& reportMin)
     {
         std::shared_ptr<Prop> propMin;
-
+        Ray ray(rayPrototype);
 
         for(const auto& prop : _props)
         {
@@ -305,6 +305,7 @@ namespace prop3
             {
                 if(0.0 < report.distance && report.distance < reportMin.distance )
                 {
+                    ray.limit = report.distance;
                     reportMin = report;
                     propMin = prop;
                 }
@@ -373,8 +374,9 @@ namespace prop3
 
             for(Raycast cast : outRaycasts)
             {
+                glm::dvec3 stageColor = cast.color * matAtt;
                 cast.color *= totalAttenuation;
-                color += fireScreenRay(cast) * cast.color;
+                color += fireScreenRay(cast) * stageColor;
             }
 
             return color;
@@ -382,9 +384,9 @@ namespace prop3
         else if(intensity != glm::dvec3(1.0))
         {
             // Background color
-            const glm::dvec3 blueSkyColor = glm::dvec3(0.25, 0.60, 1.00) * 3.2;
-            const glm::dvec3 skylineColor = glm::dvec3(1.00, 1.00, 1.00) * 3.2;
-            const glm::dvec3 sunColor = glm::dvec3(1.00, 0.7725, 0.5608) * 25.0;
+            const glm::dvec3 blueSkyColor = glm::dvec3(0.25, 0.60, 1.00) * 2.0;
+            const glm::dvec3 skylineColor = glm::dvec3(1.00, 1.00, 1.00) * 2.0;
+            const glm::dvec3 sunColor = glm::dvec3(1.00, 0.7725, 0.5608) * 20.0;
 
             const glm::dvec3 blueSkyDir = glm::dvec3(0, 0, 1);
             const glm::dvec3 sunDir = glm::dvec3(0.8017, 0.2673, 0.5345);

@@ -27,7 +27,7 @@ namespace prop3
         const std::shared_ptr<Material>& material,
         unsigned int rayCount)
     {
-        glm::dvec3 splitFactor(1.0 / rayCount);
+        double splitFactor(1.0 / rayCount);
 
         for(int i=0; i<rayCount; ++i)
         {
@@ -35,9 +35,12 @@ namespace prop3
             if(glm::dot(direction, report.normal) < 0.0)
                 direction = -direction;
 
+            double attenuation = glm::max(0.0, splitFactor*
+                    glm::dot(direction, report.normal));
+
             outRays.push_back(Raycast(
                 Ray(report.reflectionOrigin, direction),
-                splitFactor,
+                glm::dvec3(attenuation),
                 material));
         }
     }
@@ -59,7 +62,7 @@ namespace prop3
         }
         else
         {
-            glm::dvec3 splitFactor(1.0 / rayCount);
+            double splitFactor = 1.0 / rayCount;
 
             for(int i=0; i<rayCount; ++i)
             {
@@ -73,9 +76,12 @@ namespace prop3
                 glm::dvec3 direction = glm::mix(diffuseDir, reflectDir, glossiness);
                 direction = glm::normalize(direction);
 
+                double attenuation = glm::max(0.0, splitFactor *
+                        glm::dot(direction, report.normal));
+
                 outRays.push_back(Raycast(
                     Ray(report.reflectionOrigin, direction),
-                    splitFactor,
+                    glm::dvec3(attenuation),
                     material));
             }
         }
@@ -107,12 +113,12 @@ namespace prop3
                     report.normal);
 
         outRays.push_back(Raycast(
-                Ray(report.reflectionOrigin, reflectDir),
+                Ray(report.reflectionOrigin, glm::normalize(reflectDir)),
                 glm::dvec3(reflectionRatio),
                 leavedMaterial));
 
         outRays.push_back(Raycast(
-                Ray(report.refractionOrigin, refractDir),
+                Ray(report.refractionOrigin, glm::normalize(refractDir)),
                 glm::dvec3(1 - reflectionRatio),
                 enteredMaterial));
     }

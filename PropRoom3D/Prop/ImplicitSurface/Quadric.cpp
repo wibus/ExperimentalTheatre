@@ -85,25 +85,34 @@ namespace prop3
                 double dsrcSqrt = glm::sqrt(dscr);
 
                 {
-                    double t1 = (-b - dsrcSqrt) / (2 * a);
-                    glm::dvec3 pt1 = ray.origin + ray.direction*t1;
-                    glm::dvec3 n1 =  computeNormal(_q, pt1);
-                    reports.push_back(RayHitReport(ray, t1, pt1, n1, _coating));
+                    double t = (-b - dsrcSqrt) / (2 * a);
+                    if(0.0 < t && t < ray.limit)
+                    {
+                        glm::dvec3 pt1 = ray.origin + ray.direction*t;
+                        glm::dvec3 n1 =  computeNormal(_q, pt1);
+                        reports.push_back(RayHitReport(ray, t, pt1, n1, _coating));
+                    }
                 }
 
                 {
-                    double t2 = (-b + dsrcSqrt) / (2 * a);
-                    glm::dvec3 pt2 = ray.origin + ray.direction*t2;
-                    glm::dvec3 n2 =  computeNormal(_q, pt2);
-                    reports.push_back(RayHitReport(ray, t2, pt2, n2, _coating));
+                    double t = (-b + dsrcSqrt) / (2 * a);
+                    if(0.0 < t && t < ray.limit)
+                    {
+                        glm::dvec3 pt2 = ray.origin + ray.direction*t;
+                        glm::dvec3 n2 =  computeNormal(_q, pt2);
+                        reports.push_back(RayHitReport(ray, t, pt2, n2, _coating));
+                    }
                 }
             }
             else if (dscr == 0.0)
             {
                 double t = -b / (2 * a);
-                glm::dvec3 pt = ray.origin + ray.direction*t;
-                glm::dvec3 n =  computeNormal(_q, pt);
-                reports.push_back(RayHitReport(ray, t, pt, n, _coating));
+                if(0.0 < t && t < ray.limit)
+                {
+                    glm::dvec3 pt = ray.origin + ray.direction*t;
+                    glm::dvec3 n =  computeNormal(_q, pt);
+                    reports.push_back(RayHitReport(ray, t, pt, n, _coating));
+                }
             }
         }
         else
@@ -111,9 +120,12 @@ namespace prop3
             if(b != 0.0)
             {
                 double t = -c / b;
-                glm::dvec3 pt = ray.origin + ray.direction * t;
-                glm::dvec3 n =  computeNormal(_q, pt);
-                reports.push_back(RayHitReport(ray, t, pt, n, _coating));
+                if(0.0 < t && t < ray.limit)
+                {
+                    glm::dvec3 pt = ray.origin + ray.direction * t;
+                    glm::dvec3 n =  computeNormal(_q, pt);
+                    reports.push_back(RayHitReport(ray, t, pt, n, _coating));
+                }
             }
         }
     }

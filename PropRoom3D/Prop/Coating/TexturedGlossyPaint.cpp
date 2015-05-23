@@ -61,6 +61,7 @@ namespace prop3
 
             // Not blended with default color
             glossiness = pixel[0] / 255.0;
+            glossRatio *= glossiness;
         }
 
         preSize = raycasts.size();
@@ -94,9 +95,7 @@ namespace prop3
             color.z = pixel[2] / 255.0;
         }
 
-        color *= glm::max(0.0, -glm::dot(report.ray.direction, report.normal));
         color *= (1.0 - glossRatio);
-
         for(size_t i=preSize; i<postSize; ++i)
         {
             raycasts[i].color *= color;

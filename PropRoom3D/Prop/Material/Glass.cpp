@@ -39,9 +39,6 @@ namespace prop3
         if(_dyeConcentration == 0.0)
             return glm::dvec3(1.0);
 
-        double alpha = 1.0 / (1.0 + distance*_dyeConcentration);
-        alpha *= alpha *= alpha;
-
-        return glm::mix(_color, glm::dvec3(1.0), alpha);
+        return glm::pow(_color, glm::dvec3(_dyeConcentration * distance));
     }
 }

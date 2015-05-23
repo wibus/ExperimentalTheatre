@@ -53,21 +53,30 @@ namespace prop3
             double disrcSqrt = glm::sqrt(discr);
 
             double t1 = (-b - disrcSqrt) / (2 * a);
-            glm::dvec3 pt = ray.origin + ray.direction*t1;
-            glm::dvec3 n = glm::normalize(pt - _center);
-            reports.push_back(RayHitReport(ray, t1, pt, n, _coating));
+            if(0.0 < t1 && t1 < ray.limit)
+            {
+                glm::dvec3 pt = ray.origin + ray.direction*t1;
+                glm::dvec3 n = glm::normalize(pt - _center);
+                reports.push_back(RayHitReport(ray, t1, pt, n, _coating));
+            }
 
             double t2 = (-b + disrcSqrt) / (2 * a);
-            pt = ray.origin + ray.direction*t2;
-            n = glm::normalize(pt - _center);
-            reports.push_back(RayHitReport(ray, t2, pt, n, _coating));
+            if(0.0 < t2 && t2 < ray.limit)
+            {
+                glm::dvec3 pt = ray.origin + ray.direction*t2;
+                glm::dvec3 n = glm::normalize(pt - _center);
+                reports.push_back(RayHitReport(ray, t2, pt, n, _coating));
+            }
         }
         else if(discr == 0.0)
         {
             double t = -b / (2 * a);
-            glm::dvec3 pt = ray.origin + ray.direction*t;
-            glm::dvec3 n = glm::normalize(pt - _center);
-            reports.push_back(RayHitReport(ray, t, pt, n, _coating));
+            if(0.0 < t && t < ray.limit)
+            {
+                glm::dvec3 pt = ray.origin + ray.direction*t;
+                glm::dvec3 n = glm::normalize(pt - _center);
+                reports.push_back(RayHitReport(ray, t, pt, n, _coating));
+            }
         }
     }
 

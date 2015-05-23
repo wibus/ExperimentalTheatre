@@ -24,16 +24,13 @@ namespace prop3
         unsigned int outRayCountHint) const
     {
         // Pigment diffuse reflection
-        glm::dvec3 color = _color * glm::max(0.0,
-            -glm::dot(report.ray.direction, report.normal));
-
         size_t preSize = raycasts.size();
         diffuseReflection(raycasts, report, leavedMaterial, outRayCountHint);
         size_t postSize = raycasts.size();
 
         for(size_t i=preSize; i<postSize; ++i)
         {
-            raycasts[i].color *= color;
+            raycasts[i].color = _color;
         }
     }
 }

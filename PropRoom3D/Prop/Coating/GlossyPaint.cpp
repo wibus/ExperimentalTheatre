@@ -49,14 +49,11 @@ namespace prop3
 
 
         // Pigment diffuse reflection
-        glm::dvec3 color = _color * glm::max(0.0,
-            -glm::dot(report.ray.direction, report.normal));
-        color *= (1.0 - glossRatio);
-
         preSize = raycasts.size();
         diffuseReflection(raycasts, report, leavedMaterial, outRayCountHint);
         postSize = raycasts.size();
 
+        glm::dvec3 color = _color * (1.0 - glossRatio);
         for(size_t i=preSize; i<postSize; ++i)
         {
             raycasts[i].color *= color;

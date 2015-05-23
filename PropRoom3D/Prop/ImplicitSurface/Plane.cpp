@@ -49,8 +49,11 @@ namespace prop3
         if(dirDotNorm != 0.0)
         {
             double t = -(glm::dot(_normal, ray.origin) + _d) / dirDotNorm;
-            glm::dvec3 pt = ray.origin + ray.direction * t;
-            reports.push_back(RayHitReport(ray, t, pt, _normal, _coating));
+            if(0.0 < t && t < ray.limit)
+            {
+                glm::dvec3 pt = ray.origin + ray.direction * t;
+                reports.push_back(RayHitReport(ray, t, pt, _normal, _coating));
+            }
         }
     }
 
@@ -88,16 +91,16 @@ namespace prop3
 
     void PlaneTexture::raycast(const Ray& ray, std::vector<RayHitReport>& reports) const
     {
-        std::vector<RayHitReport> planeReports;
-        Plane::raycast(ray, planeReports);
+        size_t preSize = reports.size();
+        Plane::raycast(ray, reports);
+        size_t postSize = reports.size();
 
-        for(RayHitReport& r : planeReports)
+        for(int i=preSize; i<postSize; ++i)
         {
+            RayHitReport& r = reports[i];
             glm::dvec3 dist = r.position - _origin;
             r.texCoord.s = glm::dot(dist, _u) / glm::dot(_u, _u);
             r.texCoord.t = glm::dot(dist, _v) / glm::dot(_v, _v);
         }
-
-        reports.insert(reports.end(), planeReports.begin(), planeReports.end());
     }
 }

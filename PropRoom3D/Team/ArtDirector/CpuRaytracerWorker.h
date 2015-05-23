@@ -66,7 +66,7 @@ namespace prop3
                 glm::dvec3 position);
 
         virtual std::shared_ptr<Prop> findNearestProp(
-                const Ray& ray,
+                const Ray& rayPrototype,
                 prop3::RayHitReport& reportMin);
 
         virtual glm::dvec3 fireScreenRay(

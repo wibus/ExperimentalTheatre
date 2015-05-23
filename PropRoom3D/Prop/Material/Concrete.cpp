@@ -22,16 +22,14 @@ namespace prop3
         const std::shared_ptr<Material>& selfEnteredMaterial,
         unsigned int outRayCountHint) const
     {
-        glm::dvec3 color = _color * glm::max(0.0,
-            -glm::dot(report.ray.direction, report.normal));
-
         size_t preSize = raycasts.size();
         diffuseReflection(raycasts, report, selfEnteredMaterial, outRayCountHint);
         size_t postSize = raycasts.size();
 
         for(size_t i=preSize; i<postSize; ++i)
         {
-            raycasts[i].color *= color;
+            raycasts[i].color *= _color * glm::max(0.0,
+                glm::dot(raycasts[i].ray.direction, report.normal));
         }
     }
 }
