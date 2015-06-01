@@ -8,26 +8,35 @@
 
 namespace prop3
 {
+    Transform::Transform(const glm::dmat4& mat) :
+        _mat(mat),
+        _isInvComputed(false)
+    {
+
+    }
+
     Transform::Transform(double scale,
                          const glm::dquat& rotation,
                          const glm::dvec3& translation) :
-        _mat(1.0),
-        _inv(1.0),
-        _isInvComputed(true)
+        _mat(),
+        _isInvComputed(false)
     {
         _mat[0][0] = scale;
         _mat[1][1] = scale;
         _mat[2][2] = scale;
         _mat = glm::mat4_cast(rotation) * _mat;
-        _mat[0] = glm::dvec4(translation, 1);
+        _mat[3] = glm::dvec4(translation, 1);
+    }
 
-        _inv[0] = glm::dvec4(-translation, 1);
-        _inv = glm::mat4_cast(glm::conjugate(rotation)) * _mat;
-        glm::dmat4 invScale;
-        invScale[0][0] = 1.0 / scale;
-        invScale[1][1] = 1.0 / scale;
-        invScale[2][2] = 1.0 / scale;
-        _inv = invScale * _inv;
+    const glm::dmat4& Transform::inv() const
+    {
+        if(_isInvComputed)
+            return _inv;
+
+        _isInvComputed = true;
+        _inv = glm::inverse(_mat);
+
+        return _inv;
     }
 
     const std::shared_ptr<Coating> ImplicitSurface::NO_COATING(new NoCoating());

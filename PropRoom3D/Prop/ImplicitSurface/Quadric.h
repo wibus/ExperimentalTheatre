@@ -9,6 +9,23 @@ namespace prop3
     class PROP3D_EXPORT Quadric : public ImplicitSurface
     {
     public:
+
+        // Ellipsoid : x^2/rx^2 + y^2/ry^2 + z^2/rz^2 = 1
+        static std::shared_ptr<ImplicitSurface>
+            ellipsoid(double rx, double ry, double rz);
+
+        // Elliptic cone : x^2/rx^2 + y^2/ry^2 - z^2 = 0
+        static std::shared_ptr<ImplicitSurface>
+            cone(double rx, double ry);
+
+        // Elliptic paraboloid : x^2/rx^2 + y^2/ry^2 - z = 0
+        static std::shared_ptr<ImplicitSurface>
+            paraboloid(double rx, double ry);
+
+        // Elliptic cylinder : x^2/rx^2 + y^2/ry^2 = 0
+        static std::shared_ptr<ImplicitSurface>
+            cylinder(double rx, double ry);
+
         // Constructing a quadric from the equation :
         // Ax^2 + 2Bxy + 2Cxz + 2Dx  +  Ey^2 + 2Fyz + 2Gy + Hz^2 + Iz  +  J = 0
         // Disposing the coefficients that way :
@@ -20,9 +37,9 @@ namespace prop3
 
         // Constructing a quadric from the equation :
         // Ax^2 + 2Bxy + 2Cxz + 2Dx  +  Ey^2 + 2Fyz + 2Gy + Hz^2 + Iz  +  J = 0
-        Quadric(double A, double B, double C,
-                double D, double E, double F,
-                double G, double H, double I,
+        Quadric(double A, double E, double H,
+                double B, double C, double D,
+                double F, double G, double I,
                 double J);
 
         virtual ~Quadric();

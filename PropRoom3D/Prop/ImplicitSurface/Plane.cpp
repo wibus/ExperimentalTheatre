@@ -5,9 +5,9 @@
 
 namespace prop3
 {
-    Plane::Plane(const glm::dvec3& normal, const glm::dvec3& point) :
+    Plane::Plane(const glm::dvec3& normal, const glm::dvec3& origin) :
         _normal(glm::normalize(normal)),
-        _d(-glm::dot(_normal, point)),
+        _d(-glm::dot(_normal, origin)),
         _coating(ImplicitSurface::NO_COATING)
     {
     }
@@ -19,15 +19,23 @@ namespace prop3
     {
     }
 
-    Plane::~Plane()
+    std::shared_ptr<ImplicitSurface>
+        Plane::plane(double a, double b, double c, double d)
     {
+        return std::shared_ptr<ImplicitSurface>(new Plane(a, b, c, d));
+    }
 
+    std::shared_ptr<ImplicitSurface>
+        Plane::plane(const glm::dvec3& normal, const glm::dvec3& origin)
+    {
+        return std::shared_ptr<ImplicitSurface>(new Plane(normal, origin));
     }
 
     void Plane::transform(const Transform& transform)
     {
-        glm::dvec4 pt((-_d) * _normal, 1.0);
-        _normal = glm::dvec3(transform.mat() * glm::dvec4(_normal, 0.0));
+        _normal = glm::normalize(glm::dvec3(transform.mat() * glm::dvec4(_normal, 0.0)));
+        glm::dvec3 pt = glm::dvec3(transform.mat() * glm::dvec4((-_d) * _normal, 1.0));
+        _d = -glm::dot(_normal, pt);
     }
 
     EPointPosition Plane::isIn(const glm::dvec3& point) const
@@ -69,24 +77,38 @@ namespace prop3
 
 
     // Textures
-    PlaneTexture::PlaneTexture(
-            const glm::dvec3& normal, const glm::dvec3& point,
-            const glm::dvec3& u, const glm::dvec3& v, const glm::dvec3& origin) :
-        Plane(normal, point),
-        _origin(origin),
-        _u(u), _v(v)
+    PlaneTexture::PlaneTexture(const glm::dvec3& normal, const glm::dvec3& origin,
+            const glm::dvec3& texU, const glm::dvec3& texV, const glm::dvec3& texOrigin) :
+        Plane(normal, origin),
+        _texOrigin(texOrigin),
+        _texU(texU), _texV(texV)
     {
 
     }
 
-    PlaneTexture::PlaneTexture(
-            double a, double b, double c, double d,
-            const glm::dvec3& u, const glm::dvec3& v, const glm::dvec3& origin) :
+    PlaneTexture::PlaneTexture(double a, double b, double c, double d,
+            const glm::dvec3& texU, const glm::dvec3& texV, const glm::dvec3& texOrigin) :
         Plane(a, b, c, d),
-        _origin(origin),
-        _u(u), _v(v)
+        _texOrigin(texOrigin),
+        _texU(texU), _texV(texV)
     {
 
+    }
+
+    std::shared_ptr<ImplicitSurface>
+        PlaneTexture::plane(double a, double b, double c, double d,
+                            const glm::dvec3& texU, const glm::dvec3& texV, const glm::dvec3& texOrigin)
+    {
+        return std::shared_ptr<ImplicitSurface>(
+                    new PlaneTexture(a, b, c, d, texU, texV, texOrigin));
+    }
+
+    std::shared_ptr<ImplicitSurface>
+        PlaneTexture::plane(const glm::dvec3& normal, const glm::dvec3& origin,
+                            const glm::dvec3& texU, const glm::dvec3& texV, const glm::dvec3& texOrigin)
+    {
+        return std::shared_ptr<ImplicitSurface>(
+                    new PlaneTexture(normal, origin, texU, texV, texOrigin));
     }
 
     void PlaneTexture::raycast(const Ray& ray, std::vector<RayHitReport>& reports) const
@@ -98,9 +120,9 @@ namespace prop3
         for(int i=preSize; i<postSize; ++i)
         {
             RayHitReport& r = reports[i];
-            glm::dvec3 dist = r.position - _origin;
-            r.texCoord.s = glm::dot(dist, _u) / glm::dot(_u, _u);
-            r.texCoord.t = glm::dot(dist, _v) / glm::dot(_v, _v);
+            glm::dvec3 dist = r.position - _texOrigin;
+            r.texCoord.s = glm::dot(dist, _texU) / glm::dot(_texU, _texU);
+            r.texCoord.t = glm::dot(dist, _texV) / glm::dot(_texV, _texV);
         }
     }
 }

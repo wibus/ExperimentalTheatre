@@ -136,10 +136,11 @@ namespace prop3
         unsigned int sampleCount = _localRaytracer->sampleCount();
 
         std::stringstream ss;
-        ss << "Frame " << sampleCount;
+        ss << /*"Frame " <<*/ sampleCount;
 
         if(!_localRaytracer->isDrafting())
         {
+            //* Human readable
             float renderTime = _localRaytracer->renderTime();
             float secPerFrame = renderTime / sampleCount;
             float divergence = _localRaytracer->divergenceValue();
@@ -154,6 +155,24 @@ namespace prop3
             ss.precision(3);
             ss << std::scientific << std::setw(10) << divergence << " div";
             ss << ")";
+            //*/
+
+            /* CVS File
+            float renderTime = _localRaytracer->renderTime();
+            float secPerFrame = renderTime / sampleCount;
+            float divergence = _localRaytracer->divergenceValue();
+            float imgVariance = _localRaytracer->imageVariance();
+
+            ss << ", ";
+            ss.precision(3);
+            ss << std::fixed << std::setw(10) << renderTime << ", ";
+            ss.precision(3);
+            ss << std::fixed << std::setw(10)  << secPerFrame << ", ";
+            ss.precision(3);
+            ss << std::scientific << std::setw(10) << divergence << ", ";
+            ss.precision(3);
+            ss << std::scientific << std::setw(10) << imgVariance << ";";
+            //*/
         }
         else
         {

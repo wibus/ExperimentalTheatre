@@ -22,7 +22,59 @@ namespace prop3
                    (Q[0][2] + Q[2][0]) * pt.x +
                    (Q[1][2] + Q[2][1]) * pt.y;
 
-        return glm::dvec3(nx, ny, nz);
+        return glm::normalize(glm::dvec3(nx, ny, nz));
+    }
+
+    // Ellipsoid : x^2/rx^2 + y^2/ry^2 + z^2/rz^2 = 1
+    std::shared_ptr<ImplicitSurface>
+        Quadric::ellipsoid(double rx, double ry, double rz)
+    {
+        return std::shared_ptr<ImplicitSurface>(new Quadric(
+                1.0 / (rx*rx), // A
+                1.0 / (ry*ry), // B
+                1.0 / (rz*rz), // C
+                0, 0, 0,       // B, C, D
+                0, 0, 0,       // F, H, I
+                -1));          // J
+    }
+
+    // Elliptic cone : x^2/rx^2 + y^2/ry^2 - z^2 = 0
+    std::shared_ptr<ImplicitSurface>
+        Quadric::cone(double rx, double ry)
+    {
+        return std::shared_ptr<ImplicitSurface>(new Quadric(
+                1.0 / (rx*rx), // A
+                1.0 / (ry*ry), // B
+                -1.0,          // C
+                0, 0, 0,       // B, C, D
+                0, 0, 0,       // F, H, I
+                0));           // J
+    }
+
+    // Elliptic paraboloid : x^2/rx^2 + y^2/ry^2 - z = 0
+    std::shared_ptr<ImplicitSurface>
+        Quadric::paraboloid(double rx, double ry)
+    {
+        return std::shared_ptr<ImplicitSurface>(new Quadric(
+                1.0 / (rx*rx), // A
+                1.0 / (ry*ry), // B
+                0,             // C
+                0, 0, 0,      // B, C, D
+                0, 0,-1,      // F, H, I
+                0));           // J
+    }
+
+    // Elliptic cylinder : x^2/rx^2 + y^2/ry^2 = 0
+    std::shared_ptr<ImplicitSurface>
+        Quadric::cylinder(double rx, double ry)
+    {
+        return std::shared_ptr<ImplicitSurface>(new Quadric(
+                1.0 / (rx*rx), // A
+                1.0 / (ry*ry), // B
+                0,             // C
+                0, 0, 0,       // B, C, D
+                0, 0, 0,       // F, H, I
+                -1));          // J
     }
 
     Quadric::Quadric(const glm::dmat4& Q) :
@@ -32,14 +84,14 @@ namespace prop3
 
     }
 
-    Quadric::Quadric(double A, double B, double C,
-                     double D, double E, double F,
-                     double G, double H, double I,
+    Quadric::Quadric(double A, double E, double H,
+                     double B, double C, double D,
+                     double F, double G, double I,
                      double J) :
         _q(A, B, C, D,
-                  B, E, F, G,
-                  C, F, H, I,
-                  D, G, I, J),
+           B, E, F, G,
+           C, F, H, I,
+           D, G, I, J),
         _coating(ImplicitSurface::NO_COATING)
     {
 
@@ -53,7 +105,7 @@ namespace prop3
 
     void Quadric::transform(const Transform& transform)
     {
-        _q = transform.inv() * _q * glm::transpose(transform.inv());
+        _q = glm::transpose(transform.inv()) * _q * transform.inv();
     }
 
     EPointPosition Quadric::isIn(const glm::dvec3& point) const

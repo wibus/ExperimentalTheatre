@@ -27,21 +27,18 @@ namespace prop3
 
     struct PROP3D_EXPORT Transform
     {
+        Transform(const glm::dmat4& mat);
         Transform(double scale ,
                   const glm::dquat& rotation,
                   const glm::dvec3& translation);
 
         const glm::dmat4& mat() const { return _mat; }
-        const glm::dmat4& inv() const
-        {
-            if(_isInvComputed) return _mat;
-            return _inv = glm::inverse(_mat);
-        }
+        const glm::dmat4& inv() const;
 
     private:
         glm::dmat4 _mat;
         mutable glm::dmat4 _inv;
-        bool _isInvComputed;
+        mutable bool _isInvComputed;
     };
 
 

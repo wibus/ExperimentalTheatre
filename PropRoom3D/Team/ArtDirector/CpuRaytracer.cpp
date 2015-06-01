@@ -225,6 +225,11 @@ namespace prop3
         return _divergenceValue;
     }
 
+    float CpuRaytracer::imageVariance() const
+    {
+        return _imageVariance;
+    }
+
     unsigned int CpuRaytracer::sampleCount() const
     {
         return _sampleCount;
@@ -388,6 +393,7 @@ namespace prop3
         const float* colorBuffer,
         unsigned int sampleCount)
     {
+        glm::vec3 imageMean(0);
         glm::vec3 lineVariance(0);
         glm::vec3 totalVariance(0);
 
@@ -425,7 +431,7 @@ namespace prop3
             }
 
             newValue /= (float) nextSampleCount;
-            glm::vec3 meanShift = glm::abs(newValue - lastValue);
+            glm::vec3 meanShift = newValue - lastValue;
             lineVariance += meanShift * meanShift;
 
             if(i == endLineAt)
@@ -438,11 +444,28 @@ namespace prop3
             _colorBuffer[i] = newValue.r;
             _colorBuffer[i+1] = newValue.g;
             _colorBuffer[i+2] = newValue.b;
+
+            imageMean += newValue;
         }
 
         totalVariance /= (float) viewport.y;
         _divergenceValue = glm::length(glm::sqrt(totalVariance)) * sampleCount;
         _isUpdated = true;
+
+        imageMean /= cc/ 3;
+        _imageVariance = 0.0;
+        for(int i=0; i < cc; i+=3)
+        {
+            glm::vec3 color(
+                _colorBuffer[i],
+                _colorBuffer[i+1],
+                _colorBuffer[i+2]);
+
+            glm::dvec3 diff = color - imageMean;
+            _imageVariance += glm::dot(diff, diff);
+        }
+        _imageVariance /= cc/3;
+        _imageVariance = glm::sqrt(_imageVariance);
     }
 
     void CpuRaytracer::performNonStochasticSyncronousDraf()

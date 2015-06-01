@@ -30,7 +30,7 @@ namespace prop3
 
         for(size_t i=preSize; i<postSize; ++i)
         {
-            raycasts[i].color = _color;
+            raycasts[i].color *= _color;
         }
     }
 }

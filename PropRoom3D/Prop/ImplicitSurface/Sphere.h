@@ -8,10 +8,11 @@ namespace prop3
 {
     class PROP3D_EXPORT Sphere : public ImplicitSurface
     {
+        Sphere(const glm::dvec3& center, double radius);
+
     public:
-        Sphere(const glm::dvec3& center = glm::dvec3(0),
-                       double radius = 1.0);
-        virtual ~Sphere();
+        static std::shared_ptr<ImplicitSurface>
+            sphere(const glm::dvec3& center, double radius);
 
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;

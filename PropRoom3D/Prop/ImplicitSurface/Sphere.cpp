@@ -14,9 +14,10 @@ namespace prop3
 
     }
 
-    Sphere::~Sphere()
+    std::shared_ptr<ImplicitSurface>
+        Sphere::sphere(const glm::dvec3& center, double radius)
     {
-
+        return std::shared_ptr<ImplicitSurface>(new Sphere(center, radius));
     }
 
     void Sphere::transform(const Transform& transform)
