@@ -18,6 +18,7 @@
 #include "../StageManagement/Manager/KeyPressDispatcher.h"
 #include "../StageManagement/Manager/KeyReleaseDispatcher.h"
 #include "../StageManagement/Manager/MouseMoveDispatcher.h"
+#include "../StageManagement/Manager/MouseWheelDispatcher.h"
 #include "../StageManagement/Manager/MousePressDispatcher.h"
 #include "../StageManagement/Manager/MouseReleaseDispatcher.h"
 #include "../StageManagement/Event/SynchronousKeyboard.h"
@@ -402,6 +403,19 @@ namespace scaena
         return false;
     }
 
+    bool Play::mouseWheelEvent(const MouseEvent& event)
+    {
+        if(_isPlaying)
+        {
+            _synchronousMouse->setDegreeDelta( event.degreeDelta() );
+            MouseWheelDispatcher mmVisitor( event );
+            (*_currentAct)->welcome( mmVisitor );
+            return mmVisitor.eventConsumed();
+        }
+
+        return false;
+    }
+
     void Play::update()
     {
         if(!_isPlaying)
@@ -428,6 +442,7 @@ namespace scaena
         (*_currentAct)->welcome( endStepCaller );
 
         // Set displacement to zero
+        _synchronousMouse->setDegreeDelta(0);
         _synchronousMouse->setPosition(
             _synchronousMouse->position());
     }

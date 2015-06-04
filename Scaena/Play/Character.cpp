@@ -58,6 +58,11 @@ namespace scaena
         return false;
     }
 
+    bool Character::mouseWheelEvent(const MouseEvent&)
+    {
+        return false;
+    }
+
     void Character::welcome(StageManager& manager)
     {
         manager.visit(*this);

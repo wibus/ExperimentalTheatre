@@ -7,6 +7,7 @@
 #include "EventTypes.h"
 
 class QMouseEvent;
+class QWheelEvent;
 
 
 namespace scaena
@@ -16,18 +17,22 @@ namespace scaena
     public:
         MouseEvent(EMouseButton button,
                    const glm::ivec2& pos,
-                   const glm::ivec2& globalPos);
+                   const glm::ivec2& globalPos,
+                   int degreeDelta);
 
         EMouseButton button() const;
         glm::ivec2 position() const;
         glm::ivec2 globalPosition() const;
+        int degreeDelta() const;
 
         static MouseEvent convertQMouseEvent(QMouseEvent* event);
+        static MouseEvent convertQWheelEvent(QWheelEvent* event);
 
     private:
         EMouseButton _button;
         glm::ivec2 _position;
         glm::ivec2 _globalPosition;
+        int _degreeDelta;
     };
 
 
@@ -41,6 +46,9 @@ namespace scaena
 
     inline glm::ivec2 MouseEvent::globalPosition() const
         {return _globalPosition;}
+
+    inline int MouseEvent::degreeDelta() const
+        {return _degreeDelta;}
 }
 
 #endif // SCAENA_MOUSE_EVENT_H

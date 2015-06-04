@@ -14,11 +14,13 @@ namespace scaena
     public:
         SynchronousMouse();
 
+        void setDegreeDelta(int degreeDelta);
         void setPosition(const glm::ivec2& position);
         void setButtonIsPressed(EMouseButton button, bool isPressed);
 
         int x() const;
         int y() const;
+        int degreeDelta() const;
         glm::ivec2 position() const;
         int xDisplacement() const;
         int yDisplacement() const;
@@ -26,6 +28,7 @@ namespace scaena
         bool buttonIsPressed(EMouseButton button) const;
 
     private:
+        int _degreeDelta;
         glm::ivec2 _position;
         glm::ivec2 _displacement;
         bool _buttonPressed[(int)EMouseButton::NB_BUTTONS];
@@ -34,10 +37,9 @@ namespace scaena
 
 
     // IMPLEMENTATION //
-    inline void SynchronousMouse::setButtonIsPressed(EMouseButton button, bool isPressed)
-        {_buttonPressed[(int)button] = isPressed;}
     inline int SynchronousMouse::x() const {return _position.x;}
     inline int SynchronousMouse::y() const {return _position.y;}
+    inline int SynchronousMouse::degreeDelta() const {return _degreeDelta;}
     inline glm::ivec2 SynchronousMouse::position() const {return _position;}
     inline int SynchronousMouse::xDisplacement() const {return _displacement.x;}
     inline int SynchronousMouse::yDisplacement() const {return _displacement.y;}

@@ -77,12 +77,6 @@ namespace scaena
         _keyReleaseAction(event);
     }
 
-    void QGlWidgetView::mouseMoveEvent(QMouseEvent* event)
-    {
-        QGLWidget::mouseMoveEvent(event);
-        _mouseMoveAction(event);
-    }
-
     void QGlWidgetView::mousePressEvent(QMouseEvent* event)
     {
         QGLWidget::mousePressEvent(event);
@@ -93,6 +87,18 @@ namespace scaena
     {
         QGLWidget::mouseReleaseEvent(event);
         _mouseReleaseAction(event);
+    }
+
+    void QGlWidgetView::mouseMoveEvent(QMouseEvent* event)
+    {
+        QGLWidget::mouseMoveEvent(event);
+        _mouseMoveAction(event);
+    }
+
+    void QGlWidgetView::wheelEvent(QWheelEvent* event)
+    {
+        QGLWidget::wheelEvent(event);
+        _mouseWheelAction(event);
     }
 
     void QGlWidgetView::centerOnScreen()
@@ -230,12 +236,6 @@ namespace scaena
                 event->accept();
         };
 
-        _mouseMoveAction = [&play](QMouseEvent* event)
-        {
-            if(play.mouseMoveEvent(MouseEvent::convertQMouseEvent(event)))
-                event->accept();
-        };
-
         _mousePressAction = [&play](QMouseEvent* event)
         {
             if(play.mousePressEvent(MouseEvent::convertQMouseEvent(event)))
@@ -245,6 +245,18 @@ namespace scaena
         _mouseReleaseAction = [&play](QMouseEvent* event)
         {
             if(play.mouseReleaseEvent(MouseEvent::convertQMouseEvent(event)))
+                event->accept();
+        };
+
+        _mouseMoveAction = [&play](QMouseEvent* event)
+        {
+            if(play.mouseMoveEvent(MouseEvent::convertQMouseEvent(event)))
+                event->accept();
+        };
+
+        _mouseWheelAction = [&play](QWheelEvent* event)
+        {
+            if(play.mouseWheelEvent(MouseEvent::convertQWheelEvent(event)))
                 event->accept();
         };
     }

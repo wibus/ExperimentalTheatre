@@ -76,6 +76,7 @@ namespace scaena
         virtual bool mousePressEvent(const MouseEvent& event);
         virtual bool mouseReleaseEvent(const MouseEvent& event);
         virtual bool mouseMoveEvent(const MouseEvent& event);
+        virtual bool mouseWheelEvent(const MouseEvent& event);
 
         // Getters
         bool isPlaying() const;

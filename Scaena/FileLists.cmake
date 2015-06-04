@@ -28,6 +28,7 @@ SET(SCAENA_STAGEMANAGEMENT_MANAGER_HEADERS
     ${SCAENA_SRC_DIR}/StageManagement/Manager/KeyPressDispatcher.h
     ${SCAENA_SRC_DIR}/StageManagement/Manager/KeyReleaseDispatcher.h
     ${SCAENA_SRC_DIR}/StageManagement/Manager/MouseMoveDispatcher.h
+    ${SCAENA_SRC_DIR}/StageManagement/Manager/MouseWheelDispatcher.h
     ${SCAENA_SRC_DIR}/StageManagement/Manager/MousePressDispatcher.h
     ${SCAENA_SRC_DIR}/StageManagement/Manager/MouseReleaseDispatcher.h
     ${SCAENA_SRC_DIR}/StageManagement/Manager/StageManager.h)
@@ -75,6 +76,7 @@ SET(SCAENA_STAGEMANAGEMENT_MANAGER_SOURCES
     ${SCAENA_SRC_DIR}/StageManagement/Manager/KeyPressDispatcher.cpp
     ${SCAENA_SRC_DIR}/StageManagement/Manager/KeyReleaseDispatcher.cpp
     ${SCAENA_SRC_DIR}/StageManagement/Manager/MouseMoveDispatcher.cpp
+    ${SCAENA_SRC_DIR}/StageManagement/Manager/MouseWheelDispatcher.cpp
     ${SCAENA_SRC_DIR}/StageManagement/Manager/MousePressDispatcher.cpp
     ${SCAENA_SRC_DIR}/StageManagement/Manager/MouseReleaseDispatcher.cpp)
 

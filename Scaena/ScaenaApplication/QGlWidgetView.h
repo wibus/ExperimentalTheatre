@@ -31,6 +31,7 @@ namespace scaena
         virtual void mousePressEvent(QMouseEvent* event) override;
         virtual void mouseReleaseEvent(QMouseEvent* event) override;
         virtual void mouseMoveEvent(QMouseEvent* event) override;
+        virtual void wheelEvent(QWheelEvent* event) override;
 
         virtual void centerOnScreen();
         virtual void setGlWindowSpace(int w, int h);
@@ -59,6 +60,7 @@ namespace scaena
         std::function<void(QMouseEvent*)> _mouseMoveAction;
         std::function<void(QMouseEvent*)> _mousePressAction;
         std::function<void(QMouseEvent*)> _mouseReleaseAction;
+        std::function<void(QWheelEvent*)> _mouseWheelAction;
     };
 }
 
