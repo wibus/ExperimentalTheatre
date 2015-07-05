@@ -12,18 +12,16 @@ using namespace cellar;
 namespace cellar
 {
     GlShader::GlShader(GLenum type) :
-        _type(type),
         _id(0),
-        _log(),
+        _type(type),
         _fileName("")
     {
     }
 
     GlShader::GlShader(GLenum type,
                        const std::string& fileName) :
-        _type(type),
         _id(0),
-        _log(),
+        _type(type),
         _fileName("")
     {
         loadFromFile(fileName);
@@ -35,6 +33,9 @@ namespace cellar
         {
             glDeleteShader(_id);
         }
+
+        getLog().postMessage(new Message('I', false,
+            "OpenGL shader (id=" + toString(_id) + ") deleted", "GlShader"));
     }
 
     bool GlShader::loadFromFile(const std::string& fileName)
@@ -45,11 +46,12 @@ namespace cellar
 
     bool GlShader::loadFromString(const std::string& source)
     {
-        string infoName = "unknown type shader";
+        string shaderType = "unknown type shader";
         switch(_type)
         {
-        case GL_VERTEX_SHADER   : infoName = "vertex shader";   break;
-        case GL_FRAGMENT_SHADER : infoName = "fragment shader"; break;
+        case GL_VERTEX_SHADER   : shaderType = "vertex shader";   break;
+        case GL_FRAGMENT_SHADER : shaderType = "fragment shader"; break;
+        case GL_COMPUTE_SHADER  : shaderType = "compute shader";  break;
         default: break;
         }
 
@@ -59,7 +61,7 @@ namespace cellar
         else
             shaderSrc = _fileName;
 
-        infoName = "(file = " + shaderSrc + ") " + infoName;
+        string infoName = "'" + shaderSrc + "' " + shaderType;
 
         if(source.empty())
         {
@@ -83,10 +85,10 @@ namespace cellar
             return false;
         }
 
-        infoName = "(id = " + toString(_id) + ") " + infoName;
+        string shaderId = "(id = " + toString(_id) + ")";
 
-        const char* ctexte = source.c_str();
-        glShaderSource( _id, 1, &ctexte, NULL );
+        const char* ctext = source.c_str();
+        glShaderSource( _id, 1, &ctext, NULL );
         glCompileShader( _id );
 
         int compilationStatus;
@@ -102,19 +104,18 @@ namespace cellar
 
             glGetShaderInfoLog( _id, infologLength, &charsWritten, infoLog );
 
-            _log = "Errors in shader: ";
-            _log.append(infoName);
-            _log.append("\n");
-            _log.append(infoLog);
+            string log = "Errors in shader: ";
+            log.append(infoName + " " + shaderId + "\n");
+            log.append(infoLog);
 
-            getLog().postMessage(new Message('E', false, _log, "GlShader"));
+            getLog().postMessage(new Message('E', false, log, "GlShader"));
             delete[] infoLog;
 
             return false;
         }
 
         getLog().postMessage(new Message('I', false,
-            infoName + " successfully compiled", "GlShader"));
+            infoName + " successfully compiled " + shaderId, "GlShader"));
 
         return true;
     }

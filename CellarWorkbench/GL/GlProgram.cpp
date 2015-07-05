@@ -25,7 +25,6 @@ namespace cellar
     GlProgram::GlProgram() :
         _id(0),
         _linked(false),
-        _log(),
         _inAndOutLocations(),
         _shaders(),
         _textures(),
@@ -37,13 +36,16 @@ namespace cellar
     {
         if(_id != 0)
         {
-            for (auto s=_shaders.begin(); s != _shaders.end(); ++s)
+            for (auto s : _shaders)
             {
-                glDetachShader( _id, (*s)->id() );
+                glDetachShader( _id, s->id() );
             }
 
             glDeleteProgram(_id);
         }
+
+        getLog().postMessage(new Message('I', false,
+            "OpenGL program (id=" + toString(_id) + ") deleted", "GlProgram"));
     }
 
     bool GlProgram::setInAndOutLocations(const GlInputsOutputs& inout)
@@ -81,6 +83,7 @@ namespace cellar
             glDeleteProgram(_id);
             _id = 0;
         }
+
         _id = glCreateProgram();
         if(_id == 0)
         {
@@ -90,13 +93,14 @@ namespace cellar
         }
 
         // Attach provided shaders
-        string logSupInfo = " (using shaders ids={";
+        string logSupInfo = " (id = " + toString(_id) + " using shader ids = {";
         for (auto s=_shaders.begin(); s != _shaders.end(); ++s)
         {
             glAttachShader( _id, (*s)->id() );
             logSupInfo += toString((*s)->id()) + ' ';
         }
-        logSupInfo += "}";
+        logSupInfo.back() = '}';
+        logSupInfo += ")";
 
         GlInputsOutputs::IOit inIt = _inAndOutLocations.inputs().begin();
         for(;inIt != _inAndOutLocations.inputs().end(); ++inIt)
@@ -120,11 +124,9 @@ namespace cellar
             int charsWritten  = 0;
             glGetProgramInfoLog( _id, infologLength, &charsWritten, infoLog );
 
-            _log = "Errors in shader program (id): ";
-            _log.append( toString(_id) );
-            _log.append("\n");
-            _log.append(infoLog);
-            getLog().postMessage(new Message('E', false, _log, "GlProgram"));
+            string log = "Errors in shader program (id): ";
+            log.append( toString(_id) + "\n" + infoLog );
+            getLog().postMessage(new Message('E', false, log, "GlProgram"));
             delete[] infoLog;
 
             return false;
@@ -423,9 +425,5 @@ namespace cellar
             glBindTexture(it->second.first, it->second.second);
         }
         glActiveTexture(GL_TEXTURE0);
-
-
-        // TODO wibus 2013-01-22: FBO
-
     }
 }

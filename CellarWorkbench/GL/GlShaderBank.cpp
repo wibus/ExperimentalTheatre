@@ -82,7 +82,7 @@ namespace cellar
         }
 
         getLog().postMessage(new Message('I', false,
-            "Implicitly adding : " + shaderName, "GlShaderBank"));
+            "Implicitly adding : '" + shaderName + "'", "GlShaderBank"));
 
         if(addShaderFromFile(shaderName, shaderType, shaderName))
         {
@@ -101,13 +101,13 @@ namespace cellar
         if(nbRemoved)
         {
             getLog().postMessage(new Message('I', false,
-                "Shader deleted : " + shaderName, "GlShaderBank"));
+                "Shader deleted : '" + shaderName + "'", "GlShaderBank"));
 
             return true;
         }
 
         getLog().postMessage(new Message('W', false,
-            "Shader not found so not deleted : " + shaderName, "GlShaderBank"));
+            "Shader not found so not deleted : '" + shaderName + "'", "GlShaderBank"));
 
         return false;
     }

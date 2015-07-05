@@ -1,4 +1,4 @@
-#include "Chrome.h"
+#include "Metal.h"
 
 #include "../Ray/Raycast.h"
 #include "../Ray/RayUtils.h"
@@ -6,17 +6,18 @@
 
 namespace prop3
 {
-    Chrome::Chrome(const glm::dvec3& color) :
-        _color(color)
+    Metal::Metal(const glm::dvec3& color, double glossiness) :
+        _color(color),
+        _glossiness(glossiness)
     {
     }
 
-    Chrome::~Chrome()
+    Metal::~Metal()
     {
 
     }
 
-    void Chrome::brdf(
+    void Metal::brdf(
         std::vector<Raycast>& raycasts,
         const RayHitReport& report,
         const std::shared_ptr<Material>& leavedMaterial,
@@ -24,7 +25,7 @@ namespace prop3
         unsigned int outRayCountHint) const
     {
         size_t preSize = raycasts.size();
-        specularReflection(raycasts, report, selfEnteredMaterial);
+        glossyReflection(raycasts, report, selfEnteredMaterial, _glossiness, outRayCountHint);
         size_t postSize = raycasts.size();
 
         for(size_t i=preSize; i<postSize; ++i)

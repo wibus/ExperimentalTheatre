@@ -586,8 +586,12 @@ namespace prop2
 
 
         //Load font format
+        for(int i=0; i<96; i++)
+                _charsWidth[i] = 0.05f;
+        _charsHeight = 0.1f;
+        /*
         QFile flwFile((fileFullName+".flw").c_str());
-        if(false/*flwFile.open(QIODevice::ReadOnly | QIODevice::Text)*/)
+        if(flwFile.open(QIODevice::ReadOnly | QIODevice::Text))
         {
             char lw[96];
             char lh;
@@ -616,5 +620,6 @@ namespace prop2
             getLog().postMessage(new
                 Message('W', false, "\t"+fileFullName + ".flw : Absent", "Text"));
         }
+        */
     }
 }

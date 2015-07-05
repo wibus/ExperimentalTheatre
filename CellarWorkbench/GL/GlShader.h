@@ -22,15 +22,13 @@ namespace cellar
         bool loadFromFile(const std::string& fileName);
         bool loadFromString(const std::string& source);
 
-        GLenum type() const;
         GLuint id() const;
-        const std::string& log() const;
+        GLenum type() const;
 
 
     protected:
-        GLenum _type;
         GLuint _id;
-        std::string _log;
+        GLenum _type;
         std::string _fileName;
 
     private:
@@ -42,19 +40,14 @@ namespace cellar
 
 
     // IMPLEMENTATION //
-    inline GLenum GlShader::type() const
-    {
-        return _type;
-    }
-
     inline GLuint GlShader::id() const
     {
         return _id;
     }
 
-    inline const std::string& GlShader::log() const
+    inline GLenum GlShader::type() const
     {
-        return _log;
+        return _type;
     }
 }
 

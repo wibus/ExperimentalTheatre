@@ -37,6 +37,8 @@ namespace prop3
             coreCount = DEFAULT_WORKER_COUNT;
         }
 
+        //coreCount = 1;
+
         _workerObjects.resize(coreCount);
 
         init();
@@ -117,10 +119,10 @@ namespace prop3
             int levelSizeRatio,
             int threadBatchPerLevel)
     {
-        abortRendering();
         _draftLevelCount = levelCount;
         _draftLevelSizeRatio = levelSizeRatio;
         _draftThreadBatchPerLevel = threadBatchPerLevel;
+        abortRendering();
     }
 
     void CpuRaytracer::enableFastDraft(bool enable)
@@ -148,7 +150,12 @@ namespace prop3
         if(_workersInterrupted)
         {
             _workersInterrupted = false;
-            _startTime = std::chrono::steady_clock::now();
+
+            if(!isDrafter())
+            {
+                _startTime = std::chrono::steady_clock::now();
+            }
+
             for(auto& w : _workerObjects)
             {
                 if(!w->isRunning())
@@ -334,6 +341,7 @@ namespace prop3
 
         if(_draftLevel < _draftLevelCount)
         {
+            // Drafting not finished
             int ratioPower = (_draftLevelCount - (_draftLevel+1));
             int ratio = glm::pow(2, ratioPower) * _draftLevelSizeRatio;
 
@@ -342,7 +350,9 @@ namespace prop3
         }
         else
         {
+            // Drafting finished
             _draftViewportSize = _viewportSize;
+            _startTime = std::chrono::steady_clock::now();
         }
 
         // Update worker buffers' size

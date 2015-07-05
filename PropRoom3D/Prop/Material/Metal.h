@@ -7,12 +7,12 @@
 namespace prop3
 {
 
-    class PROP3D_EXPORT Chrome :
+    class PROP3D_EXPORT Metal :
             public Material
     {
     public:
-        Chrome(const glm::dvec3& color);
-        virtual ~Chrome();
+        Metal(const glm::dvec3& color, double glossiness = 1.0);
+        virtual ~Metal();
 
         virtual void brdf(
             std::vector<Raycast>& raycasts,
@@ -23,6 +23,7 @@ namespace prop3
 
     protected:
         glm::dvec3 _color;
+        double _glossiness;
     };
 }
 

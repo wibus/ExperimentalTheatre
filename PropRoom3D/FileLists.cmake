@@ -50,7 +50,7 @@ SET(PROP3_LIGHTING_HEADERS
 SET(PROP3_MATERIAL_HEADERS
     ${PROP3_SRC_DIR}/Prop/Material/Material.h
     ${PROP3_SRC_DIR}/Prop/Material/Air.h
-    ${PROP3_SRC_DIR}/Prop/Material/Chrome.h
+    ${PROP3_SRC_DIR}/Prop/Material/Metal.h
     ${PROP3_SRC_DIR}/Prop/Material/Concrete.h
     ${PROP3_SRC_DIR}/Prop/Material/Glass.h)
 
@@ -71,10 +71,18 @@ SET(PROP3_PROP_HEADERS
     ${PROP3_RAY_HEADERS}
     ${PROP3_SRC_DIR}/Prop/Prop.h)
 
+# Scene
+SET(PROP3_SCENE_HEADERS
+    ${PROP3_SRC_DIR}/Scene/Scene.h
+    ${PROP3_SRC_DIR}/Scene/SceneReader.h
+    ${PROP3_SRC_DIR}/Scene/SceneWriter.h)
+
+
 # All the header files #
 SET(PROP3_HEADERS
     ${PROP3_TEAM_HEADERS}
     ${PROP3_PROP_HEADERS}
+    ${PROP3_SCENE_HEADERS}
     ${PROP3_SRC_DIR}/libPropRoom3D_global.h)
     
 
@@ -127,7 +135,7 @@ SET(PROP3_LIGHTING_SOURCES
 SET(PROP3_MATERIAL_SOURCES
     ${PROP3_SRC_DIR}/Prop/Material/Material.cpp
     ${PROP3_SRC_DIR}/Prop/Material/Air.cpp
-    ${PROP3_SRC_DIR}/Prop/Material/Chrome.cpp
+    ${PROP3_SRC_DIR}/Prop/Material/Metal.cpp
     ${PROP3_SRC_DIR}/Prop/Material/Concrete.cpp
     ${PROP3_SRC_DIR}/Prop/Material/Glass.cpp)
 
@@ -148,10 +156,17 @@ SET(PROP3_PROP_SOURCES
     ${PROP3_RAY_SOURCES}
     ${PROP3_SRC_DIR}/Prop/Prop.cpp)
 
+# Scene
+SET(PROP3_SCENE_SOURCES
+    ${PROP3_SRC_DIR}/Scene/Scene.cpp
+    ${PROP3_SRC_DIR}/Scene/SceneReader.cpp
+    ${PROP3_SRC_DIR}/Scene/SceneWriter.cpp)
+
 # All the source files #
 SET(PROP3_SOURCES
     ${PROP3_TEAM_SOURCES}
-    ${PROP3_PROP_SOURCES})
+    ${PROP3_PROP_SOURCES}
+    ${PROP3_SCENE_SOURCES})
 
 ## Resources
 SET(PROP3_RCC_FILES

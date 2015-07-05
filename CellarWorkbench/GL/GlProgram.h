@@ -24,7 +24,6 @@ namespace cellar
         virtual ~GlProgram();
 
         GLuint id() const;
-        const std::string& log() const;
         const GlInputsOutputs& InOutLocations() const;
 
         // Build process
@@ -80,10 +79,9 @@ namespace cellar
 
         GLuint _id;
         int _linked;
-        std::string _log;
         GlInputsOutputs _inAndOutLocations;
-        std::set<std::shared_ptr<GlShader> > _shaders;
-        std::map<GLenum, std::pair<GLenum, GLuint> > _textures;
+        std::set<std::shared_ptr<GlShader>> _shaders;
+        std::map<GLenum, std::pair<GLenum, GLuint>> _textures;
         mutable std::map<std::string, int> _cachedLocations;        
     };
 
@@ -93,11 +91,6 @@ namespace cellar
     inline GLuint GlProgram::id() const
     {
         return _id;
-    }
-
-    inline const std::string& GlProgram::log() const
-    {
-        return _log;
     }
 
     inline const GlInputsOutputs& GlProgram::InOutLocations() const

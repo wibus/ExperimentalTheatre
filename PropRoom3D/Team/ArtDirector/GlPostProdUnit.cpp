@@ -1,5 +1,4 @@
 #include "GlPostProdUnit.h"
-#include "ui_QGlPostProdUnit.h"
 
 #include <cassert>
 
@@ -32,7 +31,8 @@ namespace prop3
         _adaptationFactor(1.0f),
         _temperatureColor(DEFAULT_WHITE_TEMPERATURE),
         _contrastValue(1.0f),
-        _luminosityValue(0.0f)
+        _luminosityValue(0.0f),
+        _isSetup(false)
     {
     }
 

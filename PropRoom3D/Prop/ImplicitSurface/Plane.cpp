@@ -33,8 +33,8 @@ namespace prop3
 
     void Plane::transform(const Transform& transform)
     {
-        _normal = glm::normalize(glm::dvec3(transform.mat() * glm::dvec4(_normal, 0.0)));
         glm::dvec3 pt = glm::dvec3(transform.mat() * glm::dvec4((-_d) * _normal, 1.0));
+        _normal = glm::normalize(glm::dvec3(transform.mat() * glm::dvec4(_normal, 0.0)));
         _d = -glm::dot(_normal, pt);
     }
 
