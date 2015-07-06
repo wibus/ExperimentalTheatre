@@ -113,6 +113,9 @@ namespace prop3
         std::mutex _framesMutex;
 
         std::vector<std::shared_ptr<Prop>> _props;
+
+        // Memory pools
+        std::vector<RayHitReport*> reportPool;
     };
 }
 

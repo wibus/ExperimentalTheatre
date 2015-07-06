@@ -3,19 +3,19 @@
 
 namespace prop3
 {
-    RayHitReport::RayHitReport(
-            const Ray& ray,
+    RayHitReport::RayHitReport(const Ray& ray,
             double distance,
             const glm::dvec3& position,
             const glm::dvec3& normal,
-            const std::shared_ptr<Coating>& coating,
+            const Coating* coating,
             const glm::dvec3& texCoord) :
         ray(ray),
         distance(distance),
         position(position),
         normal(normal),
         coating(coating),
-        texCoord(texCoord)
+        texCoord(texCoord),
+        _next(nullptr)
     {
     }
 

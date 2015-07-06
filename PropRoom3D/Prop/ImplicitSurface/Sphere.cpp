@@ -1,5 +1,6 @@
 #include "Sphere.h"
 
+#include "../Ray/RayHitList.h"
 #include "../Ray/RayHitReport.h"
 
 
@@ -44,7 +45,7 @@ namespace prop3
         return glm::length(dist) -  _radius;
     }
 
-    void Sphere::raycast(const Ray& ray, std::vector<RayHitReport>& reports) const
+    void Sphere::raycast(const Ray& ray, RayHitList& reports) const
     {
         double a, b, c;
         params(ray, a, b, c);
@@ -58,7 +59,7 @@ namespace prop3
             {
                 glm::dvec3 pt = ray.origin + ray.direction*t1;
                 glm::dvec3 n = glm::normalize(pt - _center);
-                reports.push_back(RayHitReport(ray, t1, pt, n, _coating));
+                reports.add(ray, t1, pt, n, _coating.get());
             }
 
             double t2 = (-b + disrcSqrt) / (2 * a);
@@ -66,7 +67,7 @@ namespace prop3
             {
                 glm::dvec3 pt = ray.origin + ray.direction*t2;
                 glm::dvec3 n = glm::normalize(pt - _center);
-                reports.push_back(RayHitReport(ray, t2, pt, n, _coating));
+                reports.add(ray, t2, pt, n, _coating.get());
             }
         }
         else if(discr == 0.0)
@@ -76,12 +77,12 @@ namespace prop3
             {
                 glm::dvec3 pt = ray.origin + ray.direction*t;
                 glm::dvec3 n = glm::normalize(pt - _center);
-                reports.push_back(RayHitReport(ray, t, pt, n, _coating));
+                reports.add(ray, t, pt, n, _coating.get());
             }
         }
     }
 
-    bool Sphere::intersects(const Ray& ray)
+    bool Sphere::intersects(const Ray& ray, RayHitList& reports) const
     {
         double a, b, c;
         params(ray, a, b, c);

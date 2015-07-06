@@ -181,6 +181,12 @@ namespace prop3
 
         cellar::getLog().postMessage(new cellar::Message(
             'I', false, ss.str(), "CpuRaytracerServer"));
+
+
+        if(!_localRaytracer->isDrafting() && sampleCount == 8)
+        {
+            //exit(0);
+        }
     }
 
     void CpuRaytracerServer::clearColorTexture()

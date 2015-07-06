@@ -1,5 +1,6 @@
 #include "Plane.h"
 
+#include "../Ray/RayHitList.h"
 #include "../Ray/RayHitReport.h"
 
 
@@ -51,7 +52,7 @@ namespace prop3
         return glm::dot(_normal, point) + _d;
     }
 
-    void Plane::raycast(const Ray& ray, std::vector<RayHitReport>& reports) const
+    void Plane::raycast(const Ray& ray, RayHitList& reports) const
     {
         double dirDotNorm = glm::dot(_normal, ray.direction);
         if(dirDotNorm != 0.0)
@@ -60,12 +61,12 @@ namespace prop3
             if(0.0 < t && t < ray.limit)
             {
                 glm::dvec3 pt = ray.origin + ray.direction * t;
-                reports.push_back(RayHitReport(ray, t, pt, _normal, _coating));
+                reports.add(ray, t, pt, _normal, _coating.get());
             }
         }
     }
 
-    bool Plane::intersects(const Ray& ray)
+    bool Plane::intersects(const Ray& ray, RayHitList& reports) const
     {
         return glm::dot(ray.direction, _normal) != 0.0;
     }
@@ -111,18 +112,20 @@ namespace prop3
                     new PlaneTexture(normal, origin, texU, texV, texOrigin));
     }
 
-    void PlaneTexture::raycast(const Ray& ray, std::vector<RayHitReport>& reports) const
+    void PlaneTexture::raycast(const Ray& ray, RayHitList& reports) const
     {
-        size_t preSize = reports.size();
+        RayHitReport* last = reports.head;
         Plane::raycast(ray, reports);
-        size_t postSize = reports.size();
+        RayHitReport* first = reports.head;
 
-        for(int i=preSize; i<postSize; ++i)
+        while(first != last)
         {
-            RayHitReport& r = reports[i];
+            RayHitReport& r = *first;
             glm::dvec3 dist = r.position - _texOrigin;
             r.texCoord.s = glm::dot(dist, _texU) / glm::dot(_texU, _texU);
             r.texCoord.t = glm::dot(dist, _texV) / glm::dot(_texV, _texV);
+
+            first = first->_next;
         }
     }
 }

@@ -13,6 +13,7 @@
 namespace prop3
 {
     class Ray;
+    class RayHitList;
     class RayHitReport;
     class Coating;
 
@@ -28,7 +29,7 @@ namespace prop3
     struct PROP3D_EXPORT Transform
     {
         Transform(const glm::dmat4& mat);
-        Transform(double scale ,
+        Transform(double scale,
                   const glm::dquat& rotation,
                   const glm::dvec3& translation);
 
@@ -59,8 +60,8 @@ namespace prop3
         double signedDistance(double x, double y, double z) const;
         virtual double signedDistance(const glm::dvec3& point) const = 0;
 
-        virtual void raycast(const Ray& ray, std::vector<RayHitReport>& reports) const =0;
-        virtual bool intersects(const Ray& ray) = 0;
+        virtual void raycast(const Ray& ray, RayHitList& reports) const =0;
+        virtual bool intersects(const Ray& ray, RayHitList& reports) const = 0;
 
         virtual void setCoating(const std::shared_ptr<Coating>& coating) = 0;
 
@@ -80,8 +81,8 @@ namespace prop3
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
-        virtual void raycast(const Ray& ray, std::vector<RayHitReport>& reports) const;
-        virtual bool intersects(const Ray& ray);
+        virtual void raycast(const Ray& ray, RayHitList& reports) const;
+        virtual bool intersects(const Ray& ray, RayHitList& reports) const;
         virtual void setCoating(const std::shared_ptr<Coating>& coating);
 
     private:
@@ -99,8 +100,8 @@ namespace prop3
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
-        virtual void raycast(const Ray& ray, std::vector<RayHitReport>& reports) const;
-        virtual bool intersects(const Ray& ray);
+        virtual void raycast(const Ray& ray, RayHitList& reports) const;
+        virtual bool intersects(const Ray& ray, RayHitList& reports) const;
         virtual void setCoating(const std::shared_ptr<Coating>& coating);
 
     private:
@@ -119,13 +120,13 @@ namespace prop3
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
-        virtual void raycast(const Ray& ray, std::vector<RayHitReport>& reports) const;
-        virtual bool intersects(const Ray& ray);
+        virtual void raycast(const Ray& ray, RayHitList& reports) const;
+        virtual bool intersects(const Ray& ray, RayHitList& reports) const;
         virtual void setCoating(const std::shared_ptr<Coating>& coating);
 
     private:
         void add(const std::shared_ptr<ImplicitSurface>& surface);
-        virtual bool raycast(const Ray& ray, std::vector<RayHitReport>& reports, bool isTest) const;
+        virtual bool raycast(const Ray& ray, RayHitList& reports, bool isTest) const;
 
         std::vector<std::shared_ptr<ImplicitSurface>> _eqs;
     };
@@ -142,13 +143,13 @@ namespace prop3
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
-        virtual void raycast(const Ray& ray, std::vector<RayHitReport>& reports) const;
-        virtual bool intersects(const Ray& ray);
+        virtual void raycast(const Ray& ray, RayHitList& reports) const;
+        virtual bool intersects(const Ray& ray, RayHitList& reports) const;
         virtual void setCoating(const std::shared_ptr<Coating>& coating);
 
     private:
         void add(const std::shared_ptr<ImplicitSurface>& surface);
-        virtual bool raycast(const Ray& ray, std::vector<RayHitReport>& reports, bool isTest) const;
+        virtual bool raycast(const Ray& ray, RayHitList& reports, bool isTest) const;
 
         std::vector<std::shared_ptr<ImplicitSurface>> _eqs;
     };

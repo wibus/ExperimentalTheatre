@@ -4,6 +4,7 @@
 
 #include "../../Prop/Prop.h"
 #include "../../Prop/Ray/Raycast.h"
+#include "../../Prop/Ray/RayHitList.h"
 #include "../../Prop/Ray/RayHitReport.h"
 #include "../../Prop/ImplicitSurface/ImplicitSurface.h"
 #include "../../Prop/Coating/Coating.h"
@@ -282,7 +283,8 @@ namespace prop3
     }
 
     std::shared_ptr<Prop> CpuRaytracerWorker::findNearestProp(
-            const Ray& rayPrototype, RayHitReport& reportMin)
+            const Ray& rayPrototype,
+            RayHitReport& reportMin)
     {
         std::shared_ptr<Prop> propMin;
         Ray ray(rayPrototype);
@@ -294,21 +296,32 @@ namespace prop3
             if(surface.get() == nullptr)
                 continue;
 
+            RayHitList reports(reportPool);
+
             const std::shared_ptr<ImplicitSurface>& bounds = prop->boundingSurface();
-            if(bounds.get() != nullptr && !bounds->intersects(ray))
+            if(bounds.get() != nullptr && !bounds->intersects(ray, reports))
                 continue;
 
-            std::vector<RayHitReport> reports;
+            reports.clear();
             surface->raycast(ray, reports);
 
-            for(const RayHitReport& report : reports)
+            bool isNearer = false;
+            RayHitReport* node = reports.head;
+            while(node != nullptr)
             {
-                if(0.0 < report.distance && report.distance < reportMin.distance )
+                if(0.0 < node->distance && node->distance < ray.limit)
                 {
-                    ray.limit = report.distance;
-                    reportMin = report;
-                    propMin = prop;
+                    ray.limit = node->distance;
+                    reportMin = *node;
+                    isNearer = true;
                 }
+
+                node = node->_next;
+            }
+
+            if(isNearer)
+            {
+                propMin = prop;
             }
         }
 
@@ -329,9 +342,9 @@ namespace prop3
 
         double maxDist = raycast.material->lightFreePathLength(ray);
 
-        glm::dvec3 dummyVec = glm::dvec3();
-        std::shared_ptr<Coating> dummyCoat;
-        RayHitReport reportMin(ray, maxDist, dummyVec, dummyVec, dummyCoat);
+        const Coating* dummyCoat = nullptr;
+        const glm::dvec3 dummyVec = glm::dvec3();
+        RayHitReport reportMin(ray, maxDist, dummyVec, dummyVec, dummyCoat, dummyVec);
         std::shared_ptr<Prop> propMin = findNearestProp(ray, reportMin);
 
         if(propMin || maxDist != INFINITY)

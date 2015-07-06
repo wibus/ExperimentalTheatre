@@ -2,6 +2,7 @@
 
 #include <GLM/gtc/matrix_transform.hpp>
 
+#include "../Ray/RayHitList.h"
 #include "../Ray/RayHitReport.h"
 #include "../Coating/NoCoating.h"
 
@@ -74,12 +75,12 @@ namespace prop3
     }
 
     void SurfaceGhost::raycast(const Ray&,
-        std::vector<RayHitReport>&) const
+        RayHitList&) const
     {
         // Never generates intersection points
     }
 
-    bool SurfaceGhost::intersects(const Ray& ray)
+    bool SurfaceGhost::intersects(const Ray& ray, RayHitList& reports) const
     {
         return false;
     }
@@ -116,18 +117,21 @@ namespace prop3
     }
 
     void SurfaceInverse::raycast(const Ray& ray,
-                        std::vector<RayHitReport>& reports) const
+                        RayHitList& reports) const
     {
         _eq->raycast(ray, reports);
-        for(RayHitReport& report : reports)
+
+        RayHitReport* node = reports.head;
+        while(node != nullptr)
         {
-            report.normal = -report.normal;
+            node->normal = -node->normal;
+            node = node->_next;
         }
     }
 
-    bool SurfaceInverse::intersects(const Ray& ray)
+    bool SurfaceInverse::intersects(const Ray& ray, RayHitList& reports) const
     {
-        return _eq->intersects(ray);
+        return _eq->intersects(ray, reports);
     }
 
     void SurfaceInverse::setCoating(const std::shared_ptr<Coating>& coating)
@@ -175,35 +179,36 @@ namespace prop3
     }
 
     void SurfaceOr::raycast(const Ray& ray,
-                           std::vector<RayHitReport>& reports) const
+                            RayHitList& reports) const
     {
         raycast(ray, reports, false);
     }
 
-    bool SurfaceOr::intersects(const Ray& ray)
+    bool SurfaceOr::intersects(const Ray& ray, RayHitList& reports) const
     {
-        std::vector<RayHitReport> reports;
         return raycast(ray, reports, true);
     }
 
     bool SurfaceOr::raycast(const Ray& ray,
-                           std::vector<RayHitReport>& reports,
+                           RayHitList& reports,
                            bool isTest) const
     {
-        std::vector<RayHitReport> eqReports;
+        RayHitList eqReports(reports.memoryPool);
         for(const auto& eq : _eqs)
         {
             eqReports.clear();
             eq->raycast(ray, eqReports);
 
-            for(RayHitReport& report : eqReports)
+            RayHitReport* parent = nullptr;
+            RayHitReport* node = eqReports.head;
+            while(node != nullptr)
             {
                 bool isIn = false;
                 for(const auto& eqTest : _eqs)
                 {
                     if(eq.get() != eqTest.get())
                     {
-                        if(eqTest->isIn(report.position) ==
+                        if(eqTest->isIn(node->position) ==
                            EPointPosition::IN)
                         {
                             isIn = true;
@@ -212,13 +217,26 @@ namespace prop3
                     }
                 }
 
+                RayHitReport* next = node->_next;
+
                 if(!isIn)
                 {
                     if(isTest)
                         return true;
 
-                    reports.push_back(report);
+                    if(parent == nullptr)
+                        eqReports.head = node->_next;
+                    else
+                        parent->_next = node->_next;
+
+                    reports.add(node);
                 }
+                else
+                {
+                    parent = node;
+                }
+
+                node = next;
             }
         }
 
@@ -271,35 +289,36 @@ namespace prop3
     }
 
     void SurfaceAnd::raycast(const Ray& ray,
-                           std::vector<RayHitReport>& reports) const
+                             RayHitList& reports) const
     {
         raycast(ray, reports, false);
     }
 
-    bool SurfaceAnd::intersects(const Ray& ray)
+    bool SurfaceAnd::intersects(const Ray& ray, RayHitList& reports) const
     {
-        std::vector<RayHitReport> reports;
         return raycast(ray, reports, true);
     }
 
     bool SurfaceAnd::raycast(const Ray& ray,
-                            std::vector<RayHitReport>& reports,
-                            bool isTest) const
+                             RayHitList& reports,
+                             bool isTest) const
     {
-        std::vector<RayHitReport> eqReports;
+        RayHitList eqReports(reports.memoryPool);
         for(const auto& eq : _eqs)
         {
             eqReports.clear();
             eq->raycast(ray, eqReports);
 
-            for(RayHitReport& report : eqReports)
+            RayHitReport* parent = nullptr;
+            RayHitReport* node = eqReports.head;
+            while(node != nullptr)
             {
                 bool isIn = true;
                 for(const auto& eqTest : _eqs)
                 {
                     if(eq.get() != eqTest.get())
                     {
-                        if(eqTest->isIn(report.position) ==
+                        if(eqTest->isIn(node->position) ==
                            EPointPosition::OUT)
                         {
                             isIn = false;
@@ -308,13 +327,26 @@ namespace prop3
                     }
                 }
 
+                RayHitReport* next = node->_next;
+
                 if(isIn)
                 {
                     if(isTest)
                         return true;
 
-                    reports.push_back(report);
+                    if(parent == nullptr)
+                        eqReports.head = node->_next;
+                    else
+                        parent->_next = node->_next;
+
+                    reports.add(node);
                 }
+                else
+                {
+                    parent = node;
+                }
+
+                node = next;
             }
         }
 
