@@ -71,6 +71,14 @@ namespace cellar
         return addShader(shader);
     }
 
+    bool GlProgram::addShader(GLenum shaderType, const std::vector<std::string>& shaderNames)
+    {
+        shared_ptr<GlShader> shader =
+            getGlShaderBank().getShaderPtr(shaderNames, shaderType);
+
+        return addShader(shader);
+    }
+
     void GlProgram::clearShaders()
     {
         _shaders.clear();
@@ -182,6 +190,7 @@ namespace cellar
 
     void GlProgram::pushProgram(GLuint id)
     {
+        glUseProgram( id );
         _progStack.push( make_pair(id, (GlProgram*)nullptr) );
     }
 
@@ -223,7 +232,7 @@ namespace cellar
 
     void GlProgram::pushProgram()
     {
-        pushProgram( _id );
+        _progStack.push( make_pair(_id, this) );
         applyState();
     }
 

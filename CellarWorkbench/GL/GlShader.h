@@ -2,6 +2,7 @@
 #define CELLARWORKBENCH_GLSHADER_H
 
 #include <string>
+#include <vector>
 
 #include <GL3/gl3w.h>
 
@@ -20,11 +21,15 @@ namespace cellar
         virtual ~GlShader();
 
         bool loadFromFile(const std::string& fileName);
+        bool loadFromFiles(const std::vector<std::string>& fileNames);
         bool loadFromString(const std::string& source);
+        bool loadFromStrings(const std::vector<std::string>& sources);
 
         GLuint id() const;
         GLenum type() const;
 
+
+        static std::string implicitName(const std::vector<std::string>& fileNames);
 
     protected:
         GLuint _id;

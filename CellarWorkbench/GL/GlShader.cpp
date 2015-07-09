@@ -44,7 +44,30 @@ namespace cellar
         return loadFromString( fileToString(fileName) );
     }
 
+    bool GlShader::loadFromFiles(const std::vector<std::string>& fileNames)
+    {
+        _fileName = implicitName(fileNames);
+
+        std::vector<std::string> sources;
+        for(const auto& file : fileNames)
+        {
+            sources.push_back( fileToString(file) );
+            if(sources.back().empty())
+                sources.pop_back();
+        }
+
+        return loadFromStrings( sources );
+    }
+
     bool GlShader::loadFromString(const std::string& source)
+    {
+        if(source.empty())
+            return loadFromStrings({ });
+        else
+            return loadFromStrings({ source });
+    }
+
+    bool GlShader::loadFromStrings(const std::vector<std::string>& sources)
     {
         string shaderType = "unknown type shader";
         switch(_type)
@@ -63,7 +86,7 @@ namespace cellar
 
         string infoName = "'" + shaderSrc + "' " + shaderType;
 
-        if(source.empty())
+        if(sources.empty())
         {
             getLog().postMessage(new Message('E', false,
                 infoName + " was absent or empty", "GlShader"));
@@ -87,9 +110,15 @@ namespace cellar
 
         string shaderId = "(id = " + toString(_id) + ")";
 
-        const char* ctext = source.c_str();
-        glShaderSource( _id, 1, &ctext, NULL );
+        const char** ctexts = new const char*[sources.size()];
+        for(int i=0; i < sources.size(); ++i)
+            ctexts[i] = sources[i].c_str();
+
+        glShaderSource( _id, sources.size(), ctexts, NULL );
         glCompileShader( _id );
+
+        delete[] ctexts;
+
 
         int compilationStatus;
         glGetShaderiv(_id, GL_COMPILE_STATUS, &compilationStatus);
@@ -118,5 +147,15 @@ namespace cellar
             infoName + " successfully compiled " + shaderId, "GlShader"));
 
         return true;
+    }
+
+    std::string GlShader::implicitName(const std::vector<std::string>& fileNames)
+    {
+        std::string shaderName;
+        for(const auto& name : fileNames)
+            shaderName += name + ";";
+        shaderName.pop_back();
+
+        return shaderName;
     }
 }

@@ -31,6 +31,17 @@ namespace cellar
         return addShader(shaderName, shaderType, shader);
     }
 
+    bool GlShaderBank::addShaderFromFiles(
+            const std::string& shaderName,
+            GLenum shaderType,
+            const std::vector<std::string>& fileNames)
+    {
+        shared_ptr<GlShader> shader(new GlShader(shaderType));
+        shader->loadFromFiles(fileNames);
+
+        return addShader(shaderName, shaderType, shader);
+    }
+
     bool GlShaderBank::addShaderFromString(
             const std::string& shaderName,
             GLenum shaderType,
@@ -38,6 +49,17 @@ namespace cellar
     {
         shared_ptr<GlShader> shader(new GlShader(shaderType));
         shader->loadFromString(shaderSource);
+
+        return addShader(shaderName, shaderType, shader);
+    }
+
+    bool GlShaderBank::addShaderFromStrings(
+            const std::string& shaderName,
+            GLenum shaderType,
+            const std::vector<std::string>& shaderSources)
+    {
+        shared_ptr<GlShader> shader(new GlShader(shaderType));
+        shader->loadFromStrings(shaderSources);
 
         return addShader(shaderName, shaderType, shader);
     }
@@ -70,6 +92,13 @@ namespace cellar
         return *getShaderPtr(shaderName, shaderType);
     }
 
+    GlShader& GlShaderBank::getShader(
+            const std::vector<std::string>& shaderNames,
+            GLenum shaderType)
+    {
+        return *getShaderPtr(shaderNames, shaderType);
+    }
+
     std::shared_ptr<GlShader> GlShaderBank::getShaderPtr(
             const std::string& shaderName,
             GLenum shaderType)
@@ -85,6 +114,30 @@ namespace cellar
             "Implicitly adding : '" + shaderName + "'", "GlShaderBank"));
 
         if(addShaderFromFile(shaderName, shaderType, shaderName))
+        {
+            return getShaderPtr(shaderName, shaderType);
+        }
+
+        return getShaderPtr("blank", shaderType);
+    }
+
+    std::shared_ptr<GlShader> GlShaderBank::getShaderPtr(
+            const std::vector<std::string>& shaderNames,
+            GLenum shaderType)
+    {
+        std::string shaderName = GlShader::implicitName(shaderNames);
+
+        auto it = _shaders.find(shaderName);
+
+        if(it != _shaders.end())
+        {
+            return it->second;
+        }
+
+        getLog().postMessage(new Message('I', false,
+            "Implicitly adding : '" + shaderName + "'", "GlShaderBank"));
+
+        if(addShaderFromFiles(shaderName, shaderType, shaderNames))
         {
             return getShaderPtr(shaderName, shaderType);
         }

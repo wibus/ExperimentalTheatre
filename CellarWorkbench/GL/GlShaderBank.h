@@ -1,6 +1,7 @@
 #ifndef CELLARWORKBENCH_GLSHADERBANK_H
 #define CELLARWORKBENCH_GLSHADERBANK_H
 
+#include <vector>
 #include <memory>
 #include <map>
 
@@ -16,7 +17,6 @@ namespace cellar
         GlShaderBank();
 
     public:
-
         bool isInBank(
                 const std::string& shaderName,
                 GLenum shaderType) const;
@@ -26,17 +26,35 @@ namespace cellar
                 GLenum shaderType,
                 const std::string& fileName);
 
+        bool addShaderFromFiles(
+                const std::string& shaderName,
+                GLenum shaderType,
+                const std::vector<std::string>& fileNames);
+
         bool addShaderFromString(
                 const std::string& shaderName,
                 GLenum shaderType,
                 const std::string& shaderSource);
 
+        bool addShaderFromStrings(
+                const std::string& shaderName,
+                GLenum shaderType,
+                const std::vector<std::string>& shaderSources);
+
         GlShader& getShader(
                 const std::string& shaderName,
                 GLenum shaderType);
 
+        GlShader& getShader(
+                const std::vector<std::string>& shaderNames,
+                GLenum shaderType);
+
         std::shared_ptr<GlShader> getShaderPtr(
                 const std::string& shaderName,
+                GLenum shaderType);
+
+        std::shared_ptr<GlShader> getShaderPtr(
+                const std::vector<std::string>& shaderNames,
                 GLenum shaderType);
 
         bool deleteShader(

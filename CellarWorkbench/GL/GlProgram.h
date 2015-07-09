@@ -2,6 +2,7 @@
 #define CELLARWORKBENCH_GLPROGRAM_H
 
 #include <string>
+#include <vector>
 #include <set>
 #include <map>
 #include <stack>
@@ -30,6 +31,7 @@ namespace cellar
         bool setInAndOutLocations(const GlInputsOutputs& inout);
         bool addShader(const std::shared_ptr<GlShader>& shader);
         bool addShader(GLenum shaderType, const std::string& shaderName);
+        bool addShader(GLenum shaderType, const std::vector<std::string>& shaderNames);
         void clearShaders();
         bool link();
 
