@@ -55,6 +55,7 @@ namespace scaena
         static const std::string MAIN_VIEW;
         virtual bool addView(const std::shared_ptr<View>& view);
         virtual std::shared_ptr<View> view(const std::string& id = MAIN_VIEW) const;
+        virtual void drawCharactersFromView(const View& view);
 
         // Acts
         virtual std::shared_ptr<Act> getAct(const std::string& id) const;

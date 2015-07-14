@@ -1,6 +1,7 @@
 #include "GlProgram.h"
 
 #include <cassert>
+#include <iostream>
 
 #include <GLM/gtc/type_ptr.hpp>
 

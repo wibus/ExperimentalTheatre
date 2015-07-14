@@ -199,6 +199,19 @@ namespace scaena
         }
     }
 
+    bool Play::addView(const std::shared_ptr<View>& view)
+    {
+        for(auto& v : _views)
+        {
+            if(v->id() == view->id())
+                return false;
+        }
+
+        _views.push_back(view);
+
+        return true;
+    }
+
     std::shared_ptr<View> Play::view(const std::string& id) const
     {
         if(!_views.empty())
@@ -216,17 +229,25 @@ namespace scaena
         return std::shared_ptr<View>();
     }
 
-    bool Play::addView(const std::shared_ptr<View>& view)
+    void Play::drawCharactersFromView(const View& view)
     {
-        for(auto& v : _views)
+        if(!_isPlaying)
+            return ;
+
+        // Draw from view only if it was installed
+        for(const auto& v : _views)
         {
-            if(v->id() == view->id())
-                return false;
+            if(v->id() == view.id())
+            {
+                StageTime time(_drawClock.totalSeconds(),
+                               _drawClock.elapsedSeconds(),
+                               _drawClock.ticksPerSecond());
+
+                DrawCaller drawCaller(v, time);
+                (*_currentAct)->welcome( drawCaller );
+                break;
+            }
         }
-
-        _views.push_back(view);
-
-        return true;
     }
 
     std::shared_ptr<Act> Play::getAct(const string& id) const

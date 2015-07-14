@@ -158,17 +158,18 @@ namespace scaena
     void QGlWidgetView::paintGL()
     {
         beginDraw(-1);
+        _playPtr->drawCharactersFromView(*this);
         endDraw(-1);
     }
 
     void QGlWidgetView::beginDraw(double dt)
     {
-        QWindow* window = windowHandle();
-        if(!window || !window->isExposed() || !isVisible())
-            return;
-
         if(dt > 0.0)
         {
+            QWindow* window = windowHandle();
+            if(!window || !window->isExposed() || !isVisible())
+                return;
+
             makeCurrent();
         }
 
@@ -177,9 +178,12 @@ namespace scaena
 
     void QGlWidgetView::endDraw(double dt)
     {
-        QWindow* window = windowHandle();
-        if(!window || !window->isExposed() || !isVisible())
-            return;
+        if(dt > 0.0)
+        {
+            QWindow* window = windowHandle();
+            if(!window || !window->isExposed() || !isVisible())
+                return;
+        }
 
         _artDirector2D->draw(glm::max(dt, 0.0));
 
@@ -203,6 +207,7 @@ namespace scaena
     void QGlWidgetView::setup(Play& play)
     {
         makeCurrent();
+        _playPtr = &play;
         setupArtDirectors(play);
         setupEventListeners(play);
     }

@@ -55,6 +55,7 @@ namespace scaena
         std::shared_ptr<prop3::AbstractArtDirector> _artDirector3D;
 
     private:
+        Play* _playPtr;
         std::function<void(QKeyEvent*)> _keyPressAction;
         std::function<void(QKeyEvent*)> _keyReleaseAction;
         std::function<void(QMouseEvent*)> _mouseMoveAction;
