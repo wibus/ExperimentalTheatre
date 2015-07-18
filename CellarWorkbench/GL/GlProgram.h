@@ -66,6 +66,11 @@ namespace cellar
         bool setVec3i(const std::string& var, const glm::ivec3& vec);
         bool setVec4i(const std::string& var, const glm::ivec4& vec);
 
+        bool setUnsigned(const std::string& var, unsigned int val);
+        bool setVec2u(const std::string& var, const glm::uvec2& vec);
+        bool setVec3u(const std::string& var, const glm::uvec3& vec);
+        bool setVec4u(const std::string& var, const glm::uvec4& vec);
+
         bool setFloat(const std::string& var, float val);
         bool setVec2f(const std::string& var, const glm::vec2& vec);
         bool setVec3f(const std::string& var, const glm::vec3& vec);

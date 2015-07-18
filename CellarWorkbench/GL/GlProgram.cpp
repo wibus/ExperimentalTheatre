@@ -338,6 +338,62 @@ namespace cellar
         return true;
     }
 
+    bool GlProgram::setUnsigned(const std::string& var, unsigned int val)
+    {
+        if( !isCurrentProgram() )
+            return false;
+
+        int loc = getUniformLocation(var);
+        if(loc == -1)
+            return false;
+
+        glUniform1ui(loc, val);
+
+        return true;
+    }
+
+    bool GlProgram::setVec2u(const std::string& var, const glm::uvec2& vec)
+    {
+        if( !isCurrentProgram() )
+            return false;
+
+        int loc = getUniformLocation(var);
+        if(loc == -1)
+            return false;
+
+        glUniform2uiv(loc, 1, glm::value_ptr(vec));
+
+        return true;
+    }
+
+    bool GlProgram::setVec3u(const std::string& var, const glm::uvec3& vec)
+    {
+        if( !isCurrentProgram() )
+            return false;
+
+        int loc = getUniformLocation(var);
+        if(loc == -1)
+            return false;
+
+        glUniform3uiv(loc, 1,  glm::value_ptr(vec));
+
+        return true;
+    }
+
+    bool GlProgram::setVec4u(const std::string& var, const glm::uvec4& vec)
+    {
+        if( !isCurrentProgram() )
+            return false;
+
+        int loc = getUniformLocation(var);
+        if(loc == -1)
+            return false;
+
+        glUniform4uiv(loc, 1,  glm::value_ptr(vec));
+
+        return true;
+    }
+
     bool GlProgram::setFloat(const std::string& var, float val)
     {
         if( !isCurrentProgram() )
