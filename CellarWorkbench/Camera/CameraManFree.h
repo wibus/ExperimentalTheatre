@@ -29,6 +29,7 @@ namespace cellar
         void pan(float radians);
         void tilt(float radians);
 
+        std::shared_ptr<Camera> camera() const;
         glm::vec3 position() const;
         void setPosition(const glm::vec3& position);
         float panOrientation() const;
@@ -56,6 +57,11 @@ namespace cellar
 
 
     // IMPLEMENTATION //
+    inline std::shared_ptr<Camera> CameraManFree::camera() const
+    {
+        return _camera;
+    }
+
     inline glm::vec3 CameraManFree::position() const
     {
         return _position;
