@@ -29,7 +29,10 @@ namespace cellar
         void pan(float radians);
         void tilt(float radians);
 
+        glm::vec3 position() const;
         void setPosition(const glm::vec3& position);
+        float panOrientation() const;
+        float tiltOrientation() const;
         void setOrientation(float panRadians, double tiltRadians);
 
     private:
@@ -49,6 +52,24 @@ namespace cellar
         float _nearPlane;
         float _farPlane;
     };
+
+
+
+    // IMPLEMENTATION //
+    inline glm::vec3 CameraManFree::position() const
+    {
+        return _position;
+    }
+
+    inline float CameraManFree::panOrientation() const
+    {
+        return _panAngle;
+    }
+
+    inline float CameraManFree::tiltOrientation() const
+    {
+        return _tiltAngle;
+    }
 }
 
 #endif // CELLARWORKBENCH_CAMERAMANFREE_H

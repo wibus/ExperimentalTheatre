@@ -15,7 +15,10 @@ namespace prop3
 
     }
 
-    bool SceneReader::read(const std::string& fileName, Scene& scene)
+    bool SceneReader::read(
+            const std::string& fileName,
+            const std::shared_ptr<AbstractTeam>& team,
+            Scene& scene)
     {
 
     }

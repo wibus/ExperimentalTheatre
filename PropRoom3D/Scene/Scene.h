@@ -5,19 +5,24 @@
 #include <vector>
 
 #include "Prop/Prop.h"
+#include "Team/AbstractTeam.h"
 
 
 namespace prop3
 {
-    class Scene
+    class PROP3D_EXPORT Scene
     {
     public :
         Scene();
         virtual ~Scene();
 
-        virtual bool read(const std::string& fileName);
-        virtual bool write(const std::string& fileName) const;
-        const std::vector<Prop>&  props() const;
+        virtual bool read(const std::string& fileName,
+                          const std::shared_ptr<AbstractTeam>& team);
+
+        virtual bool write(const std::string& fileName,
+                           const std::shared_ptr<AbstractTeam>& team) const;
+
+        std::vector<Prop>&  props();
 
 
     private:
@@ -27,7 +32,7 @@ namespace prop3
 
 
     // IMPLEMENTATION //
-    inline const std::vector<Prop>&  Scene::props() const
+    inline std::vector<Prop>& Scene::props()
     {
         return _props;
     }

@@ -38,6 +38,16 @@ namespace prop3
     {
     }
 
+    void Prop::serialize(std::ostream& stream) const
+    {
+
+    }
+
+    void Prop::deserialize(std::istream& stream)
+    {
+
+    }
+
     void Prop::setIsVisible(bool isVisible)
     {
         _isVisible = isVisible;

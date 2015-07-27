@@ -15,7 +15,10 @@ namespace prop3
 
     }
 
-    bool SceneWriter::write(const std::string& fileName, const Scene& scene)
+    bool SceneWriter::write(
+            const std::string& fileName,
+            const std::shared_ptr<AbstractTeam>& team,
+            const Scene& scene)
     {
 
     }

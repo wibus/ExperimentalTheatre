@@ -7,7 +7,7 @@
 #include <GLM/glm.hpp>
 #include <GLM/gtc/quaternion.hpp>
 
-#include "PropRoom3D/libPropRoom3D_global.h"
+#include "PropRoom3D/Scene/SceneNode.h"
 
 
 namespace prop3
@@ -16,11 +16,17 @@ namespace prop3
     class ImplicitSurface;
 
 
-    class PROP3D_EXPORT Prop
+    class PROP3D_EXPORT Prop : public SceneNode
     {
     public:
         Prop();
         virtual ~Prop();
+
+        // SceneNode interface
+        virtual void serialize(std::ostream& stream) const override;
+
+        virtual void deserialize(std::istream& stream) override;
+
 
         // Identification
         PropId id() const;

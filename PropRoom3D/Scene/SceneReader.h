@@ -3,20 +3,25 @@
 
 #include <string>
 #include <vector>
+#include <memory>
+
+#include "libPropRoom3D_global.h"
 
 
 namespace prop3
 {
     class Scene;
+    class AbstractTeam;
 
-
-    class SceneReader
+    class PROP3D_EXPORT SceneReader
     {
     public :
         SceneReader();
         virtual ~SceneReader();
 
-        virtual bool read(const std::string& fileName, Scene& scene);
+        virtual bool read(const std::string& fileName,
+                          const std::shared_ptr<AbstractTeam>& team,
+                          Scene& scene);
 
 
     private:

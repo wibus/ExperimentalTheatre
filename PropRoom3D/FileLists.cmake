@@ -75,6 +75,7 @@ SET(PROP3_PROP_HEADERS
 # Scene
 SET(PROP3_SCENE_HEADERS
     ${PROP3_SRC_DIR}/Scene/Scene.h
+    ${PROP3_SRC_DIR}/Scene/SceneNode.h
     ${PROP3_SRC_DIR}/Scene/SceneReader.h
     ${PROP3_SRC_DIR}/Scene/SceneWriter.h)
 
@@ -161,6 +162,7 @@ SET(PROP3_PROP_SOURCES
 # Scene
 SET(PROP3_SCENE_SOURCES
     ${PROP3_SRC_DIR}/Scene/Scene.cpp
+    ${PROP3_SRC_DIR}/Scene/SceneNode.cpp
     ${PROP3_SRC_DIR}/Scene/SceneReader.cpp
     ${PROP3_SRC_DIR}/Scene/SceneWriter.cpp)
 

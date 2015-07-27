@@ -16,16 +16,17 @@ namespace prop3
 
     }
 
-
-    bool Scene::read(const std::string& fileName)
+    bool Scene::read(const std::string& fileName,
+                     const std::shared_ptr<AbstractTeam>& team)
     {
         SceneReader reader;
-        reader.read(fileName, *this);
+        reader.read(fileName, team, *this);
     }
 
-    bool Scene::write(const std::string& fileName) const
+    bool Scene::write(const std::string& fileName,
+                      const std::shared_ptr<AbstractTeam>& team) const
     {
         SceneWriter writer;
-        writer.write(fileName, *this);
+        writer.write(fileName, team, *this);
     }
 }
