@@ -86,6 +86,7 @@ namespace cellar
 
         GLuint _id;
         int _linked;
+        int _validateStatus;
         GlInputsOutputs _inAndOutLocations;
         std::set<std::shared_ptr<GlShader>> _shaders;
         std::map<GLenum, std::pair<GLenum, GLuint>> _textures;

@@ -123,11 +123,11 @@ namespace cellar
         int compilationStatus;
         glGetShaderiv(_id, GL_COMPILE_STATUS, &compilationStatus);
 
-        if ( !compilationStatus )
-        {
-            int infologLength = 0;
-            glGetShaderiv( _id, GL_INFO_LOG_LENGTH, &infologLength );
 
+        int infologLength = 0;
+        glGetShaderiv( _id, GL_INFO_LOG_LENGTH, &infologLength );
+        if ( infologLength > 1 )
+            {
             char* infoLog = new char[infologLength+1];
             int charsWritten  = 0;
 
@@ -140,13 +140,13 @@ namespace cellar
             getLog().postMessage(new Message('E', false, log, "GlShader"));
             delete[] infoLog;
 
-            return false;
+            return compilationStatus;
         }
 
         getLog().postMessage(new Message('I', false,
             infoName + " successfully compiled " + shaderId, "GlShader"));
 
-        return true;
+        return compilationStatus;
     }
 
     std::string GlShader::implicitName(const std::vector<std::string>& fileNames)

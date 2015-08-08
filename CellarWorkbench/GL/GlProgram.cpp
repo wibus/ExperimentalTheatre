@@ -26,6 +26,7 @@ namespace cellar
     GlProgram::GlProgram() :
         _id(0),
         _linked(false),
+        _validateStatus(false),
         _inAndOutLocations(),
         _shaders(),
         _textures(),
@@ -123,12 +124,13 @@ namespace cellar
         glLinkProgram( _id );
         glGetProgramiv(_id, GL_LINK_STATUS, &_linked);
 
+        glValidateProgram( _id );
+        glGetProgramiv(_id, GL_VALIDATE_STATUS, &_validateStatus);
 
-        if ( !_linked )
+        int infologLength = 0;
+        glGetProgramiv( _id, GL_INFO_LOG_LENGTH, &infologLength );
+        if( infologLength > 1 )
         {
-            int infologLength = 0;
-            glGetProgramiv( _id, GL_INFO_LOG_LENGTH, &infologLength );
-
             char* infoLog = new char[infologLength+1];
             int charsWritten  = 0;
             glGetProgramInfoLog( _id, infologLength, &charsWritten, infoLog );
@@ -138,13 +140,13 @@ namespace cellar
             getLog().postMessage(new Message('E', false, log, "GlProgram"));
             delete[] infoLog;
 
-            return false;
+            return _linked && _validateStatus;
         }
 
         getLog().postMessage(new Message('I', false,
             "Shader program succefully linked" + logSupInfo, "GlProgram"));
 
-        return true;
+        return _linked &&  _validateStatus;
     }
 
     void GlProgram::setTexture(
