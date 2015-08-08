@@ -124,9 +124,6 @@ namespace cellar
         glLinkProgram( _id );
         glGetProgramiv(_id, GL_LINK_STATUS, &_linked);
 
-        glValidateProgram( _id );
-        glGetProgramiv(_id, GL_VALIDATE_STATUS, &_validateStatus);
-
         int infologLength = 0;
         glGetProgramiv( _id, GL_INFO_LOG_LENGTH, &infologLength );
         if( infologLength > 1 )
