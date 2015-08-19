@@ -1,7 +1,9 @@
 #include "Sphere.h"
 
+#include "../Coating/Coating.h"
 #include "../Ray/RayHitList.h"
 #include "../Ray/RayHitReport.h"
+#include "../../Scene/SceneVisitor.h"
 
 
 namespace prop3
@@ -101,5 +103,15 @@ namespace prop3
     void Sphere::setCoating(const std::shared_ptr<Coating>& coating)
     {
         _coating = coating;
+    }
+
+    void Sphere::accept(SceneVisitor& visitor)
+    {
+        visitor.visit(*this);
+    }
+
+    std::vector<std::shared_ptr<SceneNode>> Sphere::children() const
+    {
+        return {_coating};
     }
 }

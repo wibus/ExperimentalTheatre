@@ -1,14 +1,16 @@
 #include "Plane.h"
 
+#include "../Coating/Coating.h"
 #include "../Ray/RayHitList.h"
 #include "../Ray/RayHitReport.h"
+#include "../../Scene/SceneVisitor.h"
 
 
 namespace prop3
 {
     Plane::Plane(const glm::dvec3& normal, const glm::dvec3& origin) :
         _normal(glm::normalize(normal)),
-        _d(-glm::dot(_normal, origin)),
+        _d(-glm::dot(normal, origin)),
         _coating(ImplicitSurface::NO_COATING)
     {
     }
@@ -76,6 +78,16 @@ namespace prop3
         _coating = coating;
     }
 
+    void Plane::accept(SceneVisitor& visitor)
+    {
+        visitor.visit(*this);
+    }
+
+    std::vector<std::shared_ptr<SceneNode>> Plane::children() const
+    {
+        return { _coating };
+    }
+
 
     // Textures
     PlaneTexture::PlaneTexture(const glm::dvec3& normal, const glm::dvec3& origin,
@@ -127,5 +139,10 @@ namespace prop3
 
             first = first->_next;
         }
+    }
+
+    void PlaneTexture::accept(SceneVisitor& visitor)
+    {
+        visitor.visit(*this);
     }
 }

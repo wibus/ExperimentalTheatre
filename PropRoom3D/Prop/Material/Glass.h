@@ -14,6 +14,10 @@ namespace prop3
         Glass(const glm::dvec3& color, double dyeConcentration);
         virtual ~Glass();
 
+        // SceneNode interface
+        virtual void accept(SceneVisitor& visitor) override;
+
+
         virtual void brdf(
             std::vector<Raycast>& raycasts,
             const RayHitReport& report,
@@ -25,10 +29,28 @@ namespace prop3
             const Ray& ray,
             double distance) const override;
 
+        glm::dvec3 color() const;
+
+        double dyeConcentration() const;
+
+
     protected:
         glm::dvec3 _color;
         double _dyeConcentration;
     };
+
+
+
+    // IMPLEMENTATION //
+    inline glm::dvec3 Glass::color() const
+    {
+        return _color;
+    }
+
+    inline double Glass::dyeConcentration() const
+    {
+        return _dyeConcentration;
+    }
 }
 
 #endif // PROPROOM3D_GLASS_H

@@ -7,12 +7,14 @@
 
 #include "../Ray/Raycast.h"
 #include "../Ray/RayUtils.h"
+#include "../../Scene/SceneVisitor.h"
 
 
 namespace prop3
 {
     TexturedFlatPaint::TexturedFlatPaint(const std::string& texName,
                                  const glm::dvec3& defaultColor) :
+        _texName(texName),
         _texture(cellar::getImageBank().getImage(texName)),
         _defaultColor(defaultColor)
     {
@@ -55,5 +57,10 @@ namespace prop3
         {
             raycasts[i].color *= color;
         }
+    }
+
+    void TexturedFlatPaint::accept(SceneVisitor& visitor)
+    {
+        visitor.visit(*this);
     }
 }

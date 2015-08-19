@@ -42,7 +42,12 @@ namespace prop3
                 double F, double G, double I,
                 double J);
 
-        virtual ~Quadric();
+
+        // SceneNode interface
+        virtual void accept(SceneVisitor& visitor) override;
+
+        virtual std::vector<std::shared_ptr<SceneNode>> children() const override;
+
 
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
@@ -52,6 +57,12 @@ namespace prop3
 
         virtual void setCoating(const std::shared_ptr<Coating>& coating);
 
+        glm::dmat4 matrixRepresentation() const;
+
+        std::shared_ptr<Coating> coating() const;
+
+
+
     protected:
         void params(const Ray& ray, double& a, double& b, double& c) const;
 
@@ -59,6 +70,19 @@ namespace prop3
         glm::dmat4 _q;
         std::shared_ptr<Coating> _coating;
     };
+
+
+
+    // IMPLEMENTATION //
+    inline glm::dmat4 Quadric::matrixRepresentation() const
+    {
+        return _q;
+    }
+
+    inline std::shared_ptr<Coating> Quadric::coating() const
+    {
+        return _coating;
+    }
 }
 
 #endif // PROPROOM3D_QUADRIC_H

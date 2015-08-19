@@ -1,6 +1,7 @@
 #include "NoCoating.h"
 
 #include "../Material/Material.h"
+#include "../../Scene/SceneVisitor.h"
 
 
 namespace prop3
@@ -27,5 +28,10 @@ namespace prop3
             leavedMaterial,
             enteredMaterial,
             outRayCountHint);
+    }
+
+    void NoCoating::accept(SceneVisitor& visitor)
+    {
+        visitor.visit(*this);
     }
 }

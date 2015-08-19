@@ -3,9 +3,10 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
-#include "Prop/Prop.h"
-#include "Team/AbstractTeam.h"
+#include "../Prop/Prop.h"
+#include "../Team/AbstractTeam.h"
 
 
 namespace prop3
@@ -20,19 +21,25 @@ namespace prop3
                           const std::shared_ptr<AbstractTeam>& team);
 
         virtual bool write(const std::string& fileName,
-                           const std::shared_ptr<AbstractTeam>& team) const;
+                           const std::shared_ptr<AbstractTeam>& team);
 
-        std::vector<Prop>&  props();
+        void clearProps(const std::shared_ptr<AbstractTeam>& team);
+
+        std::shared_ptr<Prop> addProp(const std::shared_ptr<AbstractTeam>& team);
+
+        std::vector<std::shared_ptr<Prop>>&  props();
+
+        virtual void makeTraveling(SceneVisitor& visitor);
 
 
     private:
-        std::vector<Prop> _props;
+        std::vector<std::shared_ptr<Prop>> _props;
     };
 
 
 
     // IMPLEMENTATION //
-    inline std::vector<Prop>& Scene::props()
+    inline std::vector<std::shared_ptr<Prop>>& Scene::props()
     {
         return _props;
     }

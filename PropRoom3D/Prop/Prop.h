@@ -23,9 +23,9 @@ namespace prop3
         virtual ~Prop();
 
         // SceneNode interface
-        virtual void serialize(std::ostream& stream) const override;
+        virtual void accept(SceneVisitor& visitor) override;
 
-        virtual void deserialize(std::istream& stream) override;
+        virtual std::vector<std::shared_ptr<SceneNode>> children() const override;
 
 
         // Identification

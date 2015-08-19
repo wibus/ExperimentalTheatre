@@ -8,6 +8,7 @@
 #include "../Ray/Raycast.h"
 #include "../Ray/RayUtils.h"
 #include "../Material/Material.h"
+#include "../../Scene/SceneVisitor.h"
 
 
 namespace prop3
@@ -18,6 +19,8 @@ namespace prop3
             const glm::dvec3& defaultColor,
             double defaultGlossiness,
             double varnishRefractiveIndex) :
+        _texName(texName),
+        _glossName(glossName),
         _texture(cellar::getImageBank().getImage(texName)),
         _glossMap(cellar::getImageBank().getImage(glossName)),
         _defaultColor(defaultColor),
@@ -100,5 +103,10 @@ namespace prop3
         {
             raycasts[i].color *= color;
         }
+    }
+
+    void TexturedGlossyPaint::accept(SceneVisitor& visitor)
+    {
+        visitor.visit(*this);
     }
 }

@@ -16,6 +16,9 @@ namespace prop3
                     double varnishRefractiveIndex = 1.55);
         virtual ~GlossyPaint();
 
+        // SceneNode interface
+        virtual void accept(SceneVisitor& visitor) override;
+
         virtual void brdf(
             std::vector<Raycast>& raycasts,
             const RayHitReport& report,
@@ -23,11 +26,36 @@ namespace prop3
             const std::shared_ptr<Material>& enteredMaterial,
             unsigned int outRayCountHint) const override;
 
+        glm::dvec3 color() const;
+
+        double glossiness() const;
+
+        double varnishRefractiveIndex() const;
+
+
     protected:
         glm::dvec3 _color;
         double _glossiness;
         double _varnishRefractiveIndex;
     };
+
+
+
+    // IMPLEMENTATION //
+    inline glm::dvec3 GlossyPaint::color() const
+    {
+        return _color;
+    }
+
+    inline double GlossyPaint::glossiness() const
+    {
+        return _glossiness;
+    }
+
+    inline double GlossyPaint::varnishRefractiveIndex() const
+    {
+        return _varnishRefractiveIndex;
+    }
 }
 
 #endif // PROPROOM3D_GLOSSYPAINT_H

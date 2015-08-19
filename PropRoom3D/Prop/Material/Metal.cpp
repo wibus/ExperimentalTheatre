@@ -2,6 +2,7 @@
 
 #include "../Ray/Raycast.h"
 #include "../Ray/RayUtils.h"
+#include "../../Scene/SceneVisitor.h"
 
 
 namespace prop3
@@ -32,5 +33,10 @@ namespace prop3
         {
             raycasts[i].color *= _color;
         }
+    }
+
+    void Metal::accept(SceneVisitor& visitor)
+    {
+        visitor.visit(*this);
     }
 }

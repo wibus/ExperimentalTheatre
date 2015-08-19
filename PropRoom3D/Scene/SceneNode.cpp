@@ -12,4 +12,9 @@ namespace prop3
     {
 
     }
+
+    std::vector<std::shared_ptr<SceneNode>> SceneNode::children() const
+    {
+        return std::vector<std::shared_ptr<SceneNode>>();
+    }
 }

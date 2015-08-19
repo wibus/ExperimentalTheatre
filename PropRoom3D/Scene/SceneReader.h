@@ -2,10 +2,9 @@
 #define PROPROOM3D_SCENEREADER_H
 
 #include <string>
-#include <vector>
 #include <memory>
 
-#include "libPropRoom3D_global.h"
+#include "SceneVisitor.h"
 
 
 namespace prop3
@@ -13,7 +12,7 @@ namespace prop3
     class Scene;
     class AbstractTeam;
 
-    class PROP3D_EXPORT SceneReader
+    class PROP3D_EXPORT SceneReader : public SceneVisitor
     {
     public :
         SceneReader();

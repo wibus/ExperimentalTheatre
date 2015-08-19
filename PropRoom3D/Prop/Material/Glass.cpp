@@ -2,6 +2,7 @@
 
 #include "../Ray/Raycast.h"
 #include "../Ray/RayUtils.h"
+#include "../../Scene/SceneVisitor.h"
 
 
 namespace prop3
@@ -40,5 +41,10 @@ namespace prop3
             return glm::dvec3(1.0);
 
         return glm::pow(_color, glm::dvec3(_dyeConcentration * distance));
+    }
+
+    void Glass::accept(SceneVisitor& visitor)
+    {
+        visitor.visit(*this);
     }
 }

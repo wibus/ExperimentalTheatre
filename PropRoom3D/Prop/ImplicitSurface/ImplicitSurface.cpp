@@ -5,6 +5,7 @@
 #include "../Ray/RayHitList.h"
 #include "../Ray/RayHitReport.h"
 #include "../Coating/NoCoating.h"
+#include "../../Scene/SceneVisitor.h"
 
 
 namespace prop3
@@ -89,6 +90,16 @@ namespace prop3
     {
     }
 
+    void SurfaceGhost::accept(SceneVisitor& visitor)
+    {
+        visitor.visit(*this);
+    }
+
+    std::vector<std::shared_ptr<SceneNode>> SurfaceGhost::children() const
+    {
+        return { _eq };
+    }
+
 
     // SurfaceNot
     SurfaceInverse::SurfaceInverse(const std::shared_ptr<ImplicitSurface>& eq) :
@@ -137,6 +148,16 @@ namespace prop3
     void SurfaceInverse::setCoating(const std::shared_ptr<Coating>& coating)
     {
         _eq->setCoating(coating);
+    }
+
+    void SurfaceInverse::accept(SceneVisitor& visitor)
+    {
+        visitor.visit(*this);
+    }
+
+    std::vector<std::shared_ptr<SceneNode>> SurfaceInverse::children() const
+    {
+        return { _eq };
     }
 
 
@@ -249,6 +270,16 @@ namespace prop3
             eq->setCoating(coating);
     }
 
+    void SurfaceOr::accept(SceneVisitor& visitor)
+    {
+        visitor.visit(*this);
+    }
+
+    std::vector<std::shared_ptr<SceneNode>> SurfaceOr::children() const
+    {
+        return std::vector<std::shared_ptr<SceneNode>>(_eqs.begin(), _eqs.end());
+    }
+
 
     // SurfaceAnd
     SurfaceAnd::SurfaceAnd(const std::vector<std::shared_ptr<ImplicitSurface>>& eqs) :
@@ -357,6 +388,16 @@ namespace prop3
     {
         for(auto& eq : _eqs)
             eq->setCoating(coating);
+    }
+
+    void SurfaceAnd::accept(SceneVisitor& visitor)
+    {
+        visitor.visit(*this);
+    }
+
+    std::vector<std::shared_ptr<SceneNode>> SurfaceAnd::children() const
+    {
+        return std::vector<std::shared_ptr<SceneNode>>(_eqs.begin(), _eqs.end());
     }
 
 

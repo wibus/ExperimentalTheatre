@@ -3,6 +3,7 @@
 #include "../Ray/Raycast.h"
 #include "../Ray/RayUtils.h"
 #include "../Material/Material.h"
+#include "../../Scene/SceneVisitor.h"
 
 
 namespace prop3
@@ -58,5 +59,10 @@ namespace prop3
         {
             raycasts[i].color *= color;
         }
+    }
+
+    void GlossyPaint::accept(SceneVisitor& visitor)
+    {
+        visitor.visit(*this);
     }
 }

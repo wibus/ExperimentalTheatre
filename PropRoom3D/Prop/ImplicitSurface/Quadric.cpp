@@ -1,7 +1,9 @@
 #include "Quadric.h"
 
+#include "../Coating/Coating.h"
 #include "../Ray/RayHitList.h"
 #include "../Ray/RayHitReport.h"
+#include "../../Scene/SceneVisitor.h"
 
 
 namespace prop3
@@ -94,11 +96,6 @@ namespace prop3
            C, F, H, I,
            D, G, I, J),
         _coating(ImplicitSurface::NO_COATING)
-    {
-
-    }
-
-    Quadric::~Quadric()
     {
 
     }
@@ -215,5 +212,15 @@ namespace prop3
     void Quadric::setCoating(const std::shared_ptr<Coating>& coating)
     {
         _coating = coating;
+    }
+
+    void Quadric::accept(SceneVisitor& visitor)
+    {
+        visitor.visit(*this);
+    }
+
+    std::vector<std::shared_ptr<SceneNode>> Quadric::children() const
+    {
+        return {_coating};
     }
 }

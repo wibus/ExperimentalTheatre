@@ -22,6 +22,13 @@ namespace prop3
         static std::shared_ptr<ImplicitSurface>
             plane(const glm::dvec3& normal, const glm::dvec3& origin);
 
+
+        // SceneNode interface
+        virtual void accept(SceneVisitor& visitor) override;
+
+        virtual std::vector<std::shared_ptr<SceneNode>> children() const override;
+
+
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
@@ -30,9 +37,16 @@ namespace prop3
 
         virtual void setCoating(const std::shared_ptr<Coating>& coating);
 
+        double distance() const;
+
+        glm::dvec3 normal() const;
+
+        std::shared_ptr<Coating> coating() const;
+
+
     private:
-        glm::dvec3 _normal;
         double _d;
+        glm::dvec3 _normal;
         std::shared_ptr<Coating> _coating;
     };
 
@@ -55,12 +69,56 @@ namespace prop3
             plane(const glm::dvec3& normal, const glm::dvec3& origin,
                   const glm::dvec3& texU, const glm::dvec3& texV, const glm::dvec3& texOrigin);
 
+
+        // SceneNode interface
+        virtual void accept(SceneVisitor& visitor) override;
+
+
         virtual void raycast(const Ray& ray, RayHitList& reports) const;
+
+        glm::dvec3 texOrigin() const;
+
+        glm::dvec3 texU() const;
+
+        glm::dvec3 texV() const;
 
     private:
         glm::dvec3 _texOrigin;
         glm::dvec3 _texU, _texV;
     };
+
+
+
+    // IMPLEMENTATION //
+    inline double Plane::distance() const
+    {
+        return _d;
+    }
+
+    inline glm::dvec3 Plane::normal() const
+    {
+        return _normal;
+    }
+
+    inline std::shared_ptr<Coating> Plane::coating() const
+    {
+        return _coating;
+    }
+
+    inline glm::dvec3 PlaneTexture::texOrigin() const
+    {
+        return _texOrigin;
+    }
+
+    inline glm::dvec3 PlaneTexture::texU() const
+    {
+        return _texU;
+    }
+
+    inline glm::dvec3 PlaneTexture::texV() const
+    {
+        return _texV;
+    }
 }
 
 #endif // PROPROOM3D_PLANE_H

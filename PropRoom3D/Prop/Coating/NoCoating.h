@@ -14,6 +14,9 @@ namespace prop3
         NoCoating();
         virtual ~NoCoating();
 
+        // SceneNode interface
+        virtual void accept(SceneVisitor& visitor) override;
+
         virtual void brdf(
             std::vector<Raycast>& raycasts,
             const RayHitReport& report,

@@ -14,6 +14,10 @@ namespace prop3
         Metal(const glm::dvec3& color, double glossiness = 1.0);
         virtual ~Metal();
 
+        // SceneNode interface
+        virtual void accept(SceneVisitor& visitor) override;
+
+
         virtual void brdf(
             std::vector<Raycast>& raycasts,
             const RayHitReport& report,
@@ -21,10 +25,28 @@ namespace prop3
             const std::shared_ptr<Material>& selfEnteredMaterial,
             unsigned int outRayCountHint)  const override;
 
+        glm::dvec3 color() const;
+
+        double glossiness() const;
+
+
     protected:
         glm::dvec3 _color;
         double _glossiness;
     };
+
+
+
+    // IMPLEMENTATION //
+    inline glm::dvec3 Metal::color() const
+    {
+        return _color;
+    }
+
+    inline double Metal::glossiness() const
+    {
+        return _glossiness;
+    }
 }
 
 #endif // PROPROOM3D_CHROME_H

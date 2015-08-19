@@ -6,7 +6,7 @@
 
 #include <GLM/glm.hpp>
 
-#include "../../libPropRoom3D_global.h"
+#include "PropRoom3D/Scene/SceneNode.h"
 
 
 namespace prop3
@@ -16,7 +16,7 @@ namespace prop3
     class RayHitReport;
 
 
-    class PROP3D_EXPORT Material
+    class PROP3D_EXPORT Material : public SceneNode
     {
     protected:
         Material();

@@ -2,7 +2,9 @@
 
 #include <cassert>
 
+#include "ImplicitSurface/ImplicitSurface.h"
 #include "Material/Concrete.h"
+#include "../Scene/SceneVisitor.h"
 
 
 namespace prop3
@@ -38,14 +40,18 @@ namespace prop3
     {
     }
 
-    void Prop::serialize(std::ostream& stream) const
+    void Prop::accept(SceneVisitor& visitor)
     {
-
+        visitor.visit(*this);
     }
 
-    void Prop::deserialize(std::istream& stream)
+    std::vector<std::shared_ptr<SceneNode>> Prop::children() const
     {
-
+        return {
+            _surface,
+            _boundingSurface,
+            _material
+        };
     }
 
     void Prop::setIsVisible(bool isVisible)

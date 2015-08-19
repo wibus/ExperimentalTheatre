@@ -2,6 +2,7 @@
 
 #include "../Ray/Raycast.h"
 #include "../Ray/RayUtils.h"
+#include "../../Scene/SceneVisitor.h"
 
 
 namespace prop3
@@ -28,5 +29,10 @@ namespace prop3
             report,
             leavedMaterial,
             selfEnteredMaterial);
+    }
+
+    void Air::accept(SceneVisitor& visitor)
+    {
+        visitor.visit(*this);
     }
 }

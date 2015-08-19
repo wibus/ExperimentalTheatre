@@ -14,6 +14,10 @@ namespace prop3
         Air();
         virtual ~Air();
 
+        // SceneNode interface
+        virtual void accept(SceneVisitor& visitor) override;
+
+
         virtual void brdf(
             std::vector<Raycast>& raycasts,
             const RayHitReport& report,

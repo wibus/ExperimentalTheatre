@@ -18,8 +18,12 @@ namespace prop3
     {
     public:
         TexturedFlatPaint(const std::string& texName,
-                      const glm::dvec3& defaultColor = glm::dvec3(1.0));
+                          const glm::dvec3& defaultColor = glm::dvec3(1.0));
         virtual ~TexturedFlatPaint();
+
+        // SceneNode interface
+        virtual void accept(SceneVisitor& visitor) override;
+
 
         virtual void brdf(
             std::vector<Raycast>& raycasts,
@@ -28,10 +32,28 @@ namespace prop3
             const std::shared_ptr<Material>& enteredMaterial,
             unsigned int outRayCountHint) const override;
 
+        std::string texName() const;
+
+        glm::dvec3 defaultColor() const;
+
     private:
+        std::string _texName;
         cellar::Image& _texture;
         glm::dvec3 _defaultColor;
     };
+
+
+
+    // IMPLEMENTATION //
+    inline std::string TexturedFlatPaint::texName() const
+    {
+        return _texName;
+    }
+
+    inline glm::dvec3 TexturedFlatPaint::defaultColor() const
+    {
+        return _defaultColor;
+    }
 }
 
 #endif // PROPROOM3D_TEXTUREDFLATPAINT_H

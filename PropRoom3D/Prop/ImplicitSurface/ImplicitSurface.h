@@ -7,7 +7,7 @@
 #include <GLM/glm.hpp>
 #include <GLM/gtc/quaternion.hpp>
 
-#include "../../libPropRoom3D_global.h"
+#include "PropRoom3D/Scene/SceneNode.h"
 
 
 namespace prop3
@@ -44,7 +44,7 @@ namespace prop3
 
 
 
-    class PROP3D_EXPORT ImplicitSurface
+    class PROP3D_EXPORT ImplicitSurface : public SceneNode
     {
     protected:
         ImplicitSurface();
@@ -85,6 +85,12 @@ namespace prop3
         virtual bool intersects(const Ray& ray, RayHitList& reports) const;
         virtual void setCoating(const std::shared_ptr<Coating>& coating);
 
+        // SceneNode interface
+        virtual void accept(SceneVisitor& visitor) override;
+
+        virtual std::vector<std::shared_ptr<SceneNode>> children() const override;
+
+
     private:
         std::shared_ptr<ImplicitSurface> _eq;
     };
@@ -103,6 +109,12 @@ namespace prop3
         virtual void raycast(const Ray& ray, RayHitList& reports) const;
         virtual bool intersects(const Ray& ray, RayHitList& reports) const;
         virtual void setCoating(const std::shared_ptr<Coating>& coating);
+
+        // SceneNode interface
+        virtual void accept(SceneVisitor& visitor) override;
+
+        virtual std::vector<std::shared_ptr<SceneNode>> children() const override;
+
 
     private:
         std::shared_ptr<ImplicitSurface> _eq;
@@ -123,6 +135,12 @@ namespace prop3
         virtual void raycast(const Ray& ray, RayHitList& reports) const;
         virtual bool intersects(const Ray& ray, RayHitList& reports) const;
         virtual void setCoating(const std::shared_ptr<Coating>& coating);
+
+        // SceneNode interface
+        virtual void accept(SceneVisitor& visitor) override;
+
+        virtual std::vector<std::shared_ptr<SceneNode>> children() const override;
+
 
     private:
         void add(const std::shared_ptr<ImplicitSurface>& surface);
@@ -146,6 +164,12 @@ namespace prop3
         virtual void raycast(const Ray& ray, RayHitList& reports) const;
         virtual bool intersects(const Ray& ray, RayHitList& reports) const;
         virtual void setCoating(const std::shared_ptr<Coating>& coating);
+
+        // SceneNode interface
+        virtual void accept(SceneVisitor& visitor) override;
+
+        virtual std::vector<std::shared_ptr<SceneNode>> children() const override;
+
 
     private:
         void add(const std::shared_ptr<ImplicitSurface>& surface);

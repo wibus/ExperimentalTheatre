@@ -25,6 +25,10 @@ namespace prop3
                 double varnishRefractiveIndex = 1.55);
         virtual ~TexturedGlossyPaint();
 
+        // SceneNode interface
+        virtual void accept(SceneVisitor& visitor) override;
+
+
         virtual void brdf(
             std::vector<Raycast>& raycasts,
             const RayHitReport& report,
@@ -32,13 +36,54 @@ namespace prop3
             const std::shared_ptr<Material>& enteredMaterial,
             unsigned int outRayCountHint) const override;
 
+        std::string texName() const;
+
+        std::string glossName() const;
+
+        glm::dvec3 defaultColor() const;
+
+        double defaultGlossiness() const;
+
+        double varnishRefractiveIndex() const;
+
+
     private:
+        std::string _texName;
+        std::string _glossName;
         cellar::Image& _texture;
         cellar::Image& _glossMap;
         glm::dvec3 _defaultColor;
         double _defaultGlossiness;
         double _varnishRefractiveIndex;
     };
+
+
+
+    // IMPLEMENTATION //
+    inline std::string TexturedGlossyPaint::texName() const
+    {
+        return _texName;
+    }
+
+    inline std::string TexturedGlossyPaint::glossName() const
+    {
+        return _glossName;
+    }
+
+    inline glm::dvec3 TexturedGlossyPaint::defaultColor() const
+    {
+        return _defaultColor;
+    }
+
+    inline double TexturedGlossyPaint::defaultGlossiness() const
+    {
+        return _defaultGlossiness;
+    }
+
+    inline double TexturedGlossyPaint::varnishRefractiveIndex() const
+    {
+        return _varnishRefractiveIndex;
+    }
 }
 
 #endif // PROPROOM3D_TEXTUREDGLOSSYPAINT_H
