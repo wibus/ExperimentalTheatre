@@ -14,25 +14,31 @@ namespace prop3
     class PROP3D_EXPORT Scene
     {
     public :
-        Scene();
+        Scene(const std::shared_ptr<AbstractTeam>& team);
         virtual ~Scene();
 
-        virtual bool read(const std::string& fileName,
-                          const std::shared_ptr<AbstractTeam>& team);
+        virtual bool load(const std::string& fileName, bool clearScene = true);
 
-        virtual bool write(const std::string& fileName,
-                           const std::shared_ptr<AbstractTeam>& team);
+        virtual bool save(const std::string& fileName, bool prettyPrint = true);
 
-        void clearProps(const std::shared_ptr<AbstractTeam>& team);
+        virtual void deserialize(const std::string& stream, bool clearScene = true);
 
-        std::shared_ptr<Prop> addProp(const std::shared_ptr<AbstractTeam>& team);
+        virtual std::string serialize();
+
+
+        void clearProps();
+
+        std::shared_ptr<Prop> createProp();
 
         std::vector<std::shared_ptr<Prop>>&  props();
+
+        std::shared_ptr<AbstractTeam> team() const;
 
         virtual void makeTraveling(SceneVisitor& visitor);
 
 
     private:
+        std::shared_ptr<AbstractTeam> _team;
         std::vector<std::shared_ptr<Prop>> _props;
     };
 
@@ -42,6 +48,11 @@ namespace prop3
     inline std::vector<std::shared_ptr<Prop>>& Scene::props()
     {
         return _props;
+    }
+
+    inline std::shared_ptr<AbstractTeam> Scene::team() const
+    {
+        return _team;
     }
 }
 

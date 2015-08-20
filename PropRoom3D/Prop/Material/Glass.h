@@ -11,7 +11,9 @@ namespace prop3
             public Material
     {
     public:
-        Glass(const glm::dvec3& color, double dyeConcentration);
+        Glass(const glm::dvec3& color,
+              double dyeConcentration,
+              double refractiveIndex = 1.5);
         virtual ~Glass();
 
         // SceneNode interface

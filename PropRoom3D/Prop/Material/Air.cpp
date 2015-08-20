@@ -7,9 +7,9 @@
 
 namespace prop3
 {
-    Air::Air()
+    Air::Air(double refractiveIndex)
     {
-        setRefractiveIndex(1.0002772);
+        setRefractiveIndex(refractiveIndex);
     }
 
     Air::~Air()

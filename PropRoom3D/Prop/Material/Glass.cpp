@@ -7,11 +7,13 @@
 
 namespace prop3
 {
-    Glass::Glass(const glm::dvec3& color, double dyeConcentration) :
+    Glass::Glass(const glm::dvec3& color,
+                 double dyeConcentration,
+                 double refractiveIndex) :
         _color(color),
         _dyeConcentration(dyeConcentration)
     {
-        setRefractiveIndex(1.5);
+        setRefractiveIndex(refractiveIndex);
     }
 
     Glass::~Glass()

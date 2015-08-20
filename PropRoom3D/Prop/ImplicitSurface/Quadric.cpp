@@ -28,6 +28,45 @@ namespace prop3
         return glm::normalize(glm::dvec3(nx, ny, nz));
     }
 
+    Quadric::Quadric(const glm::dmat4& Q) :
+        _q(Q),
+        _coating(ImplicitSurface::NO_COATING)
+    {
+
+    }
+
+    Quadric::Quadric(double A, double E, double H,
+                     double B, double C, double D,
+                     double F, double G, double I,
+                     double J) :
+        _q(A, B, C, D,
+           B, E, F, G,
+           C, F, H, I,
+           D, G, I, J),
+        _coating(ImplicitSurface::NO_COATING)
+    {
+
+    }
+
+    std::shared_ptr<ImplicitSurface>
+        Quadric::fromMatrix(const glm::dmat4& Q)
+    {
+        return std::shared_ptr<ImplicitSurface>(new Quadric(Q));
+    }
+
+    std::shared_ptr<ImplicitSurface>
+        Quadric::fromCoeffs(double A, double E, double H,
+                   double B, double C, double D,
+                   double F, double G, double I,
+                   double J)
+    {
+        return std::shared_ptr<ImplicitSurface>(new Quadric(
+                A, E, H,
+                B, C, D,
+                F, G, I,
+                J));
+    }
+
     // Ellipsoid : x^2/rx^2 + y^2/ry^2 + z^2/rz^2 = 1
     std::shared_ptr<ImplicitSurface>
         Quadric::ellipsoid(double rx, double ry, double rz)
@@ -78,26 +117,6 @@ namespace prop3
                 0, 0, 0,       // B, C, D
                 0, 0, 0,       // F, H, I
                 -1));          // J
-    }
-
-    Quadric::Quadric(const glm::dmat4& Q) :
-        _q(Q),
-        _coating(ImplicitSurface::NO_COATING)
-    {
-
-    }
-
-    Quadric::Quadric(double A, double E, double H,
-                     double B, double C, double D,
-                     double F, double G, double I,
-                     double J) :
-        _q(A, B, C, D,
-           B, E, F, G,
-           C, F, H, I,
-           D, G, I, J),
-        _coating(ImplicitSurface::NO_COATING)
-    {
-
     }
 
 

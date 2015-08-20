@@ -1,13 +1,22 @@
 #include "Scene.h"
 
+#include <QFile>
+
+#include <CellarWorkbench/Misc/Log.h>
+#include <CellarWorkbench/Misc/StringUtils.h>
+
 #include "SceneReader.h"
 #include "SceneWriter.h"
 #include "../Team/AbstractTeam.h"
 
+using namespace std;
+using namespace cellar;
+
 
 namespace prop3
 {
-    Scene::Scene()
+    Scene::Scene(const shared_ptr<AbstractTeam>& team) :
+        _team(team)
     {
 
     }
@@ -17,33 +26,80 @@ namespace prop3
 
     }
 
-    bool Scene::read(const std::string& fileName,
-                     const std::shared_ptr<AbstractTeam>& team)
+    bool Scene::load(const string& fileName, bool clearScene)
     {
-        SceneReader reader;
-        reader.read(fileName, team, *this);
+        bool ok = false;
+        string stream = fileToString(fileName, &ok);
+
+        if(ok)
+        {
+            if(clearScene)
+            {
+                clearProps();
+            }
+
+            SceneReader reader;
+            reader.read(*this, stream);
+        }
+        else
+        {
+            getLog().postMessage(new Message('E', false,
+                "Scene failed to load from '" + fileName + "'." +
+                string(clearScene ? " Scene won't be cleared." : ""),
+                "Scene"));
+        }
     }
 
-    bool Scene::write(const std::string& fileName,
-                      const std::shared_ptr<AbstractTeam>& team)
+    bool Scene::save(const string& fileName, bool prettyPrint)
     {
         SceneWriter writer;
-        writer.write(fileName, team, *this);
+        string stream = writer.write(*this, prettyPrint);
+
+        if(!stream.empty() || _props.empty())
+        {
+            QFile file(fileName.c_str());
+            file.open(QFile::WriteOnly | QFile::Text | QFile::Truncate);
+            file.write(stream.c_str());
+            file.close();
+        }
+        else
+        {
+            getLog().postMessage(new Message('E', false,
+                "Cannot save scene to '" + fileName + "'.",
+                "Scene"));
+        }
+    }
+
+    void Scene::deserialize(const std::string& stream, bool clearScene)
+    {
+        if(clearScene)
+        {
+            clearProps();
+        }
+
+        SceneReader reader;
+        reader.read(*this, stream);
+    }
+
+    std::string Scene::serialize()
+    {
+        SceneWriter writer;
+        return writer.write(*this, false /* pretty print */);
     }
 
     void Scene::makeTraveling(SceneVisitor& visitor)
     {
-        std::vector<std::shared_ptr<SceneNode>> nodeStack;
+        vector<shared_ptr<SceneNode>> nodeStack;
 
         // Level-order tree insertion
         nodeStack.insert(nodeStack.begin(), _props.begin(), _props.end());
         for(size_t i=0; i < nodeStack.size(); ++i)
         {
-            std::shared_ptr<SceneNode> node = nodeStack[i];
+            shared_ptr<SceneNode> node = nodeStack[i];
 
             if(node.get() != nullptr)
             {
-                std::vector<std::shared_ptr<SceneNode>> children = node->children();
+                vector<shared_ptr<SceneNode>> children = node->children();
                 nodeStack.insert(nodeStack.end(), children.begin(), children.end());
             }
         }
@@ -51,7 +107,7 @@ namespace prop3
         // Post-order tree visit
         while(!nodeStack.empty())
         {
-            std::shared_ptr<SceneNode> node = nodeStack.back();
+            shared_ptr<SceneNode> node = nodeStack.back();
 
             if(node.get() != nullptr)
             {
@@ -62,19 +118,19 @@ namespace prop3
         }
     }
 
-    void Scene::clearProps(const std::shared_ptr<AbstractTeam>& team)
+    void Scene::clearProps()
     {
-        for(std::shared_ptr<Prop>& prop : _props)
+        for(shared_ptr<Prop>& prop : _props)
         {
-            team->deleteProp(prop);
+            _team->deleteProp(prop);
         }
 
         _props.clear();
     }
 
-    std::shared_ptr<Prop> Scene::addProp(const std::shared_ptr<AbstractTeam>& team)
+    shared_ptr<Prop> Scene::createProp()
     {
-        std::shared_ptr<Prop> prop = team->createProp();
+        shared_ptr<Prop> prop = _team->createProp();
         _props.push_back(prop);
         return prop;
     }

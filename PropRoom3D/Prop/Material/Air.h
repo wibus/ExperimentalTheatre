@@ -11,7 +11,7 @@ namespace prop3
             public Material
     {
     public:
-        Air();
+        Air(double refractiveIndex = 1.0002772);
         virtual ~Air();
 
         // SceneNode interface

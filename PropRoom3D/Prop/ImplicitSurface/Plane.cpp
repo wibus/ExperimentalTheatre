@@ -15,6 +15,13 @@ namespace prop3
     {
     }
 
+    Plane::Plane(const glm::dvec4& representation) :
+        _normal(representation),
+        _d(representation.w),
+        _coating(ImplicitSurface::NO_COATING)
+    {
+    }
+
     Plane::Plane(double a, double b, double c, double d) :
         _normal(a, b, c),
         _d(d),
@@ -26,6 +33,12 @@ namespace prop3
         Plane::plane(double a, double b, double c, double d)
     {
         return std::shared_ptr<ImplicitSurface>(new Plane(a, b, c, d));
+    }
+
+    std::shared_ptr<ImplicitSurface>
+        Plane::plane(const glm::dvec4& representation)
+    {
+        return std::shared_ptr<ImplicitSurface>(new Plane(representation));
     }
 
     std::shared_ptr<ImplicitSurface>
@@ -99,6 +112,16 @@ namespace prop3
 
     }
 
+    PlaneTexture::PlaneTexture(const glm::dvec4& representation,
+            const glm::dvec3& texU, const glm::dvec3& texV, const glm::dvec3& texOrigin) :
+        Plane(representation),
+        _texOrigin(texOrigin),
+        _texU(texU), _texV(texV)
+    {
+
+    }
+
+
     PlaneTexture::PlaneTexture(double a, double b, double c, double d,
             const glm::dvec3& texU, const glm::dvec3& texV, const glm::dvec3& texOrigin) :
         Plane(a, b, c, d),
@@ -114,6 +137,14 @@ namespace prop3
     {
         return std::shared_ptr<ImplicitSurface>(
                     new PlaneTexture(a, b, c, d, texU, texV, texOrigin));
+    }
+
+    std::shared_ptr<ImplicitSurface>
+        PlaneTexture::plane(const glm::dvec4& representation,
+                            const glm::dvec3& texU, const glm::dvec3& texV, const glm::dvec3& texOrigin)
+    {
+        return std::shared_ptr<ImplicitSurface>(
+                    new PlaneTexture(representation, texU, texV, texOrigin));
     }
 
     std::shared_ptr<ImplicitSurface>

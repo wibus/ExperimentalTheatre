@@ -12,12 +12,18 @@ namespace prop3
         // From the equation : a*x + b*y + c*z + d = 0
         Plane(double a, double b, double c, double d);
 
+        // From the equation : a*x + b*y + c*z + d = 0
+        Plane(const glm::dvec4& representation);
+
         // Where normal is (a, b, c) and origin is on the plane
         Plane(const glm::dvec3& normal, const glm::dvec3& origin);
 
     public:
         static std::shared_ptr<ImplicitSurface>
             plane(double a, double b, double c, double d);
+
+        static std::shared_ptr<ImplicitSurface>
+            plane(const glm::dvec4& representation);
 
         static std::shared_ptr<ImplicitSurface>
             plane(const glm::dvec3& normal, const glm::dvec3& origin);
@@ -41,6 +47,8 @@ namespace prop3
 
         glm::dvec3 normal() const;
 
+        glm::dvec4 representation() const;
+
         std::shared_ptr<Coating> coating() const;
 
 
@@ -57,12 +65,19 @@ namespace prop3
         PlaneTexture(double a, double b, double c, double d,
                      const glm::dvec3& texU, const glm::dvec3& texV, const glm::dvec3& texOrigin);
 
+        PlaneTexture(const glm::dvec4& representation,
+                     const glm::dvec3& texU, const glm::dvec3& texV, const glm::dvec3& texOrigin);
+
         PlaneTexture(const glm::dvec3& normal, const glm::dvec3& origin,
                      const glm::dvec3& texU, const glm::dvec3& texV, const glm::dvec3& texOrigin);
 
     public:
         static std::shared_ptr<ImplicitSurface>
             plane(double a, double b, double c, double d,
+                  const glm::dvec3& texU, const glm::dvec3& texV, const glm::dvec3& texOrigin);
+
+        static std::shared_ptr<ImplicitSurface>
+            plane(const glm::dvec4& representation,
                   const glm::dvec3& texU, const glm::dvec3& texV, const glm::dvec3& texOrigin);
 
         static std::shared_ptr<ImplicitSurface>
@@ -98,6 +113,11 @@ namespace prop3
     inline glm::dvec3 Plane::normal() const
     {
         return _normal;
+    }
+
+    inline glm::dvec4 Plane::representation() const
+    {
+        return glm::dvec4(_normal, _d);
     }
 
     inline std::shared_ptr<Coating> Plane::coating() const

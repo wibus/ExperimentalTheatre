@@ -129,6 +129,9 @@ namespace prop3
         SurfaceOr(const std::vector<std::shared_ptr<ImplicitSurface>>& eqs);
 
     public:
+        static std::shared_ptr<ImplicitSurface> apply(
+                const std::vector<std::shared_ptr<ImplicitSurface>>& eqs);
+
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
@@ -158,6 +161,9 @@ namespace prop3
         SurfaceAnd(const std::vector<std::shared_ptr<ImplicitSurface>>& eqs);
 
     public:
+        static std::shared_ptr<ImplicitSurface> apply(
+                const std::vector<std::shared_ptr<ImplicitSurface>>& eqs);
+
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
@@ -209,9 +215,21 @@ namespace prop3
         return signedDistance(glm::dvec3(x, y, z));
     }
 
+    inline std::shared_ptr<ImplicitSurface> SurfaceOr::apply(
+            const std::vector<std::shared_ptr<ImplicitSurface>>& eqs)
+    {
+        return std::shared_ptr<SurfaceOr>(new SurfaceOr(eqs));
+    }
+
     inline void SurfaceOr::add(const std::shared_ptr<ImplicitSurface>& surface)
     {
         _eqs.push_back(surface);
+    }
+
+    inline std::shared_ptr<ImplicitSurface> SurfaceAnd::apply(
+            const std::vector<std::shared_ptr<ImplicitSurface>>& eqs)
+    {
+        return std::shared_ptr<SurfaceAnd>(new SurfaceAnd(eqs));
     }
 
     inline void SurfaceAnd::add(const std::shared_ptr<ImplicitSurface>& surface)

@@ -25,9 +25,7 @@ namespace prop3
         SceneWriter();
         virtual ~SceneWriter();
 
-        virtual bool write(const std::string& fileName,
-                           const std::shared_ptr<AbstractTeam>& team,
-                           Scene& scene);
+        virtual std::string write(Scene& scene, bool prettyPrint);
 
 
         // Props
@@ -58,6 +56,7 @@ namespace prop3
 
     protected:
         static QJsonValue toJson(const glm::dvec3& v);
+        static QJsonValue toJson(const glm::dvec4& v);
         static QJsonValue toJson(const glm::dmat4& m);
 
     private:

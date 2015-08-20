@@ -1,6 +1,5 @@
 #include "SceneWriter.h"
 
-#include <QFile>
 #include <QJsonObject>
 #include <QJsonDocument>
 
@@ -8,6 +7,7 @@
 #include <QVector3D>
 
 #include "Scene.h"
+#include "SceneJson.h"
 
 #include "Prop/Prop.h"
 
@@ -41,10 +41,7 @@ namespace prop3
 
     }
 
-    bool SceneWriter::write(
-            const std::string& fileName,
-            const std::shared_ptr<AbstractTeam>& team,
-            Scene& scene)
+    string SceneWriter::write(Scene& scene, bool prettyPrint)
     {
         // Scan scene
         _surfaceTreeMode = false;
@@ -52,18 +49,13 @@ namespace prop3
 
         // Write file
         QJsonObject sceneObj;
-        sceneObj.insert("Materials", _materialsArray);
-        sceneObj.insert("Coatings", _coatingsArray);
-        sceneObj.insert("Surfaces", _surfacesArray);
-        sceneObj.insert("Props", _propsArray);
+        sceneObj[SCENE_MATERIAL_ARRAY] = _materialsArray;
+        sceneObj[SCENE_COATING_ARRAY]  = _coatingsArray;
+        sceneObj[SCENE_SURFACE_ARRAY]  = _surfacesArray;
+        sceneObj[SCENE_PROP_ARRAY]     = _propsArray;
 
         QJsonDocument doc;
         doc.setObject(sceneObj);
-
-        QFile file(fileName.c_str());
-        file.open(QFile::WriteOnly | QFile::Text | QFile::Truncate);
-        file.write(doc.toJson());
-        file.close();
 
 
         //Clean-up structures
@@ -71,6 +63,11 @@ namespace prop3
         _materialIdMap.clear();
         _coatingIdMap.clear();
         _propIdMap.clear();
+
+
+        return std::string(doc.toJson(
+            prettyPrint ? QJsonDocument::Indented :
+                          QJsonDocument::Compact));
     }
 
     QJsonValue SceneWriter::toJson(const glm::dvec3& v)
@@ -79,6 +76,16 @@ namespace prop3
         array.append(v.r);
         array.append(v.g);
         array.append(v.b);
+        return array;
+    }
+
+    QJsonValue SceneWriter::toJson(const glm::dvec4& v)
+    {
+        QJsonArray array;
+        array.append(v.r);
+        array.append(v.g);
+        array.append(v.b);
+        array.append(v.a);
         return array;
     }
 
@@ -136,88 +143,25 @@ namespace prop3
             if(insertProp(node))
             {
                 QJsonObject obj;
-                obj.insert("Type", QString("Prop"));
+                obj[PROP_TYPE] = PROP_TYPE_PROP;
 
-                obj.insert("Material", _materialIdMap[node.material().get()]);
+                obj[PROP_MATERIAL] = _materialIdMap[node.material().get()];
 
                 _surfaceTreeMode = true;
                 if(node.surface().get() != nullptr)
                 {
                     node.surface()->accept(*this);
-                    obj.insert("Surface Tree", _subTree);
+                    obj[PROP_SURFACE] = _subTree;
                 }
 
                 if(node.boundingSurface().get() != nullptr)
                 {
                     node.boundingSurface()->accept(*this);
-                    obj.insert("Bounding Surface Tree", _subTree);
+                    obj[PROP_BOUNDING_SURFACE] = _subTree;
                 }
                 _surfaceTreeMode = false;
 
                 _propsArray.append(obj);
-            }
-        }
-    }
-
-
-    // Materials
-    void SceneWriter::visit(Air& node)
-    {
-        if(!_surfaceTreeMode)
-        {
-            if(insertMaterial(node))
-            {
-                QJsonObject obj;
-                obj.insert("Type", QString("Air"));
-                obj.insert("Refractive Index", node.refractiveIndex());
-                _materialsArray.append(obj);
-            }
-        }
-    }
-
-    void SceneWriter::visit(Concrete& node)
-    {
-        if(!_surfaceTreeMode)
-        {
-            if(insertMaterial(node))
-            {
-                QJsonObject obj;
-                obj.insert("Type", QString("Concrete"));
-                obj.insert("Refractive Index", node.refractiveIndex());
-                obj.insert("Color", toJson(node.color()));
-                _materialsArray.append(obj);
-            }
-        }
-    }
-
-    void SceneWriter::visit(Glass& node)
-    {
-        if(!_surfaceTreeMode)
-        {
-            if(insertMaterial(node))
-            {
-                QJsonObject obj;
-                obj.insert("Type", QString("Glass"));
-                obj.insert("Refractive Index", node.refractiveIndex());
-                obj.insert("Color", toJson(node.color()));
-                obj.insert("Dye Concentration", node.dyeConcentration());
-                _materialsArray.append(obj);
-            }
-        }
-    }
-
-    void SceneWriter::visit(Metal& node)
-    {
-        if(!_surfaceTreeMode)
-        {
-            if(insertMaterial(node))
-            {
-                QJsonObject obj;
-                obj.insert("Type", QString("Metal"));
-                obj.insert("Refractive Index", node.refractiveIndex());
-                obj.insert("Color", toJson(node.color()));
-                obj.insert("Glossiness", node.glossiness());
-                _materialsArray.append(obj);
             }
         }
     }
@@ -234,7 +178,7 @@ namespace prop3
             children[0]->accept(*this);
 
             QJsonObject logOpt;
-            logOpt.insert("~", _subTree);
+            logOpt[SURFACE_OPERATOR_GHOST] = _subTree;
             _subTree = logOpt;
         }
     }
@@ -249,7 +193,7 @@ namespace prop3
             children[0]->accept(*this);
 
             QJsonObject logOpt;
-            logOpt.insert("!", _subTree);
+            logOpt[SURFACE_OPERATOR_INVERSE] = _subTree;
             _subTree = logOpt;
         }
     }
@@ -267,7 +211,7 @@ namespace prop3
             }
 
             QJsonObject localSubTree;
-            localSubTree.insert("|", childArray);
+            localSubTree[SURFACE_OPERATOR_OR] = childArray;
             _subTree = localSubTree;
         }
     }
@@ -285,7 +229,7 @@ namespace prop3
             }
 
             QJsonObject localSubTree;
-            localSubTree.insert("&", childArray);
+            localSubTree[SURFACE_OPERATOR_AND] = childArray;
             _subTree = localSubTree;
         }
     }
@@ -297,10 +241,9 @@ namespace prop3
             if(insertSurface(node))
             {
                 QJsonObject obj;
-                obj.insert("Type", QString("Plane"));
-                obj.insert("Distance", node.distance());
-                obj.insert("Normal", toJson(node.normal()));
-                obj.insert("Coating", _coatingIdMap[node.coating().get()]);
+                obj[SURFACE_TYPE]           = SURFACE_TYPE_PLANE;
+                obj[SURFACE_REPRESENTATION] = toJson(node.representation());
+                obj[SURFACE_COATING]        = _coatingIdMap[node.coating().get()];
                 _surfacesArray.append(obj);
             }
         }
@@ -317,13 +260,12 @@ namespace prop3
             if(insertSurface(node))
             {
                 QJsonObject obj;
-                obj.insert("Type", QString("PlaneTexture"));
-                obj.insert("Distance", node.distance());
-                obj.insert("Normal", toJson(node.normal()));
-                obj.insert("Coating", _coatingIdMap[node.coating().get()]);
-                obj.insert("Texure Origin", toJson(node.texOrigin()));
-                obj.insert("Texuture U", toJson(node.texU()));
-                obj.insert("Texuture V", toJson(node.texV()));
+                obj[SURFACE_TYPE]           = SURFACE_TYPE_PLANETEXTURE;
+                obj[SURFACE_REPRESENTATION] = toJson(node.representation());
+                obj[SURFACE_COATING]        = _coatingIdMap[node.coating().get()];
+                obj[SURFACE_TEX_ORIGIN]     = toJson(node.texOrigin());
+                obj[SURFACE_TEX_U_DIR]      = toJson(node.texU());
+                obj[SURFACE_TEX_V_DIR]      = toJson(node.texV());
                 _surfacesArray.append(obj);
             }
         }
@@ -340,9 +282,9 @@ namespace prop3
             if(insertSurface(node))
             {
                 QJsonObject obj;
-                obj.insert("Type", QString("Quadric"));
-                obj.insert("Representation", toJson(node.matrixRepresentation()));
-                obj.insert("Coating", _coatingIdMap[node.coating().get()]);
+                obj[SURFACE_TYPE]           = SURFACE_TYPE_QUADRIC;
+                obj[SURFACE_REPRESENTATION] = toJson(node.representation());
+                obj[SURFACE_COATING]        = _coatingIdMap[node.coating().get()];
                 _surfacesArray.append(obj);
             }
         }
@@ -359,16 +301,79 @@ namespace prop3
             if(insertSurface(node))
             {
                 QJsonObject obj;
-                obj.insert("Type", QString("Sphere"));
-                obj.insert("Radius", node.radius());
-                obj.insert("Center", toJson(node.center()));
-                obj.insert("Coating", _coatingIdMap[node.coating().get()]);
+                obj[SURFACE_TYPE]    = SURFACE_TYPE_SPHERE;
+                obj[SURFACE_RADIUS]  = node.radius();
+                obj[SURFACE_CENTER]  = toJson(node.center());
+                obj[SURFACE_COATING] = _coatingIdMap[node.coating().get()];
                 _surfacesArray.append(obj);
             }
         }
         else
         {
             _subTree = QJsonValue(_surfaceIdMap[&node]);
+        }
+    }
+
+
+    // Materials
+    void SceneWriter::visit(Air& node)
+    {
+        if(!_surfaceTreeMode)
+        {
+            if(insertMaterial(node))
+            {
+                QJsonObject obj;
+                obj[MATERIAL_TYPE]             = MATERIAL_TYPE_AIR;
+                obj[MATERIAL_REFRACTIVE_INDEX] = node.refractiveIndex();
+                _materialsArray.append(obj);
+            }
+        }
+    }
+
+    void SceneWriter::visit(Concrete& node)
+    {
+        if(!_surfaceTreeMode)
+        {
+            if(insertMaterial(node))
+            {
+                QJsonObject obj;
+                obj[MATERIAL_TYPE]             = MATERIAL_TYPE_CONCRETE;
+                obj[MATERIAL_REFRACTIVE_INDEX] = node.refractiveIndex();
+                obj[MATERIAL_COLOR]            = toJson(node.color());
+                _materialsArray.append(obj);
+            }
+        }
+    }
+
+    void SceneWriter::visit(Glass& node)
+    {
+        if(!_surfaceTreeMode)
+        {
+            if(insertMaterial(node))
+            {
+                QJsonObject obj;
+                obj[MATERIAL_TYPE]              = MATERIAL_TYPE_GLASS;
+                obj[MATERIAL_REFRACTIVE_INDEX]  = node.refractiveIndex();
+                obj[MATERIAL_COLOR]             = toJson(node.color());
+                obj[MATERIAL_DYE_CONCENTRATION] = node.dyeConcentration();
+                _materialsArray.append(obj);
+            }
+        }
+    }
+
+    void SceneWriter::visit(Metal& node)
+    {
+        if(!_surfaceTreeMode)
+        {
+            if(insertMaterial(node))
+            {
+                QJsonObject obj;
+                obj[MATERIAL_TYPE]             = MATERIAL_TYPE_METAL;
+                obj[MATERIAL_REFRACTIVE_INDEX] = node.refractiveIndex();
+                obj[MATERIAL_COLOR]            = toJson(node.color());
+                obj[MATERIAL_GLOSSINESS]       = node.glossiness();
+                _materialsArray.append(obj);
+            }
         }
     }
 
@@ -381,7 +386,7 @@ namespace prop3
             if(insertCoating(node))
             {
                 QJsonObject obj;
-                obj.insert("Type", QString("NoCoating"));
+                obj[COATING_TYPE] = COATING_TYPE_NOCOATING;
                 _coatingsArray.append(obj);
             }
         }
@@ -394,8 +399,8 @@ namespace prop3
             if(insertCoating(node))
             {
                 QJsonObject obj;
-                obj.insert("Type", QString("FlaPaint"));
-                obj.insert("Color", toJson(node.color()));
+                obj[COATING_TYPE]  = COATING_TYPE_FLATPAINT;
+                obj[COATING_COLOR] = toJson(node.color());
                 _coatingsArray.append(obj);
             }
         }
@@ -408,10 +413,10 @@ namespace prop3
             if(insertCoating(node))
             {
                 QJsonObject obj;
-                obj.insert("Type", QString("GlossyPaint"));
-                obj.insert("Color", toJson(node.color()));
-                obj.insert("Glossiness", node.glossiness());
-                obj.insert("Varnish Refractive Index", node.varnishRefractiveIndex());
+                obj[COATING_TYPE]                     = COATING_TYPE_GLOSSYPAINT;
+                obj[COATING_COLOR]                    = toJson(node.color());
+                obj[COATING_GLOSSINESS]               = node.glossiness();
+                obj[COATING_VARNISH_REFRACTIVE_INDEX] = node.varnishRefractiveIndex();
                 _coatingsArray.append(obj);
             }
         }
@@ -424,9 +429,9 @@ namespace prop3
             if(insertCoating(node))
             {
                 QJsonObject obj;
-                obj.insert("Type", QString("TexturedFlatPaint"));
-                obj.insert("Default Color", toJson(node.defaultColor()));
-                obj.insert("Texture Name", QString(node.texName().c_str()));
+                obj[COATING_TYPE]          = COATING_TYPE_TEXTUREDFLATPAINT;
+                obj[COATING_DEFAULT_COLOR] = toJson(node.defaultColor());
+                obj[COATING_TEXTURE_NAME]  = QString(node.texName().c_str());
                 _coatingsArray.append(obj);
             }
         }
@@ -439,12 +444,12 @@ namespace prop3
             if(insertCoating(node))
             {
                 QJsonObject obj;
-                obj.insert("Type", QString("TexturedGlossyPaint"));
-                obj.insert("Default Color", toJson(node.defaultColor()));
-                obj.insert("Default Glossiness", node.defaultGlossiness());
-                obj.insert("Texture Name", QString(node.texName().c_str()));
-                obj.insert("GlossMap Name", QString(node.glossName().c_str()));
-                obj.insert("Varnish Refractive Index", node.varnishRefractiveIndex());
+                obj[COATING_TYPE]                     = COATING_TYPE_TEXTUREDGLOSSYPAINT;
+                obj[COATING_DEFAULT_COLOR]            = toJson(node.defaultColor());
+                obj[COATING_DEFAULT_GLOSS]            = node.defaultGlossiness();
+                obj[COATING_TEXTURE_NAME]             = QString(node.texName().c_str());
+                obj[COATING_GLOSS_MAP_NAME]           = QString(node.glossName().c_str());
+                obj[COATING_VARNISH_REFRACTIVE_INDEX] = node.varnishRefractiveIndex();
                 _coatingsArray.append(obj);
             }
         }
