@@ -1,5 +1,5 @@
-#ifndef PROPROOM3D_SCENEREADER_H
-#define PROPROOM3D_SCENEREADER_H
+#ifndef PROPROOM3D_SCENEJSONREADER_H
+#define PROPROOM3D_SCENEJSONREADER_H
 
 #include <string>
 #include <memory>
@@ -23,11 +23,11 @@ namespace prop3
     class Coating;
 
 
-    class PROP3D_EXPORT SceneReader
+    class PROP3D_EXPORT SceneJsonReader
     {
     public :
-        SceneReader();
-        virtual ~SceneReader();
+        SceneJsonReader();
+        virtual ~SceneJsonReader();
 
         virtual bool read(Scene& scene, const std::string& stream);
 
@@ -51,4 +51,4 @@ namespace prop3
     };
 }
 
-#endif // PROPROOM3D_SCENEREADER_H
+#endif // PROPROOM3D_SCENEJSONREADER_H

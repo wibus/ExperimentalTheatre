@@ -75,11 +75,11 @@ SET(PROP3_PROP_HEADERS
 # Scene
 SET(PROP3_SCENE_HEADERS
     ${PROP3_SRC_DIR}/Scene/Scene.h
-    ${PROP3_SRC_DIR}/Scene/SceneJson.h
     ${PROP3_SRC_DIR}/Scene/SceneNode.h
     ${PROP3_SRC_DIR}/Scene/SceneVisitor.h
-    ${PROP3_SRC_DIR}/Scene/SceneReader.h
-    ${PROP3_SRC_DIR}/Scene/SceneWriter.h)
+    ${PROP3_SRC_DIR}/Scene/SceneJsonTags.h
+    ${PROP3_SRC_DIR}/Scene/SceneJsonReader.h
+    ${PROP3_SRC_DIR}/Scene/SceneJsonWriter.h)
 
 
 # All the header files #
@@ -164,11 +164,11 @@ SET(PROP3_PROP_SOURCES
 # Scene
 SET(PROP3_SCENE_SOURCES
     ${PROP3_SRC_DIR}/Scene/Scene.cpp
-    ${PROP3_SRC_DIR}/Scene/SceneJson.cpp
     ${PROP3_SRC_DIR}/Scene/SceneNode.cpp
     ${PROP3_SRC_DIR}/Scene/SceneVisitor.cpp
-    ${PROP3_SRC_DIR}/Scene/SceneReader.cpp
-    ${PROP3_SRC_DIR}/Scene/SceneWriter.cpp)
+    ${PROP3_SRC_DIR}/Scene/SceneJsonTags.cpp
+    ${PROP3_SRC_DIR}/Scene/SceneJsonReader.cpp
+    ${PROP3_SRC_DIR}/Scene/SceneJsonWriter.cpp)
 
 # All the source files #
 SET(PROP3_SOURCES

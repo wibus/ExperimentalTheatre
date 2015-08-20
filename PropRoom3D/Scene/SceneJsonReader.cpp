@@ -1,4 +1,4 @@
-#include "SceneReader.h"
+#include "SceneJsonReader.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -7,7 +7,7 @@
 #include <CellarWorkbench/Misc/Log.h>
 
 #include "Scene.h"
-#include "SceneJson.h"
+#include "SceneJsonTags.h"
 
 #include "Prop/Prop.h"
 
@@ -32,22 +32,22 @@ using namespace cellar;
 
 namespace prop3
 {
-    SceneReader::SceneReader()
+    SceneJsonReader::SceneJsonReader()
     {
 
     }
 
-    SceneReader::~SceneReader()
+    SceneJsonReader::~SceneJsonReader()
     {
 
     }
 
-    bool SceneReader::read(Scene& scene, const std::string& stream)
+    bool SceneJsonReader::read(Scene& scene, const std::string& stream)
     {
-        QJsonDocument doc = QJsonDocument::fromJson(stream.c_str());
-        QJsonObject docObj = doc.object();
+        QJsonDocument jsonDoc = QJsonDocument::fromJson(stream.c_str());
+        QJsonObject docObj = jsonDoc.object();
 
-        // Deserialize objects
+        // Deserialize coatings, materials and surfaces
         deserializeCoatings(docObj);
         deserializeMaterials(docObj);
         deserializeSurfaces(docObj);
@@ -63,7 +63,7 @@ namespace prop3
         return true;
     }
 
-    glm::dvec3 SceneReader::dvec3FromJson(const QJsonValueRef& ref)
+    glm::dvec3 SceneJsonReader::dvec3FromJson(const QJsonValueRef& ref)
     {
         QJsonArray array = ref.toArray();
         return glm::dvec3(
@@ -72,7 +72,7 @@ namespace prop3
             array[2].toDouble());
     }
 
-    glm::dvec4 SceneReader::dvec4FromJson(const QJsonValueRef& ref)
+    glm::dvec4 SceneJsonReader::dvec4FromJson(const QJsonValueRef& ref)
     {
         QJsonArray array = ref.toArray();
         return glm::dvec4(
@@ -82,7 +82,7 @@ namespace prop3
             array[3].toDouble());
     }
 
-    glm::dmat4 SceneReader::dmat4FromJson(const QJsonValueRef& ref)
+    glm::dmat4 SceneJsonReader::dmat4FromJson(const QJsonValueRef& ref)
     {
         QJsonArray array = ref.toArray();
         return glm::dmat4(
@@ -108,44 +108,44 @@ namespace prop3
                     array[15].toDouble()));
     }
 
-    void SceneReader::deserializeCoatings(const QJsonObject& sceneObj)
+    void SceneJsonReader::deserializeCoatings(const QJsonObject& sceneObj)
     {
         for(QJsonValueRef ref : sceneObj[SCENE_COATING_ARRAY].toArray())
         {
-            std::shared_ptr<Coating> obj;
-            QJsonObject coating = ref.toObject();
-            QString type = coating[COATING_TYPE].toString();
+            std::shared_ptr<Coating> coating;
+            QJsonObject jsonObj = ref.toObject();
+            QString type = jsonObj[COATING_TYPE].toString();
 
             if(type == COATING_TYPE_NOCOATING)
             {
-                obj = make_shared<NoCoating>();
+                coating = make_shared<NoCoating>();
             }
             else if(type == COATING_TYPE_FLATPAINT)
             {
-                obj = make_shared<FlatPaint>(
-                    dvec3FromJson(coating[COATING_COLOR]));
+                coating = make_shared<FlatPaint>(
+                    dvec3FromJson(jsonObj[COATING_COLOR]));
             }
             else if(type == COATING_TYPE_GLOSSYPAINT)
             {
-                obj = make_shared<GlossyPaint>(
-                    dvec3FromJson(coating[COATING_COLOR]),
-                    coating[COATING_GLOSSINESS].toDouble(),
-                    coating[COATING_VARNISH_REFRACTIVE_INDEX].toDouble());
+                coating = make_shared<GlossyPaint>(
+                    dvec3FromJson(jsonObj[COATING_COLOR]),
+                    jsonObj[COATING_GLOSSINESS].toDouble(),
+                    jsonObj[COATING_VARNISH_REFRACTIVE_INDEX].toDouble());
             }
             else if(type == COATING_TYPE_TEXTUREDFLATPAINT)
             {
-                obj = make_shared<TexturedFlatPaint>(
-                    coating[COATING_TEXTURE_NAME].toString().toStdString(),
-                    dvec3FromJson(coating[COATING_DEFAULT_COLOR]));
+                coating = make_shared<TexturedFlatPaint>(
+                    jsonObj[COATING_TEXTURE_NAME].toString().toStdString(),
+                    dvec3FromJson(jsonObj[COATING_DEFAULT_COLOR]));
             }
             else if(type == COATING_TYPE_TEXTUREDGLOSSYPAINT)
             {
-                obj = make_shared<TexturedGlossyPaint>(
-                    coating[COATING_TEXTURE_NAME].toString().toStdString(),
-                    coating[COATING_GLOSS_MAP_NAME].toString().toStdString(),
-                    dvec3FromJson(coating[COATING_DEFAULT_COLOR]),
-                    coating[COATING_DEFAULT_GLOSS].toDouble(),
-                    coating[COATING_VARNISH_REFRACTIVE_INDEX].toDouble());
+                coating = make_shared<TexturedGlossyPaint>(
+                    jsonObj[COATING_TEXTURE_NAME].toString().toStdString(),
+                    jsonObj[COATING_GLOSS_MAP_NAME].toString().toStdString(),
+                    dvec3FromJson(jsonObj[COATING_DEFAULT_COLOR]),
+                    jsonObj[COATING_DEFAULT_GLOSS].toDouble(),
+                    jsonObj[COATING_VARNISH_REFRACTIVE_INDEX].toDouble());
             }
             else
             {
@@ -153,43 +153,41 @@ namespace prop3
                     "Unknown coating type: " + type.toStdString(), "SceneReader"));
             }
 
-            if(obj.get() != nullptr)
+            if(coating.get() != nullptr)
             {
-                _coatings.push_back(obj);
+                _coatings.push_back(coating);
             }
         }
     }
 
-    void SceneReader::deserializeMaterials(const QJsonObject& sceneObj)
+    void SceneJsonReader::deserializeMaterials(const QJsonObject& sceneObj)
     {
         for(QJsonValueRef ref : sceneObj[SCENE_MATERIAL_ARRAY].toArray())
         {
-            QJsonObject material = ref.toObject();
-            QString type = material[MATERIAL_TYPE].toString();
-            std::shared_ptr<Material> obj;
+            std::shared_ptr<Material> material;
+            QJsonObject jsonObj = ref.toObject();
+            QString type = jsonObj[MATERIAL_TYPE].toString();
 
             if(type == MATERIAL_TYPE_AIR)
             {
-                obj = make_shared<Air>(
-                    material[MATERIAL_REFRACTIVE_INDEX].toDouble());
+                material = make_shared<Air>();
             }
             else if(type == MATERIAL_TYPE_CONCRETE)
             {
-                obj = make_shared<Concrete>(
-                    dvec3FromJson(material[MATERIAL_COLOR]));
+                material = make_shared<Concrete>(
+                    dvec3FromJson(jsonObj[MATERIAL_COLOR]));
             }
             else if(type == MATERIAL_TYPE_GLASS)
             {
-                obj = make_shared<Glass>(
-                    dvec3FromJson(material[MATERIAL_COLOR]),
-                    material[MATERIAL_DYE_CONCENTRATION].toDouble(),
-                    material[MATERIAL_REFRACTIVE_INDEX].toDouble());
+                material = make_shared<Glass>(
+                    dvec3FromJson(jsonObj[MATERIAL_COLOR]),
+                    jsonObj[MATERIAL_DYE_CONCENTRATION].toDouble());
             }
             else if(type == MATERIAL_TYPE_METAL)
             {
-                obj = make_shared<Metal>(
-                    dvec3FromJson(material[MATERIAL_COLOR]),
-                    material[MATERIAL_GLOSSINESS].toDouble());
+                material = make_shared<Metal>(
+                    dvec3FromJson(jsonObj[MATERIAL_COLOR]),
+                    jsonObj[MATERIAL_GLOSSINESS].toDouble());
             }
             else
             {
@@ -197,45 +195,47 @@ namespace prop3
                     "Unknown material type: " + type.toStdString(), "SceneReader"));
             }
 
-            if(obj.get() != nullptr)
+            if(material.get() != nullptr)
             {
-                _materials.push_back(obj);
+                material->setRefractiveIndex(
+                    jsonObj[MATERIAL_REFRACTIVE_INDEX].toDouble());
+
+                _materials.push_back(material);
             }
         }
     }
 
-    void SceneReader::deserializeSurfaces(const QJsonObject& sceneObj)
+    void SceneJsonReader::deserializeSurfaces(const QJsonObject& sceneObj)
     {
         for(QJsonValueRef ref : sceneObj[SCENE_SURFACE_ARRAY].toArray())
         {
-            QJsonObject surface = ref.toObject();
-            QString type = surface[SURFACE_TYPE].toString();
-
-            std::shared_ptr<ImplicitSurface> obj;
+            std::shared_ptr<ImplicitSurface> surface;
+            QJsonObject jsonObj = ref.toObject();
+            QString type = jsonObj[SURFACE_TYPE].toString();
 
             if(type == SURFACE_TYPE_PLANE)
             {
-                obj = Plane::plane(
-                    dvec4FromJson(surface[SURFACE_REPRESENTATION]));
+                surface = Plane::plane(
+                    dvec4FromJson(jsonObj[SURFACE_REPRESENTATION]));
             }
             else if(type == SURFACE_TYPE_PLANETEXTURE)
             {
-                obj = PlaneTexture::plane(
-                    dvec4FromJson(surface[SURFACE_REPRESENTATION]),
-                    dvec3FromJson(surface[SURFACE_TEX_U_DIR]),
-                    dvec3FromJson(surface[SURFACE_TEX_V_DIR]),
-                    dvec3FromJson(surface[SURFACE_TEX_ORIGIN]));
+                surface = PlaneTexture::plane(
+                    dvec4FromJson(jsonObj[SURFACE_REPRESENTATION]),
+                    dvec3FromJson(jsonObj[SURFACE_TEX_U_DIR]),
+                    dvec3FromJson(jsonObj[SURFACE_TEX_V_DIR]),
+                    dvec3FromJson(jsonObj[SURFACE_TEX_ORIGIN]));
             }
             else if(type == SURFACE_TYPE_QUADRIC)
             {
-                obj = Quadric::fromMatrix(
-                    dmat4FromJson(surface[SURFACE_REPRESENTATION]));
+                surface = Quadric::fromMatrix(
+                    dmat4FromJson(jsonObj[SURFACE_REPRESENTATION]));
             }
             else if(type == SURFACE_TYPE_SPHERE)
             {
-                obj = Sphere::sphere(
-                    dvec3FromJson(surface[SURFACE_CENTER]),
-                    surface[SURFACE_RADIUS].toDouble());
+                surface = Sphere::sphere(
+                    dvec3FromJson(jsonObj[SURFACE_CENTER]),
+                    jsonObj[SURFACE_RADIUS].toDouble());
             }
             else
             {
@@ -243,25 +243,25 @@ namespace prop3
                     "Unknown surface type: " + type.toStdString(), "SceneReader"));
             }
 
-            if(obj.get() != nullptr)
+            if(surface.get() != nullptr)
             {
-                obj->setCoating(_coatings[surface[SURFACE_COATING].toInt()]);
-                _surfaces.push_back(obj);
+                surface->setCoating(_coatings[jsonObj[SURFACE_COATING].toInt()]);
+                _surfaces.push_back(surface);
             }
         }
     }
 
-    void SceneReader::deserializeProps(const QJsonObject& sceneObj, Scene& scene)
+    void SceneJsonReader::deserializeProps(const QJsonObject& sceneObj, Scene& scene)
     {
         for(QJsonValueRef ref : sceneObj[SCENE_PROP_ARRAY].toArray())
         {
-            std::shared_ptr<Prop> obj;
-            QJsonObject prop = ref.toObject();
-            QString type = prop[PROP_TYPE].toString();
+            std::shared_ptr<Prop> prop;
+            QJsonObject jsonObj = ref.toObject();
+            QString type = jsonObj[PROP_TYPE].toString();
 
             if(type == PROP_TYPE_PROP)
             {
-                obj = scene.createProp();
+                prop = scene.createProp();
             }
             else
             {
@@ -269,26 +269,26 @@ namespace prop3
                     "Unknown prop type: " + type.toStdString(), "SceneReader"));
             }
 
-            if(obj.get() != nullptr)
+            if(prop.get() != nullptr)
             {
-                obj->setMaterial(_materials[prop[PROP_MATERIAL].toInt()]);
+                prop->setMaterial(_materials[jsonObj[PROP_MATERIAL].toInt()]);
 
-                if(prop.contains(PROP_SURFACE))
+                if(jsonObj.contains(PROP_SURFACE))
                 {
-                    obj->setSurface(subSurfTree(
-                        prop[PROP_SURFACE]));
+                    prop->setSurface(subSurfTree(
+                        jsonObj[PROP_SURFACE]));
                 }
 
-                if(prop.contains(PROP_BOUNDING_SURFACE))
+                if(jsonObj.contains(PROP_BOUNDING_SURFACE))
                 {
-                    obj->setBoundingSurface(subSurfTree(
-                        prop[PROP_BOUNDING_SURFACE]));
+                    prop->setBoundingSurface(subSurfTree(
+                        jsonObj[PROP_BOUNDING_SURFACE]));
                 }
             }
         }
     }
 
-    std::shared_ptr<ImplicitSurface> SceneReader::subSurfTree(
+    std::shared_ptr<ImplicitSurface> SceneJsonReader::subSurfTree(
             const QJsonValue& surfaceTree)
     {
         if(surfaceTree.isDouble())

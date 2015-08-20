@@ -5,8 +5,8 @@
 #include <CellarWorkbench/Misc/Log.h>
 #include <CellarWorkbench/Misc/StringUtils.h>
 
-#include "SceneReader.h"
-#include "SceneWriter.h"
+#include "SceneJsonReader.h"
+#include "SceneJsonWriter.h"
 #include "../Team/AbstractTeam.h"
 
 using namespace std;
@@ -38,7 +38,7 @@ namespace prop3
                 clearProps();
             }
 
-            SceneReader reader;
+            SceneJsonReader reader;
             reader.read(*this, stream);
         }
         else
@@ -52,7 +52,7 @@ namespace prop3
 
     bool Scene::save(const string& fileName, bool prettyPrint)
     {
-        SceneWriter writer;
+        SceneJsonWriter writer;
         string stream = writer.write(*this, prettyPrint);
 
         if(!stream.empty() || _props.empty())
@@ -77,13 +77,13 @@ namespace prop3
             clearProps();
         }
 
-        SceneReader reader;
+        SceneJsonReader reader;
         reader.read(*this, stream);
     }
 
     std::string Scene::serialize()
     {
-        SceneWriter writer;
+        SceneJsonWriter writer;
         return writer.write(*this, false /* pretty print */);
     }
 

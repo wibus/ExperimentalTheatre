@@ -1,5 +1,5 @@
-#ifndef PROPROOM3D_SCENEWRITER_H
-#define PROPROOM3D_SCENEWRITER_H
+#ifndef PROPROOM3D_SCENEJSONWRITER_H
+#define PROPROOM3D_SCENEJSONWRITER_H
 
 #include <map>
 #include <string>
@@ -19,11 +19,34 @@ namespace prop3
     class Scene;
     class AbstractTeam;
 
-    class PROP3D_EXPORT SceneWriter : public SceneVisitor
+    class PROP3D_EXPORT SceneJsonWriter : public SceneVisitor
     {
+    private:
+        class SurfaceTreeBuilder : public SceneVisitor
+        {
+        public:
+            SurfaceTreeBuilder(std::map<ImplicitSurface*, int>& surfaceIdMap);
+
+            const QJsonValue& surfaceTree() const;
+
+            // Implicit Surfaces
+            virtual void visit(SurfaceGhost& node) override;
+            virtual void visit(SurfaceInverse& node) override;
+            virtual void visit(SurfaceOr& node) override;
+            virtual void visit(SurfaceAnd& node) override;
+            virtual void visit(Plane& node) override;
+            virtual void visit(PlaneTexture& node) override;
+            virtual void visit(Quadric& node) override;
+            virtual void visit(Sphere& node) override;
+
+        private:
+            QJsonValue _subTree;
+            std::map<ImplicitSurface*, int>& _surfaceIdMap;
+        };
+
     public :
-        SceneWriter();
-        virtual ~SceneWriter();
+        SceneJsonWriter();
+        virtual ~SceneJsonWriter();
 
         virtual std::string write(Scene& scene, bool prettyPrint);
 
@@ -32,10 +55,6 @@ namespace prop3
         virtual void visit(Prop& node) override;
 
         // Implicit Surfaces
-        virtual void visit(SurfaceGhost& node) override;
-        virtual void visit(SurfaceInverse& node) override;
-        virtual void visit(SurfaceOr& node) override;
-        virtual void visit(SurfaceAnd& node) override;
         virtual void visit(Plane& node) override;
         virtual void visit(PlaneTexture& node) override;
         virtual void visit(Quadric& node) override;
@@ -60,7 +79,6 @@ namespace prop3
         static QJsonValue toJson(const glm::dmat4& m);
 
     private:
-        bool insertProp(Prop& node);
         bool insertSurface(ImplicitSurface& node);
         bool insertMaterial(Material& node);
         bool insertCoating(Coating& node);
@@ -68,16 +86,12 @@ namespace prop3
         std::map<ImplicitSurface*, int> _surfaceIdMap;
         std::map<Material*, int> _materialIdMap;
         std::map<Coating*, int> _coatingIdMap;
-        std::map<Prop*, int> _propIdMap;
 
         QJsonArray _surfacesArray;
         QJsonArray _materialsArray;
         QJsonArray _coatingsArray;
         QJsonArray _propsArray;
-
-        bool _surfaceTreeMode;
-        QJsonValue _subTree;
     };
 }
 
-#endif // PROPROOM3D_SCENEWRITER_H
+#endif // PROPROOM3D_SCENEJSONWRITER_H
