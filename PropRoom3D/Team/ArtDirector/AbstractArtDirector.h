@@ -14,6 +14,7 @@
 namespace prop3
 {
     class Prop;
+    class Scene;
     class GlPostProdUnit;
 
 
@@ -29,7 +30,7 @@ namespace prop3
     public:
         virtual ~AbstractArtDirector() {}
 
-        virtual void setup() =0;
+        virtual void setup(const std::shared_ptr<Scene>& scene) =0;
         virtual void reset() =0;
         virtual void draw(double dt) =0;
         virtual void update(double dt) =0;

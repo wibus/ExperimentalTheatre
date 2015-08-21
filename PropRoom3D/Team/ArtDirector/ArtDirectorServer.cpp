@@ -1,4 +1,4 @@
-#include "CpuRaytracerServer.h"
+#include "ArtDirectorServer.h"
 
 #include <iomanip>
 #include <iostream>
@@ -7,27 +7,30 @@
 #include <CellarWorkbench/Camera/Camera.h>
 #include <CellarWorkbench/Misc/Log.h>
 
-#include "CpuRaytracer.h"
+#include "CpuRaytracerEngine.h"
 #include "GlPostProdUnit.h"
+#include "Scene/Scene.h"
 
 
 namespace prop3
 {
-    CpuRaytracerServer::CpuRaytracerServer() :
+    ArtDirectorServer::ArtDirectorServer() :
         _colorBufferTexId(0),
-        _localRaytracer(new CpuRaytracer()),
+        _localRaytracer(new CpuRaytracerEngine()),
         _postProdUnit(new GlPostProdUnit())
     {
     }
 
-    CpuRaytracerServer::~CpuRaytracerServer()
+    ArtDirectorServer::~ArtDirectorServer()
     {
         glDeleteTextures(1, &_colorBufferTexId);
         _colorBufferTexId = 0;
     }
 
-    void CpuRaytracerServer::setup()
+    void ArtDirectorServer::setup(const std::shared_ptr<Scene>& scene)
     {
+        _scene = scene;
+
         // Color texture
         glGenTextures(1, &_colorBufferTexId);
         glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
@@ -39,6 +42,7 @@ namespace prop3
 
         clearColorTexture();
 
+        _localRaytracer->setup(scene);
         _localRaytracer->enableFastDraft(true);
         _localRaytracer->setDraftParams(2, 4, 1);
 
@@ -49,7 +53,7 @@ namespace prop3
         }
     }
 
-    void CpuRaytracerServer::reset()
+    void ArtDirectorServer::reset()
     {
         _localRaytracer->reset();
         clearColorTexture();
@@ -57,7 +61,7 @@ namespace prop3
         // TODO wbussiere 2015-05-01 : reset clients
     }
 
-    void CpuRaytracerServer::draw(double dt)
+    void ArtDirectorServer::draw(double dt)
     {
         if(_localRaytracer->isUpdated())
         {
@@ -69,15 +73,20 @@ namespace prop3
         _postProdUnit->execute();
     }
 
-    void CpuRaytracerServer::update(double dt)
+    void ArtDirectorServer::update(double dt)
     {
-        _localRaytracer->gatherWorkerFrames();
+        if(_scene->sceneChanged())
+        {
+            clearColorTexture();
+        }
+
+        _localRaytracer->update();
 
         // TODO wbussiere 2015-05-01 : retreive client frames
         //_localRaytracer->pourFramesIn();
     }
 
-    void CpuRaytracerServer::notify(cellar::CameraMsg &msg)
+    void ArtDirectorServer::notify(cellar::CameraMsg &msg)
     {
         clearColorTexture();
         if(msg.change == cellar::CameraMsg::EChange::VIEWPORT)
@@ -98,28 +107,22 @@ namespace prop3
         // TODO wbussiere 2015-05-01 : notify clients
     }
 
-    void CpuRaytracerServer::manageProp(const std::shared_ptr<Prop>& prop)
+    void ArtDirectorServer::manageProp(const std::shared_ptr<Prop>& prop)
     {
-        clearColorTexture();
-        _localRaytracer->manageProp(prop);
-
         // TODO wbussiere 2015-05-01 : notify clients
     }
 
-    void CpuRaytracerServer::unmanageProp(const std::shared_ptr<Prop>& prop)
+    void ArtDirectorServer::unmanageProp(const std::shared_ptr<Prop>& prop)
     {
-        clearColorTexture();
-        _localRaytracer->unmanageProp(prop);
-
         // TODO wbussiere 2015-05-01 : notify clients
     }
 
-    std::shared_ptr<GlPostProdUnit> CpuRaytracerServer::postProdUnit() const
+    std::shared_ptr<GlPostProdUnit> ArtDirectorServer::postProdUnit() const
     {
         return _postProdUnit;
     }
 
-    void CpuRaytracerServer::sendBuffersToGpu()
+    void ArtDirectorServer::sendBuffersToGpu()
     {
         const glm::ivec2& viewportSize = _localRaytracer->viewportSize();
         const std::vector<float>& colorBuffer = _localRaytracer->colorBuffer();
@@ -189,7 +192,7 @@ namespace prop3
         }
     }
 
-    void CpuRaytracerServer::clearColorTexture()
+    void ArtDirectorServer::clearColorTexture()
     {
         const float black[] = {0, 0, 0};
 

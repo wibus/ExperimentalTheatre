@@ -1,22 +1,22 @@
-#include "CpuRaytracer.h"
+#include "CpuRaytracerEngine.h"
 
 #include <list>
-#include <sstream>
 #include <iostream>
 #include <algorithm>
 
 #include <CellarWorkbench/Misc/Log.h>
 
-#include "../../Prop/Prop.h"
-#include "../../Prop/Material/Material.h"
+#include "Prop/Prop.h"
+#include "Scene/Scene.h"
+#include "Scene/SceneJsonWriter.h"
 #include "CpuRaytracerWorker.h"
 
 
 namespace prop3
 {
-    const unsigned int CpuRaytracer::DEFAULT_WORKER_COUNT = 4;
+    const unsigned int CpuRaytracerEngine::DEFAULT_WORKER_COUNT = 4;
 
-    CpuRaytracer::CpuRaytracer() :
+    CpuRaytracerEngine::CpuRaytracerEngine() :
         _sampleCount(0),
         _draftLevel(0),
         _draftLevelCount(0),
@@ -29,22 +29,23 @@ namespace prop3
         _workersInterrupted(false)
     {
         // hardware_concurrency is only a hint on the number of cores
-        unsigned int coreCount =
-            std::thread::hardware_concurrency();
+        unsigned int workerCount = std::thread::hardware_concurrency();
 
-        if(coreCount < 1)
+        if(workerCount < 1)
         {
-            coreCount = DEFAULT_WORKER_COUNT;
+            workerCount = DEFAULT_WORKER_COUNT;
         }
 
-        //coreCount = 1;
+        //workerCount = 1;
 
-        _workerObjects.resize(coreCount);
-
-        init();
+        _workerObjects.resize(workerCount);
+        for(size_t i=0; i < workerCount; ++i)
+        {
+            _workerObjects[i].reset(new CpuRaytracerWorker());
+        }
     }
 
-    CpuRaytracer::CpuRaytracer(unsigned int  workerCount) :
+    CpuRaytracerEngine::CpuRaytracerEngine(unsigned int  workerCount) :
         _sampleCount(0),
         _draftLevel(0),
         _draftLevelCount(0),
@@ -56,31 +57,13 @@ namespace prop3
         _workersInterrupted(false),
         _workerObjects(workerCount)
     {
-        init();
-    }
-
-
-    void CpuRaytracer::init()
-    {
-        size_t workerCount = _workerObjects.size();
-
-        std::stringstream ss;
-        ss << "Using " << workerCount << " raytracer workers to render scene";
-        cellar::getLog().postMessage(new cellar::Message(
-            'I', false, ss.str(), "CpuRaytracer"));
-
         for(size_t i=0; i < workerCount; ++i)
         {
             _workerObjects[i].reset(new CpuRaytracerWorker());
-            _workerThreads.push_back(std::thread(
-                CpuRaytracerWorker::launchWorker,
-                _workerObjects[i]));
         }
-
-        bufferHardReset();
     }
 
-    CpuRaytracer::~CpuRaytracer()
+    CpuRaytracerEngine::~CpuRaytracerEngine()
     {
         for(auto& w : _workerObjects)
         {
@@ -92,29 +75,43 @@ namespace prop3
         }
     }
 
-    void CpuRaytracer::reset()
+    void CpuRaytracerEngine::setup(const std::shared_ptr<Scene>& scene)
     {
-        abortRendering();
+        _scene = scene;
 
-        _props.clear();
+        size_t workerCount = _workerObjects.size();
 
-        for(auto& w : _workerObjects)
+        cellar::getLog().postMessage(new cellar::Message('I', false,
+            "Using " + std::to_string(workerCount) + " raytracer workers to render scene",
+            "CpuRaytracer"));
+
+        for(size_t i=0; i < workerCount; ++i)
         {
-            w->setProps(_props);
+            _workerThreads.push_back(std::thread(
+                CpuRaytracerWorker::launchWorker,
+                _workerObjects[i]));
         }
+
+        bufferHardReset();
     }
 
-    bool CpuRaytracer::isDrafter() const
+    void CpuRaytracerEngine::reset()
+    {
+        abortRendering();
+        dispatchScene();
+    }
+
+    bool CpuRaytracerEngine::isDrafter() const
     {
         return _draftLevelCount != 0 && _draftThreadBatchPerLevel != 0;
     }
 
-    bool CpuRaytracer::isDrafting() const
+    bool CpuRaytracerEngine::isDrafting() const
     {
         return isDrafter() && _draftLevel < _draftLevelCount;
     }
 
-    void CpuRaytracer::setDraftParams(
+    void CpuRaytracerEngine::setDraftParams(
             int levelCount,
             int levelSizeRatio,
             int threadBatchPerLevel)
@@ -125,14 +122,20 @@ namespace prop3
         abortRendering();
     }
 
-    void CpuRaytracer::enableFastDraft(bool enable)
+    void CpuRaytracerEngine::enableFastDraft(bool enable)
     {
         _fastDraftEnabled = enable;
     }
 
-    void CpuRaytracer::gatherWorkerFrames()
+    void CpuRaytracerEngine::update()
     {
-        if(_props.empty())
+        if(_scene->sceneChanged())
+        {
+            abortRendering();
+            dispatchScene();
+        }
+
+        if(_scene->props().empty())
             return;
 
 
@@ -177,7 +180,7 @@ namespace prop3
         }
     }
 
-    void CpuRaytracer::pourFramesIn(
+    void CpuRaytracerEngine::pourFramesIn(
             const std::vector<float>& colorBuffer,
             unsigned int sampleCount)
     {
@@ -186,7 +189,7 @@ namespace prop3
         incorporateFrames(colorBuffer.data(), sampleCount);
     }
 
-    void CpuRaytracer::pourFramesOut(
+    void CpuRaytracerEngine::pourFramesOut(
             std::vector<float>& colorBuffer,
             unsigned int& sampleCount)
     {
@@ -199,12 +202,12 @@ namespace prop3
         _isUpdated = false;
     }
 
-    bool CpuRaytracer::isUpdated()
+    bool CpuRaytracerEngine::isUpdated()
     {
         return _isUpdated;
     }
 
-    bool CpuRaytracer::onUpdateConsumed()
+    bool CpuRaytracerEngine::onUpdateConsumed()
     {
         _isUpdated = false;
 
@@ -217,7 +220,7 @@ namespace prop3
         }
     }
 
-    float CpuRaytracer::renderTime() const
+    float CpuRaytracerEngine::renderTime() const
     {
         if(isDrafting() || _sampleCount == 0)
             return 0;
@@ -227,34 +230,34 @@ namespace prop3
         return dt.count();
     }
 
-    float CpuRaytracer::divergenceValue() const
+    float CpuRaytracerEngine::divergenceValue() const
     {
         return _divergenceValue;
     }
 
-    float CpuRaytracer::imageVariance() const
+    float CpuRaytracerEngine::imageVariance() const
     {
         return _imageVariance;
     }
 
-    unsigned int CpuRaytracer::sampleCount() const
+    unsigned int CpuRaytracerEngine::sampleCount() const
     {
         return _sampleCount;
     }
 
-    const glm::ivec2& CpuRaytracer::viewportSize() const
+    const glm::ivec2& CpuRaytracerEngine::viewportSize() const
     {
         if(isDrafting())
             return _draftViewportSize;
         return _viewportSize;
     }
 
-    const std::vector<float>& CpuRaytracer::colorBuffer() const
+    const std::vector<float>& CpuRaytracerEngine::colorBuffer() const
     {
         return _colorBuffer;
     }
 
-    void CpuRaytracer::resize(int width, int height)
+    void CpuRaytracerEngine::resize(int width, int height)
     {
         abortRendering();
 
@@ -273,7 +276,7 @@ namespace prop3
         }
     }
 
-    void CpuRaytracer::updateView(const glm::dmat4& view)
+    void CpuRaytracerEngine::updateView(const glm::dmat4& view)
     {
         abortRendering();
 
@@ -283,7 +286,7 @@ namespace prop3
         }
     }
 
-    void CpuRaytracer::updateProjection(const glm::dmat4& proj)
+    void CpuRaytracerEngine::updateProjection(const glm::dmat4& proj)
     {
         abortRendering();
 
@@ -293,34 +296,18 @@ namespace prop3
         }
     }
 
-    void CpuRaytracer::manageProp(const std::shared_ptr<Prop>& prop)
+    void CpuRaytracerEngine::dispatchScene()
     {
-        abortRendering();
-
-        _props.push_back(prop);
+        SceneJsonWriter writer;
+        std::string sceneStream = writer.serialize(*_scene);
 
         for(auto& w : _workerObjects)
         {
-            w->setProps(_props);
+            w->setSceneStream(sceneStream);
         }
     }
 
-    void CpuRaytracer::unmanageProp(const std::shared_ptr<Prop>& prop)
-    {
-        abortRendering();
-
-        std::remove_if(_props.begin(), _props.end(),
-            [&prop](const std::shared_ptr<Prop>& p) {
-                return p == prop;
-        });
-
-        for(auto& w : _workerObjects)
-        {
-            w->setProps(_props);
-        }
-    }
-
-    void CpuRaytracer::skipDrafting()
+    void CpuRaytracerEngine::skipDrafting()
     {
         if(!isDrafting())
             return;
@@ -330,7 +317,7 @@ namespace prop3
         nextDraftSize();
     }
 
-    void CpuRaytracer::nextDraftSize()
+    void CpuRaytracerEngine::nextDraftSize()
     {
         if(!isDrafting())
             return;
@@ -365,7 +352,7 @@ namespace prop3
         }
     }
 
-    void CpuRaytracer::abortRendering()
+    void CpuRaytracerEngine::abortRendering()
     {
         // Reset buffers
         bufferSoftReset();
@@ -386,12 +373,12 @@ namespace prop3
         }
     }
 
-    void CpuRaytracer::bufferSoftReset()
+    void CpuRaytracerEngine::bufferSoftReset()
     {
         _sampleCount = 0;
     }
 
-    void CpuRaytracer::bufferHardReset()
+    void CpuRaytracerEngine::bufferHardReset()
     {
         _sampleCount = 0;
 
@@ -399,7 +386,7 @@ namespace prop3
         std::fill(_colorBuffer.begin(), _colorBuffer.end(), 0.0f);
     }
 
-    void CpuRaytracer::incorporateFrames(
+    void CpuRaytracerEngine::incorporateFrames(
         const float* colorBuffer,
         unsigned int sampleCount)
     {
@@ -478,7 +465,7 @@ namespace prop3
         _imageVariance = glm::sqrt(_imageVariance);
     }
 
-    void CpuRaytracer::performNonStochasticSyncronousDraf()
+    void CpuRaytracerEngine::performNonStochasticSyncronousDraf()
     {
         typedef decltype(_workerObjects.front()) WorkerPtr;
         typedef std::pair<glm::ivec2, WorkerPtr> DrafterType;

@@ -3,11 +3,16 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 
+#include <QFile>
 #include <QVariant>
 #include <QVector3D>
 
+#include <CellarWorkbench/Misc/Log.h>
+
 #include "Scene.h"
 #include "SceneJsonTags.h"
+
+#include "Team/AbstractTeam.h"
 
 #include "Prop/Prop.h"
 
@@ -27,6 +32,7 @@
 #include "Prop/Material/Metal.h"
 
 using namespace std;
+using namespace cellar;
 
 
 namespace prop3
@@ -41,7 +47,7 @@ namespace prop3
 
     }
 
-    string SceneJsonWriter::write(Scene& scene, bool prettyPrint)
+    string SceneJsonWriter::serialize(Scene& scene, bool prettyPrint)
     {
         // Scan scene
         scene.makeTraveling(*this);
@@ -66,6 +72,28 @@ namespace prop3
         return std::string(doc.toJson(
             prettyPrint ? QJsonDocument::Indented :
                           QJsonDocument::Compact));
+    }
+
+    bool SceneJsonWriter::saveToFile(Scene& scene, const string& fileName, bool prettyPrint)
+    {
+        string stream = serialize(scene, prettyPrint);
+
+        if(!stream.empty() || scene.props().empty())
+        {
+            QFile file(fileName.c_str());
+            file.open(QFile::WriteOnly | QFile::Text | QFile::Truncate);
+            file.write(stream.c_str());
+            file.close();
+        }
+        else
+        {
+            getLog().postMessage(new Message('E', false,
+                "Cannot save scene to '" + fileName + "'.",
+                "SceneJsonWriter"));
+            return false;
+        }
+
+        return true;
     }
 
     QJsonValue SceneJsonWriter::toJson(const glm::dvec3& v)

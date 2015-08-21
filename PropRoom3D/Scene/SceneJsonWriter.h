@@ -17,7 +17,7 @@
 namespace prop3
 {
     class Scene;
-    class AbstractTeam;
+
 
     class PROP3D_EXPORT SceneJsonWriter : public SceneVisitor
     {
@@ -48,7 +48,9 @@ namespace prop3
         SceneJsonWriter();
         virtual ~SceneJsonWriter();
 
-        virtual std::string write(Scene& scene, bool prettyPrint);
+        virtual std::string serialize(Scene& scene, bool prettyPrint = false);
+
+        virtual bool saveToFile(Scene& scene, const std::string& fileName, bool prettyPrint = true);
 
 
         // Props

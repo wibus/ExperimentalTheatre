@@ -11,9 +11,24 @@
 #include "../../Prop/Material/Material.h"
 #include "../../Prop/Material/Air.h"
 
+#include "../../Scene/Scene.h"
+#include "../../Scene/SceneJsonReader.h"
+
+#include "../AbstractTeam.h"
+#include "../Designer/StdDesigner.h"
+
 
 namespace prop3
 {
+    class WorkerTeam : public AbstractTeam
+    {
+    public:
+        WorkerTeam() :
+            AbstractTeam(new StdDesigner(), nullptr /* Choreographer */)
+        {
+        }
+    };
+
     void CpuRaytracerWorker::launchWorker(
         const std::shared_ptr<CpuRaytracerWorker>& worker)
     {
@@ -30,10 +45,12 @@ namespace prop3
         _screenRayIntensityThreshold(1.0 / 128.0),
         _diffuseRayCount(1),
         _viewportSize(1, 1),
-        _workingColorBuffer(nullptr)
+        _workingColorBuffer(nullptr),
+        _team(new WorkerTeam())
     {
         int bufferSize = _viewportSize.x * _viewportSize.y * 3;
         _workingColorBuffer = new float[bufferSize];
+        _team->setup();
     }
 
     CpuRaytracerWorker::~CpuRaytracerWorker()
@@ -83,16 +100,16 @@ namespace prop3
             const glm::ivec2& origin,
             const glm::ivec2& size)
     {
-            skipAndExecute([this, &resolution, &origin, &size](){
-                _viewportOrig = origin;
-                if(size != _viewportSize)
-                {
-                    _resolution = resolution;
-                    _viewportSize = size;
-                    destroyBuffers();
-                    getNewWorkingBuffers();
-                }
-            });
+        skipAndExecute([this, &resolution, &origin, &size](){
+            _viewportOrig = origin;
+            if(size != _viewportSize)
+            {
+                _resolution = resolution;
+                _viewportSize = size;
+                destroyBuffers();
+                getNewWorkingBuffers();
+            }
+        });
     }
 
     void CpuRaytracerWorker::updateView(const glm::dmat4& view)
@@ -112,10 +129,10 @@ namespace prop3
         });
     }
 
-    void CpuRaytracerWorker::setProps(const std::vector<std::shared_ptr<Prop>>& props)
+    void CpuRaytracerWorker::setSceneStream(const std::string& stream)
     {
-        skipAndExecute([this, &props](){
-            _props = props;
+        skipAndExecute([this, &stream](){
+            _sceneStream = stream;
         });
     }
 
@@ -176,7 +193,9 @@ namespace prop3
         {
             std::unique_lock<std::mutex> lk(_flowMutex);
             _cv.wait(lk, [this]{
-                return (_runningPredicate && !_props.empty()) ||
+                return (_runningPredicate &&
+                            (!_team->scene()->props().empty() ||
+                             !_sceneStream.empty())) ||
                         _terminatePredicate;
             });
 
@@ -184,6 +203,14 @@ namespace prop3
             if(_terminatePredicate)
             {
                 return;
+            }
+
+            // Verify if scene stream was updated
+            if(!_sceneStream.empty())
+            {
+                SceneJsonReader reader;
+                reader.deserialize(*_team, _sceneStream);
+                _sceneStream.clear();
             }
 
 
@@ -262,7 +289,7 @@ namespace prop3
     std::shared_ptr<Material> CpuRaytracerWorker::findAmbientMaterial(
             glm::dvec3 position)
     {
-        for(const auto& prop : _props)
+        for(const auto& prop : _team->scene()->props())
         {
             const std::shared_ptr<ImplicitSurface>& surface = prop->surface();
 
@@ -289,7 +316,7 @@ namespace prop3
         std::shared_ptr<Prop> propMin;
         Ray ray(rayPrototype);
 
-        for(const auto& prop : _props)
+        for(const auto& prop : _team->scene()->props())
         {
             const std::shared_ptr<ImplicitSurface>& surface = prop->surface();
 

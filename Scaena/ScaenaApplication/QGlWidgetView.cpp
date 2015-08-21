@@ -16,7 +16,7 @@
 #include <PropRoom2D/Team/ArtDirector/GlArtDirector.h>
 
 #include <PropRoom3D/Team/AbstractTeam.h>
-#include <PropRoom3D/Team/ArtDirector/CpuRaytracerServer.h>
+#include <PropRoom3D/Team/ArtDirector/ArtDirectorServer.h>
 
 #include "../Play/Play.h"
 #include "../StageManagement/Event/MouseEvent.h"
@@ -218,7 +218,7 @@ namespace scaena
         play.propTeam2D()->addArtDirector(_artDirector2D);
         _artDirector2D->resize(width(), height());
 
-        _artDirector3D.reset(new prop3::CpuRaytracerServer());
+        _artDirector3D.reset(new prop3::ArtDirectorServer());
         play.propTeam3D()->addArtDirector(_artDirector3D);
         _artDirector3D->resize(width(), height());
     }

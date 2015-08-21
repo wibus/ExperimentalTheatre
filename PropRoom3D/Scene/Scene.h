@@ -6,7 +6,6 @@
 #include <memory>
 
 #include "../Prop/Prop.h"
-#include "../Team/AbstractTeam.h"
 
 
 namespace prop3
@@ -14,45 +13,49 @@ namespace prop3
     class PROP3D_EXPORT Scene
     {
     public :
-        Scene(const std::shared_ptr<AbstractTeam>& team);
+        Scene();
         virtual ~Scene();
 
-        virtual bool load(const std::string& fileName, bool clearScene = true);
-
-        virtual bool save(const std::string& fileName, bool prettyPrint = true);
-
-        virtual void deserialize(const std::string& stream, bool clearScene = true);
-
-        virtual std::string serialize();
-
-
-        void clearProps();
-
-        std::shared_ptr<Prop> createProp();
-
-        std::vector<std::shared_ptr<Prop>>&  props();
-
-        std::shared_ptr<AbstractTeam> team() const;
 
         virtual void makeTraveling(SceneVisitor& visitor);
 
 
+        virtual void addProp(const std::shared_ptr<Prop>& prop);
+
+        virtual void removeProp(const std::shared_ptr<Prop>& prop);
+
+        const std::vector<std::shared_ptr<Prop>>&  props();
+
+
+        bool updateTimeStamp();
+
+        TimeStamp timeStamp() const;
+
+        bool sceneChanged() const;
+
+
     private:
-        std::shared_ptr<AbstractTeam> _team;
         std::vector<std::shared_ptr<Prop>> _props;
+        TimeStamp _timeStamp;
+        bool _sceneChanged;
     };
 
 
 
     // IMPLEMENTATION //
-    inline std::vector<std::shared_ptr<Prop>>& Scene::props()
+    inline const std::vector<std::shared_ptr<Prop>>& Scene::props()
     {
         return _props;
     }
 
-    inline std::shared_ptr<AbstractTeam> Scene::team() const
+    inline TimeStamp Scene::timeStamp() const
     {
-        return _team;
+        return _timeStamp;
+    }
+
+    inline bool Scene::sceneChanged() const
+    {
+        return _sceneChanged;
     }
 }
 

@@ -5,9 +5,12 @@
 #include <QJsonArray>
 
 #include <CellarWorkbench/Misc/Log.h>
+#include <CellarWorkbench/Misc/StringUtils.h>
 
 #include "Scene.h"
 #include "SceneJsonTags.h"
+
+#include <Team/AbstractTeam.h>
 
 #include "Prop/Prop.h"
 
@@ -42,8 +45,16 @@ namespace prop3
 
     }
 
-    bool SceneJsonReader::read(Scene& scene, const std::string& stream)
+    bool SceneJsonReader::deserialize(
+            AbstractTeam& team,
+            const std::string& stream,
+            bool clearScene)
     {
+        if(clearScene)
+        {
+            team.clearProps();
+        }
+
         QJsonDocument jsonDoc = QJsonDocument::fromJson(stream.c_str());
         QJsonObject docObj = jsonDoc.object();
 
@@ -53,7 +64,7 @@ namespace prop3
         deserializeSurfaces(docObj);
 
         // Fill-in props
-        deserializeProps(docObj, scene);
+        deserializeProps(docObj, team);
 
         //Clean-up structures
         _surfaces.clear();
@@ -61,6 +72,27 @@ namespace prop3
         _coatings.clear();
 
         return true;
+    }
+
+    bool SceneJsonReader::loadFromFile(
+            AbstractTeam& team,
+            const std::string& fileName,
+            bool clearScene)
+    {
+        bool ok = false;
+        string stream = fileToString(fileName, &ok);
+
+        if(ok)
+        {
+            deserialize(team, stream, clearScene);
+        }
+        else
+        {
+            getLog().postMessage(new Message('E', false,
+                "Scene failed to load from '" + fileName + "'." +
+                string(clearScene ? " Scene won't be cleared." : ""),
+                "SceneJsonReader"));
+        }
     }
 
     glm::dvec3 SceneJsonReader::dvec3FromJson(const QJsonValueRef& ref)
@@ -251,7 +283,7 @@ namespace prop3
         }
     }
 
-    void SceneJsonReader::deserializeProps(const QJsonObject& sceneObj, Scene& scene)
+    void SceneJsonReader::deserializeProps(const QJsonObject& sceneObj, AbstractTeam& team)
     {
         for(QJsonValueRef ref : sceneObj[SCENE_PROP_ARRAY].toArray())
         {
@@ -261,7 +293,7 @@ namespace prop3
 
             if(type == PROP_TYPE_PROP)
             {
-                prop = scene.createProp();
+                prop = team.createProp();
             }
             else
             {

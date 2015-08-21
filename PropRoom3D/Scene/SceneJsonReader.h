@@ -14,7 +14,6 @@
 
 namespace prop3
 {
-    class Scene;
     class AbstractTeam;
 
     class Prop;
@@ -29,7 +28,9 @@ namespace prop3
         SceneJsonReader();
         virtual ~SceneJsonReader();
 
-        virtual bool read(Scene& scene, const std::string& stream);
+        virtual bool deserialize(AbstractTeam& team, const std::string& stream, bool clearScene = true);
+
+        virtual bool loadFromFile(AbstractTeam& team, const std::string& fileName, bool clearScene = true);
 
 
     protected:
@@ -41,7 +42,7 @@ namespace prop3
         void deserializeCoatings(const QJsonObject& sceneObj);
         void deserializeMaterials(const QJsonObject& sceneObj);
         void deserializeSurfaces(const QJsonObject& sceneObj);
-        void deserializeProps(const QJsonObject& sceneObj, Scene& scene);
+        void deserializeProps(const QJsonObject& sceneObj, AbstractTeam& team);
         std::shared_ptr<ImplicitSurface> subSurfTree(
                 const QJsonValue& surfaceTree);
 

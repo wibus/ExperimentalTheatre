@@ -1,7 +1,7 @@
 #include "StdTeam.h"
 
 #include "Designer/StdDesigner.h"
-#include "ArtDirector/CpuRaytracerServer.h"
+#include "ArtDirector/ArtDirectorServer.h"
 #include "Choreographer/StdChoreographer.h"
 
 namespace prop3

@@ -1,5 +1,5 @@
-#ifndef PROPROOM3D_CPURAYTRACER_H
-#define PROPROOM3D_CPURAYTRACER_H
+#ifndef PROPROOM3D_CPURAYTRACERENGINE_H
+#define PROPROOM3D_CPURAYTRACERENGINE_H
 
 #include <vector>
 #include <thread>
@@ -12,15 +12,18 @@
 namespace prop3
 {
     class Prop;
+    class Scene;
     class CpuRaytracerWorker;
 
-    class PROP3D_EXPORT CpuRaytracer
+
+    class PROP3D_EXPORT CpuRaytracerEngine
     {
     public:
-        CpuRaytracer();
-        CpuRaytracer(unsigned int workerCount);
-        virtual ~CpuRaytracer();
+        CpuRaytracerEngine();
+        CpuRaytracerEngine(unsigned int workerCount);
+        virtual ~CpuRaytracerEngine();
 
+        virtual void setup(const std::shared_ptr<Scene>& scene);
         virtual void reset();
 
         virtual bool isDrafter() const;
@@ -40,7 +43,7 @@ namespace prop3
         virtual const glm::ivec2& viewportSize() const;
         virtual const std::vector<float>& colorBuffer() const;
 
-        virtual void gatherWorkerFrames();
+        virtual void update();
         virtual void pourFramesIn(
             const std::vector<float>& colorBuffer,
             unsigned int sampleCount);
@@ -52,10 +55,9 @@ namespace prop3
         virtual void updateView(const glm::dmat4& view);
         virtual void updateProjection(const glm::dmat4& proj);
 
-        virtual void manageProp(const std::shared_ptr<Prop>& prop);
-        virtual void unmanageProp(const std::shared_ptr<Prop>& prop);
 
     protected:
+        virtual void dispatchScene();
         virtual void skipDrafting();
         virtual void nextDraftSize();
         virtual void abortRendering();
@@ -68,8 +70,6 @@ namespace prop3
         virtual void performNonStochasticSyncronousDraf();
 
     private:
-        void init();
-
         static const unsigned int DEFAULT_WORKER_COUNT;
 
         float _divergenceValue;
@@ -88,7 +88,7 @@ namespace prop3
         bool _isUpdated;
         glm::ivec2 _viewportSize;
         std::vector<float> _colorBuffer;
-        std::vector<std::shared_ptr<Prop>> _props;
+        std::shared_ptr<Scene> _scene;
 
         friend class CpuRaytracerWorker;
         bool _workersInterrupted;
@@ -97,4 +97,4 @@ namespace prop3
     };
 }
 
-#endif // PROPROOM3D_CPURAYTRACER_H
+#endif // PROPROOM3D_CPURAYTRACERENGINE_H

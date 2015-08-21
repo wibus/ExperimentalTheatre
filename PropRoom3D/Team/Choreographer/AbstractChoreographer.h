@@ -11,6 +11,7 @@
 namespace prop3
 {
     class Prop;
+    class Scene;
 
 
     class PROP3D_EXPORT AbstractChoreographer

@@ -2,9 +2,9 @@
 # Art Director
 SET(PROP3_ART_DIRECTOR_HEADERS
     ${PROP3_SRC_DIR}/Team/ArtDirector/AbstractArtDirector.h
-    ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracer.h
-    ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerClient.h
-    ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerServer.h
+    ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorClient.h
+    ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorServer.h
+    ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerEngine.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerWorker.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/GlPostProdUnit.h)
 
@@ -93,9 +93,9 @@ SET(PROP3_HEADERS
 ## Sources ##
 # Art Director
 SET(PROP3_ART_DIRECTOR_SOURCES
-    ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracer.cpp
-    ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerClient.cpp
-    ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerServer.cpp
+    ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorClient.cpp
+    ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorServer.cpp
+    ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerEngine.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerWorker.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/GlPostProdUnit.cpp)
 

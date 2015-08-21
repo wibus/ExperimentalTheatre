@@ -24,6 +24,8 @@ namespace prop3
     class Material;
     class Prop;
 
+    class AbstractTeam;
+
 
     class PROP3D_EXPORT CpuRaytracerWorker
     {
@@ -45,7 +47,8 @@ namespace prop3
                 const glm::ivec2& size);
         virtual void updateView(const glm::dmat4& view);
         virtual void updateProjection(const glm::dmat4& proj);
-        virtual void setProps(const std::vector<std::shared_ptr<Prop>>& props);
+
+        virtual void setSceneStream(const std::string& stream);
 
         // TODO
         virtual void useStochasticTracing(bool use);
@@ -112,7 +115,8 @@ namespace prop3
         float* _workingColorBuffer;
         std::mutex _framesMutex;
 
-        std::vector<std::shared_ptr<Prop>> _props;
+        std::string _sceneStream;
+        std::shared_ptr<AbstractTeam> _team;
 
         // Memory pools
         std::vector<RayHitReport*> reportPool;
