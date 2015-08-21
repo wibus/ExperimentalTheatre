@@ -49,6 +49,9 @@ namespace prop3
 
             nodeStack.pop_back();
         }
+
+        // Visit the environment node
+        _environment->accept(visitor);
     }
 
     void Scene::addProp(const std::shared_ptr<Prop>& prop)
@@ -69,11 +72,18 @@ namespace prop3
         }
     }
 
+    void Scene::setEnvironment(const std::shared_ptr<Environment>& env)
+    {
+        _environment = env;
+    }
+
     bool Scene::updateTimeStamp()
     {
         TimeStamp lastTimeStamp = _timeStamp;
 
         vector<shared_ptr<SceneNode>> nodes;
+
+        nodes.push_back(_environment);
         nodes.insert(nodes.begin(), _props.begin(), _props.end());
         for(size_t i=0; i < nodes.size(); ++i)
         {

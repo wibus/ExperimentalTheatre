@@ -16,10 +16,10 @@ namespace prop3
         virtual void reset();
         virtual void update(double dt);
 
-        virtual void setGravity(const glm::dvec3& unitsPerSecondSquared);
+        virtual void manageProp(const std::shared_ptr<Prop>& prop) override;
+        virtual void unmanageProp(const std::shared_ptr<Prop>& prop) override;
 
-        virtual void manageProp(const std::shared_ptr<Prop>& prop);
-        virtual void unmanageProp(const std::shared_ptr<Prop>& prop);
+        virtual void setEnvironment(const std::shared_ptr<Environment>& env) override;
 
     private:
 

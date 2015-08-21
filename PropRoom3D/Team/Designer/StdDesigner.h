@@ -12,10 +12,12 @@ namespace prop3
         StdDesigner();
         virtual ~StdDesigner();
 
-        virtual void setup();
-        virtual void reset();
+        virtual void setup() override;
+        virtual void reset() override;
 
-        virtual std::shared_ptr<Prop>   createProp();
+        virtual std::shared_ptr<Prop> createProp() override;
+
+        virtual std::shared_ptr<Environment> createEnvironment() override;
     };
 }
 

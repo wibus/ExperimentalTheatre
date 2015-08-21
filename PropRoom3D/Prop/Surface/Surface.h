@@ -1,5 +1,5 @@
-#ifndef PROPROOM3D_IMPLICITSURFACE_H
-#define PROPROOM3D_IMPLICITSURFACE_H
+#ifndef PROPROOM3D_SURFACE_H
+#define PROPROOM3D_SURFACE_H
 
 #include <memory>
 #include <vector>
@@ -14,7 +14,6 @@ namespace prop3
 {
     class Ray;
     class RayHitList;
-    class RayHitReport;
     class Coating;
 
 
@@ -44,13 +43,13 @@ namespace prop3
 
 
 
-    class PROP3D_EXPORT ImplicitSurface : public SceneNode
+    class PROP3D_EXPORT Surface : public SceneNode
     {
     protected:
-        ImplicitSurface();
+        Surface();
 
     public:
-        virtual ~ImplicitSurface();
+        virtual ~Surface();
 
         virtual void transform(const Transform& transform) = 0;
 
@@ -71,11 +70,11 @@ namespace prop3
 
 
     // Logical surfaces
-    class PROP3D_EXPORT SurfaceGhost : public ImplicitSurface
+    class PROP3D_EXPORT SurfaceGhost : public Surface
     {
-        friend std::shared_ptr<ImplicitSurface> operator~ (
-                const std::shared_ptr<ImplicitSurface>&);
-        SurfaceGhost(const std::shared_ptr<ImplicitSurface>& eq);
+        friend std::shared_ptr<Surface> operator~ (
+                const std::shared_ptr<Surface>&);
+        SurfaceGhost(const std::shared_ptr<Surface>& surf);
 
     public:
         virtual void transform(const Transform& transform);
@@ -92,15 +91,15 @@ namespace prop3
 
 
     private:
-        std::shared_ptr<ImplicitSurface> _eq;
+        std::shared_ptr<Surface> _surf;
     };
 
 
-    class PROP3D_EXPORT SurfaceInverse : public ImplicitSurface
+    class PROP3D_EXPORT SurfaceInverse : public Surface
     {
-        friend std::shared_ptr<ImplicitSurface> operator! (
-                const std::shared_ptr<ImplicitSurface>&);
-        SurfaceInverse(const std::shared_ptr<ImplicitSurface>& eq);
+        friend std::shared_ptr<Surface> operator! (
+                const std::shared_ptr<Surface>&);
+        SurfaceInverse(const std::shared_ptr<Surface>& surf);
 
     public:
         virtual void transform(const Transform& transform);
@@ -117,20 +116,20 @@ namespace prop3
 
 
     private:
-        std::shared_ptr<ImplicitSurface> _eq;
+        std::shared_ptr<Surface> _surf;
     };
 
 
-    class PROP3D_EXPORT SurfaceOr : public ImplicitSurface
+    class PROP3D_EXPORT SurfaceOr : public Surface
     {
-        friend std::shared_ptr<ImplicitSurface> operator| (
-                const std::shared_ptr<ImplicitSurface>&,
-                const std::shared_ptr<ImplicitSurface>&);
-        SurfaceOr(const std::vector<std::shared_ptr<ImplicitSurface>>& eqs);
+        friend std::shared_ptr<Surface> operator| (
+                const std::shared_ptr<Surface>&,
+                const std::shared_ptr<Surface>&);
+        SurfaceOr(const std::vector<std::shared_ptr<Surface>>& surfs);
 
     public:
-        static std::shared_ptr<ImplicitSurface> apply(
-                const std::vector<std::shared_ptr<ImplicitSurface>>& eqs);
+        static std::shared_ptr<Surface> apply(
+                const std::vector<std::shared_ptr<Surface>>& surfs);
 
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
@@ -146,23 +145,23 @@ namespace prop3
 
 
     private:
-        void add(const std::shared_ptr<ImplicitSurface>& surface);
+        void add(const std::shared_ptr<Surface>& surface);
         virtual bool raycast(const Ray& ray, RayHitList& reports, bool isTest) const;
 
-        std::vector<std::shared_ptr<ImplicitSurface>> _eqs;
+        std::vector<std::shared_ptr<Surface>> _surfs;
     };
 
 
-    class PROP3D_EXPORT SurfaceAnd : public ImplicitSurface
+    class PROP3D_EXPORT SurfaceAnd : public Surface
     {
-        friend std::shared_ptr<ImplicitSurface> operator& (
-                const std::shared_ptr<ImplicitSurface>&,
-                const std::shared_ptr<ImplicitSurface>&);
-        SurfaceAnd(const std::vector<std::shared_ptr<ImplicitSurface>>& eqs);
+        friend std::shared_ptr<Surface> operator& (
+                const std::shared_ptr<Surface>&,
+                const std::shared_ptr<Surface>&);
+        SurfaceAnd(const std::vector<std::shared_ptr<Surface>>& surfs);
 
     public:
-        static std::shared_ptr<ImplicitSurface> apply(
-                const std::vector<std::shared_ptr<ImplicitSurface>>& eqs);
+        static std::shared_ptr<Surface> apply(
+                const std::vector<std::shared_ptr<Surface>>& surfs);
 
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
@@ -178,64 +177,64 @@ namespace prop3
 
 
     private:
-        void add(const std::shared_ptr<ImplicitSurface>& surface);
+        void add(const std::shared_ptr<Surface>& surface);
         virtual bool raycast(const Ray& ray, RayHitList& reports, bool isTest) const;
 
-        std::vector<std::shared_ptr<ImplicitSurface>> _eqs;
+        std::vector<std::shared_ptr<Surface>> _surfs;
     };
 
 
     // Logical operators overloading
     // Ghost surface
-    std::shared_ptr<ImplicitSurface> operator~ (
-            const std::shared_ptr<ImplicitSurface>& eq);
+    std::shared_ptr<Surface> operator~ (
+            const std::shared_ptr<Surface>& surf);
     // Invert sides
-    std::shared_ptr<ImplicitSurface> operator! (
-            const std::shared_ptr<ImplicitSurface>& eq);
+    std::shared_ptr<Surface> operator! (
+            const std::shared_ptr<Surface>& surf);
     // Surface union
-    std::shared_ptr<ImplicitSurface> operator| (
-            const std::shared_ptr<ImplicitSurface>& eq1,
-            const std::shared_ptr<ImplicitSurface>& eq2);
+    std::shared_ptr<Surface> operator| (
+            const std::shared_ptr<Surface>& surf1,
+            const std::shared_ptr<Surface>& surf2);
     // Surface intersection
-    std::shared_ptr<ImplicitSurface> operator& (
-            const std::shared_ptr<ImplicitSurface>& eq1,
-            const std::shared_ptr<ImplicitSurface>& eq2);
+    std::shared_ptr<Surface> operator& (
+            const std::shared_ptr<Surface>& surf1,
+            const std::shared_ptr<Surface>& surf2);
 
 
 
 
     // IMPLEMENTATION //
-    inline EPointPosition ImplicitSurface::isIn(double x, double y, double z) const
+    inline EPointPosition Surface::isIn(double x, double y, double z) const
     {
         return isIn(glm::dvec3(x, y, z));
     }
 
-    inline double ImplicitSurface::signedDistance(double x, double y, double z) const
+    inline double Surface::signedDistance(double x, double y, double z) const
     {
         return signedDistance(glm::dvec3(x, y, z));
     }
 
-    inline std::shared_ptr<ImplicitSurface> SurfaceOr::apply(
-            const std::vector<std::shared_ptr<ImplicitSurface>>& eqs)
+    inline std::shared_ptr<Surface> SurfaceOr::apply(
+            const std::vector<std::shared_ptr<Surface>>& surfs)
     {
-        return std::shared_ptr<SurfaceOr>(new SurfaceOr(eqs));
+        return std::shared_ptr<SurfaceOr>(new SurfaceOr(surfs));
     }
 
-    inline void SurfaceOr::add(const std::shared_ptr<ImplicitSurface>& surface)
+    inline void SurfaceOr::add(const std::shared_ptr<Surface>& surface)
     {
-        _eqs.push_back(surface);
+        _surfs.push_back(surface);
     }
 
-    inline std::shared_ptr<ImplicitSurface> SurfaceAnd::apply(
-            const std::vector<std::shared_ptr<ImplicitSurface>>& eqs)
+    inline std::shared_ptr<Surface> SurfaceAnd::apply(
+            const std::vector<std::shared_ptr<Surface>>& surfs)
     {
-        return std::shared_ptr<SurfaceAnd>(new SurfaceAnd(eqs));
+        return std::shared_ptr<SurfaceAnd>(new SurfaceAnd(surfs));
     }
 
-    inline void SurfaceAnd::add(const std::shared_ptr<ImplicitSurface>& surface)
+    inline void SurfaceAnd::add(const std::shared_ptr<Surface>& surface)
     {
-        _eqs.push_back(surface);
+        _surfs.push_back(surface);
     }
 }
 
-#endif // PROPROOM3D_IMPLICITSURFACE_H
+#endif // PROPROOM3D_SURFACE_H

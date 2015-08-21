@@ -7,6 +7,7 @@
 namespace prop3
 {
     // Scene object
+    extern const QString SCENE_ENVIRONMENT_OBJ;
     extern const QString SCENE_MATERIAL_ARRAY;
     extern const QString SCENE_COATING_ARRAY;
     extern const QString SCENE_SURFACE_ARRAY;
@@ -62,6 +63,21 @@ namespace prop3
     extern const QString COATING_TEXTURE_NAME;
     extern const QString COATING_GLOSS_MAP_NAME;
     extern const QString COATING_VARNISH_REFRACTIVE_INDEX;
+
+    // Environments
+    extern const QString ENVIRONMENT_TYPE;
+    extern const QString ENVIRONMENT_TYPE_ENVIRONMENT;
+    extern const QString ENVIRONMENT_BACKDROP;
+
+    // Backdrops
+    extern const QString BACKDROP_TYPE;
+    extern const QString BACKDROP_TYPE_PROCEDURALSUN;
+    extern const QString BACKDROP_IS_DIRECTLY_VISIBLE;
+    extern const QString BACKDROP_SUN_COLOR;
+    extern const QString BACKDROP_SKY_COLOR;
+    extern const QString BACKDROP_SKYLINE_COLOR;
+    extern const QString BACKDROP_UP_SKY_DIR;
+    extern const QString BACKDROP_SUN_DIR;
 }
 
 #endif // PROPROOM3D_SCENEJSONTAGS_H

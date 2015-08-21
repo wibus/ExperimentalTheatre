@@ -25,7 +25,7 @@ namespace prop3
         class SurfaceTreeBuilder : public SceneVisitor
         {
         public:
-            SurfaceTreeBuilder(std::map<ImplicitSurface*, int>& surfaceIdMap);
+            SurfaceTreeBuilder(std::map<Surface*, int>& surfaceIdMap);
 
             const QJsonValue& surfaceTree() const;
 
@@ -41,7 +41,7 @@ namespace prop3
 
         private:
             QJsonValue _subTree;
-            std::map<ImplicitSurface*, int>& _surfaceIdMap;
+            std::map<Surface*, int>& _surfaceIdMap;
         };
 
     public :
@@ -75,17 +75,23 @@ namespace prop3
         virtual void visit(TexturedFlatPaint& node) override;
         virtual void visit(TexturedGlossyPaint& node) override;
 
+        // Environments
+        virtual void visit(Environment& node) override;
+
+        // Backdrops
+        virtual void visit(ProceduralSun& node) override;
+
     protected:
         static QJsonValue toJson(const glm::dvec3& v);
         static QJsonValue toJson(const glm::dvec4& v);
         static QJsonValue toJson(const glm::dmat4& m);
 
     private:
-        bool insertSurface(ImplicitSurface& node);
+        bool insertSurface(Surface& node);
         bool insertMaterial(Material& node);
         bool insertCoating(Coating& node);
 
-        std::map<ImplicitSurface*, int> _surfaceIdMap;
+        std::map<Surface*, int> _surfaceIdMap;
         std::map<Material*, int> _materialIdMap;
         std::map<Coating*, int> _coatingIdMap;
 
@@ -93,6 +99,9 @@ namespace prop3
         QJsonArray _materialsArray;
         QJsonArray _coatingsArray;
         QJsonArray _propsArray;
+
+        QJsonObject _environmentObj;
+        QJsonObject _backdropObj;
     };
 }
 

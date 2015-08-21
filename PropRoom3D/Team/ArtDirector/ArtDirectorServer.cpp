@@ -117,6 +117,11 @@ namespace prop3
         // TODO wbussiere 2015-05-01 : notify clients
     }
 
+    void ArtDirectorServer::setEnvironment(const std::shared_ptr<Environment>& env)
+    {
+        // TODO wbussiere 2015-05-01 : notify clients
+    }
+
     std::shared_ptr<GlPostProdUnit> ArtDirectorServer::postProdUnit() const
     {
         return _postProdUnit;

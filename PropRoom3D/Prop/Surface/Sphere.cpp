@@ -12,15 +12,15 @@ namespace prop3
         _radius(radius),
         _radius2(radius*radius),
         _center(center),
-        _coating(ImplicitSurface::NO_COATING)
+        _coating(Surface::NO_COATING)
     {
 
     }
 
-    std::shared_ptr<ImplicitSurface>
+    std::shared_ptr<Surface>
         Sphere::sphere(const glm::dvec3& center, double radius)
     {
-        return std::shared_ptr<ImplicitSurface>(new Sphere(center, radius));
+        return std::shared_ptr<Surface>(new Sphere(center, radius));
     }
 
     void Sphere::transform(const Transform& transform)
@@ -30,6 +30,8 @@ namespace prop3
         glm::dvec4 unit = glm::dvec4(1.0, 0.0, 0.0, 0.0);
         _radius *= glm::length(transform.mat() * unit);
         _radius2 = _radius*_radius;
+
+        stampCurrentUpdate();
     }
 
     EPointPosition Sphere::isIn(const glm::dvec3& point) const
@@ -103,6 +105,8 @@ namespace prop3
     void Sphere::setCoating(const std::shared_ptr<Coating>& coating)
     {
         _coating = coating;
+
+        stampCurrentUpdate();
     }
 
     void Sphere::accept(SceneVisitor& visitor)

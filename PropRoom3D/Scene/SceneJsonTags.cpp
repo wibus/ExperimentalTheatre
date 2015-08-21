@@ -4,6 +4,7 @@
 namespace prop3
 {
     // Scene object
+    const QString SCENE_ENVIRONMENT_OBJ = "Environment";
     const QString SCENE_MATERIAL_ARRAY  = "Materials";
     const QString SCENE_COATING_ARRAY   = "Coatings";
     const QString SCENE_SURFACE_ARRAY   = "Surfaces";
@@ -61,4 +62,19 @@ namespace prop3
     const QString COATING_TEXTURE_NAME              = "Tex Name";
     const QString COATING_GLOSS_MAP_NAME            = "Gloss Name";
     const QString COATING_VARNISH_REFRACTIVE_INDEX  = "Varnish Refractive Index";
+
+    // Environments
+    const QString ENVIRONMENT_TYPE                  = "Type";
+    const QString ENVIRONMENT_TYPE_ENVIRONMENT      = "Environment";
+    const QString ENVIRONMENT_BACKDROP              = "Backdrop";
+
+    // Backdrops
+    const QString BACKDROP_TYPE                 = "Type";
+    const QString BACKDROP_TYPE_PROCEDURALSUN   = "ProceduralSun";
+    const QString BACKDROP_IS_DIRECTLY_VISIBLE  = "Is Directly Visible";
+    const QString BACKDROP_SUN_COLOR            = "Sun Color";
+    const QString BACKDROP_SKY_COLOR            = "Sky Color";
+    const QString BACKDROP_SKYLINE_COLOR        = "Skyline Color";
+    const QString BACKDROP_UP_SKY_DIR           = "Up Sky Dir";
+    const QString BACKDROP_SUN_DIR              = "Sun Dir";
 }

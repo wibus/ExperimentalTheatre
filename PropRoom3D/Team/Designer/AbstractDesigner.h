@@ -9,6 +9,7 @@
 namespace prop3
 {
     class Prop;
+    class Environment;
 
 
     class PROP3D_EXPORT AbstractDesigner
@@ -23,6 +24,8 @@ namespace prop3
         virtual void reset() =0;
 
         virtual std::shared_ptr<Prop> createProp() = 0;
+
+        virtual std::shared_ptr<Environment> createEnvironment() = 0;
     };
 }
 

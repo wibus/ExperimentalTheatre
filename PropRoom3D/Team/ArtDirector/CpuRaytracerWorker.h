@@ -21,6 +21,7 @@ namespace prop3
     class Ray;
     class Raycast;
     class RayHitReport;
+    class Backdrop;
     class Material;
     class Prop;
 
@@ -117,6 +118,8 @@ namespace prop3
 
         std::string _sceneStream;
         std::shared_ptr<AbstractTeam> _team;
+        std::shared_ptr<Backdrop> _backdrop;
+        std::vector<std::shared_ptr<Prop>> _props;
 
         // Memory pools
         std::vector<RayHitReport*> reportPool;

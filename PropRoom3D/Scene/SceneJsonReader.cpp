@@ -14,9 +14,9 @@
 
 #include "Prop/Prop.h"
 
-#include "Prop/ImplicitSurface/Plane.h"
-#include "Prop/ImplicitSurface/Quadric.h"
-#include "Prop/ImplicitSurface/Sphere.h"
+#include "Prop/Surface/Plane.h"
+#include "Prop/Surface/Quadric.h"
+#include "Prop/Surface/Sphere.h"
 
 #include "Prop/Coating/NoCoating.h"
 #include "Prop/Coating/FlatPaint.h"
@@ -28,6 +28,10 @@
 #include "Prop/Material/Concrete.h"
 #include "Prop/Material/Glass.h"
 #include "Prop/Material/Metal.h"
+
+#include "Environment/Environment.h"
+
+#include "Environment/Backdrop/ProceduralSun.h"
 
 using namespace std;
 using namespace cellar;
@@ -58,6 +62,9 @@ namespace prop3
         QJsonDocument jsonDoc = QJsonDocument::fromJson(stream.c_str());
         QJsonObject docObj = jsonDoc.object();
 
+        // Fill-in environment
+        deserializeEnvironment(docObj, team);
+
         // Deserialize coatings, materials and surfaces
         deserializeCoatings(docObj);
         deserializeMaterials(docObj);
@@ -66,10 +73,12 @@ namespace prop3
         // Fill-in props
         deserializeProps(docObj, team);
 
+
         //Clean-up structures
         _surfaces.clear();
         _materials.clear();
         _coatings.clear();
+        _backdrop.reset();
 
         return true;
     }
@@ -140,6 +149,60 @@ namespace prop3
                     array[15].toDouble()));
     }
 
+    void SceneJsonReader::deserializeBackdrop(const QJsonObject& envObj)
+    {
+        QJsonValue backdropValue = envObj[ENVIRONMENT_BACKDROP];
+        if(backdropValue.isObject())
+        {
+            QJsonObject obj = backdropValue.toObject();
+            QString type = obj[BACKDROP_TYPE].toString();
+
+            if(type == BACKDROP_TYPE_PROCEDURALSUN)
+            {
+                ProceduralSun* proceduralSun = new ProceduralSun();
+                proceduralSun->setSunColor(dvec3FromJson(obj[BACKDROP_SUN_COLOR]));
+                proceduralSun->setSkyColor(dvec3FromJson(obj[BACKDROP_SKY_COLOR]));
+                proceduralSun->setSkylineColor(dvec3FromJson(obj[BACKDROP_SKYLINE_COLOR]));
+                proceduralSun->setUpSkyDirection(dvec3FromJson(obj[BACKDROP_UP_SKY_DIR]));
+                proceduralSun->setSunDirection(dvec3FromJson(obj[BACKDROP_SUN_DIR]));
+                _backdrop.reset(proceduralSun);
+            }
+            else
+            {
+                getLog().postMessage(new Message('E', false,
+                    "Unknown backdrop type: " + type.toStdString(), "SceneJsonReader"));
+            }
+
+            if(_backdrop.get() != nullptr)
+            {
+                _backdrop->setIsDirectlyVisible(obj[BACKDROP_IS_DIRECTLY_VISIBLE].toBool());
+            }
+        }
+    }
+
+    void SceneJsonReader::deserializeEnvironment(const QJsonObject& sceneObj, AbstractTeam& team)
+    {
+        std::shared_ptr<Environment> environment;
+        QJsonObject obj = sceneObj[SCENE_ENVIRONMENT_OBJ].toObject();
+        QString type = obj[ENVIRONMENT_TYPE].toString();
+
+        if(type == ENVIRONMENT_TYPE_ENVIRONMENT)
+        {
+            environment = team.scene()->environment();
+        }
+        else
+        {
+            getLog().postMessage(new Message('E', false,
+                "Unknown environment type: " + type.toStdString(), "SceneJsonReader"));
+        }
+
+        if(environment.get() != nullptr)
+        {
+            deserializeBackdrop(obj);
+            environment->setBackdrop(_backdrop);
+        }
+    }
+
     void SceneJsonReader::deserializeCoatings(const QJsonObject& sceneObj)
     {
         for(QJsonValueRef ref : sceneObj[SCENE_COATING_ARRAY].toArray())
@@ -182,7 +245,7 @@ namespace prop3
             else
             {
                 getLog().postMessage(new Message('E', false,
-                    "Unknown coating type: " + type.toStdString(), "SceneReader"));
+                    "Unknown coating type: " + type.toStdString(), "SceneJsonReader"));
             }
 
             if(coating.get() != nullptr)
@@ -224,7 +287,7 @@ namespace prop3
             else
             {
                 getLog().postMessage(new Message('E', false,
-                    "Unknown material type: " + type.toStdString(), "SceneReader"));
+                    "Unknown material type: " + type.toStdString(), "SceneJsonReader"));
             }
 
             if(material.get() != nullptr)
@@ -241,7 +304,7 @@ namespace prop3
     {
         for(QJsonValueRef ref : sceneObj[SCENE_SURFACE_ARRAY].toArray())
         {
-            std::shared_ptr<ImplicitSurface> surface;
+            std::shared_ptr<Surface> surface;
             QJsonObject jsonObj = ref.toObject();
             QString type = jsonObj[SURFACE_TYPE].toString();
 
@@ -272,7 +335,7 @@ namespace prop3
             else
             {
                 getLog().postMessage(new Message('E', false,
-                    "Unknown surface type: " + type.toStdString(), "SceneReader"));
+                    "Unknown surface type: " + type.toStdString(), "SceneJsonReader"));
             }
 
             if(surface.get() != nullptr)
@@ -298,7 +361,7 @@ namespace prop3
             else
             {
                 getLog().postMessage(new Message('E', false,
-                    "Unknown prop type: " + type.toStdString(), "SceneReader"));
+                    "Unknown prop type: " + type.toStdString(), "SceneJsonReader"));
             }
 
             if(prop.get() != nullptr)
@@ -320,7 +383,7 @@ namespace prop3
         }
     }
 
-    std::shared_ptr<ImplicitSurface> SceneJsonReader::subSurfTree(
+    std::shared_ptr<Surface> SceneJsonReader::subSurfTree(
             const QJsonValue& surfaceTree)
     {
         if(surfaceTree.isDouble())
@@ -343,14 +406,14 @@ namespace prop3
             }
             else if(logOpt == SURFACE_OPERATOR_OR)
             {
-                vector<shared_ptr<ImplicitSurface>> operansSurf;
+                vector<shared_ptr<Surface>> operansSurf;
                 for(QJsonValueRef ref : jsonObj[SURFACE_OPERATOR_OR].toArray())
                     operansSurf.push_back(subSurfTree(ref));
                 return SurfaceOr::apply(operansSurf);
             }
             else if(logOpt == SURFACE_OPERATOR_AND)
             {
-                vector<shared_ptr<ImplicitSurface>> operansSurf;
+                vector<shared_ptr<Surface>> operansSurf;
                 for(QJsonValueRef ref : jsonObj[SURFACE_OPERATOR_AND].toArray())
                     operansSurf.push_back(subSurfTree(ref));
                 return SurfaceAnd::apply(operansSurf);
@@ -358,7 +421,7 @@ namespace prop3
             else
             {
                 getLog().postMessage(new Message('E', false,
-                    "Unknown surface operator: " + logOpt.toStdString(), "SceneReader"));
+                    "Unknown surface operator: " + logOpt.toStdString(), "SceneJsonReader"));
             }
         }
     }

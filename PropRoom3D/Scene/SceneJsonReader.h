@@ -16,10 +16,11 @@ namespace prop3
 {
     class AbstractTeam;
 
-    class Prop;
-    class ImplicitSurface;
+    class Surface;
     class Material;
     class Coating;
+
+    class Backdrop;
 
 
     class PROP3D_EXPORT SceneJsonReader
@@ -39,16 +40,22 @@ namespace prop3
         static glm::dmat4 dmat4FromJson(const QJsonValueRef& ref);
 
     private:
+        void deserializeBackdrop(const QJsonObject& envObj);
+        void deserializeEnvironment(const QJsonObject& sceneObj, AbstractTeam& team);
+
         void deserializeCoatings(const QJsonObject& sceneObj);
         void deserializeMaterials(const QJsonObject& sceneObj);
         void deserializeSurfaces(const QJsonObject& sceneObj);
         void deserializeProps(const QJsonObject& sceneObj, AbstractTeam& team);
-        std::shared_ptr<ImplicitSurface> subSurfTree(
+
+        std::shared_ptr<Surface> subSurfTree(
                 const QJsonValue& surfaceTree);
 
-        std::vector<std::shared_ptr<ImplicitSurface>> _surfaces;
+        std::vector<std::shared_ptr<Surface>> _surfaces;
         std::vector<std::shared_ptr<Material>> _materials;
         std::vector<std::shared_ptr<Coating>> _coatings;
+
+        std::shared_ptr<Backdrop> _backdrop;
     };
 }
 

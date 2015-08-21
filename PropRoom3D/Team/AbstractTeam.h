@@ -18,6 +18,7 @@ namespace prop3
 {
     class Prop;
     class Scene;
+    class Environment;
     class AbstractDesigner;
     class AbstractArtDirector;
     class AbstractChoreographer;

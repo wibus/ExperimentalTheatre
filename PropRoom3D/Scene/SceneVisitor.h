@@ -10,7 +10,7 @@ namespace prop3
     class Prop;
 
     // Implicit Surfaces
-    class ImplicitSurface;
+    class Surface;
     class SurfaceGhost;
     class SurfaceInverse;
     class SurfaceOr;
@@ -34,6 +34,13 @@ namespace prop3
     class GlossyPaint;
     class TexturedFlatPaint;
     class TexturedGlossyPaint;
+
+    // Environments
+    class Environment;
+
+    // Backdrops
+    class Backdrop;
+    class ProceduralSun;
 
 
     class PROP3D_EXPORT SceneVisitor
@@ -69,6 +76,12 @@ namespace prop3
         virtual void visit(GlossyPaint& node);
         virtual void visit(TexturedFlatPaint& node);
         virtual void visit(TexturedGlossyPaint& node);
+
+        // Environments
+        virtual void visit(Environment& node);
+
+        // Backdrops
+        virtual void visit(ProceduralSun& node);
     };
 }
 

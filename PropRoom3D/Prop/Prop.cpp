@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-#include "ImplicitSurface/ImplicitSurface.h"
+#include "Surface/Surface.h"
 #include "Material/Concrete.h"
 #include "../Scene/SceneVisitor.h"
 
@@ -59,12 +59,12 @@ namespace prop3
         _isVisible = isVisible;
     }
 
-    void Prop::setSurface(const std::shared_ptr<ImplicitSurface>& surface)
+    void Prop::setSurface(const std::shared_ptr<Surface>& surface)
     {
         _surface = surface;
     }
 
-    void Prop::setBoundingSurface(const std::shared_ptr<ImplicitSurface>& surface)
+    void Prop::setBoundingSurface(const std::shared_ptr<Surface>& surface)
     {
         _boundingSurface = surface;
     }

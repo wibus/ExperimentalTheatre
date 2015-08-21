@@ -28,11 +28,6 @@ namespace prop3
         // TODO wbussiere 2014-12-13
     }
 
-    void StdChoreographer::setGravity(const glm::dvec3& unitsPerSecondSquared)
-    {
-        // TODO wbussiere 2014-12-13
-    }
-
     void StdChoreographer::manageProp(const std::shared_ptr<Prop>& prop)
     {
         // TODO wbussiere 2014-12-13
@@ -43,4 +38,8 @@ namespace prop3
         // TODO wbussiere 2014-12-13
     }
 
+    void StdChoreographer::setEnvironment(const std::shared_ptr<Environment>& env)
+    {
+        // TODO wbussiere 2014-12-13
+    }
 }

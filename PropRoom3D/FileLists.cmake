@@ -35,13 +35,6 @@ SET(PROP3_COATING_HEADERS
     ${PROP3_SRC_DIR}/Prop/Coating/TexturedFlatPaint.h
     ${PROP3_SRC_DIR}/Prop/Coating/TexturedGlossyPaint.h)
 
-# Implicit Surfaces
-SET(PROP3_IMPLICIT_SURFACE_HEADERS
-    ${PROP3_SRC_DIR}/Prop/ImplicitSurface/ImplicitSurface.h
-    ${PROP3_SRC_DIR}/Prop/ImplicitSurface/Plane.h
-    ${PROP3_SRC_DIR}/Prop/ImplicitSurface/Quadric.h
-    ${PROP3_SRC_DIR}/Prop/ImplicitSurface/Sphere.h)
-
 # Lighting
 SET(PROP3_LIGHTING_HEADERS
     ${PROP3_SRC_DIR}/Prop/Lighting/Light3D.h)
@@ -62,14 +55,21 @@ SET(PROP3_RAY_HEADERS
     ${PROP3_SRC_DIR}/Prop/Ray/RayHitReport.h
     ${PROP3_SRC_DIR}/Prop/Ray/RayUtils.h)
 
+# Surfaces
+SET(PROP3_SURFACE_HEADERS
+    ${PROP3_SRC_DIR}/Prop/Surface/Surface.h
+    ${PROP3_SRC_DIR}/Prop/Surface/Plane.h
+    ${PROP3_SRC_DIR}/Prop/Surface/Quadric.h
+    ${PROP3_SRC_DIR}/Prop/Surface/Sphere.h)
+
 # Prop
 SET(PROP3_PROP_HEADERS
     ${PROP3_COATING_HEADERS}
-    ${PROP3_IMPLICIT_SURFACE_HEADERS}
     ${PROP3_HARDWARE_HEADERS}
     ${PROP3_LIGHTING_HEADERS}
     ${PROP3_MATERIAL_HEADERS}
     ${PROP3_RAY_HEADERS}
+    ${PROP3_SURFACE_HEADERS}
     ${PROP3_SRC_DIR}/Prop/Prop.h)
 
 # Scene
@@ -81,12 +81,23 @@ SET(PROP3_SCENE_HEADERS
     ${PROP3_SRC_DIR}/Scene/SceneJsonReader.h
     ${PROP3_SRC_DIR}/Scene/SceneJsonWriter.h)
 
+# Backdrops
+SET(PROP3_BACKDROP_HEADERS
+    ${PROP3_SRC_DIR}/Environment/Backdrop/Backdrop.h
+    ${PROP3_SRC_DIR}/Environment/Backdrop/ProceduralSun.h)
+
+# Environments
+SET(PROP3_ENVIRONMENT_HEADERS
+    ${PROP3_BACKDROP_HEADERS}
+    ${PROP3_SRC_DIR}/Environment/Environment.h)
+
 
 # All the header files #
 SET(PROP3_HEADERS
     ${PROP3_TEAM_HEADERS}
     ${PROP3_PROP_HEADERS}
     ${PROP3_SCENE_HEADERS}
+    ${PROP3_ENVIRONMENT_HEADERS}
     ${PROP3_SRC_DIR}/libPropRoom3D_global.h)
     
 
@@ -124,12 +135,10 @@ SET(PROP3_COATING_SOURCES
     ${PROP3_SRC_DIR}/Prop/Coating/TexturedFlatPaint.cpp
     ${PROP3_SRC_DIR}/Prop/Coating/TexturedGlossyPaint.cpp)
 
-# Implicit Surfaces
-SET(PROP3_IMPLICIT_SURFACE_SOURCES
-    ${PROP3_SRC_DIR}/Prop/ImplicitSurface/ImplicitSurface.cpp
-    ${PROP3_SRC_DIR}/Prop/ImplicitSurface/Plane.cpp
-    ${PROP3_SRC_DIR}/Prop/ImplicitSurface/Quadric.cpp
-    ${PROP3_SRC_DIR}/Prop/ImplicitSurface/Sphere.cpp)
+# Environments
+SET(PROP3_ENVIRONMENT_SOURCES
+    ${PROP3_SRC_DIR}/Prop/Environment/Environment.cpp
+    ${PROP3_SRC_DIR}/Prop/Environment/ProceduralSun.cpp)
 
 # Lighting
 SET(PROP3_LIGHTING_SOURCES
@@ -151,14 +160,21 @@ SET(PROP3_RAY_SOURCES
     ${PROP3_SRC_DIR}/Prop/Ray/RayHitReport.cpp
     ${PROP3_SRC_DIR}/Prop/Ray/RayUtils.cpp)
 
+# Surfaces
+SET(PROP3_SURFACE_SOURCES
+    ${PROP3_SRC_DIR}/Prop/Surface/Surface.cpp
+    ${PROP3_SRC_DIR}/Prop/Surface/Plane.cpp
+    ${PROP3_SRC_DIR}/Prop/Surface/Quadric.cpp
+    ${PROP3_SRC_DIR}/Prop/Surface/Sphere.cpp)
+
 # Props
 SET(PROP3_PROP_SOURCES
     ${PROP3_COATING_SOURCES}
-    ${PROP3_IMPLICIT_SURFACE_SOURCES}
     ${PROP3_HARDWARE_SOURCES}
     ${PROP3_LIGHTING_SOURCES}
     ${PROP3_MATERIAL_SOURCES}
     ${PROP3_RAY_SOURCES}
+    ${PROP3_SURFACE_SOURCES}
     ${PROP3_SRC_DIR}/Prop/Prop.cpp)
 
 # Scene
@@ -170,11 +186,23 @@ SET(PROP3_SCENE_SOURCES
     ${PROP3_SRC_DIR}/Scene/SceneJsonReader.cpp
     ${PROP3_SRC_DIR}/Scene/SceneJsonWriter.cpp)
 
+# Backdrops
+SET(PROP3_BACKDROP_SOURCES
+    ${PROP3_SRC_DIR}/Environment/Backdrop/Backdrop.cpp
+    ${PROP3_SRC_DIR}/Environment/Backdrop/ProceduralSun.cpp)
+
+# Environments
+SET(PROP3_ENVIRONMENT_SOURCES
+    ${PROP3_BACKDROP_SOURCES}
+    ${PROP3_SRC_DIR}/Environment/Environment.cpp)
+
+
 # All the source files #
 SET(PROP3_SOURCES
     ${PROP3_TEAM_SOURCES}
     ${PROP3_PROP_SOURCES}
-    ${PROP3_SCENE_SOURCES})
+    ${PROP3_SCENE_SOURCES}
+    ${PROP3_ENVIRONMENT_SOURCES})
 
 ## Resources
 SET(PROP3_RCC_FILES

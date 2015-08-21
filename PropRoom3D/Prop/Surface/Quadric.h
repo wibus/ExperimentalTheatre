@@ -1,12 +1,12 @@
 #ifndef PROPROOM3D_QUADRIC_H
 #define PROPROOM3D_QUADRIC_H
 
-#include "ImplicitSurface.h"
+#include "Surface.h"
 
 
 namespace prop3
 {
-    class PROP3D_EXPORT Quadric : public ImplicitSurface
+    class PROP3D_EXPORT Quadric : public Surface
     {
     protected:
         // Constructing a quadric from the equation :
@@ -26,29 +26,29 @@ namespace prop3
                 double J);
 
     public:
-        static std::shared_ptr<ImplicitSurface>
+        static std::shared_ptr<Surface>
             fromMatrix(const glm::dmat4& Q);
 
-        static std::shared_ptr<ImplicitSurface>
+        static std::shared_ptr<Surface>
             fromCoeffs(double A, double E, double H,
                        double B, double C, double D,
                        double F, double G, double I,
                        double J);
 
         // Ellipsoid : x^2/rx^2 + y^2/ry^2 + z^2/rz^2 = 1
-        static std::shared_ptr<ImplicitSurface>
+        static std::shared_ptr<Surface>
             ellipsoid(double rx, double ry, double rz);
 
         // Elliptic cone : x^2/rx^2 + y^2/ry^2 - z^2 = 0
-        static std::shared_ptr<ImplicitSurface>
+        static std::shared_ptr<Surface>
             cone(double rx, double ry);
 
         // Elliptic paraboloid : x^2/rx^2 + y^2/ry^2 - z = 0
-        static std::shared_ptr<ImplicitSurface>
+        static std::shared_ptr<Surface>
             paraboloid(double rx, double ry);
 
         // Elliptic cylinder : x^2/rx^2 + y^2/ry^2 = 0
-        static std::shared_ptr<ImplicitSurface>
+        static std::shared_ptr<Surface>
             cylinder(double rx, double ry);
 
 

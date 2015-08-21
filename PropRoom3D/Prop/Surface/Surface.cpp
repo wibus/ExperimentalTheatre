@@ -1,4 +1,4 @@
-#include "ImplicitSurface.h"
+#include "Surface.h"
 
 #include <GLM/gtc/matrix_transform.hpp>
 
@@ -41,38 +41,38 @@ namespace prop3
         return _inv;
     }
 
-    const std::shared_ptr<Coating> ImplicitSurface::NO_COATING(new NoCoating());
+    const std::shared_ptr<Coating> Surface::NO_COATING(new NoCoating());
 
-    ImplicitSurface::ImplicitSurface()
+    Surface::Surface()
     {
 
     }
 
-    ImplicitSurface::~ImplicitSurface()
+    Surface::~Surface()
     {
 
     }
 
 
     // SurfaceGhost
-    SurfaceGhost::SurfaceGhost(const std::shared_ptr<ImplicitSurface>& eq) :
-        _eq(eq)
+    SurfaceGhost::SurfaceGhost(const std::shared_ptr<Surface>& surf) :
+        _surf(surf)
     {
     }
 
     void SurfaceGhost::transform(const Transform& transform)
     {
-        _eq->transform(transform);
+        _surf->transform(transform);
     }
 
     EPointPosition SurfaceGhost::isIn(const glm::dvec3& point) const
     {
-        return _eq->isIn(point);
+        return _surf->isIn(point);
     }
 
     double SurfaceGhost::signedDistance(const glm::dvec3& point) const
     {
-        return _eq->signedDistance(point);
+        return _surf->signedDistance(point);
     }
 
     void SurfaceGhost::raycast(const Ray&,
@@ -97,24 +97,24 @@ namespace prop3
 
     std::vector<std::shared_ptr<SceneNode>> SurfaceGhost::children() const
     {
-        return { _eq };
+        return { _surf };
     }
 
 
     // SurfaceNot
-    SurfaceInverse::SurfaceInverse(const std::shared_ptr<ImplicitSurface>& eq) :
-        _eq(eq)
+    SurfaceInverse::SurfaceInverse(const std::shared_ptr<Surface>& surf) :
+        _surf(surf)
     {
     }
 
     void SurfaceInverse::transform(const Transform& transform)
     {
-        _eq->transform(transform);
+        _surf->transform(transform);
     }
 
     EPointPosition SurfaceInverse::isIn(const glm::dvec3& point) const
     {
-        EPointPosition pos = _eq->isIn(point);
+        EPointPosition pos = _surf->isIn(point);
         return pos != EPointPosition::IN ?
                 pos == EPointPosition::OUT ?
                     EPointPosition::IN :
@@ -124,13 +124,13 @@ namespace prop3
 
     double SurfaceInverse::signedDistance(const glm::dvec3& point) const
     {
-        return -_eq->signedDistance(point);
+        return -_surf->signedDistance(point);
     }
 
     void SurfaceInverse::raycast(const Ray& ray,
                         RayHitList& reports) const
     {
-        _eq->raycast(ray, reports);
+        _surf->raycast(ray, reports);
 
         RayHitReport* node = reports.head;
         while(node != nullptr)
@@ -142,12 +142,12 @@ namespace prop3
 
     bool SurfaceInverse::intersects(const Ray& ray, RayHitList& reports) const
     {
-        return _eq->intersects(ray, reports);
+        return _surf->intersects(ray, reports);
     }
 
     void SurfaceInverse::setCoating(const std::shared_ptr<Coating>& coating)
     {
-        _eq->setCoating(coating);
+        _surf->setCoating(coating);
     }
 
     void SurfaceInverse::accept(SceneVisitor& visitor)
@@ -157,31 +157,31 @@ namespace prop3
 
     std::vector<std::shared_ptr<SceneNode>> SurfaceInverse::children() const
     {
-        return { _eq };
+        return { _surf };
     }
 
 
     // SurfaceOr
-    SurfaceOr::SurfaceOr(const std::vector<std::shared_ptr<ImplicitSurface>>& eqs) :
-        _eqs(eqs)
+    SurfaceOr::SurfaceOr(const std::vector<std::shared_ptr<Surface>>& surfs) :
+        _surfs(surfs)
     {
     }
 
     void SurfaceOr::transform(const Transform& transform)
     {
-        for(auto& eq : _eqs)
-            eq->transform(transform);
+        for(auto& surf : _surfs)
+            surf->transform(transform);
     }
 
     EPointPosition SurfaceOr::isIn(const glm::dvec3& point) const
     {
         EPointPosition pos = EPointPosition::OUT;
-        for(const auto& eq : _eqs)
+        for(const auto& surf : _surfs)
         {
-            EPointPosition eqPtPos = eq->isIn(point);
-            if(eqPtPos == EPointPosition::IN)
+            EPointPosition surfPtPos = surf->isIn(point);
+            if(surfPtPos == EPointPosition::IN)
                 return EPointPosition::IN;
-            else if(eqPtPos == EPointPosition::ON)
+            else if(surfPtPos == EPointPosition::ON)
                 pos = EPointPosition::ON;
         }
         return pos;
@@ -189,11 +189,11 @@ namespace prop3
 
     double SurfaceOr::signedDistance(const glm::dvec3& point) const
     {
-        static_assert(std::numeric_limits<double>::is_iec559, "IEEE 754 required");
+        static_assert(std::numeric_limits<double>::is_iec559, "IEEE 754 rsurfuired");
         double minDist = std::numeric_limits<double>::infinity();
-        for(const auto& eq : _eqs)
+        for(const auto& surf : _surfs)
         {
-            minDist = glm::min(minDist, eq->signedDistance(point));
+            minDist = glm::min(minDist, surf->signedDistance(point));
         }
 
         return minDist;
@@ -214,22 +214,22 @@ namespace prop3
                            RayHitList& reports,
                            bool isTest) const
     {
-        RayHitList eqReports(reports.memoryPool);
-        for(const auto& eq : _eqs)
+        RayHitList surfReports(reports.memoryPool);
+        for(const auto& surf : _surfs)
         {
-            eqReports.clear();
-            eq->raycast(ray, eqReports);
+            surfReports.clear();
+            surf->raycast(ray, surfReports);
 
             RayHitReport* parent = nullptr;
-            RayHitReport* node = eqReports.head;
+            RayHitReport* node = surfReports.head;
             while(node != nullptr)
             {
                 bool isIn = false;
-                for(const auto& eqTest : _eqs)
+                for(const auto& surfTest : _surfs)
                 {
-                    if(eq.get() != eqTest.get())
+                    if(surf.get() != surfTest.get())
                     {
-                        if(eqTest->isIn(node->position) ==
+                        if(surfTest->isIn(node->position) ==
                            EPointPosition::IN)
                         {
                             isIn = true;
@@ -246,7 +246,7 @@ namespace prop3
                         return true;
 
                     if(parent == nullptr)
-                        eqReports.head = node->_next;
+                        surfReports.head = node->_next;
                     else
                         parent->_next = node->_next;
 
@@ -266,8 +266,8 @@ namespace prop3
 
     void SurfaceOr::setCoating(const std::shared_ptr<Coating>& coating)
     {
-        for(auto& eq : _eqs)
-            eq->setCoating(coating);
+        for(auto& surf : _surfs)
+            surf->setCoating(coating);
     }
 
     void SurfaceOr::accept(SceneVisitor& visitor)
@@ -277,31 +277,31 @@ namespace prop3
 
     std::vector<std::shared_ptr<SceneNode>> SurfaceOr::children() const
     {
-        return std::vector<std::shared_ptr<SceneNode>>(_eqs.begin(), _eqs.end());
+        return std::vector<std::shared_ptr<SceneNode>>(_surfs.begin(), _surfs.end());
     }
 
 
     // SurfaceAnd
-    SurfaceAnd::SurfaceAnd(const std::vector<std::shared_ptr<ImplicitSurface>>& eqs) :
-        _eqs(eqs)
+    SurfaceAnd::SurfaceAnd(const std::vector<std::shared_ptr<Surface>>& surfs) :
+        _surfs(surfs)
     {
     }
 
     void SurfaceAnd::transform(const Transform& transform)
     {
-        for(auto& eq : _eqs)
-            eq->transform(transform);
+        for(auto& surf : _surfs)
+            surf->transform(transform);
     }
 
     EPointPosition SurfaceAnd::isIn(const glm::dvec3& point) const
     {
         EPointPosition pos = EPointPosition::IN;
-        for(const auto& eq : _eqs)
+        for(const auto& surf : _surfs)
         {
-            EPointPosition eqPtPos = eq->isIn(point);
-            if(eqPtPos == EPointPosition::OUT)
+            EPointPosition surfPtPos = surf->isIn(point);
+            if(surfPtPos == EPointPosition::OUT)
                 return EPointPosition::OUT;
-            else if(eqPtPos == EPointPosition::ON)
+            else if(surfPtPos == EPointPosition::ON)
                 pos = EPointPosition::ON;
         }
         return pos;
@@ -309,11 +309,11 @@ namespace prop3
 
     double SurfaceAnd::signedDistance(const glm::dvec3& point) const
     {
-        static_assert(std::numeric_limits<double>::is_iec559, "IEEE 754 required");
+        static_assert(std::numeric_limits<double>::is_iec559, "IEEE 754 rsurfuired");
         double maxDist = -std::numeric_limits<double>::infinity();
-        for(const auto& eq : _eqs)
+        for(const auto& surf : _surfs)
         {
-            maxDist = glm::max(maxDist, eq->signedDistance(point));
+            maxDist = glm::max(maxDist, surf->signedDistance(point));
         }
 
         return maxDist;
@@ -334,22 +334,22 @@ namespace prop3
                              RayHitList& reports,
                              bool isTest) const
     {
-        RayHitList eqReports(reports.memoryPool);
-        for(const auto& eq : _eqs)
+        RayHitList surfReports(reports.memoryPool);
+        for(const auto& surf : _surfs)
         {
-            eqReports.clear();
-            eq->raycast(ray, eqReports);
+            surfReports.clear();
+            surf->raycast(ray, surfReports);
 
             RayHitReport* parent = nullptr;
-            RayHitReport* node = eqReports.head;
+            RayHitReport* node = surfReports.head;
             while(node != nullptr)
             {
                 bool isIn = true;
-                for(const auto& eqTest : _eqs)
+                for(const auto& surfTest : _surfs)
                 {
-                    if(eq.get() != eqTest.get())
+                    if(surf.get() != surfTest.get())
                     {
-                        if(eqTest->isIn(node->position) ==
+                        if(surfTest->isIn(node->position) ==
                            EPointPosition::OUT)
                         {
                             isIn = false;
@@ -366,7 +366,7 @@ namespace prop3
                         return true;
 
                     if(parent == nullptr)
-                        eqReports.head = node->_next;
+                        surfReports.head = node->_next;
                     else
                         parent->_next = node->_next;
 
@@ -386,8 +386,8 @@ namespace prop3
 
     void SurfaceAnd::setCoating(const std::shared_ptr<Coating>& coating)
     {
-        for(auto& eq : _eqs)
-            eq->setCoating(coating);
+        for(auto& surf : _surfs)
+            surf->setCoating(coating);
     }
 
     void SurfaceAnd::accept(SceneVisitor& visitor)
@@ -397,62 +397,62 @@ namespace prop3
 
     std::vector<std::shared_ptr<SceneNode>> SurfaceAnd::children() const
     {
-        return std::vector<std::shared_ptr<SceneNode>>(_eqs.begin(), _eqs.end());
+        return std::vector<std::shared_ptr<SceneNode>>(_surfs.begin(), _surfs.end());
     }
 
 
     // Operators
-    std::shared_ptr<ImplicitSurface> operator~ (
-            const std::shared_ptr<ImplicitSurface>& eq)
+    std::shared_ptr<Surface> operator~ (
+            const std::shared_ptr<Surface>& surf)
     {
-        return std::shared_ptr<ImplicitSurface>(new SurfaceGhost(eq));
+        return std::shared_ptr<Surface>(new SurfaceGhost(surf));
     }
 
-    std::shared_ptr<ImplicitSurface> operator!(
-            const std::shared_ptr<ImplicitSurface>& eq)
+    std::shared_ptr<Surface> operator!(
+            const std::shared_ptr<Surface>& surf)
     {
-        return std::shared_ptr<ImplicitSurface>(new SurfaceInverse(eq));
+        return std::shared_ptr<Surface>(new SurfaceInverse(surf));
     }
 
-    std::shared_ptr<ImplicitSurface> operator| (
-            const std::shared_ptr<ImplicitSurface>& eq1,
-            const std::shared_ptr<ImplicitSurface>& eq2)
+    std::shared_ptr<Surface> operator| (
+            const std::shared_ptr<Surface>& surf1,
+            const std::shared_ptr<Surface>& surf2)
     {
         std::shared_ptr<SurfaceOr> cast1;
-        if(cast1 = std::dynamic_pointer_cast<SurfaceOr>(eq1))
+        if(cast1 = std::dynamic_pointer_cast<SurfaceOr>(surf1))
         {
-            cast1->add(eq2);
+            cast1->add(surf2);
             return cast1;
         }
 
         std::shared_ptr<SurfaceOr> cast2;
-        if(cast2 = std::dynamic_pointer_cast<SurfaceOr>(eq2))
+        if(cast2 = std::dynamic_pointer_cast<SurfaceOr>(surf2))
         {
-            cast2->add(eq1);
+            cast2->add(surf1);
             return cast2;
         }
 
-        return std::shared_ptr<ImplicitSurface>(new SurfaceOr({eq1, eq2}));
+        return std::shared_ptr<Surface>(new SurfaceOr({surf1, surf2}));
     }
 
-    std::shared_ptr<ImplicitSurface> operator& (
-            const std::shared_ptr<ImplicitSurface>& eq1,
-            const std::shared_ptr<ImplicitSurface>& eq2)
+    std::shared_ptr<Surface> operator& (
+            const std::shared_ptr<Surface>& surf1,
+            const std::shared_ptr<Surface>& surf2)
     {
         std::shared_ptr<SurfaceAnd> cast1;
-        if(cast1 = std::dynamic_pointer_cast<SurfaceAnd>(eq1))
+        if(cast1 = std::dynamic_pointer_cast<SurfaceAnd>(surf1))
         {
-            cast1->add(eq2);
+            cast1->add(surf2);
             return cast1;
         }
 
         std::shared_ptr<SurfaceAnd> cast2;
-        if(cast2 = std::dynamic_pointer_cast<SurfaceAnd>(eq2))
+        if(cast2 = std::dynamic_pointer_cast<SurfaceAnd>(surf2))
         {
-            cast2->add(eq1);
+            cast2->add(surf1);
             return cast2;
         }
 
-        return std::shared_ptr<ImplicitSurface>(new SurfaceAnd({eq1, eq2}));
+        return std::shared_ptr<Surface>(new SurfaceAnd({surf1, surf2}));
     }
 }

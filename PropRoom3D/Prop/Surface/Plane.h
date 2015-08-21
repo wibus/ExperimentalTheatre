@@ -1,12 +1,12 @@
 #ifndef PROPROOM3D_PLANE_H
 #define PROPROOM3D_PLANE_H
 
-#include "ImplicitSurface.h"
+#include "Surface.h"
 
 
 namespace prop3
 {
-    class PROP3D_EXPORT Plane : public ImplicitSurface
+    class PROP3D_EXPORT Plane : public Surface
     {
     protected:
         // From the equation : a*x + b*y + c*z + d = 0
@@ -19,13 +19,13 @@ namespace prop3
         Plane(const glm::dvec3& normal, const glm::dvec3& origin);
 
     public:
-        static std::shared_ptr<ImplicitSurface>
+        static std::shared_ptr<Surface>
             plane(double a, double b, double c, double d);
 
-        static std::shared_ptr<ImplicitSurface>
+        static std::shared_ptr<Surface>
             plane(const glm::dvec4& representation);
 
-        static std::shared_ptr<ImplicitSurface>
+        static std::shared_ptr<Surface>
             plane(const glm::dvec3& normal, const glm::dvec3& origin);
 
 
@@ -72,15 +72,15 @@ namespace prop3
                      const glm::dvec3& texU, const glm::dvec3& texV, const glm::dvec3& texOrigin);
 
     public:
-        static std::shared_ptr<ImplicitSurface>
+        static std::shared_ptr<Surface>
             plane(double a, double b, double c, double d,
                   const glm::dvec3& texU, const glm::dvec3& texV, const glm::dvec3& texOrigin);
 
-        static std::shared_ptr<ImplicitSurface>
+        static std::shared_ptr<Surface>
             plane(const glm::dvec4& representation,
                   const glm::dvec3& texU, const glm::dvec3& texV, const glm::dvec3& texOrigin);
 
-        static std::shared_ptr<ImplicitSurface>
+        static std::shared_ptr<Surface>
             plane(const glm::dvec3& normal, const glm::dvec3& origin,
                   const glm::dvec3& texU, const glm::dvec3& texV, const glm::dvec3& texOrigin);
 

@@ -15,6 +15,7 @@ namespace prop3
 {
     class Prop;
     class Scene;
+    class Environment;
     class GlPostProdUnit;
 
 
@@ -43,6 +44,8 @@ namespace prop3
 
         virtual void manageProp(const std::shared_ptr<Prop>& prop) =0;
         virtual void unmanageProp(const std::shared_ptr<Prop>& prop) =0;
+
+        virtual void setEnvironment(const std::shared_ptr<Environment>& env) = 0;
 
 
     private:

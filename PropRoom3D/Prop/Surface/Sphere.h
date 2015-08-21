@@ -1,17 +1,17 @@
 #ifndef PROPROOM3D_SPHERE_H
 #define PROPROOM3D_SPHERE_H
 
-#include "ImplicitSurface.h"
+#include "Surface.h"
 
 
 namespace prop3
 {
-    class PROP3D_EXPORT Sphere : public ImplicitSurface
+    class PROP3D_EXPORT Sphere : public Surface
     {
         Sphere(const glm::dvec3& center, double radius);
 
     public:
-        static std::shared_ptr<ImplicitSurface>
+        static std::shared_ptr<Surface>
             sphere(const glm::dvec3& center, double radius);
 
         // SceneNode interface

@@ -30,7 +30,7 @@ namespace prop3
 
     Quadric::Quadric(const glm::dmat4& Q) :
         _q(Q),
-        _coating(ImplicitSurface::NO_COATING)
+        _coating(Surface::NO_COATING)
     {
 
     }
@@ -43,24 +43,24 @@ namespace prop3
            B, E, F, G,
            C, F, H, I,
            D, G, I, J),
-        _coating(ImplicitSurface::NO_COATING)
+        _coating(Surface::NO_COATING)
     {
 
     }
 
-    std::shared_ptr<ImplicitSurface>
+    std::shared_ptr<Surface>
         Quadric::fromMatrix(const glm::dmat4& Q)
     {
-        return std::shared_ptr<ImplicitSurface>(new Quadric(Q));
+        return std::shared_ptr<Surface>(new Quadric(Q));
     }
 
-    std::shared_ptr<ImplicitSurface>
+    std::shared_ptr<Surface>
         Quadric::fromCoeffs(double A, double E, double H,
                    double B, double C, double D,
                    double F, double G, double I,
                    double J)
     {
-        return std::shared_ptr<ImplicitSurface>(new Quadric(
+        return std::shared_ptr<Surface>(new Quadric(
                 A, E, H,
                 B, C, D,
                 F, G, I,
@@ -68,10 +68,10 @@ namespace prop3
     }
 
     // Ellipsoid : x^2/rx^2 + y^2/ry^2 + z^2/rz^2 = 1
-    std::shared_ptr<ImplicitSurface>
+    std::shared_ptr<Surface>
         Quadric::ellipsoid(double rx, double ry, double rz)
     {
-        return std::shared_ptr<ImplicitSurface>(new Quadric(
+        return std::shared_ptr<Surface>(new Quadric(
                 1.0 / (rx*rx), // A
                 1.0 / (ry*ry), // B
                 1.0 / (rz*rz), // C
@@ -81,10 +81,10 @@ namespace prop3
     }
 
     // Elliptic cone : x^2/rx^2 + y^2/ry^2 - z^2 = 0
-    std::shared_ptr<ImplicitSurface>
+    std::shared_ptr<Surface>
         Quadric::cone(double rx, double ry)
     {
-        return std::shared_ptr<ImplicitSurface>(new Quadric(
+        return std::shared_ptr<Surface>(new Quadric(
                 1.0 / (rx*rx), // A
                 1.0 / (ry*ry), // B
                 -1.0,          // C
@@ -94,10 +94,10 @@ namespace prop3
     }
 
     // Elliptic paraboloid : x^2/rx^2 + y^2/ry^2 - z = 0
-    std::shared_ptr<ImplicitSurface>
+    std::shared_ptr<Surface>
         Quadric::paraboloid(double rx, double ry)
     {
-        return std::shared_ptr<ImplicitSurface>(new Quadric(
+        return std::shared_ptr<Surface>(new Quadric(
                 1.0 / (rx*rx), // A
                 1.0 / (ry*ry), // B
                 0,             // C
@@ -107,10 +107,10 @@ namespace prop3
     }
 
     // Elliptic cylinder : x^2/rx^2 + y^2/ry^2 = 0
-    std::shared_ptr<ImplicitSurface>
+    std::shared_ptr<Surface>
         Quadric::cylinder(double rx, double ry)
     {
-        return std::shared_ptr<ImplicitSurface>(new Quadric(
+        return std::shared_ptr<Surface>(new Quadric(
                 1.0 / (rx*rx), // A
                 1.0 / (ry*ry), // B
                 0,             // C
@@ -123,6 +123,8 @@ namespace prop3
     void Quadric::transform(const Transform& transform)
     {
         _q = glm::transpose(transform.inv()) * _q * transform.inv();
+
+        stampCurrentUpdate();
     }
 
     EPointPosition Quadric::isIn(const glm::dvec3& point) const
@@ -231,6 +233,8 @@ namespace prop3
     void Quadric::setCoating(const std::shared_ptr<Coating>& coating)
     {
         _coating = coating;
+
+        stampCurrentUpdate();
     }
 
     void Quadric::accept(SceneVisitor& visitor)

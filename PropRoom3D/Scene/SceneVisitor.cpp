@@ -109,4 +109,18 @@ namespace prop3
     {
 
     }
+
+
+    // Environments
+    void SceneVisitor::visit(Environment& node)
+    {
+
+    }
+
+
+    // Backdrops
+    void SceneVisitor::visit(ProceduralSun& node)
+    {
+
+    }
 }

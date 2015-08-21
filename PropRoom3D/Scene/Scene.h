@@ -6,6 +6,7 @@
 #include <memory>
 
 #include "../Prop/Prop.h"
+#include "../Environment/Environment.h"
 
 
 namespace prop3
@@ -27,6 +28,11 @@ namespace prop3
         const std::vector<std::shared_ptr<Prop>>&  props();
 
 
+        virtual void setEnvironment(const std::shared_ptr<Environment>& env);
+
+        std::shared_ptr<Environment> environment() const;
+
+
         bool updateTimeStamp();
 
         TimeStamp timeStamp() const;
@@ -36,6 +42,7 @@ namespace prop3
 
     private:
         std::vector<std::shared_ptr<Prop>> _props;
+        std::shared_ptr<Environment> _environment;
         TimeStamp _timeStamp;
         bool _sceneChanged;
     };
@@ -46,6 +53,11 @@ namespace prop3
     inline const std::vector<std::shared_ptr<Prop>>& Scene::props()
     {
         return _props;
+    }
+
+    inline std::shared_ptr<Environment> Scene::environment() const
+    {
+        return _environment;
     }
 
     inline TimeStamp Scene::timeStamp() const

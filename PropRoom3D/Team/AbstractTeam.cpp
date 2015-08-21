@@ -29,6 +29,14 @@ namespace prop3
             _choreographer->setup();
         for(auto& artDir : _artDirectors)
             artDir->setup(_scene);
+
+        auto env = _propDesigner->createEnvironment();
+
+        _scene->setEnvironment(env);
+        if(_choreographer.get() != nullptr)
+            _choreographer->setEnvironment(env);
+        for(auto& artDir : _artDirectors)
+            artDir->setEnvironment(env);
     }
 
     void AbstractTeam::reset()
@@ -59,7 +67,7 @@ namespace prop3
 
     void AbstractTeam::clearProps()
     {
-        std::vector<std::shared_ptr<Prop>> props = _scene->props();
+        auto props = _scene->props();
         for(auto prop : props)
         {
             deleteProp(prop);

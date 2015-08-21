@@ -12,6 +12,7 @@ namespace prop3
 {
     class Prop;
     class Scene;
+    class Environment;
 
 
     class PROP3D_EXPORT AbstractChoreographer
@@ -26,10 +27,10 @@ namespace prop3
         virtual void reset() =0;
         virtual void update(double dt) =0;
 
-        virtual void setGravity(const glm::dvec3& unitsPerSecondSquared) =0;
-
         virtual void manageProp(const std::shared_ptr<Prop>& prop) =0;
         virtual void unmanageProp(const std::shared_ptr<Prop>& prop) =0;
+
+        virtual void setEnvironment(const std::shared_ptr<Environment>& env) = 0;
     };
 }
 

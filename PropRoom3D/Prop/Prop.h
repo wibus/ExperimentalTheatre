@@ -13,7 +13,7 @@
 namespace prop3
 {
     class Material;
-    class ImplicitSurface;
+    class Surface;
 
 
     class PROP3D_EXPORT Prop : public SceneNode
@@ -36,12 +36,12 @@ namespace prop3
         virtual void setIsVisible(bool isVisible);
 
         // Surface
-        std::shared_ptr<ImplicitSurface> surface() const;
-        virtual void setSurface(const std::shared_ptr<ImplicitSurface>& surface);
+        std::shared_ptr<Surface> surface() const;
+        virtual void setSurface(const std::shared_ptr<Surface>& surface);
 
         // Bounding Surface
-        std::shared_ptr<ImplicitSurface> boundingSurface() const;
-        virtual void setBoundingSurface(const std::shared_ptr<ImplicitSurface>& surface);
+        std::shared_ptr<Surface> boundingSurface() const;
+        virtual void setBoundingSurface(const std::shared_ptr<Surface>& surface);
 
         // Material
         const std::shared_ptr<Material>& material() const;
@@ -119,8 +119,8 @@ namespace prop3
 
 
         // Attributes
-        std::shared_ptr<ImplicitSurface> _surface;
-        std::shared_ptr<ImplicitSurface> _boundingSurface;
+        std::shared_ptr<Surface> _surface;
+        std::shared_ptr<Surface> _boundingSurface;
         std::shared_ptr<Material> _material;
         EBodyType _bodyType;
 
@@ -162,12 +162,12 @@ namespace prop3
         return _isVisible;
     }
 
-    inline std::shared_ptr<ImplicitSurface> Prop::surface() const
+    inline std::shared_ptr<Surface> Prop::surface() const
     {
         return _surface;
     }
 
-    inline std::shared_ptr<ImplicitSurface> Prop::boundingSurface() const
+    inline std::shared_ptr<Surface> Prop::boundingSurface() const
     {
         return _boundingSurface;
     }

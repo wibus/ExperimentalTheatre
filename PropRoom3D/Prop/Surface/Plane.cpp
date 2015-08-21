@@ -11,40 +11,40 @@ namespace prop3
     Plane::Plane(const glm::dvec3& normal, const glm::dvec3& origin) :
         _normal(glm::normalize(normal)),
         _d(-glm::dot(normal, origin)),
-        _coating(ImplicitSurface::NO_COATING)
+        _coating(Surface::NO_COATING)
     {
     }
 
     Plane::Plane(const glm::dvec4& representation) :
         _normal(representation),
         _d(representation.w),
-        _coating(ImplicitSurface::NO_COATING)
+        _coating(Surface::NO_COATING)
     {
     }
 
     Plane::Plane(double a, double b, double c, double d) :
         _normal(a, b, c),
         _d(d),
-        _coating(ImplicitSurface::NO_COATING)
+        _coating(Surface::NO_COATING)
     {
     }
 
-    std::shared_ptr<ImplicitSurface>
+    std::shared_ptr<Surface>
         Plane::plane(double a, double b, double c, double d)
     {
-        return std::shared_ptr<ImplicitSurface>(new Plane(a, b, c, d));
+        return std::shared_ptr<Surface>(new Plane(a, b, c, d));
     }
 
-    std::shared_ptr<ImplicitSurface>
+    std::shared_ptr<Surface>
         Plane::plane(const glm::dvec4& representation)
     {
-        return std::shared_ptr<ImplicitSurface>(new Plane(representation));
+        return std::shared_ptr<Surface>(new Plane(representation));
     }
 
-    std::shared_ptr<ImplicitSurface>
+    std::shared_ptr<Surface>
         Plane::plane(const glm::dvec3& normal, const glm::dvec3& origin)
     {
-        return std::shared_ptr<ImplicitSurface>(new Plane(normal, origin));
+        return std::shared_ptr<Surface>(new Plane(normal, origin));
     }
 
     void Plane::transform(const Transform& transform)
@@ -52,6 +52,8 @@ namespace prop3
         glm::dvec3 pt = glm::dvec3(transform.mat() * glm::dvec4((-_d) * _normal, 1.0));
         _normal = glm::normalize(glm::dvec3(transform.mat() * glm::dvec4(_normal, 0.0)));
         _d = -glm::dot(_normal, pt);
+
+        stampCurrentUpdate();
     }
 
     EPointPosition Plane::isIn(const glm::dvec3& point) const
@@ -89,6 +91,8 @@ namespace prop3
     void Plane::setCoating(const std::shared_ptr<Coating>& coating)
     {
         _coating = coating;
+
+        stampCurrentUpdate();
     }
 
     void Plane::accept(SceneVisitor& visitor)
@@ -131,27 +135,27 @@ namespace prop3
 
     }
 
-    std::shared_ptr<ImplicitSurface>
+    std::shared_ptr<Surface>
         PlaneTexture::plane(double a, double b, double c, double d,
                             const glm::dvec3& texU, const glm::dvec3& texV, const glm::dvec3& texOrigin)
     {
-        return std::shared_ptr<ImplicitSurface>(
+        return std::shared_ptr<Surface>(
                     new PlaneTexture(a, b, c, d, texU, texV, texOrigin));
     }
 
-    std::shared_ptr<ImplicitSurface>
+    std::shared_ptr<Surface>
         PlaneTexture::plane(const glm::dvec4& representation,
                             const glm::dvec3& texU, const glm::dvec3& texV, const glm::dvec3& texOrigin)
     {
-        return std::shared_ptr<ImplicitSurface>(
+        return std::shared_ptr<Surface>(
                     new PlaneTexture(representation, texU, texV, texOrigin));
     }
 
-    std::shared_ptr<ImplicitSurface>
+    std::shared_ptr<Surface>
         PlaneTexture::plane(const glm::dvec3& normal, const glm::dvec3& origin,
                             const glm::dvec3& texU, const glm::dvec3& texV, const glm::dvec3& texOrigin)
     {
-        return std::shared_ptr<ImplicitSurface>(
+        return std::shared_ptr<Surface>(
                     new PlaneTexture(normal, origin, texU, texV, texOrigin));
     }
 

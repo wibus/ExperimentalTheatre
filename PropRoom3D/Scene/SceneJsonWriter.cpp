@@ -16,9 +16,9 @@
 
 #include "Prop/Prop.h"
 
-#include "Prop/ImplicitSurface/Plane.h"
-#include "Prop/ImplicitSurface/Quadric.h"
-#include "Prop/ImplicitSurface/Sphere.h"
+#include "Prop/Surface/Plane.h"
+#include "Prop/Surface/Quadric.h"
+#include "Prop/Surface/Sphere.h"
 
 #include "Prop/Coating/NoCoating.h"
 #include "Prop/Coating/FlatPaint.h"
@@ -30,6 +30,10 @@
 #include "Prop/Material/Concrete.h"
 #include "Prop/Material/Glass.h"
 #include "Prop/Material/Metal.h"
+
+#include "Environment/Environment.h"
+
+#include "Environment/Backdrop/ProceduralSun.h"
 
 using namespace std;
 using namespace cellar;
@@ -54,10 +58,11 @@ namespace prop3
 
         // Write file
         QJsonObject sceneObj;
-        sceneObj[SCENE_MATERIAL_ARRAY] = _materialsArray;
-        sceneObj[SCENE_COATING_ARRAY]  = _coatingsArray;
-        sceneObj[SCENE_SURFACE_ARRAY]  = _surfacesArray;
-        sceneObj[SCENE_PROP_ARRAY]     = _propsArray;
+        sceneObj[SCENE_ENVIRONMENT_OBJ] = _environmentObj;
+        sceneObj[SCENE_MATERIAL_ARRAY]  = _materialsArray;
+        sceneObj[SCENE_COATING_ARRAY]   = _coatingsArray;
+        sceneObj[SCENE_SURFACE_ARRAY]   = _surfacesArray;
+        sceneObj[SCENE_PROP_ARRAY]      = _propsArray;
 
         QJsonDocument doc;
         doc.setObject(sceneObj);
@@ -67,6 +72,13 @@ namespace prop3
         _surfaceIdMap.clear();
         _materialIdMap.clear();
         _coatingIdMap.clear();
+
+        _backdropObj = QJsonObject();
+        _environmentObj = QJsonObject();
+        _materialsArray = QJsonArray();
+        _coatingsArray = QJsonArray();
+        _surfacesArray = QJsonArray();
+        _propsArray = QJsonArray();
 
 
         return std::string(doc.toJson(
@@ -140,7 +152,7 @@ namespace prop3
         return array;
     }
 
-    bool SceneJsonWriter::insertSurface(ImplicitSurface& node)
+    bool SceneJsonWriter::insertSurface(Surface& node)
     {
         return _surfaceIdMap.insert(make_pair(&node, _surfaceIdMap.size())).second;
     }
@@ -349,8 +361,41 @@ namespace prop3
         }
     }
 
+
+    // Environments
+    void SceneJsonWriter::visit(Environment& node)
+    {
+        auto backdrop = node.backdrop();
+        QJsonValue backdropValue;
+        if(backdrop.get())
+        {
+            backdrop->accept(*this);
+            backdropValue = _backdropObj;
+        }
+
+        _environmentObj[ENVIRONMENT_TYPE]       = ENVIRONMENT_TYPE_ENVIRONMENT;
+        _environmentObj[ENVIRONMENT_BACKDROP]   = backdropValue;
+    }
+
+
+    // Backdrops
+    void SceneJsonWriter::visit(ProceduralSun& node)
+    {
+        _backdropObj[BACKDROP_TYPE]                 = BACKDROP_TYPE_PROCEDURALSUN;
+        _backdropObj[BACKDROP_IS_DIRECTLY_VISIBLE]  = node.isDirectlyVisible();
+        _backdropObj[BACKDROP_SUN_COLOR]            = toJson(node.sunColor());
+        _backdropObj[BACKDROP_SKY_COLOR]            = toJson(node.skyColor());
+        _backdropObj[BACKDROP_SKYLINE_COLOR]        = toJson(node.skylineColor());
+        _backdropObj[BACKDROP_UP_SKY_DIR]           = toJson(node.upSkyDirection());
+        _backdropObj[BACKDROP_SUN_DIR]              = toJson(node.sunDirection());
+    }
+
+
+    //////////////////////////
+    // Surface Tree Builder //
+    //////////////////////////
     SceneJsonWriter::SurfaceTreeBuilder::SurfaceTreeBuilder(
-            std::map<ImplicitSurface*, int>& surfaceIdMap) :
+            std::map<Surface*, int>& surfaceIdMap) :
         _surfaceIdMap(surfaceIdMap)
     {
 

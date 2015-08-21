@@ -6,10 +6,13 @@
 #include "../../Prop/Ray/Raycast.h"
 #include "../../Prop/Ray/RayHitList.h"
 #include "../../Prop/Ray/RayHitReport.h"
-#include "../../Prop/ImplicitSurface/ImplicitSurface.h"
+#include "../../Prop/Surface/Surface.h"
 #include "../../Prop/Coating/Coating.h"
 #include "../../Prop/Material/Material.h"
 #include "../../Prop/Material/Air.h"
+
+#include "../../Environment/Environment.h"
+#include "../../Environment/Backdrop/Backdrop.h"
 
 #include "../../Scene/Scene.h"
 #include "../../Scene/SceneJsonReader.h"
@@ -194,7 +197,7 @@ namespace prop3
             std::unique_lock<std::mutex> lk(_flowMutex);
             _cv.wait(lk, [this]{
                 return (_runningPredicate &&
-                            (!_team->scene()->props().empty() ||
+                            (!_props.empty() ||
                              !_sceneStream.empty())) ||
                         _terminatePredicate;
             });
@@ -210,6 +213,8 @@ namespace prop3
             {
                 SceneJsonReader reader;
                 reader.deserialize(*_team, _sceneStream);
+                _backdrop = _team->scene()->environment()->backdrop();
+                _props = _team->scene()->props();
                 _sceneStream.clear();
             }
 
@@ -289,14 +294,14 @@ namespace prop3
     std::shared_ptr<Material> CpuRaytracerWorker::findAmbientMaterial(
             glm::dvec3 position)
     {
-        for(const auto& prop : _team->scene()->props())
+        for(const auto& prop : _props)
         {
-            const std::shared_ptr<ImplicitSurface>& surface = prop->surface();
+            const std::shared_ptr<Surface>& surface = prop->surface();
 
             if(surface.get() == nullptr)
                 continue;
 
-            const std::shared_ptr<ImplicitSurface>& bounds = prop->boundingSurface();
+            const std::shared_ptr<Surface>& bounds = prop->boundingSurface();
             if(bounds.get() != nullptr && bounds->isIn(position) == EPointPosition::OUT)
                 continue;
 
@@ -316,16 +321,16 @@ namespace prop3
         std::shared_ptr<Prop> propMin;
         Ray ray(rayPrototype);
 
-        for(const auto& prop : _team->scene()->props())
+        for(const auto& prop : _props)
         {
-            const std::shared_ptr<ImplicitSurface>& surface = prop->surface();
+            const std::shared_ptr<Surface>& surface = prop->surface();
 
             if(surface.get() == nullptr)
                 continue;
 
             RayHitList reports(reportPool);
 
-            const std::shared_ptr<ImplicitSurface>& bounds = prop->boundingSurface();
+            const std::shared_ptr<Surface>& bounds = prop->boundingSurface();
             if(bounds.get() != nullptr && !bounds->intersects(ray, reports))
                 continue;
 
@@ -421,28 +426,13 @@ namespace prop3
 
             return color;
         }
-        else if(intensity != glm::dvec3(1.0))
+        else if(_backdrop.get() != nullptr)
         {
-            // Background color
-            const glm::dvec3 blueSkyColor = glm::dvec3(0.25, 0.60, 1.00) * 2.0;
-            const glm::dvec3 skylineColor = glm::dvec3(1.00, 1.00, 1.00) * 2.0;
-            const glm::dvec3 sunColor = glm::dvec3(1.00, 0.7725, 0.5608) * 20.0;
-
-            const glm::dvec3 blueSkyDir = glm::dvec3(0, 0, 1);
-            const glm::dvec3 sunDir = glm::dvec3(0.8017, 0.2673, 0.5345);
-
-            double upDot = glm::dot(blueSkyDir, ray.direction);
-            glm::dvec3 blueSky = blueSkyColor * glm::max(0.0, upDot);
-
-            double a = 1.0 - glm::abs(upDot);
-            a *= a *= a *= a;
-            glm::dvec3 skyline = skylineColor * a;
-
-            double s = glm::max(0.0, glm::dot(sunDir, ray.direction));
-            s *= s *= s *= s *= s;
-            glm::dvec3 sun = sunColor * s;
-
-            return (blueSky + skyline + sun);
+            if(intensity != glm::dvec3(1.0) ||
+               _backdrop->isDirectlyVisible())
+            {
+                return _backdrop->raycast(ray);
+            }
         }
 
         return glm::dvec3(0.0);
