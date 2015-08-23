@@ -49,6 +49,8 @@ namespace prop3
             _postProdUnit->setColorBufferTexId(_colorBufferTexId);
             _postProdUnit->setup();
         }
+
+        camera()->refresh();
     }
 
     void ArtDirectorServer::reset()

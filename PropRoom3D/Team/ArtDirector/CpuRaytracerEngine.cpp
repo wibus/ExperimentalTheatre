@@ -26,7 +26,7 @@ namespace prop3
         _viewportSize(1, 1)
     {
         // hardware_concurrency is only a hint on the number of cores
-        _protectedState.setWorkerCount( 1 + 0 *
+        _protectedState.setWorkerCount( //1 + 0 *
             std::thread::hardware_concurrency());
 
         if(_raytracerState->workerCount() < 1)
@@ -71,9 +71,10 @@ namespace prop3
 
         for(size_t i=0; i < workerCount; ++i)
         {
-            _workerObjects.push_back(
-                std::shared_ptr<CpuRaytracerWorker>(
-                    new CpuRaytracerWorker()));
+            std::shared_ptr<CpuRaytracerWorker> worker(
+                new CpuRaytracerWorker());
+
+            _workerObjects.push_back(worker);
             _workerThreads.push_back(std::thread(
                 CpuRaytracerWorker::launchWorker,
                 _workerObjects[i]));
