@@ -6,7 +6,7 @@
 
 #include <GLM/glm.hpp>
 
-#include "../../libPropRoom3D_global.h"
+#include "RaytracerState.h"
 
 
 namespace prop3
@@ -26,22 +26,12 @@ namespace prop3
         virtual void setup(const std::shared_ptr<Scene>& scene);
         virtual void reset();
 
-        virtual bool isDrafter() const;
-        virtual bool isDrafting() const;
-        virtual void setDraftParams(
-                int levelCount,
-                int levelSizeRatio,
-                int threadBatchPerLevel);
-        virtual void enableFastDraft(bool enable);
-
         virtual bool isUpdated();
         virtual bool onUpdateConsumed();
-        virtual float renderTime() const;
-        virtual float divergenceValue() const;
-        virtual float imageVariance() const;
-        virtual unsigned int sampleCount() const;
         virtual const glm::ivec2& viewportSize() const;
         virtual const std::vector<float>& colorBuffer() const;
+
+        std::shared_ptr<RaytracerState> raytracerState() const;
 
         virtual void update();
         virtual void pourFramesIn(
@@ -72,17 +62,10 @@ namespace prop3
     private:
         static const unsigned int DEFAULT_WORKER_COUNT;
 
-        float _divergenceValue;
-        float _imageVariance;
-        unsigned int _sampleCount;
-        std::chrono::steady_clock::time_point _startTime;
+        RaytracerState::ProtectedState _protectedState;
+        std::shared_ptr<RaytracerState> _raytracerState;
 
-        int _draftLevel;
-        int _draftLevelCount;
-        int _draftLevelSizeRatio;
-        int _draftThreadBatchPerLevel;
         glm::ivec2 _draftViewportSize;
-        bool _fastDraftEnabled;
         bool _fastDraftDone;
 
         bool _isUpdated;
@@ -91,7 +74,6 @@ namespace prop3
         std::shared_ptr<Scene> _scene;
 
         friend class CpuRaytracerWorker;
-        bool _workersInterrupted;
         std::vector<std::thread> _workerThreads;
         std::vector<std::shared_ptr<CpuRaytracerWorker>> _workerObjects;
     };

@@ -29,8 +29,6 @@ namespace prop3
 
     void ArtDirectorServer::setup(const std::shared_ptr<Scene>& scene)
     {
-        _scene = scene;
-
         // Color texture
         glGenTextures(1, &_colorBufferTexId);
         glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
@@ -42,9 +40,9 @@ namespace prop3
 
         clearColorTexture();
 
+        _scene = scene;
         _localRaytracer->setup(scene);
-        _localRaytracer->enableFastDraft(true);
-        _localRaytracer->setDraftParams(2, 4, 1);
+        raytracerState()->setDraftParams(2, 4, 1, true);
 
         if(_postProdUnit)
         {
@@ -127,6 +125,11 @@ namespace prop3
         return _postProdUnit;
     }
 
+    std::shared_ptr<RaytracerState> ArtDirectorServer::raytracerState() const
+    {
+        return _localRaytracer->raytracerState();
+    }
+
     void ArtDirectorServer::sendBuffersToGpu()
     {
         const glm::ivec2& viewportSize = _localRaytracer->viewportSize();
@@ -141,17 +144,17 @@ namespace prop3
 
 
         // Output image stats
-        unsigned int sampleCount = _localRaytracer->sampleCount();
+        unsigned int sampleCount = raytracerState()->sampleCount();
 
         std::stringstream ss;
         ss << /*"Frame " <<*/ sampleCount;
 
-        if(!_localRaytracer->isDrafting())
+        if(!raytracerState()->isDrafting())
         {
             //* Human readable
-            float renderTime = _localRaytracer->renderTime();
+            float renderTime = raytracerState()->renderTime();
             float secPerFrame = renderTime / sampleCount;
-            float divergence = _localRaytracer->divergenceValue();
+            float divergence = raytracerState()->divergence();
 
             ss << "\t(";
             ss.precision(3);
@@ -191,7 +194,7 @@ namespace prop3
             'I', false, ss.str(), "CpuRaytracerServer"));
 
 
-        if(!_localRaytracer->isDrafting() && sampleCount == 8)
+        if(!raytracerState()->isDrafting() && sampleCount == 8)
         {
             //exit(0);
         }

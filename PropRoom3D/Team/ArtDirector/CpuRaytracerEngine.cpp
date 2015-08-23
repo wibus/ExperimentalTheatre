@@ -10,6 +10,7 @@
 #include "Scene/Scene.h"
 #include "Scene/SceneJsonWriter.h"
 #include "CpuRaytracerWorker.h"
+#include "RaytracerState.h"
 
 
 namespace prop3
@@ -17,50 +18,32 @@ namespace prop3
     const unsigned int CpuRaytracerEngine::DEFAULT_WORKER_COUNT = 4;
 
     CpuRaytracerEngine::CpuRaytracerEngine() :
-        _sampleCount(0),
-        _draftLevel(0),
-        _draftLevelCount(0),
-        _draftThreadBatchPerLevel(0),
+        _protectedState(),
+        _raytracerState(new RaytracerState(_protectedState)),
         _draftViewportSize(1, 1),
-        _fastDraftEnabled(false),
         _fastDraftDone(false),
         _isUpdated(false),
-        _viewportSize(1, 1),
-        _workersInterrupted(false)
+        _viewportSize(1, 1)
     {
         // hardware_concurrency is only a hint on the number of cores
-        unsigned int workerCount = std::thread::hardware_concurrency();
+        _protectedState.setWorkerCount( 1 + 0 *
+            std::thread::hardware_concurrency());
 
-        if(workerCount < 1)
+        if(_raytracerState->workerCount() < 1)
         {
-            workerCount = DEFAULT_WORKER_COUNT;
-        }
-
-        //workerCount = 1;
-
-        _workerObjects.resize(workerCount);
-        for(size_t i=0; i < workerCount; ++i)
-        {
-            _workerObjects[i].reset(new CpuRaytracerWorker());
+            _protectedState.setWorkerCount( DEFAULT_WORKER_COUNT );
         }
     }
 
     CpuRaytracerEngine::CpuRaytracerEngine(unsigned int  workerCount) :
-        _sampleCount(0),
-        _draftLevel(0),
-        _draftLevelCount(0),
-        _draftThreadBatchPerLevel(0),
+        _protectedState(),
+        _raytracerState(new RaytracerState(_protectedState)),
         _draftViewportSize(1, 1),
-        _fastDraftEnabled(false),
+        _fastDraftDone(false),
         _isUpdated(false),
-        _viewportSize(1, 1),
-        _workersInterrupted(false),
-        _workerObjects(workerCount)
+        _viewportSize(1, 1)
     {
-        for(size_t i=0; i < workerCount; ++i)
-        {
-            _workerObjects[i].reset(new CpuRaytracerWorker());
-        }
+        _protectedState.setWorkerCount( workerCount );
     }
 
     CpuRaytracerEngine::~CpuRaytracerEngine()
@@ -69,6 +52,7 @@ namespace prop3
         {
             w->terminate();
         }
+
         for(std::thread& t : _workerThreads)
         {
             t.join();
@@ -79,7 +63,7 @@ namespace prop3
     {
         _scene = scene;
 
-        size_t workerCount = _workerObjects.size();
+        size_t workerCount = _raytracerState->workerCount();
 
         cellar::getLog().postMessage(new cellar::Message('I', false,
             "Using " + std::to_string(workerCount) + " raytracer workers to render scene",
@@ -87,6 +71,9 @@ namespace prop3
 
         for(size_t i=0; i < workerCount; ++i)
         {
+            _workerObjects.push_back(
+                std::shared_ptr<CpuRaytracerWorker>(
+                    new CpuRaytracerWorker()));
             _workerThreads.push_back(std::thread(
                 CpuRaytracerWorker::launchWorker,
                 _workerObjects[i]));
@@ -101,32 +88,6 @@ namespace prop3
         dispatchScene();
     }
 
-    bool CpuRaytracerEngine::isDrafter() const
-    {
-        return _draftLevelCount != 0 && _draftThreadBatchPerLevel != 0;
-    }
-
-    bool CpuRaytracerEngine::isDrafting() const
-    {
-        return isDrafter() && _draftLevel < _draftLevelCount;
-    }
-
-    void CpuRaytracerEngine::setDraftParams(
-            int levelCount,
-            int levelSizeRatio,
-            int threadBatchPerLevel)
-    {
-        _draftLevelCount = levelCount;
-        _draftLevelSizeRatio = levelSizeRatio;
-        _draftThreadBatchPerLevel = threadBatchPerLevel;
-        abortRendering();
-    }
-
-    void CpuRaytracerEngine::enableFastDraft(bool enable)
-    {
-        _fastDraftEnabled = enable;
-    }
-
     void CpuRaytracerEngine::update()
     {
         if(_scene->sceneChanged())
@@ -139,7 +100,7 @@ namespace prop3
             return;
 
 
-        if(_fastDraftEnabled)
+        if(_raytracerState->fastDraftEnabled())
         {
             if(!_fastDraftDone)
             {
@@ -150,13 +111,13 @@ namespace prop3
         }
 
 
-        if(_workersInterrupted)
+        if(_raytracerState->interrupted())
         {
-            _workersInterrupted = false;
+            _protectedState.setInterrupted( false );
 
-            if(!isDrafter())
+            if(!_raytracerState->isDrafter())
             {
-                _startTime = std::chrono::steady_clock::now();
+                _protectedState.startTimeChrono();
             }
 
             for(auto& w : _workerObjects)
@@ -193,8 +154,8 @@ namespace prop3
             std::vector<float>& colorBuffer,
             unsigned int& sampleCount)
     {
-        sampleCount = _sampleCount;
-        _sampleCount = 0;
+        sampleCount = _raytracerState->sampleCount();
+        _protectedState.setSampleCount( 0 );
 
         colorBuffer.resize(_colorBuffer.size());
         std::copy(_colorBuffer.begin(), _colorBuffer.end(), colorBuffer.begin());
@@ -211,43 +172,20 @@ namespace prop3
     {
         _isUpdated = false;
 
-        if(isDrafting())
+        if(_raytracerState->isDrafting())
         {
-            if(_sampleCount >= _draftThreadBatchPerLevel * _workerThreads.size())
+            if(_raytracerState->sampleCount() >=
+               _raytracerState->draftFrameCountPerLevel()
+                    * _workerThreads.size())
             {
                 nextDraftSize();
             }
         }
     }
 
-    float CpuRaytracerEngine::renderTime() const
-    {
-        if(isDrafting() || _sampleCount == 0)
-            return 0;
-
-        std::chrono::duration<double> dt =
-            std::chrono::steady_clock::now() - _startTime;
-        return dt.count();
-    }
-
-    float CpuRaytracerEngine::divergenceValue() const
-    {
-        return _divergenceValue;
-    }
-
-    float CpuRaytracerEngine::imageVariance() const
-    {
-        return _imageVariance;
-    }
-
-    unsigned int CpuRaytracerEngine::sampleCount() const
-    {
-        return _sampleCount;
-    }
-
     const glm::ivec2& CpuRaytracerEngine::viewportSize() const
     {
-        if(isDrafting())
+        if(_raytracerState->isDrafting())
             return _draftViewportSize;
         return _viewportSize;
     }
@@ -257,6 +195,11 @@ namespace prop3
         return _colorBuffer;
     }
 
+    std::shared_ptr<RaytracerState> CpuRaytracerEngine::raytracerState() const
+    {
+        return _raytracerState;
+    }
+
     void CpuRaytracerEngine::resize(int width, int height)
     {
         abortRendering();
@@ -264,7 +207,7 @@ namespace prop3
         _viewportSize = glm::ivec2(width, height);
         _colorBuffer.resize(width * height * 3);
 
-        if(!isDrafting())
+        if(!_raytracerState->isDrafting())
         {
             for(auto& w : _workerObjects)
             {
@@ -309,28 +252,34 @@ namespace prop3
 
     void CpuRaytracerEngine::skipDrafting()
     {
-        if(!isDrafting())
+        if(!_raytracerState->isDrafting())
             return;
 
         _fastDraftDone = true;
-        _draftLevel = _draftLevelCount-1;
+        _protectedState.setDraftLevel(
+            _raytracerState->draftLevelCount() - 1);
+
         nextDraftSize();
     }
 
     void CpuRaytracerEngine::nextDraftSize()
     {
-        if(!isDrafting())
+        if(!_raytracerState->isDrafting())
             return;
 
-        ++_draftLevel;
-        _sampleCount = 0;
-        _divergenceValue = 0;
+        _protectedState.setDraftLevel(
+            _raytracerState->draftLevel() + 1);
+        _protectedState.setSampleCount( 0 );
+        _protectedState.setDivergence( 1.0 );
 
-        if(_draftLevel < _draftLevelCount)
+        if(_raytracerState->isDrafting())
         {
             // Drafting not finished
-            int ratioPower = (_draftLevelCount - (_draftLevel+1));
-            int ratio = glm::pow(2, ratioPower) * _draftLevelSizeRatio;
+            int ratioPower = (raytracerState()->draftLevelCount()
+                              - (raytracerState()->draftLevel() + 1));
+
+            int ratio = glm::pow(2, ratioPower) *
+                        raytracerState()->draftLevelSizeRatio();
 
             _draftViewportSize = _viewportSize / glm::ivec2(ratio);
             _draftViewportSize = glm::max(_draftViewportSize, glm::ivec2(1));
@@ -339,7 +288,7 @@ namespace prop3
         {
             // Drafting finished
             _draftViewportSize = _viewportSize;
-            _startTime = std::chrono::steady_clock::now();
+            _protectedState.startTimeChrono();
         }
 
         // Update worker buffers' size
@@ -358,29 +307,29 @@ namespace prop3
         bufferSoftReset();
 
         // Stop workers
-        _workersInterrupted = true;
+        _protectedState.setInterrupted( true );
         for(auto& w : _workerObjects)
         {
             w->stop();
         }
 
         // Reset draft state
-        if(isDrafter())
+        if(_raytracerState->isDrafter())
         {
             _fastDraftDone = false;
-            _draftLevel = -1;
+            _protectedState.setDraftLevel( -1 );
             nextDraftSize();
         }
     }
 
     void CpuRaytracerEngine::bufferSoftReset()
     {
-        _sampleCount = 0;
+        _protectedState.setSampleCount( 0 );
     }
 
     void CpuRaytracerEngine::bufferHardReset()
     {
-        _sampleCount = 0;
+        _protectedState.setSampleCount( 0 );
 
         _colorBuffer.resize(_viewportSize.x * _viewportSize.y * 3);
         std::fill(_colorBuffer.begin(), _colorBuffer.end(), 0.0f);
@@ -394,9 +343,9 @@ namespace prop3
         glm::vec3 lineVariance(0);
         glm::vec3 totalVariance(0);
 
-        int lastSampleCount = _sampleCount;
-        _sampleCount += sampleCount;
-        int nextSampleCount = _sampleCount;
+        int lastSampleCount = _raytracerState->sampleCount();
+        _protectedState.setSampleCount(lastSampleCount + sampleCount);
+        int nextSampleCount = _raytracerState->sampleCount();
 
         const glm::ivec2& viewport = viewportSize();
         int cc = viewport.x * viewport.y * 3;
@@ -446,23 +395,10 @@ namespace prop3
         }
 
         totalVariance /= (float) viewport.y;
-        _divergenceValue = glm::length(glm::sqrt(totalVariance)) * sampleCount;
+        _protectedState.setDivergence(
+            glm::length(glm::sqrt(totalVariance)) * sampleCount);
+
         _isUpdated = true;
-
-        imageMean /= cc/ 3;
-        _imageVariance = 0.0;
-        for(int i=0; i < cc; i+=3)
-        {
-            glm::vec3 color(
-                _colorBuffer[i],
-                _colorBuffer[i+1],
-                _colorBuffer[i+2]);
-
-            glm::dvec3 diff = color - imageMean;
-            _imageVariance += glm::dot(diff, diff);
-        }
-        _imageVariance /= cc/3;
-        _imageVariance = glm::sqrt(_imageVariance);
     }
 
     void CpuRaytracerEngine::performNonStochasticSyncronousDraf()
@@ -523,7 +459,8 @@ namespace prop3
         }
 
         // Set this draft level as complete
-        _sampleCount = _draftThreadBatchPerLevel * workerCount;
+        _protectedState.setSampleCount(
+            _raytracerState->draftFrameCountPerLevel() * workerCount );
 
         // Notify user that a new frame is ready
         _isUpdated = true;

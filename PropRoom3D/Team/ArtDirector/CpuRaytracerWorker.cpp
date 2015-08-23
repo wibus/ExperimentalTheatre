@@ -379,7 +379,7 @@ namespace prop3
         RayHitReport reportMin(ray, maxDist, dummyVec, dummyVec, dummyCoat, dummyVec);
         std::shared_ptr<Prop> propMin = findNearestProp(ray, reportMin);
 
-        if(propMin || maxDist != INFINITY)
+        if(propMin.get() != nullptr || maxDist != INFINITY)
         {
             if(!_useStochasticTracing)
             {

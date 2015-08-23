@@ -11,6 +11,8 @@ namespace prop3
 {
     class CpuRaytracerEngine;
     class GlPostProdUnit;
+    class RaytracerState;
+
 
     class PROP3D_EXPORT ArtDirectorServer :
             public AbstractArtDirector
@@ -32,6 +34,8 @@ namespace prop3
         virtual void setEnvironment(const std::shared_ptr<Environment>& env) override;
 
         std::shared_ptr<GlPostProdUnit> postProdUnit() const;
+
+        std::shared_ptr<RaytracerState> raytracerState() const;
 
 
     protected:
