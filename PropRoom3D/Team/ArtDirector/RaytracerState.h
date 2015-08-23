@@ -159,7 +159,7 @@ namespace prop3
 
     inline bool RaytracerState::fastDraftEnabled() const
     {
-        return _fastDraftEnabled;
+        return isDrafter() && _fastDraftEnabled;
     }
 
     inline bool RaytracerState::isDrafter() const

@@ -51,6 +51,7 @@ namespace prop3
         virtual void skipDrafting();
         virtual void nextDraftSize();
         virtual void abortRendering();
+        virtual void interruptWorkers();
         virtual void bufferSoftReset();
         virtual void bufferHardReset();
         virtual void incorporateFrames(
@@ -66,7 +67,6 @@ namespace prop3
         std::shared_ptr<RaytracerState> _raytracerState;
 
         glm::ivec2 _draftViewportSize;
-        bool _fastDraftDone;
 
         bool _isUpdated;
         glm::ivec2 _viewportSize;

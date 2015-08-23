@@ -21,7 +21,6 @@ namespace prop3
         _protectedState(),
         _raytracerState(new RaytracerState(_protectedState)),
         _draftViewportSize(1, 1),
-        _fastDraftDone(false),
         _isUpdated(false),
         _viewportSize(1, 1)
     {
@@ -39,7 +38,6 @@ namespace prop3
         _protectedState(),
         _raytracerState(new RaytracerState(_protectedState)),
         _draftViewportSize(1, 1),
-        _fastDraftDone(false),
         _isUpdated(false),
         _viewportSize(1, 1)
     {
@@ -100,23 +98,22 @@ namespace prop3
         if(_scene->props().empty())
             return;
 
-
-        if(_raytracerState->fastDraftEnabled())
-        {
-            if(!_fastDraftDone)
-            {
-                performNonStochasticSyncronousDraf();
-                _fastDraftDone = true;
-                return;
-            }
-        }
-
+        if(!_raytracerState->isRendering())
+            return;
 
         if(_raytracerState->interrupted())
         {
             _protectedState.setInterrupted( false );
 
-            if(!_raytracerState->isDrafter())
+            if(_raytracerState->isDrafter())
+            {
+                if(_raytracerState->draftLevel() == 0 &&
+                   _raytracerState->fastDraftEnabled())
+                {
+                    performNonStochasticSyncronousDraf();
+                }
+            }
+            else
             {
                 _protectedState.startTimeChrono();
             }
@@ -128,6 +125,8 @@ namespace prop3
                     w->start();
                 }
             }
+
+            return;
         }
 
 
@@ -180,6 +179,14 @@ namespace prop3
                     * _workerThreads.size())
             {
                 nextDraftSize();
+            }
+        }
+        else
+        {
+            if(_raytracerState->divergence() <=
+               _raytracerState->divergenceThreshold())
+            {
+                interruptWorkers();
             }
         }
     }
@@ -256,7 +263,6 @@ namespace prop3
         if(!_raytracerState->isDrafting())
             return;
 
-        _fastDraftDone = true;
         _protectedState.setDraftLevel(
             _raytracerState->draftLevelCount() - 1);
 
@@ -308,18 +314,22 @@ namespace prop3
         bufferSoftReset();
 
         // Stop workers
-        _protectedState.setInterrupted( true );
-        for(auto& w : _workerObjects)
-        {
-            w->stop();
-        }
+        interruptWorkers();
 
         // Reset draft state
         if(_raytracerState->isDrafter())
         {
-            _fastDraftDone = false;
             _protectedState.setDraftLevel( -1 );
             nextDraftSize();
+        }
+    }
+
+    void CpuRaytracerEngine::interruptWorkers()
+    {
+        _protectedState.setInterrupted( true );
+        for(auto& w : _workerObjects)
+        {
+            w->stop();
         }
     }
 
