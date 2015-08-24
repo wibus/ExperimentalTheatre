@@ -4,11 +4,12 @@
 namespace prop3
 {
     // Scene object
-    const QString SCENE_ENVIRONMENT_OBJ = "Environment";
-    const QString SCENE_MATERIAL_ARRAY  = "Materials";
-    const QString SCENE_COATING_ARRAY   = "Coatings";
-    const QString SCENE_SURFACE_ARRAY   = "Surfaces";
-    const QString SCENE_PROP_ARRAY      = "Props";
+    const QString SCENE_ENVIRONMENT_OBJECT = "Environment";
+    const QString SCENE_BACKDROP_ARRAY     = "Backdrops";
+    const QString SCENE_MATERIAL_ARRAY     = "Materials";
+    const QString SCENE_COATING_ARRAY      = "Coatings";
+    const QString SCENE_SURFACE_ARRAY      = "Surfaces";
+    const QString SCENE_PROP_ARRAY         = "Props";
 
     // Props
     const QString PROP_TYPE             = "Type";
@@ -67,6 +68,7 @@ namespace prop3
     const QString ENVIRONMENT_TYPE                  = "Type";
     const QString ENVIRONMENT_TYPE_ENVIRONMENT      = "Environment";
     const QString ENVIRONMENT_BACKDROP              = "Backdrop";
+    const QString ENVIRONMENT_AMBIENT_MATERIAL      = "Ambient Material";
 
     // Backdrops
     const QString BACKDROP_TYPE                 = "Type";

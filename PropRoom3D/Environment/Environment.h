@@ -7,6 +7,7 @@
 namespace prop3
 {
     class Backdrop;
+    class Material;
 
 
     class PROP3D_EXPORT Environment : public SceneNode
@@ -21,6 +22,11 @@ namespace prop3
         virtual void setBackdrop(const std::shared_ptr<Backdrop>& backdrop);
 
 
+        std::shared_ptr<Material> ambientMaterial() const;
+
+        virtual void setAmbientMaterial(const std::shared_ptr<Material>& ambientMaterial);
+
+
         virtual void accept(SceneVisitor& visito) override;
 
         virtual std::vector<std::shared_ptr<SceneNode>> children() const override;
@@ -28,6 +34,7 @@ namespace prop3
 
     private:
         std::shared_ptr<Backdrop> _backdrop;
+        std::shared_ptr<Material> _ambientMaterial;
     };
 
 
@@ -36,6 +43,11 @@ namespace prop3
     inline std::shared_ptr<Backdrop> Environment::backdrop() const
     {
         return _backdrop;
+    }
+
+    inline std::shared_ptr<Material> Environment::ambientMaterial() const
+    {
+        return _ambientMaterial;
     }
 }
 

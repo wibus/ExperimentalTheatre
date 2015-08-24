@@ -25,6 +25,7 @@ namespace prop3
         vector<shared_ptr<SceneNode>> nodeStack;
 
         // Level-order tree insertion
+        nodeStack.push_back(_environment);
         nodeStack.insert(nodeStack.begin(), _props.begin(), _props.end());
         for(size_t i=0; i < nodeStack.size(); ++i)
         {
@@ -49,9 +50,6 @@ namespace prop3
 
             nodeStack.pop_back();
         }
-
-        // Visit the environment node
-        _environment->accept(visitor);
     }
 
     void Scene::addProp(const std::shared_ptr<Prop>& prop)

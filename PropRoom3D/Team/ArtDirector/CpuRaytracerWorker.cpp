@@ -213,6 +213,7 @@ namespace prop3
             {
                 SceneJsonReader reader;
                 reader.deserialize(*_team, _sceneStream);
+                _envMaterial = _team->scene()->environment()->ambientMaterial();
                 _backdrop = _team->scene()->environment()->backdrop();
                 _props = _team->scene()->props();
                 _sceneStream.clear();
@@ -311,7 +312,7 @@ namespace prop3
             }
         }
 
-        return std::shared_ptr<Material>(new Air());
+        return _envMaterial;
     }
 
     std::shared_ptr<Prop> CpuRaytracerWorker::findNearestProp(

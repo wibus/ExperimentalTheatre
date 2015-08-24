@@ -40,7 +40,7 @@ namespace prop3
         static glm::dmat4 dmat4FromJson(const QJsonValueRef& ref);
 
     private:
-        void deserializeBackdrop(const QJsonObject& envObj);
+        void deserializeBackdrops(const QJsonObject& sceneObj);
         void deserializeEnvironment(const QJsonObject& sceneObj, AbstractTeam& team);
 
         void deserializeCoatings(const QJsonObject& sceneObj);
@@ -51,11 +51,10 @@ namespace prop3
         std::shared_ptr<Surface> subSurfTree(
                 const QJsonValue& surfaceTree);
 
+        std::vector<std::shared_ptr<Backdrop>> _backdrops;
         std::vector<std::shared_ptr<Surface>> _surfaces;
         std::vector<std::shared_ptr<Material>> _materials;
         std::vector<std::shared_ptr<Coating>> _coatings;
-
-        std::shared_ptr<Backdrop> _backdrop;
     };
 }
 

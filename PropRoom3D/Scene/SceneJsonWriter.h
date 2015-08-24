@@ -87,21 +87,22 @@ namespace prop3
         static QJsonValue toJson(const glm::dmat4& m);
 
     private:
+        bool insertBackdrop(Backdrop& node);
         bool insertSurface(Surface& node);
         bool insertMaterial(Material& node);
         bool insertCoating(Coating& node);
 
-        std::map<Surface*, int> _surfaceIdMap;
-        std::map<Material*, int> _materialIdMap;
+        std::map<Backdrop*, int> _backdropIdMap;
         std::map<Coating*, int> _coatingIdMap;
+        std::map<Material*, int> _materialIdMap;
+        std::map<Surface*, int> _surfaceIdMap;
 
+        QJsonObject _environmentObject;
+        QJsonArray _backdropsArray;
         QJsonArray _surfacesArray;
         QJsonArray _materialsArray;
         QJsonArray _coatingsArray;
         QJsonArray _propsArray;
-
-        QJsonObject _environmentObj;
-        QJsonObject _backdropObj;
     };
 }
 

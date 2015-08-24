@@ -1,4 +1,4 @@
-#ifndef PROPROOM3D_CPURAYTRACERWORKER_H
+﻿#ifndef PROPROOM3D_CPURAYTRACERWORKER_H
 #define PROPROOM3D_CPURAYTRACERWORKER_H
 
 #include <memory>
@@ -119,6 +119,7 @@ namespace prop3
         std::string _sceneStream;
         std::shared_ptr<AbstractTeam> _team;
         std::shared_ptr<Backdrop> _backdrop;
+        std::shared_ptr<Material> _envMaterial;
         std::vector<std::shared_ptr<Prop>> _props;
 
         // Memory pools

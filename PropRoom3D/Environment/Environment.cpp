@@ -1,13 +1,15 @@
 #include "Environment.h"
 
 #include "Backdrop/Backdrop.h"
+#include "Prop/Material/Air.h"
 #include "Scene/SceneVisitor.h"
 
 namespace prop3
 {
 
     Environment::Environment() :
-        _backdrop(nullptr)
+        _backdrop(nullptr),
+        _ambientMaterial(new Air())
     {
 
     }
@@ -24,6 +26,13 @@ namespace prop3
         stampCurrentUpdate();
     }
 
+    void Environment::setAmbientMaterial(const std::shared_ptr<Material>& ambientMaterial)
+    {
+        _ambientMaterial = ambientMaterial;
+
+        stampCurrentUpdate();
+    }
+
     void Environment::accept(SceneVisitor& visitor)
     {
         visitor.visit(*this);
@@ -31,6 +40,6 @@ namespace prop3
 
     std::vector<std::shared_ptr<SceneNode>> Environment::children() const
     {
-        return { _backdrop };
+        return { _backdrop, _ambientMaterial };
     }
 }

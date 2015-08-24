@@ -7,7 +7,8 @@
 namespace prop3
 {
     // Scene object
-    extern const QString SCENE_ENVIRONMENT_OBJ;
+    extern const QString SCENE_ENVIRONMENT_OBJECT;
+    extern const QString SCENE_BACKDROP_ARRAY;
     extern const QString SCENE_MATERIAL_ARRAY;
     extern const QString SCENE_COATING_ARRAY;
     extern const QString SCENE_SURFACE_ARRAY;
@@ -68,6 +69,7 @@ namespace prop3
     extern const QString ENVIRONMENT_TYPE;
     extern const QString ENVIRONMENT_TYPE_ENVIRONMENT;
     extern const QString ENVIRONMENT_BACKDROP;
+    extern const QString ENVIRONMENT_AMBIENT_MATERIAL;
 
     // Backdrops
     extern const QString BACKDROP_TYPE;

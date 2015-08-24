@@ -58,27 +58,29 @@ namespace prop3
 
         // Write file
         QJsonObject sceneObj;
-        sceneObj[SCENE_ENVIRONMENT_OBJ] = _environmentObj;
-        sceneObj[SCENE_MATERIAL_ARRAY]  = _materialsArray;
-        sceneObj[SCENE_COATING_ARRAY]   = _coatingsArray;
-        sceneObj[SCENE_SURFACE_ARRAY]   = _surfacesArray;
-        sceneObj[SCENE_PROP_ARRAY]      = _propsArray;
+        sceneObj[SCENE_ENVIRONMENT_OBJECT] = _environmentObject;
+        sceneObj[SCENE_BACKDROP_ARRAY]     = _backdropsArray;
+        sceneObj[SCENE_MATERIAL_ARRAY]     = _materialsArray;
+        sceneObj[SCENE_COATING_ARRAY]      = _coatingsArray;
+        sceneObj[SCENE_SURFACE_ARRAY]      = _surfacesArray;
+        sceneObj[SCENE_PROP_ARRAY]         = _propsArray;
 
         QJsonDocument doc;
         doc.setObject(sceneObj);
 
 
         //Clean-up structures
+        _backdropIdMap.clear();
         _surfaceIdMap.clear();
         _materialIdMap.clear();
         _coatingIdMap.clear();
 
-        _backdropObj = QJsonObject();
-        _environmentObj = QJsonObject();
+        _environmentObject = QJsonObject();
+        _backdropsArray = QJsonArray();
+        _propsArray = QJsonArray();
+        _surfacesArray = QJsonArray();
         _materialsArray = QJsonArray();
         _coatingsArray = QJsonArray();
-        _surfacesArray = QJsonArray();
-        _propsArray = QJsonArray();
 
 
         return std::string(doc.toJson(
@@ -150,6 +152,12 @@ namespace prop3
         array.append(m[3][2]);
         array.append(m[3][3]);
         return array;
+    }
+
+
+    bool SceneJsonWriter::insertBackdrop(Backdrop& node)
+    {
+        return _backdropIdMap.insert(make_pair(&node, _backdropIdMap.size())).second;
     }
 
     bool SceneJsonWriter::insertSurface(Surface& node)
@@ -365,29 +373,31 @@ namespace prop3
     // Environments
     void SceneJsonWriter::visit(Environment& node)
     {
-        auto backdrop = node.backdrop();
-        QJsonValue backdropValue;
-        if(backdrop.get())
-        {
-            backdrop->accept(*this);
-            backdropValue = _backdropObj;
-        }
+        _environmentObject[ENVIRONMENT_TYPE]             = ENVIRONMENT_TYPE_ENVIRONMENT;
+        _environmentObject[ENVIRONMENT_AMBIENT_MATERIAL] = _materialIdMap[node.ambientMaterial().get()];
 
-        _environmentObj[ENVIRONMENT_TYPE]       = ENVIRONMENT_TYPE_ENVIRONMENT;
-        _environmentObj[ENVIRONMENT_BACKDROP]   = backdropValue;
+        if(node.backdrop().get() != nullptr)
+        {
+            _environmentObject[ENVIRONMENT_BACKDROP] = _backdropIdMap[node.backdrop().get()];
+        }
     }
 
 
     // Backdrops
     void SceneJsonWriter::visit(ProceduralSun& node)
     {
-        _backdropObj[BACKDROP_TYPE]                 = BACKDROP_TYPE_PROCEDURALSUN;
-        _backdropObj[BACKDROP_IS_DIRECTLY_VISIBLE]  = node.isDirectlyVisible();
-        _backdropObj[BACKDROP_SUN_COLOR]            = toJson(node.sunColor());
-        _backdropObj[BACKDROP_SKY_COLOR]            = toJson(node.skyColor());
-        _backdropObj[BACKDROP_SKYLINE_COLOR]        = toJson(node.skylineColor());
-        _backdropObj[BACKDROP_UP_SKY_DIR]           = toJson(node.upSkyDirection());
-        _backdropObj[BACKDROP_SUN_DIR]              = toJson(node.sunDirection());
+        if(insertBackdrop(node))
+        {
+            QJsonObject obj;
+            obj[BACKDROP_TYPE]                 = BACKDROP_TYPE_PROCEDURALSUN;
+            obj[BACKDROP_IS_DIRECTLY_VISIBLE]  = node.isDirectlyVisible();
+            obj[BACKDROP_SUN_COLOR]            = toJson(node.sunColor());
+            obj[BACKDROP_SKY_COLOR]            = toJson(node.skyColor());
+            obj[BACKDROP_SKYLINE_COLOR]        = toJson(node.skylineColor());
+            obj[BACKDROP_UP_SKY_DIR]           = toJson(node.upSkyDirection());
+            obj[BACKDROP_SUN_DIR]              = toJson(node.sunDirection());
+            _backdropsArray.append(obj);
+        }
     }
 
 
