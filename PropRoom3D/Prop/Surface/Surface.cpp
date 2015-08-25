@@ -5,7 +5,7 @@
 #include "../Ray/RayHitList.h"
 #include "../Ray/RayHitReport.h"
 #include "../Coating/NoCoating.h"
-#include "../../Scene/SceneVisitor.h"
+#include "../../StageSet/StageSetVisitor.h"
 
 
 namespace prop3
@@ -90,12 +90,12 @@ namespace prop3
     {
     }
 
-    void SurfaceGhost::accept(SceneVisitor& visitor)
+    void SurfaceGhost::accept(StageSetVisitor& visitor)
     {
         visitor.visit(*this);
     }
 
-    std::vector<std::shared_ptr<SceneNode>> SurfaceGhost::children() const
+    std::vector<std::shared_ptr<StageSetNode>> SurfaceGhost::children() const
     {
         return { _surf };
     }
@@ -150,12 +150,12 @@ namespace prop3
         _surf->setCoating(coating);
     }
 
-    void SurfaceInverse::accept(SceneVisitor& visitor)
+    void SurfaceInverse::accept(StageSetVisitor& visitor)
     {
         visitor.visit(*this);
     }
 
-    std::vector<std::shared_ptr<SceneNode>> SurfaceInverse::children() const
+    std::vector<std::shared_ptr<StageSetNode>> SurfaceInverse::children() const
     {
         return { _surf };
     }
@@ -270,14 +270,14 @@ namespace prop3
             surf->setCoating(coating);
     }
 
-    void SurfaceOr::accept(SceneVisitor& visitor)
+    void SurfaceOr::accept(StageSetVisitor& visitor)
     {
         visitor.visit(*this);
     }
 
-    std::vector<std::shared_ptr<SceneNode>> SurfaceOr::children() const
+    std::vector<std::shared_ptr<StageSetNode>> SurfaceOr::children() const
     {
-        return std::vector<std::shared_ptr<SceneNode>>(_surfs.begin(), _surfs.end());
+        return std::vector<std::shared_ptr<StageSetNode>>(_surfs.begin(), _surfs.end());
     }
 
 
@@ -390,14 +390,14 @@ namespace prop3
             surf->setCoating(coating);
     }
 
-    void SurfaceAnd::accept(SceneVisitor& visitor)
+    void SurfaceAnd::accept(StageSetVisitor& visitor)
     {
         visitor.visit(*this);
     }
 
-    std::vector<std::shared_ptr<SceneNode>> SurfaceAnd::children() const
+    std::vector<std::shared_ptr<StageSetNode>> SurfaceAnd::children() const
     {
-        return std::vector<std::shared_ptr<SceneNode>>(_surfs.begin(), _surfs.end());
+        return std::vector<std::shared_ptr<StageSetNode>>(_surfs.begin(), _surfs.end());
     }
 
 

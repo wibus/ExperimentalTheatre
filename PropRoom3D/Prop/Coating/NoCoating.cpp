@@ -1,7 +1,7 @@
 #include "NoCoating.h"
 
 #include "../Material/Material.h"
-#include "../../Scene/SceneVisitor.h"
+#include "../../StageSet/StageSetVisitor.h"
 
 
 namespace prop3
@@ -30,7 +30,7 @@ namespace prop3
             outRayCountHint);
     }
 
-    void NoCoating::accept(SceneVisitor& visitor)
+    void NoCoating::accept(StageSetVisitor& visitor)
     {
         visitor.visit(*this);
     }

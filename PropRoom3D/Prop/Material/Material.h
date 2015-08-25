@@ -6,7 +6,7 @@
 
 #include <GLM/glm.hpp>
 
-#include "PropRoom3D/Scene/SceneNode.h"
+#include "PropRoom3D/StageSet/StageSetNode.h"
 
 
 namespace prop3
@@ -16,7 +16,7 @@ namespace prop3
     class RayHitReport;
 
 
-    class PROP3D_EXPORT Material : public SceneNode
+    class PROP3D_EXPORT Material : public StageSetNode
     {
     protected:
         Material();

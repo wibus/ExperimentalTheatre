@@ -7,7 +7,7 @@
 
 #include "../Ray/Raycast.h"
 #include "../Ray/RayUtils.h"
-#include "../../Scene/SceneVisitor.h"
+#include "../../StageSet/StageSetVisitor.h"
 
 
 namespace prop3
@@ -59,7 +59,7 @@ namespace prop3
         }
     }
 
-    void TexturedFlatPaint::accept(SceneVisitor& visitor)
+    void TexturedFlatPaint::accept(StageSetVisitor& visitor)
     {
         visitor.visit(*this);
     }

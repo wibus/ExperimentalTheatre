@@ -2,7 +2,7 @@
 
 #include "Backdrop/Backdrop.h"
 #include "Prop/Material/Air.h"
-#include "Scene/SceneVisitor.h"
+#include "StageSet/StageSetVisitor.h"
 
 namespace prop3
 {
@@ -33,12 +33,12 @@ namespace prop3
         stampCurrentUpdate();
     }
 
-    void Environment::accept(SceneVisitor& visitor)
+    void Environment::accept(StageSetVisitor& visitor)
     {
         visitor.visit(*this);
     }
 
-    std::vector<std::shared_ptr<SceneNode>> Environment::children() const
+    std::vector<std::shared_ptr<StageSetNode>> Environment::children() const
     {
         return { _backdrop, _ambientMaterial };
     }

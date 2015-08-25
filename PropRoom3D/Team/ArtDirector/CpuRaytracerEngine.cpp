@@ -7,8 +7,8 @@
 #include <CellarWorkbench/Misc/Log.h>
 
 #include "Prop/Prop.h"
-#include "Scene/Scene.h"
-#include "Scene/SceneJsonWriter.h"
+#include "StageSet/StageSet.h"
+#include "StageSet/StageSetJsonWriter.h"
 #include "CpuRaytracerWorker.h"
 #include "RaytracerState.h"
 
@@ -57,14 +57,14 @@ namespace prop3
         }
     }
 
-    void CpuRaytracerEngine::setup(const std::shared_ptr<Scene>& scene)
+    void CpuRaytracerEngine::setup(const std::shared_ptr<StageSet>& stageSet)
     {
-        _scene = scene;
+        _stageSet = stageSet;
 
         size_t workerCount = _raytracerState->workerCount();
 
         cellar::getLog().postMessage(new cellar::Message('I', false,
-            "Using " + std::to_string(workerCount) + " raytracer workers to render scene",
+            "Using " + std::to_string(workerCount) + " raytracer workers to render stageSet",
             "CpuRaytracer"));
 
         for(size_t i=0; i < workerCount; ++i)
@@ -84,18 +84,18 @@ namespace prop3
     void CpuRaytracerEngine::reset()
     {
         abortRendering();
-        dispatchScene();
+        dispatchStageSet();
     }
 
     void CpuRaytracerEngine::update()
     {
-        if(_scene->sceneChanged())
+        if(_stageSet->stageSetChanged())
         {
             abortRendering();
-            dispatchScene();
+            dispatchStageSet();
         }
 
-        if(_scene->props().empty())
+        if(_stageSet->props().empty())
             return;
 
         if(!_raytracerState->isRendering())
@@ -247,14 +247,14 @@ namespace prop3
         }
     }
 
-    void CpuRaytracerEngine::dispatchScene()
+    void CpuRaytracerEngine::dispatchStageSet()
     {
-        SceneJsonWriter writer;
-        std::string sceneStream = writer.serialize(*_scene);
+        StageSetJsonWriter writer;
+        std::string stageSetStream = writer.serialize(*_stageSet);
 
         for(auto& w : _workerObjects)
         {
-            w->setSceneStream(sceneStream);
+            w->setStageSetStream(stageSetStream);
         }
     }
 

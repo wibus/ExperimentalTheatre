@@ -12,7 +12,7 @@
 namespace prop3
 {
     class Prop;
-    class Scene;
+    class StageSet;
     class CpuRaytracerWorker;
 
 
@@ -23,7 +23,7 @@ namespace prop3
         CpuRaytracerEngine(unsigned int workerCount);
         virtual ~CpuRaytracerEngine();
 
-        virtual void setup(const std::shared_ptr<Scene>& scene);
+        virtual void setup(const std::shared_ptr<StageSet>& stageSet);
         virtual void reset();
 
         virtual bool isUpdated();
@@ -47,7 +47,7 @@ namespace prop3
 
 
     protected:
-        virtual void dispatchScene();
+        virtual void dispatchStageSet();
         virtual void skipDrafting();
         virtual void nextDraftSize();
         virtual void abortRendering();
@@ -71,7 +71,7 @@ namespace prop3
         bool _isUpdated;
         glm::ivec2 _viewportSize;
         std::vector<float> _colorBuffer;
-        std::shared_ptr<Scene> _scene;
+        std::shared_ptr<StageSet> _stageSet;
 
         friend class CpuRaytracerWorker;
         std::vector<std::thread> _workerThreads;

@@ -9,7 +9,7 @@
 
 #include "CpuRaytracerEngine.h"
 #include "GlPostProdUnit.h"
-#include "Scene/Scene.h"
+#include "StageSet/StageSet.h"
 
 
 namespace prop3
@@ -27,7 +27,7 @@ namespace prop3
         _colorBufferTexId = 0;
     }
 
-    void ArtDirectorServer::setup(const std::shared_ptr<Scene>& scene)
+    void ArtDirectorServer::setup(const std::shared_ptr<StageSet>& stageSet)
     {
         // Color texture
         glGenTextures(1, &_colorBufferTexId);
@@ -40,8 +40,8 @@ namespace prop3
 
         clearColorTexture();
 
-        _scene = scene;
-        _localRaytracer->setup(scene);
+        _stageSet = stageSet;
+        _localRaytracer->setup(stageSet);
         raytracerState()->setDraftParams(2, 4, 1, true);
 
         if(_postProdUnit)
@@ -75,7 +75,7 @@ namespace prop3
 
     void ArtDirectorServer::update(double dt)
     {
-        if(_scene->sceneChanged())
+        if(_stageSet->stageSetChanged())
         {
             clearColorTexture();
         }

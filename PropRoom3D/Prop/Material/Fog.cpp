@@ -6,7 +6,7 @@
 #include "../Ray/RayUtils.h"
 #include "../Ray/RayHitList.h"
 #include "../Surface/Sphere.h"
-#include "../../Scene/SceneVisitor.h"
+#include "../../StageSet/StageSetVisitor.h"
 
 
 namespace prop3
@@ -82,7 +82,7 @@ namespace prop3
         }
     }
 
-    void Fog::accept(SceneVisitor& visitor)
+    void Fog::accept(StageSetVisitor& visitor)
     {
         visitor.visit(*this);
     }

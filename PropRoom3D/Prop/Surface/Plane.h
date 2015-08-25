@@ -29,10 +29,10 @@ namespace prop3
             plane(const glm::dvec3& normal, const glm::dvec3& origin);
 
 
-        // SceneNode interface
-        virtual void accept(SceneVisitor& visitor) override;
+        // StageSetNode interface
+        virtual void accept(StageSetVisitor& visitor) override;
 
-        virtual std::vector<std::shared_ptr<SceneNode>> children() const override;
+        virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
 
 
         virtual void transform(const Transform& transform);
@@ -85,8 +85,8 @@ namespace prop3
                   const glm::dvec3& texU, const glm::dvec3& texV, const glm::dvec3& texOrigin);
 
 
-        // SceneNode interface
-        virtual void accept(SceneVisitor& visitor) override;
+        // StageSetNode interface
+        virtual void accept(StageSetVisitor& visitor) override;
 
 
         virtual void raycast(const Ray& ray, RayHitList& reports) const;

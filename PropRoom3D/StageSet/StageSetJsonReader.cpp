@@ -1,14 +1,13 @@
-#include "SceneJsonReader.h"
+#include "StageSetJsonReader.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
 
 #include <CellarWorkbench/Misc/Log.h>
-#include <CellarWorkbench/Misc/StringUtils.h>
 
-#include "Scene.h"
-#include "SceneJsonTags.h"
+#include "StageSet.h"
+#include "StageSetJsonTags.h"
 
 #include <Team/AbstractTeam.h>
 
@@ -30,9 +29,8 @@
 #include "Prop/Material/Glass.h"
 #include "Prop/Material/Metal.h"
 
-#include "Environment/Environment.h"
-
-#include "Environment/Backdrop/ProceduralSun.h"
+#include "Prop/Environment/Environment.h"
+#include "Prop/Environment/Backdrop/ProceduralSun.h"
 
 using namespace std;
 using namespace cellar;
@@ -40,22 +38,22 @@ using namespace cellar;
 
 namespace prop3
 {
-    SceneJsonReader::SceneJsonReader()
+    StageSetJsonReader::StageSetJsonReader()
     {
 
     }
 
-    SceneJsonReader::~SceneJsonReader()
+    StageSetJsonReader::~StageSetJsonReader()
     {
 
     }
 
-    bool SceneJsonReader::deserialize(
+    bool StageSetJsonReader::deserialize(
             AbstractTeam& team,
             const std::string& stream,
-            bool clearScene)
+            bool clearStageSet)
     {
-        if(clearScene)
+        if(clearStageSet)
         {
             team.clearProps();
         }
@@ -85,28 +83,7 @@ namespace prop3
         return true;
     }
 
-    bool SceneJsonReader::loadFromFile(
-            AbstractTeam& team,
-            const std::string& fileName,
-            bool clearScene)
-    {
-        bool ok = false;
-        string stream = fileToString(fileName, &ok);
-
-        if(ok)
-        {
-            deserialize(team, stream, clearScene);
-        }
-        else
-        {
-            getLog().postMessage(new Message('E', false,
-                "Scene failed to load from '" + fileName + "'." +
-                string(clearScene ? " Scene won't be cleared." : ""),
-                "SceneJsonReader"));
-        }
-    }
-
-    glm::dvec3 SceneJsonReader::dvec3FromJson(const QJsonValueRef& ref)
+    glm::dvec3 StageSetJsonReader::dvec3FromJson(const QJsonValueRef& ref)
     {
         QJsonArray array = ref.toArray();
         return glm::dvec3(
@@ -115,7 +92,7 @@ namespace prop3
             array[2].toDouble());
     }
 
-    glm::dvec4 SceneJsonReader::dvec4FromJson(const QJsonValueRef& ref)
+    glm::dvec4 StageSetJsonReader::dvec4FromJson(const QJsonValueRef& ref)
     {
         QJsonArray array = ref.toArray();
         return glm::dvec4(
@@ -125,7 +102,7 @@ namespace prop3
             array[3].toDouble());
     }
 
-    glm::dmat4 SceneJsonReader::dmat4FromJson(const QJsonValueRef& ref)
+    glm::dmat4 StageSetJsonReader::dmat4FromJson(const QJsonValueRef& ref)
     {
         QJsonArray array = ref.toArray();
         return glm::dmat4(
@@ -151,9 +128,9 @@ namespace prop3
                     array[15].toDouble()));
     }
 
-    void SceneJsonReader::deserializeBackdrops(const QJsonObject& sceneObj)
+    void StageSetJsonReader::deserializeBackdrops(const QJsonObject& stageSetObj)
     {
-        for(QJsonValueRef ref : sceneObj[SCENE_BACKDROP_ARRAY].toArray())
+        for(QJsonValueRef ref : stageSetObj[STAGESET_BACKDROP_ARRAY].toArray())
         {
             std::shared_ptr<Backdrop> backdrop;
             QJsonObject obj = ref.toObject();
@@ -172,7 +149,7 @@ namespace prop3
             else
             {
                 getLog().postMessage(new Message('E', false,
-                    "Unknown backdrop type: " + type.toStdString(), "SceneJsonReader"));
+                    "Unknown backdrop type: " + type.toStdString(), "StageSetJsonReader"));
             }
 
             if(backdrop.get() != nullptr)
@@ -183,20 +160,20 @@ namespace prop3
         }
     }
 
-    void SceneJsonReader::deserializeEnvironment(const QJsonObject& sceneObj, AbstractTeam& team)
+    void StageSetJsonReader::deserializeEnvironment(const QJsonObject& stageSetObj, AbstractTeam& team)
     {
         std::shared_ptr<Environment> environment;
-        QJsonObject obj = sceneObj[SCENE_ENVIRONMENT_OBJECT].toObject();
+        QJsonObject obj = stageSetObj[STAGESET_ENVIRONMENT_OBJECT].toObject();
         QString type = obj[ENVIRONMENT_TYPE].toString();
 
         if(type == ENVIRONMENT_TYPE_ENVIRONMENT)
         {
-            environment = team.scene()->environment();
+            environment = team.stageSet()->environment();
         }
         else
         {
             getLog().postMessage(new Message('E', false,
-                "Unknown environment type: " + type.toStdString(), "SceneJsonReader"));
+                "Unknown environment type: " + type.toStdString(), "StageSetJsonReader"));
         }
 
         if(environment.get() != nullptr)
@@ -208,9 +185,9 @@ namespace prop3
         }
     }
 
-    void SceneJsonReader::deserializeCoatings(const QJsonObject& sceneObj)
+    void StageSetJsonReader::deserializeCoatings(const QJsonObject& stageSetObj)
     {
-        for(QJsonValueRef ref : sceneObj[SCENE_COATING_ARRAY].toArray())
+        for(QJsonValueRef ref : stageSetObj[STAGESET_COATING_ARRAY].toArray())
         {
             std::shared_ptr<Coating> coating;
             QJsonObject obj = ref.toObject();
@@ -250,7 +227,7 @@ namespace prop3
             else
             {
                 getLog().postMessage(new Message('E', false,
-                    "Unknown coating type: " + type.toStdString(), "SceneJsonReader"));
+                    "Unknown coating type: " + type.toStdString(), "StageSetJsonReader"));
             }
 
             if(coating.get() != nullptr)
@@ -260,9 +237,9 @@ namespace prop3
         }
     }
 
-    void SceneJsonReader::deserializeMaterials(const QJsonObject& sceneObj)
+    void StageSetJsonReader::deserializeMaterials(const QJsonObject& stageSetObj)
     {
-        for(QJsonValueRef ref : sceneObj[SCENE_MATERIAL_ARRAY].toArray())
+        for(QJsonValueRef ref : stageSetObj[STAGESET_MATERIAL_ARRAY].toArray())
         {
             std::shared_ptr<Material> material;
             QJsonObject obj = ref.toObject();
@@ -299,7 +276,7 @@ namespace prop3
             else
             {
                 getLog().postMessage(new Message('E', false,
-                    "Unknown material type: " + type.toStdString(), "SceneJsonReader"));
+                    "Unknown material type: " + type.toStdString(), "StageSetJsonReader"));
             }
 
             if(material.get() != nullptr)
@@ -312,9 +289,9 @@ namespace prop3
         }
     }
 
-    void SceneJsonReader::deserializeSurfaces(const QJsonObject& sceneObj)
+    void StageSetJsonReader::deserializeSurfaces(const QJsonObject& stageSetObj)
     {
-        for(QJsonValueRef ref : sceneObj[SCENE_SURFACE_ARRAY].toArray())
+        for(QJsonValueRef ref : stageSetObj[STAGESET_SURFACE_ARRAY].toArray())
         {
             std::shared_ptr<Surface> surface;
             QJsonObject obj = ref.toObject();
@@ -347,7 +324,7 @@ namespace prop3
             else
             {
                 getLog().postMessage(new Message('E', false,
-                    "Unknown surface type: " + type.toStdString(), "SceneJsonReader"));
+                    "Unknown surface type: " + type.toStdString(), "StageSetJsonReader"));
             }
 
             if(surface.get() != nullptr)
@@ -358,9 +335,9 @@ namespace prop3
         }
     }
 
-    void SceneJsonReader::deserializeProps(const QJsonObject& sceneObj, AbstractTeam& team)
+    void StageSetJsonReader::deserializeProps(const QJsonObject& stageSetObj, AbstractTeam& team)
     {
-        for(QJsonValueRef ref : sceneObj[SCENE_PROP_ARRAY].toArray())
+        for(QJsonValueRef ref : stageSetObj[STAGESET_PROP_ARRAY].toArray())
         {
             std::shared_ptr<Prop> prop;
             QJsonObject obj = ref.toObject();
@@ -373,7 +350,7 @@ namespace prop3
             else
             {
                 getLog().postMessage(new Message('E', false,
-                    "Unknown prop type: " + type.toStdString(), "SceneJsonReader"));
+                    "Unknown prop type: " + type.toStdString(), "StageSetJsonReader"));
             }
 
             if(prop.get() != nullptr)
@@ -395,7 +372,7 @@ namespace prop3
         }
     }
 
-    std::shared_ptr<Surface> SceneJsonReader::subSurfTree(
+    std::shared_ptr<Surface> StageSetJsonReader::subSurfTree(
             const QJsonValue& surfaceTree)
     {
         if(surfaceTree.isDouble())
@@ -433,7 +410,7 @@ namespace prop3
             else
             {
                 getLog().postMessage(new Message('E', false,
-                    "Unknown surface operator: " + logOpt.toStdString(), "SceneJsonReader"));
+                    "Unknown surface operator: " + logOpt.toStdString(), "StageSetJsonReader"));
             }
         }
     }

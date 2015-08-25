@@ -64,6 +64,16 @@ SET(PROP3_SURFACE_HEADERS
     ${PROP3_SRC_DIR}/Prop/Surface/Quadric.h
     ${PROP3_SRC_DIR}/Prop/Surface/Sphere.h)
 
+# Backdrops
+SET(PROP3_BACKDROP_HEADERS
+    ${PROP3_SRC_DIR}/Prop/Environment/Backdrop/Backdrop.h
+    ${PROP3_SRC_DIR}/Prop/Environment/Backdrop/ProceduralSun.h)
+
+# Environments
+SET(PROP3_ENVIRONMENT_HEADERS
+    ${PROP3_BACKDROP_HEADERS}
+    ${PROP3_SRC_DIR}/Prop/Environment/Environment.h)
+
 # Prop
 SET(PROP3_PROP_HEADERS
     ${PROP3_COATING_HEADERS}
@@ -72,34 +82,24 @@ SET(PROP3_PROP_HEADERS
     ${PROP3_MATERIAL_HEADERS}
     ${PROP3_RAY_HEADERS}
     ${PROP3_SURFACE_HEADERS}
+    ${PROP3_ENVIRONMENT_HEADERS}
     ${PROP3_SRC_DIR}/Prop/Prop.h)
 
-# Scene
-SET(PROP3_SCENE_HEADERS
-    ${PROP3_SRC_DIR}/Scene/Scene.h
-    ${PROP3_SRC_DIR}/Scene/SceneNode.h
-    ${PROP3_SRC_DIR}/Scene/SceneVisitor.h
-    ${PROP3_SRC_DIR}/Scene/SceneJsonTags.h
-    ${PROP3_SRC_DIR}/Scene/SceneJsonReader.h
-    ${PROP3_SRC_DIR}/Scene/SceneJsonWriter.h)
-
-# Backdrops
-SET(PROP3_BACKDROP_HEADERS
-    ${PROP3_SRC_DIR}/Environment/Backdrop/Backdrop.h
-    ${PROP3_SRC_DIR}/Environment/Backdrop/ProceduralSun.h)
-
-# Environments
-SET(PROP3_ENVIRONMENT_HEADERS
-    ${PROP3_BACKDROP_HEADERS}
-    ${PROP3_SRC_DIR}/Environment/Environment.h)
+# StageSet
+SET(PROP3_STAGESET_HEADERS
+    ${PROP3_SRC_DIR}/StageSet/StageSet.h
+    ${PROP3_SRC_DIR}/StageSet/StageSetNode.h
+    ${PROP3_SRC_DIR}/StageSet/StageSetVisitor.h
+    ${PROP3_SRC_DIR}/StageSet/StageSetJsonTags.h
+    ${PROP3_SRC_DIR}/StageSet/StageSetJsonReader.h
+    ${PROP3_SRC_DIR}/StageSet/StageSetJsonWriter.h)
 
 
 # All the header files #
 SET(PROP3_HEADERS
     ${PROP3_TEAM_HEADERS}
     ${PROP3_PROP_HEADERS}
-    ${PROP3_SCENE_HEADERS}
-    ${PROP3_ENVIRONMENT_HEADERS}
+    ${PROP3_STAGESET_HEADERS}
     ${PROP3_SRC_DIR}/libPropRoom3D_global.h)
     
 
@@ -138,11 +138,6 @@ SET(PROP3_COATING_SOURCES
     ${PROP3_SRC_DIR}/Prop/Coating/TexturedFlatPaint.cpp
     ${PROP3_SRC_DIR}/Prop/Coating/TexturedGlossyPaint.cpp)
 
-# Environments
-SET(PROP3_ENVIRONMENT_SOURCES
-    ${PROP3_SRC_DIR}/Prop/Environment/Environment.cpp
-    ${PROP3_SRC_DIR}/Prop/Environment/ProceduralSun.cpp)
-
 # Lighting
 SET(PROP3_LIGHTING_SOURCES
     ${PROP3_SRC_DIR}/Prop/Lighting/Light3D.cpp)
@@ -171,6 +166,17 @@ SET(PROP3_SURFACE_SOURCES
     ${PROP3_SRC_DIR}/Prop/Surface/Quadric.cpp
     ${PROP3_SRC_DIR}/Prop/Surface/Sphere.cpp)
 
+# Backdrops
+SET(PROP3_BACKDROP_SOURCES
+    ${PROP3_SRC_DIR}/Prop/Environment/Backdrop/Backdrop.cpp
+    ${PROP3_SRC_DIR}/Prop/Environment/Backdrop/ProceduralSun.cpp)
+
+# Environments
+SET(PROP3_ENVIRONMENT_SOURCES
+    ${PROP3_BACKDROP_SOURCES}
+    ${PROP3_SRC_DIR}/Prop/Environment/Environment.cpp)
+
+
 # Props
 SET(PROP3_PROP_SOURCES
     ${PROP3_COATING_SOURCES}
@@ -179,34 +185,23 @@ SET(PROP3_PROP_SOURCES
     ${PROP3_MATERIAL_SOURCES}
     ${PROP3_RAY_SOURCES}
     ${PROP3_SURFACE_SOURCES}
+    ${PROP3_ENVIRONMENT_SOURCES}
     ${PROP3_SRC_DIR}/Prop/Prop.cpp)
 
-# Scene
-SET(PROP3_SCENE_SOURCES
-    ${PROP3_SRC_DIR}/Scene/Scene.cpp
-    ${PROP3_SRC_DIR}/Scene/SceneNode.cpp
-    ${PROP3_SRC_DIR}/Scene/SceneVisitor.cpp
-    ${PROP3_SRC_DIR}/Scene/SceneJsonTags.cpp
-    ${PROP3_SRC_DIR}/Scene/SceneJsonReader.cpp
-    ${PROP3_SRC_DIR}/Scene/SceneJsonWriter.cpp)
-
-# Backdrops
-SET(PROP3_BACKDROP_SOURCES
-    ${PROP3_SRC_DIR}/Environment/Backdrop/Backdrop.cpp
-    ${PROP3_SRC_DIR}/Environment/Backdrop/ProceduralSun.cpp)
-
-# Environments
-SET(PROP3_ENVIRONMENT_SOURCES
-    ${PROP3_BACKDROP_SOURCES}
-    ${PROP3_SRC_DIR}/Environment/Environment.cpp)
-
+# StageSet
+SET(PROP3_STAGESET_SOURCES
+    ${PROP3_SRC_DIR}/StageSet/StageSet.cpp
+    ${PROP3_SRC_DIR}/StageSet/StageSetNode.cpp
+    ${PROP3_SRC_DIR}/StageSet/StageSetVisitor.cpp
+    ${PROP3_SRC_DIR}/StageSet/StageSetJsonTags.cpp
+    ${PROP3_SRC_DIR}/StageSet/StageSetJsonReader.cpp
+    ${PROP3_SRC_DIR}/StageSet/StageSetJsonWriter.cpp)
 
 # All the source files #
 SET(PROP3_SOURCES
     ${PROP3_TEAM_SOURCES}
     ${PROP3_PROP_SOURCES}
-    ${PROP3_SCENE_SOURCES}
-    ${PROP3_ENVIRONMENT_SOURCES})
+    ${PROP3_STAGESET_SOURCES})
 
 ## Resources
 SET(PROP3_RCC_FILES

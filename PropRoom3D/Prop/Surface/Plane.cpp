@@ -3,7 +3,7 @@
 #include "../Coating/Coating.h"
 #include "../Ray/RayHitList.h"
 #include "../Ray/RayHitReport.h"
-#include "../../Scene/SceneVisitor.h"
+#include "../../StageSet/StageSetVisitor.h"
 
 
 namespace prop3
@@ -95,12 +95,12 @@ namespace prop3
         stampCurrentUpdate();
     }
 
-    void Plane::accept(SceneVisitor& visitor)
+    void Plane::accept(StageSetVisitor& visitor)
     {
         visitor.visit(*this);
     }
 
-    std::vector<std::shared_ptr<SceneNode>> Plane::children() const
+    std::vector<std::shared_ptr<StageSetNode>> Plane::children() const
     {
         return { _coating };
     }
@@ -176,7 +176,7 @@ namespace prop3
         }
     }
 
-    void PlaneTexture::accept(SceneVisitor& visitor)
+    void PlaneTexture::accept(StageSetVisitor& visitor)
     {
         visitor.visit(*this);
     }

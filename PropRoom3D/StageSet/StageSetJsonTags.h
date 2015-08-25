@@ -1,18 +1,18 @@
-#ifndef PROPROOM3D_SCENEJSONTAGS_H
-#define PROPROOM3D_SCENEJSONTAGS_H
+#ifndef PROPROOM3D_STAGESETJSONTAGS_H
+#define PROPROOM3D_STAGESETJSONTAGS_H
 
 #include <QString>
 
 
 namespace prop3
 {
-    // Scene object
-    extern const QString SCENE_ENVIRONMENT_OBJECT;
-    extern const QString SCENE_BACKDROP_ARRAY;
-    extern const QString SCENE_MATERIAL_ARRAY;
-    extern const QString SCENE_COATING_ARRAY;
-    extern const QString SCENE_SURFACE_ARRAY;
-    extern const QString SCENE_PROP_ARRAY;
+    // StageSet object
+    extern const QString STAGESET_ENVIRONMENT_OBJECT;
+    extern const QString STAGESET_BACKDROP_ARRAY;
+    extern const QString STAGESET_MATERIAL_ARRAY;
+    extern const QString STAGESET_COATING_ARRAY;
+    extern const QString STAGESET_SURFACE_ARRAY;
+    extern const QString STAGESET_PROP_ARRAY;
 
     // Props
     extern const QString PROP_TYPE;
@@ -84,4 +84,4 @@ namespace prop3
     extern const QString BACKDROP_SUN_DIR;
 }
 
-#endif // PROPROOM3D_SCENEJSONTAGS_H
+#endif // PROPROOM3D_STAGESETJSONTAGS_H

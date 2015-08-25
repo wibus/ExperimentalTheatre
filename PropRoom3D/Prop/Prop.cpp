@@ -4,7 +4,7 @@
 
 #include "Surface/Surface.h"
 #include "Material/Concrete.h"
-#include "../Scene/SceneVisitor.h"
+#include "../StageSet/StageSetVisitor.h"
 
 
 namespace prop3
@@ -40,12 +40,12 @@ namespace prop3
     {
     }
 
-    void Prop::accept(SceneVisitor& visitor)
+    void Prop::accept(StageSetVisitor& visitor)
     {
         visitor.visit(*this);
     }
 
-    std::vector<std::shared_ptr<SceneNode>> Prop::children() const
+    std::vector<std::shared_ptr<StageSetNode>> Prop::children() const
     {
         return {
             _surface,

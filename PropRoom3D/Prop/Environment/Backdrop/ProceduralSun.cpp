@@ -1,7 +1,7 @@
 #include "ProceduralSun.h"
 
 #include "Prop/Ray/RayHitList.h"
-#include "Scene/SceneVisitor.h"
+#include "StageSet/StageSetVisitor.h"
 
 namespace prop3
 {
@@ -72,7 +72,7 @@ namespace prop3
         return (sky + skyline + sun);
     }
 
-    void ProceduralSun::accept(SceneVisitor& visitor)
+    void ProceduralSun::accept(StageSetVisitor& visitor)
     {
         visitor.visit(*this);
     }

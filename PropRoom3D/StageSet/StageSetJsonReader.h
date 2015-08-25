@@ -1,5 +1,5 @@
-#ifndef PROPROOM3D_SCENEJSONREADER_H
-#define PROPROOM3D_SCENEJSONREADER_H
+#ifndef PROPROOM3D_STAGESETJSONREADER_H
+#define PROPROOM3D_STAGESETJSONREADER_H
 
 #include <string>
 #include <memory>
@@ -23,15 +23,13 @@ namespace prop3
     class Backdrop;
 
 
-    class PROP3D_EXPORT SceneJsonReader
+    class PROP3D_EXPORT StageSetJsonReader
     {
     public :
-        SceneJsonReader();
-        virtual ~SceneJsonReader();
+        StageSetJsonReader();
+        virtual ~StageSetJsonReader();
 
-        virtual bool deserialize(AbstractTeam& team, const std::string& stream, bool clearScene = true);
-
-        virtual bool loadFromFile(AbstractTeam& team, const std::string& fileName, bool clearScene = true);
+        virtual bool deserialize(AbstractTeam& team, const std::string& stream, bool clearStageSet = true);
 
 
     protected:
@@ -40,13 +38,13 @@ namespace prop3
         static glm::dmat4 dmat4FromJson(const QJsonValueRef& ref);
 
     private:
-        void deserializeBackdrops(const QJsonObject& sceneObj);
-        void deserializeEnvironment(const QJsonObject& sceneObj, AbstractTeam& team);
+        void deserializeBackdrops(const QJsonObject& stageSetObj);
+        void deserializeEnvironment(const QJsonObject& stageSetObj, AbstractTeam& team);
 
-        void deserializeCoatings(const QJsonObject& sceneObj);
-        void deserializeMaterials(const QJsonObject& sceneObj);
-        void deserializeSurfaces(const QJsonObject& sceneObj);
-        void deserializeProps(const QJsonObject& sceneObj, AbstractTeam& team);
+        void deserializeCoatings(const QJsonObject& stageSetObj);
+        void deserializeMaterials(const QJsonObject& stageSetObj);
+        void deserializeSurfaces(const QJsonObject& stageSetObj);
+        void deserializeProps(const QJsonObject& stageSetObj, AbstractTeam& team);
 
         std::shared_ptr<Surface> subSurfTree(
                 const QJsonValue& surfaceTree);
@@ -58,4 +56,4 @@ namespace prop3
     };
 }
 
-#endif // PROPROOM3D_SCENEJSONREADER_H
+#endif // PROPROOM3D_STAGESETJSONREADER_H

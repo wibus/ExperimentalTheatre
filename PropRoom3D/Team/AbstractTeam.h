@@ -17,7 +17,7 @@ namespace cellar
 namespace prop3
 {
     class Prop;
-    class Scene;
+    class StageSet;
     class Environment;
     class AbstractDesigner;
     class AbstractArtDirector;
@@ -44,8 +44,10 @@ namespace prop3
         virtual void reset();
         virtual void update(double dt);
 
-        // Scene accessor
-        virtual std::shared_ptr<Scene> scene() const;
+        // StageSet
+        virtual std::shared_ptr<StageSet> stageSet() const;
+        virtual bool saveScene(const std::string& fileName, bool prettyPrint = true);
+        virtual bool loadScene(const std::string& fileName, bool clearStageSet = true);
 
         // Factory methods
         virtual void clearProps();
@@ -59,7 +61,7 @@ namespace prop3
 
     private:
         // Team members
-        std::shared_ptr<Scene> _scene;
+        std::shared_ptr<StageSet> _stageSet;
         std::unique_ptr<AbstractDesigner> _propDesigner;
         std::unique_ptr<AbstractChoreographer> _choreographer;
         std::vector<std::shared_ptr<AbstractArtDirector>> _artDirectors;
@@ -68,9 +70,9 @@ namespace prop3
 
 
     // IMPLEMENTATION //
-    inline std::shared_ptr<Scene> AbstractTeam::scene() const
+    inline std::shared_ptr<StageSet> AbstractTeam::stageSet() const
     {
-        return _scene;
+        return _stageSet;
     }
 }
 

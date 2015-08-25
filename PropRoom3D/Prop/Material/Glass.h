@@ -16,8 +16,8 @@ namespace prop3
               double refractiveIndex = 1.5);
         virtual ~Glass();
 
-        // SceneNode interface
-        virtual void accept(SceneVisitor& visitor) override;
+        // StageSetNode interface
+        virtual void accept(StageSetVisitor& visitor) override;
 
 
         virtual void brdf(

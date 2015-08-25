@@ -52,10 +52,10 @@ namespace prop3
             cylinder(double rx, double ry);
 
 
-        // SceneNode interface
-        virtual void accept(SceneVisitor& visitor) override;
+        // StageSetNode interface
+        virtual void accept(StageSetVisitor& visitor) override;
 
-        virtual std::vector<std::shared_ptr<SceneNode>> children() const override;
+        virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
 
 
         virtual void transform(const Transform& transform);

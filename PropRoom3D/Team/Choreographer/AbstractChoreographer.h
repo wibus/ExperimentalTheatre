@@ -11,7 +11,7 @@
 namespace prop3
 {
     class Prop;
-    class Scene;
+    class StageSet;
     class Environment;
 
 

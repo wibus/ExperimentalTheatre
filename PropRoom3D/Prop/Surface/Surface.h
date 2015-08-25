@@ -7,7 +7,7 @@
 #include <GLM/glm.hpp>
 #include <GLM/gtc/quaternion.hpp>
 
-#include "PropRoom3D/Scene/SceneNode.h"
+#include "PropRoom3D/StageSet/StageSetNode.h"
 
 
 namespace prop3
@@ -43,7 +43,7 @@ namespace prop3
 
 
 
-    class PROP3D_EXPORT Surface : public SceneNode
+    class PROP3D_EXPORT Surface : public StageSetNode
     {
     protected:
         Surface();
@@ -84,10 +84,10 @@ namespace prop3
         virtual bool intersects(const Ray& ray, RayHitList& reports) const;
         virtual void setCoating(const std::shared_ptr<Coating>& coating);
 
-        // SceneNode interface
-        virtual void accept(SceneVisitor& visitor) override;
+        // StageSetNode interface
+        virtual void accept(StageSetVisitor& visitor) override;
 
-        virtual std::vector<std::shared_ptr<SceneNode>> children() const override;
+        virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
 
 
     private:
@@ -109,10 +109,10 @@ namespace prop3
         virtual bool intersects(const Ray& ray, RayHitList& reports) const;
         virtual void setCoating(const std::shared_ptr<Coating>& coating);
 
-        // SceneNode interface
-        virtual void accept(SceneVisitor& visitor) override;
+        // StageSetNode interface
+        virtual void accept(StageSetVisitor& visitor) override;
 
-        virtual std::vector<std::shared_ptr<SceneNode>> children() const override;
+        virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
 
 
     private:
@@ -138,10 +138,10 @@ namespace prop3
         virtual bool intersects(const Ray& ray, RayHitList& reports) const;
         virtual void setCoating(const std::shared_ptr<Coating>& coating);
 
-        // SceneNode interface
-        virtual void accept(SceneVisitor& visitor) override;
+        // StageSetNode interface
+        virtual void accept(StageSetVisitor& visitor) override;
 
-        virtual std::vector<std::shared_ptr<SceneNode>> children() const override;
+        virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
 
 
     private:
@@ -170,10 +170,10 @@ namespace prop3
         virtual bool intersects(const Ray& ray, RayHitList& reports) const;
         virtual void setCoating(const std::shared_ptr<Coating>& coating);
 
-        // SceneNode interface
-        virtual void accept(SceneVisitor& visitor) override;
+        // StageSetNode interface
+        virtual void accept(StageSetVisitor& visitor) override;
 
-        virtual std::vector<std::shared_ptr<SceneNode>> children() const override;
+        virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
 
 
     private:

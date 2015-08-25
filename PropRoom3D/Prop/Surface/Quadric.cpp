@@ -3,7 +3,7 @@
 #include "../Coating/Coating.h"
 #include "../Ray/RayHitList.h"
 #include "../Ray/RayHitReport.h"
-#include "../../Scene/SceneVisitor.h"
+#include "../../StageSet/StageSetVisitor.h"
 
 
 namespace prop3
@@ -237,12 +237,12 @@ namespace prop3
         stampCurrentUpdate();
     }
 
-    void Quadric::accept(SceneVisitor& visitor)
+    void Quadric::accept(StageSetVisitor& visitor)
     {
         visitor.visit(*this);
     }
 
-    std::vector<std::shared_ptr<SceneNode>> Quadric::children() const
+    std::vector<std::shared_ptr<StageSetNode>> Quadric::children() const
     {
         return {_coating};
     }

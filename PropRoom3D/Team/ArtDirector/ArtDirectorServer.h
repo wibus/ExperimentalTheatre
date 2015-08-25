@@ -21,7 +21,7 @@ namespace prop3
         ArtDirectorServer();
         virtual ~ArtDirectorServer();
 
-        virtual void setup(const std::shared_ptr<Scene>& scene) override;
+        virtual void setup(const std::shared_ptr<StageSet>& stageSet) override;
         virtual void reset() override;
         virtual void draw(double dt) override;
         virtual void update(double dt) override;
@@ -46,7 +46,7 @@ namespace prop3
         unsigned int _colorBufferTexId;
         std::shared_ptr<CpuRaytracerEngine> _localRaytracer;
         std::shared_ptr<GlPostProdUnit> _postProdUnit;
-        std::shared_ptr<Scene> _scene;
+        std::shared_ptr<StageSet> _stageSet;
     };
 }
 

@@ -1,5 +1,5 @@
-#ifndef PROPROOM3D_SCENENODE_H
-#define PROPROOM3D_SCENENODE_H
+#ifndef PROPROOM3D_STAGESETNODE_H
+#define PROPROOM3D_STAGESETNODE_H
 
 #include <vector>
 #include <memory>
@@ -9,7 +9,7 @@
 
 namespace prop3
 {
-    class SceneVisitor;
+    class StageSetVisitor;
 
 
     class PROP3D_EXPORT TimeStamp
@@ -32,17 +32,17 @@ namespace prop3
     };
 
 
-    class PROP3D_EXPORT SceneNode
+    class PROP3D_EXPORT StageSetNode
     {
     protected:
-        SceneNode();
+        StageSetNode();
 
     public:
-        virtual ~SceneNode();
+        virtual ~StageSetNode();
 
-        virtual void accept(SceneVisitor& visitor) = 0;
+        virtual void accept(StageSetVisitor& visitor) = 0;
 
-        virtual std::vector<std::shared_ptr<SceneNode>> children() const;
+        virtual std::vector<std::shared_ptr<StageSetNode>> children() const;
 
         TimeStamp timeStamp() const;
 
@@ -58,10 +58,10 @@ namespace prop3
 
 
     // IMPLEMENTATION //
-    inline TimeStamp SceneNode::timeStamp() const
+    inline TimeStamp StageSetNode::timeStamp() const
     {
         return _timeStamp;
     }
 }
 
-#endif // PROPROOM3D_SCENENODE_H
+#endif // PROPROOM3D_STAGESETNODE_H

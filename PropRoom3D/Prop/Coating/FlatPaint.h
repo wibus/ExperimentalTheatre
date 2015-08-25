@@ -14,8 +14,8 @@ namespace prop3
         FlatPaint(const glm::dvec3& color);
         virtual ~FlatPaint();
 
-        // SceneNode interface
-        virtual void accept(SceneVisitor& visitor) override;
+        // StageSetNode interface
+        virtual void accept(StageSetVisitor& visitor) override;
 
 
         virtual void brdf(

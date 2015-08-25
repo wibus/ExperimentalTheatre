@@ -37,7 +37,7 @@ namespace prop3
         virtual glm::dvec3 raycast(const Ray& ray) const override;
 
 
-        virtual void accept(SceneVisitor& visito) override;
+        virtual void accept(StageSetVisitor& visito) override;
 
     private:
         glm::dvec3 _sunColor;

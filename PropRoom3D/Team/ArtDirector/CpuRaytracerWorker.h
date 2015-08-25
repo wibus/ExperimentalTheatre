@@ -49,7 +49,7 @@ namespace prop3
         virtual void updateView(const glm::dmat4& view);
         virtual void updateProjection(const glm::dmat4& proj);
 
-        virtual void setSceneStream(const std::string& stream);
+        virtual void setStageSetStream(const std::string& stream);
 
         // TODO
         virtual void useStochasticTracing(bool use);
@@ -115,7 +115,7 @@ namespace prop3
         float* _workingColorBuffer;
         std::mutex _framesMutex;
 
-        std::string _sceneStream;
+        std::string _stageSetStream;
         std::shared_ptr<AbstractTeam> _team;
         std::shared_ptr<Backdrop> _backdrop;
         std::shared_ptr<Material> _envMaterial;

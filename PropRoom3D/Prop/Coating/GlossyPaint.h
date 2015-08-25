@@ -16,8 +16,8 @@ namespace prop3
                     double varnishRefractiveIndex = 1.55);
         virtual ~GlossyPaint();
 
-        // SceneNode interface
-        virtual void accept(SceneVisitor& visitor) override;
+        // StageSetNode interface
+        virtual void accept(StageSetVisitor& visitor) override;
 
         virtual void brdf(
             std::vector<Raycast>& raycasts,

@@ -1,4 +1,4 @@
-#include "SceneNode.h"
+#include "StageSetNode.h"
 
 #include <chrono>
 
@@ -35,22 +35,22 @@ namespace prop3
             std::chrono::high_resolution_clock::now().time_since_epoch()).count();
     }
 
-    SceneNode::SceneNode()
+    StageSetNode::StageSetNode()
     {
         stampCurrentUpdate();
     }
 
-    SceneNode::~SceneNode()
+    StageSetNode::~StageSetNode()
     {
 
     }
 
-    std::vector<std::shared_ptr<SceneNode>> SceneNode::children() const
+    std::vector<std::shared_ptr<StageSetNode>> StageSetNode::children() const
     {
-        return std::vector<std::shared_ptr<SceneNode>>();
+        return std::vector<std::shared_ptr<StageSetNode>>();
     }
 
-    void SceneNode::stampCurrentUpdate()
+    void StageSetNode::stampCurrentUpdate()
     {
         _timeStamp = TimeStamp::getCurrentTimeStamp();
     }

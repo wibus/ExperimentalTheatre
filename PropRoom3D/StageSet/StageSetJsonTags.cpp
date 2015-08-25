@@ -1,15 +1,15 @@
-#include "SceneJsonTags.h"
+#include "StageSetJsonTags.h"
 
 
 namespace prop3
 {
-    // Scene object
-    const QString SCENE_ENVIRONMENT_OBJECT = "Environment";
-    const QString SCENE_BACKDROP_ARRAY     = "Backdrops";
-    const QString SCENE_MATERIAL_ARRAY     = "Materials";
-    const QString SCENE_COATING_ARRAY      = "Coatings";
-    const QString SCENE_SURFACE_ARRAY      = "Surfaces";
-    const QString SCENE_PROP_ARRAY         = "Props";
+    // StageSet object
+    const QString STAGESET_ENVIRONMENT_OBJECT = "Environment";
+    const QString STAGESET_BACKDROP_ARRAY     = "Backdrops";
+    const QString STAGESET_MATERIAL_ARRAY     = "Materials";
+    const QString STAGESET_COATING_ARRAY      = "Coatings";
+    const QString STAGESET_SURFACE_ARRAY      = "Surfaces";
+    const QString STAGESET_PROP_ARRAY         = "Props";
 
     // Props
     const QString PROP_TYPE             = "Type";

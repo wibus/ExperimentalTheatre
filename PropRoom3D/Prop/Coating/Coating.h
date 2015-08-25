@@ -6,7 +6,7 @@
 
 #include <GLM/glm.hpp>
 
-#include "PropRoom3D/Scene/SceneNode.h"
+#include "PropRoom3D/StageSet/StageSetNode.h"
 
 
 namespace prop3
@@ -16,7 +16,7 @@ namespace prop3
     class Material;
 
 
-    class PROP3D_EXPORT Coating : public SceneNode
+    class PROP3D_EXPORT Coating : public StageSetNode
     {
     protected:
         Coating();

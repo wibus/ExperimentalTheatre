@@ -1,16 +1,15 @@
-#include "SceneJsonWriter.h"
+#include "StageSetJsonWriter.h"
 
 #include <QJsonObject>
 #include <QJsonDocument>
 
-#include <QFile>
 #include <QVariant>
 #include <QVector3D>
 
 #include <CellarWorkbench/Misc/Log.h>
 
-#include "Scene.h"
-#include "SceneJsonTags.h"
+#include "StageSet.h"
+#include "StageSetJsonTags.h"
 
 #include "Team/AbstractTeam.h"
 
@@ -32,9 +31,8 @@
 #include "Prop/Material/Glass.h"
 #include "Prop/Material/Metal.h"
 
-#include "Environment/Environment.h"
-
-#include "Environment/Backdrop/ProceduralSun.h"
+#include "Prop/Environment/Environment.h"
+#include "Prop/Environment/Backdrop/ProceduralSun.h"
 
 using namespace std;
 using namespace cellar;
@@ -42,32 +40,32 @@ using namespace cellar;
 
 namespace prop3
 {
-    SceneJsonWriter::SceneJsonWriter()
+    StageSetJsonWriter::StageSetJsonWriter()
     {
 
     }
 
-    SceneJsonWriter::~SceneJsonWriter()
+    StageSetJsonWriter::~StageSetJsonWriter()
     {
 
     }
 
-    string SceneJsonWriter::serialize(Scene& scene, bool prettyPrint)
+    string StageSetJsonWriter::serialize(StageSet& stageSet, bool prettyPrint)
     {
-        // Scan scene
-        scene.makeTraveling(*this);
+        // Scan stageSet
+        stageSet.makeTraveling(*this);
 
         // Write file
-        QJsonObject sceneObj;
-        sceneObj[SCENE_ENVIRONMENT_OBJECT] = _environmentObject;
-        sceneObj[SCENE_BACKDROP_ARRAY]     = _backdropsArray;
-        sceneObj[SCENE_MATERIAL_ARRAY]     = _materialsArray;
-        sceneObj[SCENE_COATING_ARRAY]      = _coatingsArray;
-        sceneObj[SCENE_SURFACE_ARRAY]      = _surfacesArray;
-        sceneObj[SCENE_PROP_ARRAY]         = _propsArray;
+        QJsonObject stageSetObj;
+        stageSetObj[STAGESET_ENVIRONMENT_OBJECT] = _environmentObject;
+        stageSetObj[STAGESET_BACKDROP_ARRAY]     = _backdropsArray;
+        stageSetObj[STAGESET_MATERIAL_ARRAY]     = _materialsArray;
+        stageSetObj[STAGESET_COATING_ARRAY]      = _coatingsArray;
+        stageSetObj[STAGESET_SURFACE_ARRAY]      = _surfacesArray;
+        stageSetObj[STAGESET_PROP_ARRAY]         = _propsArray;
 
         QJsonDocument doc;
-        doc.setObject(sceneObj);
+        doc.setObject(stageSetObj);
 
 
         //Clean-up structures
@@ -89,29 +87,7 @@ namespace prop3
                           QJsonDocument::Compact));
     }
 
-    bool SceneJsonWriter::saveToFile(Scene& scene, const string& fileName, bool prettyPrint)
-    {
-        string stream = serialize(scene, prettyPrint);
-
-        if(!stream.empty() || scene.props().empty())
-        {
-            QFile file(fileName.c_str());
-            file.open(QFile::WriteOnly | QFile::Text | QFile::Truncate);
-            file.write(stream.c_str());
-            file.close();
-        }
-        else
-        {
-            getLog().postMessage(new Message('E', false,
-                "Cannot save scene to '" + fileName + "'.",
-                "SceneJsonWriter"));
-            return false;
-        }
-
-        return true;
-    }
-
-    QJsonValue SceneJsonWriter::toJson(const glm::dvec3& v)
+    QJsonValue StageSetJsonWriter::toJson(const glm::dvec3& v)
     {
         QJsonArray array;
         array.append(v.r);
@@ -120,7 +96,7 @@ namespace prop3
         return array;
     }
 
-    QJsonValue SceneJsonWriter::toJson(const glm::dvec4& v)
+    QJsonValue StageSetJsonWriter::toJson(const glm::dvec4& v)
     {
         QJsonArray array;
         array.append(v.r);
@@ -130,7 +106,7 @@ namespace prop3
         return array;
     }
 
-    QJsonValue SceneJsonWriter::toJson(const glm::dmat4& m)
+    QJsonValue StageSetJsonWriter::toJson(const glm::dmat4& m)
     {
         QJsonArray array;
         array.append(m[0][0]);
@@ -156,29 +132,29 @@ namespace prop3
     }
 
 
-    bool SceneJsonWriter::insertBackdrop(Backdrop& node)
+    bool StageSetJsonWriter::insertBackdrop(Backdrop& node)
     {
         return _backdropIdMap.insert(make_pair(&node, _backdropIdMap.size())).second;
     }
 
-    bool SceneJsonWriter::insertSurface(Surface& node)
+    bool StageSetJsonWriter::insertSurface(Surface& node)
     {
         return _surfaceIdMap.insert(make_pair(&node, _surfaceIdMap.size())).second;
     }
 
-    bool SceneJsonWriter::insertMaterial(Material& node)
+    bool StageSetJsonWriter::insertMaterial(Material& node)
     {
         return _materialIdMap.insert(make_pair(&node, _materialIdMap.size())).second;
     }
 
-    bool SceneJsonWriter::insertCoating(Coating& node)
+    bool StageSetJsonWriter::insertCoating(Coating& node)
     {
         return _coatingIdMap.insert(make_pair(&node, _coatingIdMap.size())).second;
     }
 
 
     // Props
-    void SceneJsonWriter::visit(Prop& node)
+    void StageSetJsonWriter::visit(Prop& node)
     {
         QJsonObject obj;
         obj[PROP_TYPE] = PROP_TYPE_PROP;
@@ -204,7 +180,7 @@ namespace prop3
 
 
     // Implicit Surfaces
-    void SceneJsonWriter::visit(Plane& node)
+    void StageSetJsonWriter::visit(Plane& node)
     {
         if(insertSurface(node))
         {
@@ -216,7 +192,7 @@ namespace prop3
         }
     }
 
-    void SceneJsonWriter::visit(PlaneTexture& node)
+    void StageSetJsonWriter::visit(PlaneTexture& node)
     {
         if(insertSurface(node))
         {
@@ -231,7 +207,7 @@ namespace prop3
         }
     }
 
-    void SceneJsonWriter::visit(Quadric& node)
+    void StageSetJsonWriter::visit(Quadric& node)
     {
         if(insertSurface(node))
         {
@@ -243,7 +219,7 @@ namespace prop3
         }
     }
 
-    void SceneJsonWriter::visit(Sphere& node)
+    void StageSetJsonWriter::visit(Sphere& node)
     {
         if(insertSurface(node))
         {
@@ -258,7 +234,7 @@ namespace prop3
 
 
     // Materials
-    void SceneJsonWriter::visit(Air& node)
+    void StageSetJsonWriter::visit(Air& node)
     {
         if(insertMaterial(node))
         {
@@ -269,7 +245,7 @@ namespace prop3
         }
     }
 
-    void SceneJsonWriter::visit(Fog& node)
+    void StageSetJsonWriter::visit(Fog& node)
     {
         if(insertMaterial(node))
         {
@@ -283,7 +259,7 @@ namespace prop3
         }
     }
 
-    void SceneJsonWriter::visit(Concrete& node)
+    void StageSetJsonWriter::visit(Concrete& node)
     {
         if(insertMaterial(node))
         {
@@ -295,7 +271,7 @@ namespace prop3
         }
     }
 
-    void SceneJsonWriter::visit(Glass& node)
+    void StageSetJsonWriter::visit(Glass& node)
     {
         if(insertMaterial(node))
         {
@@ -308,7 +284,7 @@ namespace prop3
         }
     }
 
-    void SceneJsonWriter::visit(Metal& node)
+    void StageSetJsonWriter::visit(Metal& node)
     {
         if(insertMaterial(node))
         {
@@ -323,7 +299,7 @@ namespace prop3
 
 
     // Coatings
-    void SceneJsonWriter::visit(NoCoating& node)
+    void StageSetJsonWriter::visit(NoCoating& node)
     {
         if(insertCoating(node))
         {
@@ -333,7 +309,7 @@ namespace prop3
         }
     }
 
-    void SceneJsonWriter::visit(FlatPaint& node)
+    void StageSetJsonWriter::visit(FlatPaint& node)
     {
         if(insertCoating(node))
         {
@@ -344,7 +320,7 @@ namespace prop3
         }
     }
 
-    void SceneJsonWriter::visit(GlossyPaint& node)
+    void StageSetJsonWriter::visit(GlossyPaint& node)
     {
         if(insertCoating(node))
         {
@@ -357,7 +333,7 @@ namespace prop3
         }
     }
 
-    void SceneJsonWriter::visit(TexturedFlatPaint& node)
+    void StageSetJsonWriter::visit(TexturedFlatPaint& node)
     {
         if(insertCoating(node))
         {
@@ -369,7 +345,7 @@ namespace prop3
         }
     }
 
-    void SceneJsonWriter::visit(TexturedGlossyPaint& node)
+    void StageSetJsonWriter::visit(TexturedGlossyPaint& node)
     {
         if(insertCoating(node))
         {
@@ -386,7 +362,7 @@ namespace prop3
 
 
     // Environments
-    void SceneJsonWriter::visit(Environment& node)
+    void StageSetJsonWriter::visit(Environment& node)
     {
         _environmentObject[ENVIRONMENT_TYPE]              = ENVIRONMENT_TYPE_ENVIRONMENT;
         _environmentObject[ENVIRONMENT_AMBIENT_MATERIAL]  = _materialIdMap[node.ambientMaterial().get()];
@@ -399,7 +375,7 @@ namespace prop3
 
 
     // Backdrops
-    void SceneJsonWriter::visit(ProceduralSun& node)
+    void StageSetJsonWriter::visit(ProceduralSun& node)
     {
         if(insertBackdrop(node))
         {
@@ -419,19 +395,19 @@ namespace prop3
     //////////////////////////
     // Surface Tree Builder //
     //////////////////////////
-    SceneJsonWriter::SurfaceTreeBuilder::SurfaceTreeBuilder(
+    StageSetJsonWriter::SurfaceTreeBuilder::SurfaceTreeBuilder(
             std::map<Surface*, int>& surfaceIdMap) :
         _surfaceIdMap(surfaceIdMap)
     {
 
     }
 
-    const QJsonValue& SceneJsonWriter::SurfaceTreeBuilder::surfaceTree() const
+    const QJsonValue& StageSetJsonWriter::SurfaceTreeBuilder::surfaceTree() const
     {
         return _subTree;
     }
 
-    void SceneJsonWriter::SurfaceTreeBuilder::visit(SurfaceGhost& node)
+    void StageSetJsonWriter::SurfaceTreeBuilder::visit(SurfaceGhost& node)
     {
         auto children = node.children();
         assert(children.size() == 1);
@@ -442,7 +418,7 @@ namespace prop3
         _subTree = logOpt;
     }
 
-    void SceneJsonWriter::SurfaceTreeBuilder::visit(SurfaceInverse& node)
+    void StageSetJsonWriter::SurfaceTreeBuilder::visit(SurfaceInverse& node)
     {
         auto children = node.children();
         assert(children.size() == 1);
@@ -453,7 +429,7 @@ namespace prop3
         _subTree = logOpt;
     }
 
-    void SceneJsonWriter::SurfaceTreeBuilder::visit(SurfaceOr& node)
+    void StageSetJsonWriter::SurfaceTreeBuilder::visit(SurfaceOr& node)
     {
         QJsonArray childArray;
         for(auto surf : node.children())
@@ -467,7 +443,7 @@ namespace prop3
         _subTree = localSubTree;
     }
 
-    void SceneJsonWriter::SurfaceTreeBuilder::visit(SurfaceAnd& node)
+    void StageSetJsonWriter::SurfaceTreeBuilder::visit(SurfaceAnd& node)
     {
         QJsonArray childArray;
         for(auto surf : node.children())
@@ -481,22 +457,22 @@ namespace prop3
         _subTree = localSubTree;
     }
 
-    void SceneJsonWriter::SurfaceTreeBuilder::visit(Plane& node)
+    void StageSetJsonWriter::SurfaceTreeBuilder::visit(Plane& node)
     {
         _subTree = QJsonValue(_surfaceIdMap[&node]);
     }
 
-    void SceneJsonWriter::SurfaceTreeBuilder::visit(PlaneTexture& node)
+    void StageSetJsonWriter::SurfaceTreeBuilder::visit(PlaneTexture& node)
     {
         _subTree = QJsonValue(_surfaceIdMap[&node]);
     }
 
-    void SceneJsonWriter::SurfaceTreeBuilder::visit(Quadric& node)
+    void StageSetJsonWriter::SurfaceTreeBuilder::visit(Quadric& node)
     {
         _subTree = QJsonValue(_surfaceIdMap[&node]);
     }
 
-    void SceneJsonWriter::SurfaceTreeBuilder::visit(Sphere& node)
+    void StageSetJsonWriter::SurfaceTreeBuilder::visit(Sphere& node)
     {
         _subTree = QJsonValue(_surfaceIdMap[&node]);
     }

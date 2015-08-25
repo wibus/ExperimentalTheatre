@@ -3,7 +3,7 @@
 #include "../Ray/Raycast.h"
 #include "../Ray/RayUtils.h"
 #include "../Material/Material.h"
-#include "../../Scene/SceneVisitor.h"
+#include "../../StageSet/StageSetVisitor.h"
 
 
 namespace prop3
@@ -61,7 +61,7 @@ namespace prop3
         }
     }
 
-    void GlossyPaint::accept(SceneVisitor& visitor)
+    void GlossyPaint::accept(StageSetVisitor& visitor)
     {
         visitor.visit(*this);
     }

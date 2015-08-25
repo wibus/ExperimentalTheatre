@@ -1,7 +1,7 @@
 #ifndef PROPROOM3D_ENVIRONMENT_H
 #define PROPROOM3D_ENVIRONMENT_H
 
-#include "PropRoom3D/Scene/SceneNode.h"
+#include "PropRoom3D/StageSet/StageSetNode.h"
 
 
 namespace prop3
@@ -10,7 +10,7 @@ namespace prop3
     class Material;
 
 
-    class PROP3D_EXPORT Environment : public SceneNode
+    class PROP3D_EXPORT Environment : public StageSetNode
     {
     public:
         Environment();
@@ -27,9 +27,9 @@ namespace prop3
         virtual void setAmbientMaterial(const std::shared_ptr<Material>& ambientMaterial);
 
 
-        virtual void accept(SceneVisitor& visito) override;
+        virtual void accept(StageSetVisitor& visito) override;
 
-        virtual std::vector<std::shared_ptr<SceneNode>> children() const override;
+        virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
 
 
     private:

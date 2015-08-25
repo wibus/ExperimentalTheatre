@@ -14,10 +14,10 @@ namespace prop3
         static std::shared_ptr<Surface>
             sphere(const glm::dvec3& center, double radius);
 
-        // SceneNode interface
-        virtual void accept(SceneVisitor& visitor) override;
+        // StageSetNode interface
+        virtual void accept(StageSetVisitor& visitor) override;
 
-        virtual std::vector<std::shared_ptr<SceneNode>> children() const override;
+        virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
 
 
         virtual void transform(const Transform& transform);

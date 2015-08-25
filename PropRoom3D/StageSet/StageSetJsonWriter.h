@@ -1,5 +1,5 @@
-#ifndef PROPROOM3D_SCENEJSONWRITER_H
-#define PROPROOM3D_SCENEJSONWRITER_H
+#ifndef PROPROOM3D_STAGESETJSONWRITER_H
+#define PROPROOM3D_STAGESETJSONWRITER_H
 
 #include <map>
 #include <string>
@@ -11,18 +11,18 @@
 
 #include <GLM/glm.hpp>
 
-#include "SceneVisitor.h"
+#include "StageSetVisitor.h"
 
 
 namespace prop3
 {
-    class Scene;
+    class StageSet;
 
 
-    class PROP3D_EXPORT SceneJsonWriter : public SceneVisitor
+    class PROP3D_EXPORT StageSetJsonWriter : public StageSetVisitor
     {
     private:
-        class SurfaceTreeBuilder : public SceneVisitor
+        class SurfaceTreeBuilder : public StageSetVisitor
         {
         public:
             SurfaceTreeBuilder(std::map<Surface*, int>& surfaceIdMap);
@@ -45,12 +45,10 @@ namespace prop3
         };
 
     public :
-        SceneJsonWriter();
-        virtual ~SceneJsonWriter();
+        StageSetJsonWriter();
+        virtual ~StageSetJsonWriter();
 
-        virtual std::string serialize(Scene& scene, bool prettyPrint = false);
-
-        virtual bool saveToFile(Scene& scene, const std::string& fileName, bool prettyPrint = true);
+        virtual std::string serialize(StageSet& stageSet, bool prettyPrint = false);
 
 
         // Props
@@ -107,4 +105,4 @@ namespace prop3
     };
 }
 
-#endif // PROPROOM3D_SCENEJSONWRITER_H
+#endif // PROPROOM3D_STAGESETJSONWRITER_H

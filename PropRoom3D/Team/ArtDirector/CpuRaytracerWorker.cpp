@@ -11,11 +11,11 @@
 #include "../../Prop/Material/Material.h"
 #include "../../Prop/Material/Air.h"
 
-#include "../../Environment/Environment.h"
-#include "../../Environment/Backdrop/Backdrop.h"
+#include "../../Prop/Environment/Environment.h"
+#include "../../Prop/Environment/Backdrop/Backdrop.h"
 
-#include "../../Scene/Scene.h"
-#include "../../Scene/SceneJsonReader.h"
+#include "../../StageSet/StageSet.h"
+#include "../../StageSet/StageSetJsonReader.h"
 
 #include "../AbstractTeam.h"
 #include "../Designer/StdDesigner.h"
@@ -132,10 +132,10 @@ namespace prop3
         });
     }
 
-    void CpuRaytracerWorker::setSceneStream(const std::string& stream)
+    void CpuRaytracerWorker::setStageSetStream(const std::string& stream)
     {
         skipAndExecute([this, &stream](){
-            _sceneStream = stream;
+            _stageSetStream = stream;
         });
     }
 
@@ -198,7 +198,7 @@ namespace prop3
             _cv.wait(lk, [this]{
                 return (_runningPredicate &&
                             (!_props.empty() ||
-                             !_sceneStream.empty())) ||
+                             !_stageSetStream.empty())) ||
                         _terminatePredicate;
             });
 
@@ -208,15 +208,15 @@ namespace prop3
                 return;
             }
 
-            // Verify if scene stream was updated
-            if(!_sceneStream.empty())
+            // Verify if stageSet stream was updated
+            if(!_stageSetStream.empty())
             {
-                SceneJsonReader reader;
-                reader.deserialize(*_team, _sceneStream);
-                _envMaterial = _team->scene()->environment()->ambientMaterial();
-                _backdrop = _team->scene()->environment()->backdrop();
-                _props = _team->scene()->props();
-                _sceneStream.clear();
+                StageSetJsonReader reader;
+                reader.deserialize(*_team, _stageSetStream);
+                _envMaterial = _team->stageSet()->environment()->ambientMaterial();
+                _backdrop = _team->stageSet()->environment()->backdrop();
+                _props = _team->stageSet()->props();
+                _stageSetStream.clear();
             }
 
 

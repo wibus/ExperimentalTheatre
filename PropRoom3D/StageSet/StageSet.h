@@ -1,24 +1,24 @@
-#ifndef PROPROOM3D_SCENE_H
-#define PROPROOM3D_SCENE_H
+#ifndef PROPROOM3D_STAGESET_H
+#define PROPROOM3D_STAGESET_H
 
 #include <string>
 #include <vector>
 #include <memory>
 
 #include "../Prop/Prop.h"
-#include "../Environment/Environment.h"
+#include "../Prop/Environment/Environment.h"
 
 
 namespace prop3
 {
-    class PROP3D_EXPORT Scene
+    class PROP3D_EXPORT StageSet
     {
     public :
-        Scene();
-        virtual ~Scene();
+        StageSet();
+        virtual ~StageSet();
 
 
-        virtual void makeTraveling(SceneVisitor& visitor);
+        virtual void makeTraveling(StageSetVisitor& visitor);
 
 
         virtual void addProp(const std::shared_ptr<Prop>& prop);
@@ -37,38 +37,38 @@ namespace prop3
 
         TimeStamp timeStamp() const;
 
-        bool sceneChanged() const;
+        bool stageSetChanged() const;
 
 
     private:
         std::vector<std::shared_ptr<Prop>> _props;
         std::shared_ptr<Environment> _environment;
         TimeStamp _timeStamp;
-        bool _sceneChanged;
+        bool _stageSetChanged;
     };
 
 
 
     // IMPLEMENTATION //
-    inline const std::vector<std::shared_ptr<Prop>>& Scene::props()
+    inline const std::vector<std::shared_ptr<Prop>>& StageSet::props()
     {
         return _props;
     }
 
-    inline std::shared_ptr<Environment> Scene::environment() const
+    inline std::shared_ptr<Environment> StageSet::environment() const
     {
         return _environment;
     }
 
-    inline TimeStamp Scene::timeStamp() const
+    inline TimeStamp StageSet::timeStamp() const
     {
         return _timeStamp;
     }
 
-    inline bool Scene::sceneChanged() const
+    inline bool StageSet::stageSetChanged() const
     {
-        return _sceneChanged;
+        return _stageSetChanged;
     }
 }
 
-#endif // PROPROOM3D_SCENE_H
+#endif // PROPROOM3D_STAGESET_H

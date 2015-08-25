@@ -1,5 +1,5 @@
-#ifndef PROPROOM3D_SCENEVISITOR_H
-#define PROPROOM3D_SCENEVISITOR_H
+#ifndef PROPROOM3D_STAGESETVISITOR_H
+#define PROPROOM3D_STAGESETVISITOR_H
 
 #include "PropRoom3D/libPropRoom3D_global.h"
 
@@ -44,13 +44,13 @@ namespace prop3
     class ProceduralSun;
 
 
-    class PROP3D_EXPORT SceneVisitor
+    class PROP3D_EXPORT StageSetVisitor
     {
     protected:
-        SceneVisitor();
+        StageSetVisitor();
 
     public:
-        virtual ~SceneVisitor();
+        virtual ~StageSetVisitor();
 
         // Props
         virtual void visit(Prop& node);
@@ -87,4 +87,4 @@ namespace prop3
     };
 }
 
-#endif // PROPROOM3D_SCENEVISITOR_H
+#endif // PROPROOM3D_STAGESETVISITOR_H

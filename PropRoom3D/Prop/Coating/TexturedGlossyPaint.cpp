@@ -8,7 +8,7 @@
 #include "../Ray/Raycast.h"
 #include "../Ray/RayUtils.h"
 #include "../Material/Material.h"
-#include "../../Scene/SceneVisitor.h"
+#include "../../StageSet/StageSetVisitor.h"
 
 
 namespace prop3
@@ -105,7 +105,7 @@ namespace prop3
         }
     }
 
-    void TexturedGlossyPaint::accept(SceneVisitor& visitor)
+    void TexturedGlossyPaint::accept(StageSetVisitor& visitor)
     {
         visitor.visit(*this);
     }

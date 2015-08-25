@@ -21,8 +21,8 @@ namespace prop3
                           const glm::dvec3& defaultColor = glm::dvec3(1.0));
         virtual ~TexturedFlatPaint();
 
-        // SceneNode interface
-        virtual void accept(SceneVisitor& visitor) override;
+        // StageSetNode interface
+        virtual void accept(StageSetVisitor& visitor) override;
 
 
         virtual void brdf(
