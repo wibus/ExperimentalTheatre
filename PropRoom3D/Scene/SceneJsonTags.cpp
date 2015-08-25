@@ -41,13 +41,15 @@ namespace prop3
     // Materials
     const QString MATERIAL_TYPE                 = "Type";
     const QString MATERIAL_TYPE_AIR             = "Air";
+    const QString MATERIAL_TYPE_FOG             = "Fog";
     const QString MATERIAL_TYPE_CONCRETE        = "Concrete";
     const QString MATERIAL_TYPE_GLASS           = "Glass";
     const QString MATERIAL_TYPE_METAL           = "Metal";
     const QString MATERIAL_REFRACTIVE_INDEX     = "Refractive Index";
     const QString MATERIAL_COLOR                = "Color";
-    const QString MATERIAL_DYE_CONCENTRATION    = "Dyr Concentration";
+    const QString MATERIAL_CONCENTRATION        = "Concentration";
     const QString MATERIAL_GLOSSINESS           = "Glossiness";
+    const QString MATERIAL_RADIUS               = "Radius";
 
     // Coatings
     const QString COATING_TYPE                      = "Type";

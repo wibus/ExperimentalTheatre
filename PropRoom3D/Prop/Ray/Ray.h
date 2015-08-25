@@ -12,11 +12,14 @@ namespace prop3
     {
         Ray(const glm::dvec3& origin,
             const glm::dvec3& direction,
-            double limit = INFINITY);
+            double limit = BACKDROP_DISTANCE);
 
         glm::dvec3 origin;
         glm::dvec3 direction;
         double limit;
+
+
+        static const double BACKDROP_DISTANCE;
     };
 }
 

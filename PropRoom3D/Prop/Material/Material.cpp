@@ -30,7 +30,7 @@ namespace prop3
 
     double Material::lightFreePathLength(const Ray& ray) const
     {
-        return INFINITY;
+        return Ray::BACKDROP_DISTANCE;
     }
 
     glm::dvec3 Material::lightAttenuation(

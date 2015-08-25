@@ -12,7 +12,7 @@ namespace prop3
     {
     public:
         Glass(const glm::dvec3& color,
-              double dyeConcentration,
+              double concentration,
               double refractiveIndex = 1.5);
         virtual ~Glass();
 
@@ -33,12 +33,12 @@ namespace prop3
 
         glm::dvec3 color() const;
 
-        double dyeConcentration() const;
+        double concentration() const;
 
 
     protected:
         glm::dvec3 _color;
-        double _dyeConcentration;
+        double _concentration;
     };
 
 
@@ -49,9 +49,9 @@ namespace prop3
         return _color;
     }
 
-    inline double Glass::dyeConcentration() const
+    inline double Glass::concentration() const
     {
-        return _dyeConcentration;
+        return _concentration;
     }
 }
 

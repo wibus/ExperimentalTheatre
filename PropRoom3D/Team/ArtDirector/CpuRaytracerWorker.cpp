@@ -364,7 +364,6 @@ namespace prop3
     glm::dvec3 CpuRaytracerWorker::fireScreenRay(
             const Raycast& raycast)
     {
-        const Ray& ray = raycast.ray;
         const glm::dvec3& intensity = raycast.color;
         double maxIntensity = glm::max(glm::max(
             intensity.r, intensity.g), intensity.b);
@@ -373,34 +372,39 @@ namespace prop3
             return glm::dvec3(0.0);
         }
 
-        double maxDist = raycast.material->lightFreePathLength(ray);
+        Ray ray = raycast.ray;
+        double matPathLen = raycast.material->lightFreePathLength(ray);
+        ray.limit = matPathLen;
 
         const Coating* dummyCoat = nullptr;
         const glm::dvec3 dummyVec = glm::dvec3();
-        RayHitReport reportMin(ray, maxDist, dummyVec, dummyVec, dummyCoat, dummyVec);
+        RayHitReport reportMin(ray, matPathLen, dummyVec, dummyVec, dummyCoat, dummyVec);
         std::shared_ptr<Prop> propMin = findNearestProp(ray, reportMin);
 
-        if(propMin.get() != nullptr || maxDist != INFINITY)
+        glm::dvec3 matAtt =
+            raycast.material->lightAttenuation(
+                reportMin.ray, reportMin.distance);
+
+        if(reportMin.distance != Ray::BACKDROP_DISTANCE)
         {
             if(!_useStochasticTracing)
             {
-                return draft(raycast, reportMin, propMin);
+                return draft(raycast, reportMin);
             }
 
             unsigned int outRayCountHint = glm::ceil(_diffuseRayCount * maxIntensity);
-            glm::dvec3 matAtt = raycast.material->lightAttenuation(ray, reportMin.distance);
             glm::dvec3 totalAttenuation = matAtt * raycast.color;
             std::vector<Raycast> outRaycasts;
             glm::dvec3 color(0.0);
 
             // TODO: optimise reports generation
             // by skipping intersection past maxDist
-            if(reportMin.distance > maxDist)
+            if(reportMin.distance >= matPathLen)
             {
                 raycast.material->scatterLight(
                         outRaycasts,
                         ray,
-                        maxDist,
+                        matPathLen,
                         raycast.material,
                         outRayCountHint);
             }
@@ -432,7 +436,7 @@ namespace prop3
             if(intensity != glm::dvec3(1.0) ||
                _backdrop->isDirectlyVisible())
             {
-                return _backdrop->raycast(ray);
+                return _backdrop->raycast(ray) * matAtt;
             }
         }
 
@@ -441,8 +445,7 @@ namespace prop3
 
     glm::dvec3 CpuRaytracerWorker::draft(
         const Raycast& raycast,
-        const RayHitReport& report,
-        const std::shared_ptr<Prop>& prop)
+        const RayHitReport& report)
     {
         const glm::dvec3 sunDir(0.5345, 0.2673, 0.8017);
         double attenuation = glm::dot(report.normal, sunDir);

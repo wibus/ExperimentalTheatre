@@ -68,6 +68,11 @@ namespace prop3
 
     }
 
+    void SceneVisitor::visit(Fog& node)
+    {
+
+    }
+
     void SceneVisitor::visit(Concrete& node)
     {
 

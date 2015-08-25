@@ -42,13 +42,15 @@ namespace prop3
     // Materials
     extern const QString MATERIAL_TYPE;
     extern const QString MATERIAL_TYPE_AIR;
+    extern const QString MATERIAL_TYPE_FOG;
     extern const QString MATERIAL_TYPE_CONCRETE;
     extern const QString MATERIAL_TYPE_GLASS;
     extern const QString MATERIAL_TYPE_METAL;
     extern const QString MATERIAL_REFRACTIVE_INDEX;
     extern const QString MATERIAL_COLOR;
-    extern const QString MATERIAL_DYE_CONCENTRATION;
+    extern const QString MATERIAL_CONCENTRATION;
     extern const QString MATERIAL_GLOSSINESS;
+    extern const QString MATERIAL_RADIUS;
 
     // Coatings
     extern const QString COATING_TYPE;

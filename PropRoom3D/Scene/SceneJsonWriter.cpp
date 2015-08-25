@@ -27,6 +27,7 @@
 #include "Prop/Coating/TexturedGlossyPaint.h"
 
 #include "Prop/Material/Air.h"
+#include "Prop/Material/Fog.h"
 #include "Prop/Material/Concrete.h"
 #include "Prop/Material/Glass.h"
 #include "Prop/Material/Metal.h"
@@ -268,6 +269,20 @@ namespace prop3
         }
     }
 
+    void SceneJsonWriter::visit(Fog& node)
+    {
+        if(insertMaterial(node))
+        {
+            QJsonObject obj;
+            obj[MATERIAL_TYPE]              = MATERIAL_TYPE_FOG;
+            obj[MATERIAL_REFRACTIVE_INDEX]  = node.refractiveIndex();
+            obj[MATERIAL_COLOR]             = toJson(node.color());
+            obj[MATERIAL_CONCENTRATION]     = node.concentration();
+            obj[MATERIAL_RADIUS]            = node.radius();
+            _materialsArray.append(obj);
+        }
+    }
+
     void SceneJsonWriter::visit(Concrete& node)
     {
         if(insertMaterial(node))
@@ -288,7 +303,7 @@ namespace prop3
             obj[MATERIAL_TYPE]              = MATERIAL_TYPE_GLASS;
             obj[MATERIAL_REFRACTIVE_INDEX]  = node.refractiveIndex();
             obj[MATERIAL_COLOR]             = toJson(node.color());
-            obj[MATERIAL_DYE_CONCENTRATION] = node.dyeConcentration();
+            obj[MATERIAL_CONCENTRATION]     = node.concentration();
             _materialsArray.append(obj);
         }
     }
@@ -373,8 +388,8 @@ namespace prop3
     // Environments
     void SceneJsonWriter::visit(Environment& node)
     {
-        _environmentObject[ENVIRONMENT_TYPE]             = ENVIRONMENT_TYPE_ENVIRONMENT;
-        _environmentObject[ENVIRONMENT_AMBIENT_MATERIAL] = _materialIdMap[node.ambientMaterial().get()];
+        _environmentObject[ENVIRONMENT_TYPE]              = ENVIRONMENT_TYPE_ENVIRONMENT;
+        _environmentObject[ENVIRONMENT_AMBIENT_MATERIAL]  = _materialIdMap[node.ambientMaterial().get()];
 
         if(node.backdrop().get() != nullptr)
         {

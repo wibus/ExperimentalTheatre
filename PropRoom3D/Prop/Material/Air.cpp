@@ -7,6 +7,8 @@
 
 namespace prop3
 {
+    const double Air::AIR_REFRACTIVE_INDEX = 1.0002772;
+
     Air::Air(double refractiveIndex)
     {
         setRefractiveIndex(refractiveIndex);

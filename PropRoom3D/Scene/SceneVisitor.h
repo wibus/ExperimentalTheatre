@@ -23,6 +23,7 @@ namespace prop3
     // Materials
     class Material;
     class Air;
+    class Fog;
     class Concrete;
     class Glass;
     class Metal;
@@ -66,6 +67,7 @@ namespace prop3
 
         // Materials
         virtual void visit(Air& node);
+        virtual void visit(Fog& node);
         virtual void visit(Concrete& node);
         virtual void visit(Glass& node);
         virtual void visit(Metal& node);

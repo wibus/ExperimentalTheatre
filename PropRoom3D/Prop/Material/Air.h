@@ -11,7 +11,7 @@ namespace prop3
             public Material
     {
     public:
-        Air(double refractiveIndex = 1.0002772);
+        Air(double refractiveIndex = AIR_REFRACTIVE_INDEX);
         virtual ~Air();
 
         // SceneNode interface
@@ -24,6 +24,8 @@ namespace prop3
             const std::shared_ptr<Material>& leavedMaterial,
             const std::shared_ptr<Material>& selfEnteredMaterial,
             unsigned int outRayCountHint)  const override;
+
+        static const double AIR_REFRACTIVE_INDEX;
     };
 }
 

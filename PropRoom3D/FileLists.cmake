@@ -44,6 +44,7 @@ SET(PROP3_LIGHTING_HEADERS
 SET(PROP3_MATERIAL_HEADERS
     ${PROP3_SRC_DIR}/Prop/Material/Material.h
     ${PROP3_SRC_DIR}/Prop/Material/Air.h
+    ${PROP3_SRC_DIR}/Prop/Material/Fog.h
     ${PROP3_SRC_DIR}/Prop/Material/Metal.h
     ${PROP3_SRC_DIR}/Prop/Material/Concrete.h
     ${PROP3_SRC_DIR}/Prop/Material/Glass.h)
@@ -150,6 +151,7 @@ SET(PROP3_LIGHTING_SOURCES
 SET(PROP3_MATERIAL_SOURCES
     ${PROP3_SRC_DIR}/Prop/Material/Material.cpp
     ${PROP3_SRC_DIR}/Prop/Material/Air.cpp
+    ${PROP3_SRC_DIR}/Prop/Material/Fog.cpp
     ${PROP3_SRC_DIR}/Prop/Material/Metal.cpp
     ${PROP3_SRC_DIR}/Prop/Material/Concrete.cpp
     ${PROP3_SRC_DIR}/Prop/Material/Glass.cpp)

@@ -64,6 +64,7 @@ namespace prop3
 
         // Materials
         virtual void visit(Air& node) override;
+        virtual void visit(Fog& node) override;
         virtual void visit(Concrete& node) override;
         virtual void visit(Glass& node) override;
         virtual void visit(Metal& node) override;

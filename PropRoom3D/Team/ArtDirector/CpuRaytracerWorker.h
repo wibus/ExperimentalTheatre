@@ -78,8 +78,7 @@ namespace prop3
 
         virtual glm::dvec3 draft(
                 const Raycast& raycast,
-                const RayHitReport& report,
-                const std::shared_ptr<Prop>& prop);
+                const RayHitReport& report);
 
 
     private:

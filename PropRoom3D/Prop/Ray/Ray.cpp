@@ -3,6 +3,9 @@
 
 namespace prop3
 {
+    const double Ray::BACKDROP_DISTANCE = INFINITY;
+
+
     Ray::Ray(
             const glm::dvec3& origin,
             const glm::dvec3& direction,

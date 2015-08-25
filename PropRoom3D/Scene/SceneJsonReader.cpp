@@ -25,6 +25,7 @@
 #include "Prop/Coating/TexturedGlossyPaint.h"
 
 #include "Prop/Material/Air.h"
+#include "Prop/Material/Fog.h"
 #include "Prop/Material/Concrete.h"
 #include "Prop/Material/Glass.h"
 #include "Prop/Material/Metal.h"
@@ -271,6 +272,13 @@ namespace prop3
             {
                 material = make_shared<Air>();
             }
+            else if(type == MATERIAL_TYPE_FOG)
+            {
+                material = make_shared<Fog>(
+                    dvec3FromJson(obj[MATERIAL_COLOR]),
+                    obj[MATERIAL_CONCENTRATION].toDouble(),
+                    obj[MATERIAL_RADIUS].toDouble());
+            }
             else if(type == MATERIAL_TYPE_CONCRETE)
             {
                 material = make_shared<Concrete>(
@@ -280,7 +288,7 @@ namespace prop3
             {
                 material = make_shared<Glass>(
                     dvec3FromJson(obj[MATERIAL_COLOR]),
-                    obj[MATERIAL_DYE_CONCENTRATION].toDouble());
+                    obj[MATERIAL_CONCENTRATION].toDouble());
             }
             else if(type == MATERIAL_TYPE_METAL)
             {

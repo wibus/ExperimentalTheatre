@@ -8,10 +8,10 @@
 namespace prop3
 {
     Glass::Glass(const glm::dvec3& color,
-                 double dyeConcentration,
+                 double concentration,
                  double refractiveIndex) :
         _color(color),
-        _dyeConcentration(dyeConcentration)
+        _concentration(concentration)
     {
         setRefractiveIndex(refractiveIndex);
     }
@@ -39,10 +39,10 @@ namespace prop3
                 const Ray& ray,
                 double distance) const
     {
-        if(_dyeConcentration == 0.0)
+        if(_concentration == 0.0)
             return glm::dvec3(1.0);
 
-        return glm::pow(_color, glm::dvec3(_dyeConcentration * distance));
+        return glm::pow(_color, glm::dvec3(_concentration * distance));
     }
 
     void Glass::accept(SceneVisitor& visitor)
