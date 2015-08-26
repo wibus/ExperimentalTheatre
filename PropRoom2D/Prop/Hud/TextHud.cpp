@@ -8,7 +8,7 @@ namespace prop2
         _height(12.0),
         _handlePosition(0.0, 0.0),
         _text(""),
-        _fontName("Arial"),
+        _fontName("Mono"),
         _color(1.0, 1.0, 1.0, 1.0)
     {
     }

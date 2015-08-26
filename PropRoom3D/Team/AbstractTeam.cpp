@@ -23,7 +23,8 @@ namespace prop3
                                AbstractChoreographer* choreographer) :
         _stageSet(new StageSet()),
         _propDesigner(propDesigner),
-        _choreographer(choreographer)
+        _choreographer(choreographer),
+        _artDirectors()
     {
     }
 

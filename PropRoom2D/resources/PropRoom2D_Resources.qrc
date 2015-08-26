@@ -5,7 +5,6 @@
         <file>shaders/HudVertex.vert</file>
         <file>shaders/PolygonFragment.frag</file>
         <file>shaders/ShapeVertex.vert</file>
-        <file>fonts/Arial.flw</file>
-        <file>fonts/Arial.png</file>
+        <file>fonts/Mono.png</file>
     </qresource>
 </RCC>

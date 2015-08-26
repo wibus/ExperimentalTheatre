@@ -316,8 +316,8 @@ namespace prop2
             // Texture
             int cid = chars[c] - 32;
             texCharWidth = font.charWidth(cid);
-            double s = ((cid%10)/10.0) * 0.9765625; // Magic Number :0 !!! (1000 / 1024)
-            double t = ((cid/10)/10.0) * 0.9765625; // Proportion correction
+            double s = ((cid%10)/10.0);
+            double t = ((cid/10)/10.0) + 0.004;
             double ns = s + texCharWidth;
             double nt = t + texCharHeight;
 
@@ -583,43 +583,15 @@ namespace prop2
         // Make font part of the image bank
         getImageBank().addImage("font-"+_name, image);
         _id =  GlToolkit::genTextureId(getImageBank().getImage("font-"+_name));
+        glBindTexture(GL_TEXTURE_2D, _id);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glBindTexture(GL_TEXTURE_2D, 0);
 
 
         //Load font format
+        _charsHeight = 0.1f;
         for(int i=0; i<96; i++)
                 _charsWidth[i] = 0.05f;
-        _charsHeight = 0.1f;
-        /*
-        QFile flwFile((fileFullName+".flw").c_str());
-        if(flwFile.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            char lw[96];
-            char lh;
-            char dimensions;
-
-            //Extracting data
-            flwFile.read(&dimensions,1);
-            flwFile.read(&lh,1);
-            flwFile.read(lw,96);
-            flwFile.close();
-
-            //Converting into rigth format
-            _charsHeight = lh/pow((double)2,dimensions);
-            for(int i=0; i<96; i++)
-                    _charsWidth[i] = lw[i]/pow((double)2,dimensions);
-
-            getLog().postMessage(new
-                Message('I', false, "\t"+fileFullName + ".flw : OK", "Text"));
-        }
-        else
-        {
-            for(int i=0; i<96; i++)
-                    _charsWidth[i] = 0.05f;
-            _charsHeight = 0.1f;
-
-            getLog().postMessage(new
-                Message('W', false, "\t"+fileFullName + ".flw : Absent", "Text"));
-        }
-        */
     }
 }

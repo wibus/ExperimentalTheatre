@@ -122,8 +122,7 @@ SET(PROP2_SOURCES
 SET(PROP2_RCC_FILES
     ${PROP2_SRC_DIR}/resources/PropRoom2D_Resources.qrc)
 SET(PROP2_FONT_FILES
-    ${PROP2_SRC_DIR}/resources/fonts/Arial.png
-    ${PROP2_SRC_DIR}/resources/fonts/Arial.flw)
+    ${PROP2_SRC_DIR}/resources/fonts/Mono.png)
 SET(PROP2_SHADER_FILES
     ${PROP2_SRC_DIR}/resources/shaders/ShapeVertex.vert
     ${PROP2_SRC_DIR}/resources/shaders/CircleFragment.frag
