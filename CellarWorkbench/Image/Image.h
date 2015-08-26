@@ -17,6 +17,8 @@ namespace cellar
         Image();
         Image(const Image& image);
         Image(const std::string& fileName);
+        Image(int width,
+              int height);
         Image(unsigned char *pixels,
               int width,
               int height);

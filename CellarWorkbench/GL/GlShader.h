@@ -29,7 +29,10 @@ namespace cellar
         GLenum type() const;
 
 
-        static std::string implicitName(const std::vector<std::string>& fileNames);
+        static std::string implicitName(const std::string& fileName,
+                                        const GLenum& shaderType);
+        static std::string implicitName(const std::vector<std::string>& fileNames,
+                                        const GLenum& shaderType);
 
     protected:
         GLuint _id;

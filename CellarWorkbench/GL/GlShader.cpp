@@ -46,7 +46,7 @@ namespace cellar
 
     bool GlShader::loadFromFiles(const std::vector<std::string>& fileNames)
     {
-        _fileName = implicitName(fileNames);
+        _fileName = implicitName(fileNames, _type);
 
         std::vector<std::string> sources;
         for(const auto& file : fileNames)
@@ -149,13 +149,22 @@ namespace cellar
         return compilationStatus;
     }
 
-    std::string GlShader::implicitName(const std::vector<std::string>& fileNames)
+    std::string GlShader::implicitName(
+            const std::string& fileName,
+            const GLenum& shaderType)
+    {
+        return fileName + "(type=" + to_string(shaderType) + ")";
+    }
+
+    std::string GlShader::implicitName(
+            const std::vector<std::string>& fileNames,
+            const GLenum& shaderType)
     {
         std::string shaderName;
         for(const auto& name : fileNames)
             shaderName += name + ";";
         shaderName.pop_back();
 
-        return shaderName;
+        return implicitName(shaderName, shaderType);
     }
 }

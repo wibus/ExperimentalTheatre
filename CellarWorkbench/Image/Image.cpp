@@ -35,6 +35,17 @@ namespace cellar
         load(fileName);
     }
 
+    Image::Image(int width,
+                 int height) :
+        _id(__attribId()),
+        _pixels(nullptr),
+        _width(width),
+        _height(height)
+    {
+        int size = dataSize();
+        _pixels = new unsigned char[size];
+    }
+
     Image::Image(unsigned char *pixels,
                  int width,
                  int height) :

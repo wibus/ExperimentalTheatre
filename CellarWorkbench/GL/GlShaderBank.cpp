@@ -104,18 +104,26 @@ namespace cellar
             GLenum shaderType)
     {
         auto it = _shaders.find(shaderName);
+        if(it != _shaders.end())
+        {
+            return it->second;
+        }
 
+        std::string implicitName =
+            GlShader::implicitName(
+                shaderName, shaderType);
+        it = _shaders.find(implicitName);
         if(it != _shaders.end())
         {
             return it->second;
         }
 
         getLog().postMessage(new Message('I', false,
-            "Implicitly adding : '" + shaderName + "'", "GlShaderBank"));
+            "Implicitly adding : '" + implicitName + "'", "GlShaderBank"));
 
-        if(addShaderFromFile(shaderName, shaderType, shaderName))
+        if(addShaderFromFile(implicitName, shaderType, shaderName))
         {
-            return getShaderPtr(shaderName, shaderType);
+            return getShaderPtr(implicitName, shaderType);
         }
 
         return getShaderPtr("blank", shaderType);
@@ -125,9 +133,11 @@ namespace cellar
             const std::vector<std::string>& shaderNames,
             GLenum shaderType)
     {
-        std::string shaderName = GlShader::implicitName(shaderNames);
+        std::string implicitName =
+            GlShader::implicitName(
+                shaderNames, shaderType);
 
-        auto it = _shaders.find(shaderName);
+        auto it = _shaders.find(implicitName);
 
         if(it != _shaders.end())
         {
@@ -135,11 +145,11 @@ namespace cellar
         }
 
         getLog().postMessage(new Message('I', false,
-            "Implicitly adding : '" + shaderName + "'", "GlShaderBank"));
+            "Implicitly adding : '" + implicitName + "'", "GlShaderBank"));
 
-        if(addShaderFromFiles(shaderName, shaderType, shaderNames))
+        if(addShaderFromFiles(implicitName, shaderType, shaderNames))
         {
-            return getShaderPtr(shaderName, shaderType);
+            return getShaderPtr(implicitName, shaderType);
         }
 
         return getShaderPtr("blank", shaderType);
