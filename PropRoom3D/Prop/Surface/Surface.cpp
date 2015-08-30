@@ -41,6 +41,7 @@ namespace prop3
         return _inv;
     }
 
+
     const std::shared_ptr<Coating> Surface::NO_COATING(new NoCoating());
 
     Surface::Surface()

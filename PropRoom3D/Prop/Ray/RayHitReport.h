@@ -14,27 +14,32 @@ namespace prop3
     struct PROP3D_EXPORT RayHitReport
     {
         RayHitReport(
-            const Ray& ray,
             double distance,
             const glm::dvec3& position,
+            const glm::dvec3& incident,
             const glm::dvec3& normal,
-            const Coating* coating,
-            const glm::dvec3& texCoord);
+            const glm::dvec3& texCoord,
+            const Coating* coating);
 
         void compile();
 
-        Ray ray;
         double distance;
         glm::dvec3 position;
+        glm::dvec3 incident;
         glm::dvec3 normal;
-        const Coating* coating;
         glm::dvec3 texCoord;
+        const Coating* coating;
 
+        // Compiled data
+        bool isTextured;
         glm::dvec3 reflectionOrigin;
         glm::dvec3 refractionOrigin;
 
         // List next node
         RayHitReport* _next;
+
+        static const double EPSILON_LENGTH;
+        static const glm::dvec3 NO_TEXCOORD;
     };
 }
 

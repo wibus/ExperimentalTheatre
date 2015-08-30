@@ -7,13 +7,69 @@
 
 namespace prop3
 {
-    void specularReflection(
+    glm::dvec3 directSpecularReflection(
+        const RayHitReport& report,
+        const glm::dvec3& outDir)
+    {
+        // Eventhough this is an approximation,
+        // floating point precision would not allow
+        // to compute the real probability of specular reflexions
+        return glm::dvec3(0.0);
+    }
+
+    glm::dvec3 directDiffuseReflection(
+        const RayHitReport& report,
+        const glm::dvec3& outDir)
+    {
+        return glm::dvec3(glm::max(0.0,
+            glm::dot(-report.incident, report.normal)));
+    }
+
+    glm::dvec3 directGlossyReflection(
+        const RayHitReport& report,
+        const glm::dvec3& outDir,
+        double glossiness)
+    {
+        if(glossiness <= 0.0)
+        {
+            return directDiffuseReflection(report, outDir);
+        }
+        else if(glossiness >= 1.0)
+        {
+            return directSpecularReflection(report, outDir);
+        }
+        else
+        {
+            glm::dvec3 reflectDir = glm::reflect(
+                    report.incident, report.normal);
+
+            double alpha = (glm::dot(reflectDir, outDir) + 1.0) / 2.0;
+
+            glm::dvec3 diffuse = directDiffuseReflection(report, outDir);
+            glm::dvec3 glossy = glm::dvec3(glm::pow(alpha, 1.0 / glossiness));
+
+            return glm::mix(diffuse, glossy, glossiness);
+        }
+    }
+
+    glm::dvec3 directSpecularRefraction(
+        const RayHitReport& report,
+        const glm::dvec3& outDir)
+    {
+        // Eventhough this is an approximation,
+        // floating point precision would not allow
+        // to compute the real probability of specular refractions
+        return glm::dvec3(0.0);
+    }
+
+
+    void indirectSpecularReflection(
         std::vector<Raycast>& outRays,
         const RayHitReport& report,
         const std::shared_ptr<Material>& material)
     {
         glm::dvec3 reflectDir = glm::reflect(
-                report.ray.direction, report.normal);
+                report.incident, report.normal);
 
         outRays.push_back(Raycast(
                 Ray(report.reflectionOrigin, reflectDir),
@@ -21,7 +77,7 @@ namespace prop3
                 material));
     }
 
-    void diffuseReflection(
+    void indirectDiffuseReflection(
         std::vector<Raycast>& outRays,
         const RayHitReport& report,
         const std::shared_ptr<Material>& material,
@@ -45,7 +101,7 @@ namespace prop3
         }
     }
 
-    void glossyReflection(
+    void indirectGlossyReflection(
         std::vector<Raycast>& outRays,
         const RayHitReport& report,
         const std::shared_ptr<Material>& material,
@@ -54,11 +110,11 @@ namespace prop3
     {
         if(glossiness <= 0.0)
         {
-            diffuseReflection(outRays, report, material, rayCount);
+            indirectDiffuseReflection(outRays, report, material, rayCount);
         }
         else if(glossiness >= 1.0)
         {
-            specularReflection(outRays, report, material);
+            indirectSpecularReflection(outRays, report, material);
         }
         else
         {
@@ -71,7 +127,7 @@ namespace prop3
                     diffuseDir = -diffuseDir;
 
                 glm::dvec3 reflectDir = glm::reflect(
-                        report.ray.direction, report.normal);
+                        report.incident, report.normal);
 
                 glm::dvec3 direction = glm::mix(diffuseDir, reflectDir, glossiness);
                 direction = glm::normalize(direction);
@@ -87,29 +143,29 @@ namespace prop3
         }
     }
 
-    void specularRefraction(
+    void indirectSpecularRefraction(
         std::vector<Raycast>& outRays,
         const RayHitReport& report,
-            const std::shared_ptr<Material>& leavedMaterial,
-            const std::shared_ptr<Material>& enteredMaterial)
+        const std::shared_ptr<Material>& leavedMaterial,
+        const std::shared_ptr<Material>& enteredMaterial)
     {
         double reflectionRatio =
                 computeReflexionRatio(
                     leavedMaterial->refractiveIndex(),
                     enteredMaterial->refractiveIndex(),
-                    report.ray.direction,
+                    report.incident,
                     report.normal);
 
         glm::dvec3 reflectDir =
                 glm::reflect(
-                    report.ray.direction,
+                    report.incident,
                     report.normal);
 
         glm::dvec3 refractDir =
                 computeRefraction(
                     leavedMaterial->refractiveIndex(),
                     enteredMaterial->refractiveIndex(),
-                    report.ray.direction,
+                    report.incident,
                     report.normal);
 
         outRays.push_back(Raycast(
@@ -126,15 +182,15 @@ namespace prop3
     double computeReflexionRatio(
             double leavedRefractiveIndex,
             double enteredRefractiveIndex,
-            const glm::dvec3& incidentDirection,
-            const glm::dvec3& surfaceNormal)
+            const glm::dvec3& incident,
+            const glm::dvec3& normal)
     {
         // Schlick's approximation
         double R0 = (leavedRefractiveIndex - enteredRefractiveIndex) /
                     (leavedRefractiveIndex + enteredRefractiveIndex);
         R0 = R0 * R0;
 
-        double cosNV = 1.0 - glm::abs(glm::dot(incidentDirection, surfaceNormal));
+        double cosNV = 1.0 - glm::abs(glm::dot(incident, normal));
         double cosNV2 = cosNV * cosNV;
         double cosNV5 = cosNV2 * cosNV2 * cosNV;
         return R0 + (1.0 - R0) * cosNV5;

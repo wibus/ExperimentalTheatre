@@ -46,6 +46,7 @@ namespace prop3
         _useStochasticTracing(true),
         _lightRayIntensityThreshold(1.0),
         _screenRayIntensityThreshold(1.0 / 128.0),
+        _backdropRayCount(1),
         _diffuseRayCount(1),
         _viewportSize(1, 1),
         _workingColorBuffer(nullptr),
@@ -243,6 +244,41 @@ namespace prop3
 
     void CpuRaytracerWorker::shootFromLights()
     {
+        /*
+        _lightHitColors.clear();
+        _lightHitReports.clear();
+
+        if(_useStochasticTracing)
+            return;
+
+        for(Raycast& raycast : _backdrop->fireRays(_backdropRayCount))
+        {
+            Ray& ray  = raycast.ray;
+            const std::shared_ptr<Material>& material = raycast.material;
+            double matPathLen = material->lightFreePathLength(ray);
+            ray.limit = matPathLen;
+
+            const Coating* dummyCoat = nullptr;
+            const glm::dvec3 dummyVec = glm::dvec3();
+            RayHitReport reportMin(matPathLen, dummyVec, dummyVec,
+                                   dummyVec, dummyVec, dummyCoat);
+
+            ray.limit = findNearestProp(ray, reportMin);
+
+
+            if(ray.limit != Ray::BACKDROP_DISTANCE)
+            {
+                // TODO: Add depth to light raycasting
+
+                glm::dvec3 hitColor = raycast.color *
+                    material->lightAttenuation(ray);
+
+
+                _lightHitColors.push_back(hitColor);
+                _lightHitReports.push_back(reportMin);
+            }
+        }
+        */
     }
 
     void CpuRaytracerWorker::shootFromScreen()
@@ -315,7 +351,7 @@ namespace prop3
         return _envMaterial;
     }
 
-    std::shared_ptr<Prop> CpuRaytracerWorker::findNearestProp(
+    double CpuRaytracerWorker::findNearestProp(
             const Ray& rayPrototype,
             RayHitReport& reportMin)
     {
@@ -329,7 +365,7 @@ namespace prop3
             if(surface.get() == nullptr)
                 continue;
 
-            RayHitList reports(reportPool);
+            RayHitList reports(_reportPool);
 
             const std::shared_ptr<Surface>& bounds = prop->boundingSurface();
             if(bounds.get() != nullptr && !bounds->intersects(ray, reports))
@@ -358,85 +394,133 @@ namespace prop3
             }
         }
 
-        return propMin;
+        return reportMin.distance;
     }
 
     glm::dvec3 CpuRaytracerWorker::fireScreenRay(
             const Raycast& raycast)
     {
-        const glm::dvec3& intensity = raycast.color;
-        double maxIntensity = glm::max(glm::max(
-            intensity.r, intensity.g), intensity.b);
-        if(maxIntensity < _screenRayIntensityThreshold)
+        // Check if step contribution is too small
+        const glm::dvec3& currAtt = raycast.color;
+        double currIntensity = glm::max(glm::max(currAtt.x, currAtt.y), currAtt.z);
+        if(currIntensity < _screenRayIntensityThreshold)
         {
             return glm::dvec3(0.0);
         }
 
+
+        // Compute maximum travelled distance in current material
         Ray ray = raycast.ray;
-        double matPathLen = raycast.material->lightFreePathLength(ray);
+        const std::shared_ptr<Material>& material = raycast.material;
+        double matPathLen = material->lightFreePathLength(ray);
         ray.limit = matPathLen;
 
+
+        // Find nearest ray-surface intersection
         const Coating* dummyCoat = nullptr;
         const glm::dvec3 dummyVec = glm::dvec3();
-        RayHitReport reportMin(ray, matPathLen, dummyVec, dummyVec, dummyCoat, dummyVec);
-        std::shared_ptr<Prop> propMin = findNearestProp(ray, reportMin);
+        RayHitReport reportMin(matPathLen, dummyVec, dummyVec,
+                               dummyVec, dummyVec, dummyCoat);
+        ray.limit = findNearestProp(ray, reportMin);
 
-        glm::dvec3 matAtt =
-            raycast.material->lightAttenuation(
-                reportMin.ray, reportMin.distance);
+        glm::dvec3 matAtt = material->lightAttenuation(ray);
 
-        if(reportMin.distance != Ray::BACKDROP_DISTANCE)
+        if(ray.limit != Ray::BACKDROP_DISTANCE)
         {
+            // If non-stochatic draft is active
             if(!_useStochasticTracing)
             {
                 return draft(raycast, reportMin);
             }
 
-            unsigned int outRayCountHint = glm::ceil(_diffuseRayCount * maxIntensity);
-            glm::dvec3 totalAttenuation = matAtt * raycast.color;
-            std::vector<Raycast> outRaycasts;
-            glm::dvec3 color(0.0);
+            glm::dvec3 toEyeColorSum(0.0);
 
-            // TODO: optimise reports generation
-            // by skipping intersection past maxDist
+
+            std::vector<Raycast> outRaycasts;
+            unsigned int outRayCountHint = glm::ceil(
+                    _diffuseRayCount * currIntensity);
+
             if(reportMin.distance >= matPathLen)
             {
-                raycast.material->scatterLight(
+                material->scatterLight(
                         outRaycasts,
                         ray,
                         matPathLen,
-                        raycast.material,
+                        material,
                         outRayCountHint);
             }
             else
             {
                 reportMin.compile();
+
+                const Coating* coating = reportMin.coating;
                 std::shared_ptr<Material> enteredMaterial =
                         findAmbientMaterial(reportMin.refractionOrigin);
 
-                reportMin.coating->brdf(
+                // Inderect lighting
+                coating->indirectBrdf(
                         outRaycasts,
                         reportMin,
-                        raycast.material,
+                        material,
                         enteredMaterial,
                         outRayCountHint);
+
+                // Direct lighting
+                std::vector<Raycast> lightCasts = _backdrop->fireOn(
+                        reportMin.position, _backdropRayCount);
+                size_t lightCastCount = lightCasts.size();
+                for(size_t c=0; c < lightCastCount; ++c)
+                {
+                    Raycast& lightCast = lightCasts[c];
+                    Ray& lightRay = lightCast.ray;
+
+                    RayHitReport lightReport = reportMin;
+                    lightReport.distance = Ray::BACKDROP_DISTANCE;
+                    lightRay.limit = findNearestProp(lightRay, lightReport);
+                    if(lightRay.limit != Ray::BACKDROP_DISTANCE)
+                    {
+                        if(glm::length(lightReport.position - reportMin.position)
+                             < RayHitReport::EPSILON_LENGTH)
+                        {
+                            double lightPathLen = material->lightFreePathLength(lightRay);
+                            if(lightPathLen >= lightRay.limit)
+                            {
+                                glm::dvec3 lightAtt = material->lightAttenuation(lightRay);
+
+                                lightReport.compile();
+                                std::shared_ptr<Material> lightEnteredMaterial =
+                                        findAmbientMaterial(lightReport.refractionOrigin);
+
+                                toEyeColorSum += lightAtt * lightCast.color *
+                                    coating->directBrdf(
+                                        lightReport,
+                                        -ray.direction,
+                                        _envMaterial,
+                                        lightEnteredMaterial);
+                            }
+                        }
+                    }
+                }
             }
 
-            for(Raycast cast : outRaycasts)
+            for(Raycast& brdf : outRaycasts)
             {
-                glm::dvec3 stageColor = cast.color * matAtt;
-                cast.color *= totalAttenuation;
-                color += fireScreenRay(cast) * stageColor;
+                glm::dvec3 stepAtt = brdf.color * matAtt;
+                glm::dvec3 nextAtt = currAtt * stepAtt;
+
+                Raycast fromRaycast(brdf.ray, nextAtt, brdf.material);
+                toEyeColorSum += fireScreenRay(fromRaycast) * stepAtt;
             }
 
-            return color;
+            return toEyeColorSum;
         }
         else if(_backdrop.get() != nullptr)
         {
-            if(intensity != glm::dvec3(1.0) ||
+            bool directView = (currAtt == glm::dvec3(1.0));
+            if(!directView ||
                _backdrop->isDirectlyVisible())
             {
-                return _backdrop->raycast(ray) * matAtt;
+                return _backdrop->raycast(ray, directView) * matAtt;
             }
         }
 

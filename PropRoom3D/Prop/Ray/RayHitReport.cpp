@@ -3,28 +3,34 @@
 
 namespace prop3
 {
-    RayHitReport::RayHitReport(const Ray& ray,
+    const double RayHitReport::EPSILON_LENGTH = 0.000001;
+    const glm::dvec3 RayHitReport::NO_TEXCOORD = glm::dvec3(INFINITY);
+
+    RayHitReport::RayHitReport(
             double distance,
             const glm::dvec3& position,
+            const glm::dvec3& incident,
             const glm::dvec3& normal,
-            const Coating* coating,
-            const glm::dvec3& texCoord) :
-        ray(ray),
+            const glm::dvec3& texCoord,
+            const Coating* coating) :
         distance(distance),
         position(position),
+        incident(incident),
         normal(normal),
-        coating(coating),
         texCoord(texCoord),
+        coating(coating),
         _next(nullptr)
     {
     }
 
     void RayHitReport::compile()
     {
-        if(glm::dot(ray.direction, normal) > 0.0)
+        isTextured = (texCoord != NO_TEXCOORD);
+
+        if(glm::dot(incident, normal) > 0.0)
             normal = - normal;
 
-        glm::dvec3 espilonDist = normal * 0.000001;
+        glm::dvec3 espilonDist = normal * EPSILON_LENGTH;
         reflectionOrigin = position +  espilonDist;
         refractionOrigin = position -  espilonDist;
     }

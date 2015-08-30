@@ -34,7 +34,7 @@ namespace prop3
 
     }
 
-    void TexturedGlossyPaint::brdf(
+    void TexturedGlossyPaint::indirectBrdf(
             std::vector<Raycast>& raycasts,
             const RayHitReport& report,
             const std::shared_ptr<Material>& leavedMaterial,
@@ -42,18 +42,17 @@ namespace prop3
             unsigned int outRayCountHint) const
     {
         size_t preSize, postSize;
-        bool isTextured = report.texCoord != glm::dvec3();
 
-        double glossRatio = computeReflexionRatio(
+        double mirrorRatio = computeReflexionRatio(
             leavedMaterial->refractiveIndex(),
             _varnishRefractiveIndex,
-            report.ray.direction,
+            report.incident,
             report.normal);
 
 
         // Varnish glossy reflection
         double glossiness = _defaultGlossiness;
-        if(isTextured)
+        if(report.isTextured)
         {
             const glm::dvec3& texCoord = report.texCoord;
             int i = texCoord.s * _glossMap.width();
@@ -64,26 +63,26 @@ namespace prop3
 
             // Not blended with default color
             glossiness = pixel[0] / 255.0;
-            glossRatio *= glossiness;
+            mirrorRatio *= glossiness;
         }
 
         preSize = raycasts.size();
-        glossyReflection(raycasts, report, leavedMaterial, glossiness, outRayCountHint);
+        indirectGlossyReflection(raycasts, report, leavedMaterial, glossiness, outRayCountHint);
         postSize = raycasts.size();
 
         for(size_t i=preSize; i<postSize; ++i)
         {
-            raycasts[i].color *= glossRatio;
+            raycasts[i].color *= mirrorRatio;
         }
 
 
         // Pigment diffuse reflection
         preSize = raycasts.size();
-        diffuseReflection(raycasts, report, leavedMaterial, outRayCountHint);
+        indirectDiffuseReflection(raycasts, report, leavedMaterial, outRayCountHint);
         postSize = raycasts.size();
 
         glm::dvec3 color = _defaultColor;
-        if(isTextured)
+        if(report.isTextured)
         {
             const glm::dvec3& texCoord = report.texCoord;
             int i = texCoord.s * _texture.width();
@@ -98,11 +97,61 @@ namespace prop3
             color.z = pixel[2] / 255.0;
         }
 
-        color *= (1.0 - glossRatio);
+        color *= (1.0 - mirrorRatio);
         for(size_t i=preSize; i<postSize; ++i)
         {
             raycasts[i].color *= color;
         }
+    }
+
+    glm::dvec3 TexturedGlossyPaint::directBrdf(
+            const RayHitReport& report,
+            const glm::dvec3& outDirection,
+            const std::shared_ptr<Material>& leavedMaterial,
+            const std::shared_ptr<Material>& enteredMaterial) const
+    {
+        double mirrorRatio = computeReflexionRatio(
+            leavedMaterial->refractiveIndex(),
+            _varnishRefractiveIndex,
+            report.incident,
+            report.normal);
+
+        double glossiness = _defaultGlossiness;
+        if(report.isTextured)
+        {
+            const glm::dvec3& texCoord = report.texCoord;
+            int i = texCoord.s * _glossMap.width();
+            int j = texCoord.t * _glossMap.height();
+            unsigned char* pixel = _glossMap.pixel(
+                glm::clamp(i, 0,  _glossMap.width()-1),
+                glm::clamp(j, 0, _glossMap.height()-1));
+
+            // Not blended with default color
+            glossiness = pixel[0] / 255.0;
+            mirrorRatio *= glossiness;
+        }
+
+        glm::dvec3 color = _defaultColor;
+        if(report.isTextured)
+        {
+            const glm::dvec3& texCoord = report.texCoord;
+            int i = texCoord.s * _texture.width();
+            int j = texCoord.t * _texture.height();
+            unsigned char* pixel = _texture.pixel(
+                glm::clamp(i, 0,  _texture.width()-1),
+                glm::clamp(j, 0, _texture.height()-1));
+
+            // Not blended with default color
+            color.x = pixel[0] / 255.0;
+            color.y = pixel[1] / 255.0;
+            color.z = pixel[2] / 255.0;
+        }
+
+
+        return glm::mix(
+            color * directDiffuseReflection(report, outDirection),
+            directGlossyReflection(report, outDirection, glossiness),
+            mirrorRatio);
     }
 
     void TexturedGlossyPaint::accept(StageSetVisitor& visitor)

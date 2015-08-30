@@ -22,7 +22,7 @@ namespace prop3
 
     }
 
-    void GlossyPaint::brdf(
+    void GlossyPaint::indirectBrdf(
         std::vector<Raycast>& raycasts,
         const RayHitReport& report,
         const std::shared_ptr<Material>& leavedMaterial,
@@ -31,34 +31,52 @@ namespace prop3
     {
         size_t preSize, postSize;
 
-        double glossRatio = computeReflexionRatio(
+        double mirrorRatio = computeReflexionRatio(
             leavedMaterial->refractiveIndex(),
             _varnishRefractiveIndex,
-            report.ray.direction,
+            report.incident,
             report.normal);
 
 
         // Varnish glossy reflection
         preSize = raycasts.size();
-        glossyReflection(raycasts, report, leavedMaterial, _glossiness, outRayCountHint);
+        indirectGlossyReflection(raycasts, report, leavedMaterial, _glossiness, outRayCountHint);
         postSize = raycasts.size();
 
         for(size_t i=preSize; i<postSize; ++i)
         {
-            raycasts[i].color *= glossRatio;
+            raycasts[i].color *= mirrorRatio;
         }
 
 
         // Pigment diffuse reflection
         preSize = raycasts.size();
-        diffuseReflection(raycasts, report, leavedMaterial, outRayCountHint);
+        indirectDiffuseReflection(raycasts, report, leavedMaterial, outRayCountHint);
         postSize = raycasts.size();
 
-        glm::dvec3 color = _color * (1.0 - glossRatio);
+        glm::dvec3 color = _color * (1.0 - mirrorRatio);
         for(size_t i=preSize; i<postSize; ++i)
         {
             raycasts[i].color *= color;
         }
+    }
+
+    glm::dvec3 GlossyPaint::directBrdf(
+            const RayHitReport& report,
+            const glm::dvec3& outDirection,
+            const std::shared_ptr<Material>& leavedMaterial,
+            const std::shared_ptr<Material>& enteredMaterial) const
+    {
+        double mirrorRatio = computeReflexionRatio(
+            leavedMaterial->refractiveIndex(),
+            _varnishRefractiveIndex,
+            report.incident,
+            report.normal);
+
+        return glm::mix(
+            _color * directDiffuseReflection(report, outDirection),
+            directGlossyReflection(report, outDirection, _glossiness),
+            mirrorRatio);
     }
 
     void GlossyPaint::accept(StageSetVisitor& visitor)

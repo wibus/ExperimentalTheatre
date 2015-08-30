@@ -79,6 +79,7 @@ namespace prop3
     const QString BACKDROP_SUN_COLOR            = "Sun Color";
     const QString BACKDROP_SKY_COLOR            = "Sky Color";
     const QString BACKDROP_SKYLINE_COLOR        = "Skyline Color";
-    const QString BACKDROP_UP_SKY_DIR           = "Up Sky Dir";
+    const QString BACKDROP_GROUND_COLOR         = "Ground Color";
+    const QString BACKDROP_GROUND_HEIGHT        = "Ground Height";
     const QString BACKDROP_SUN_DIR              = "Sun Dir";
 }

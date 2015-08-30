@@ -63,7 +63,9 @@ namespace prop3
             {
                 glm::dvec3 pt = ray.origin + ray.direction*t1;
                 glm::dvec3 n = glm::normalize(pt - _center);
-                reports.add(ray, t1, pt, n, _coating.get());
+                reports.add(t1, pt, ray.direction, n,
+                            RayHitReport::NO_TEXCOORD,
+                             _coating.get());
             }
 
             double t2 = (-b + disrcSqrt) / (2 * a);
@@ -71,7 +73,9 @@ namespace prop3
             {
                 glm::dvec3 pt = ray.origin + ray.direction*t2;
                 glm::dvec3 n = glm::normalize(pt - _center);
-                reports.add(ray, t2, pt, n, _coating.get());
+                reports.add(t2, pt, ray.direction, n,
+                            RayHitReport::NO_TEXCOORD,
+                             _coating.get());
             }
         }
         else if(discr == 0.0)
@@ -81,7 +85,9 @@ namespace prop3
             {
                 glm::dvec3 pt = ray.origin + ray.direction*t;
                 glm::dvec3 n = glm::normalize(pt - _center);
-                reports.add(ray, t, pt, n, _coating.get());
+                reports.add(t, pt, ray.direction, n,
+                            RayHitReport::NO_TEXCOORD,
+                             _coating.get());
             }
         }
     }

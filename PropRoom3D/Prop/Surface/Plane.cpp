@@ -78,7 +78,9 @@ namespace prop3
             if(0.0 < t && t < ray.limit)
             {
                 glm::dvec3 pt = ray.origin + ray.direction * t;
-                reports.add(ray, t, pt, _normal, _coating.get());
+                reports.add(t, pt, ray.direction, _normal,
+                            RayHitReport::NO_TEXCOORD,
+                            _coating.get());
             }
         }
     }

@@ -80,7 +80,8 @@ namespace prop3
     extern const QString BACKDROP_SUN_COLOR;
     extern const QString BACKDROP_SKY_COLOR;
     extern const QString BACKDROP_SKYLINE_COLOR;
-    extern const QString BACKDROP_UP_SKY_DIR;
+    extern const QString BACKDROP_GROUND_COLOR;
+    extern const QString BACKDROP_GROUND_HEIGHT;
     extern const QString BACKDROP_SUN_DIR;
 }
 

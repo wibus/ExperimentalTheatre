@@ -161,7 +161,9 @@ namespace prop3
                     {
                         glm::dvec3 pt1 = ray.origin + ray.direction*t;
                         glm::dvec3 n1 =  computeNormal(_q, pt1);
-                        reports.add(ray, t, pt1, n1, _coating.get());
+                        reports.add(t, pt1, ray.direction, n1,
+                                    RayHitReport::NO_TEXCOORD,
+                                    _coating.get());
                     }
                 }
 
@@ -171,7 +173,9 @@ namespace prop3
                     {
                         glm::dvec3 pt2 = ray.origin + ray.direction*t;
                         glm::dvec3 n2 =  computeNormal(_q, pt2);
-                        reports.add(ray, t, pt2, n2, _coating.get());
+                        reports.add(t, pt2, ray.direction, n2,
+                                    RayHitReport::NO_TEXCOORD,
+                                    _coating.get());
                     }
                 }
             }
@@ -182,7 +186,9 @@ namespace prop3
                 {
                     glm::dvec3 pt = ray.origin + ray.direction*t;
                     glm::dvec3 n =  computeNormal(_q, pt);
-                    reports.add(ray, t, pt, n, _coating.get());
+                    reports.add(t, pt, ray.direction, n,
+                                RayHitReport::NO_TEXCOORD,
+                                _coating.get());
                 }
             }
         }
@@ -195,7 +201,9 @@ namespace prop3
                 {
                     glm::dvec3 pt = ray.origin + ray.direction * t;
                     glm::dvec3 n =  computeNormal(_q, pt);
-                    reports.add(ray, t, pt, n, _coating.get());
+                    reports.add(t, pt, ray.direction, n,
+                                RayHitReport::NO_TEXCOORD,
+                                _coating.get());
                 }
             }
         }

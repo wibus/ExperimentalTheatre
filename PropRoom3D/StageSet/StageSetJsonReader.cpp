@@ -142,7 +142,8 @@ namespace prop3
                 proceduralSun->setSunColor(dvec3FromJson(obj[BACKDROP_SUN_COLOR]));
                 proceduralSun->setSkyColor(dvec3FromJson(obj[BACKDROP_SKY_COLOR]));
                 proceduralSun->setSkylineColor(dvec3FromJson(obj[BACKDROP_SKYLINE_COLOR]));
-                proceduralSun->setUpSkyDirection(dvec3FromJson(obj[BACKDROP_UP_SKY_DIR]));
+                proceduralSun->setGroundColor(dvec3FromJson(obj[BACKDROP_GROUND_COLOR]));
+                proceduralSun->setGroundHeight(obj[BACKDROP_GROUND_HEIGHT].toDouble());
                 proceduralSun->setSunDirection(dvec3FromJson(obj[BACKDROP_SUN_DIR]));
                 backdrop.reset(proceduralSun);
             }

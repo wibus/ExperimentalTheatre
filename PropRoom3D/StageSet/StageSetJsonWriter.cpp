@@ -385,7 +385,8 @@ namespace prop3
             obj[BACKDROP_SUN_COLOR]            = toJson(node.sunColor());
             obj[BACKDROP_SKY_COLOR]            = toJson(node.skyColor());
             obj[BACKDROP_SKYLINE_COLOR]        = toJson(node.skylineColor());
-            obj[BACKDROP_UP_SKY_DIR]           = toJson(node.upSkyDirection());
+            obj[BACKDROP_GROUND_COLOR]         = toJson(node.groundColor());
+            obj[BACKDROP_GROUND_HEIGHT]        = node.groundHeight();
             obj[BACKDROP_SUN_DIR]              = toJson(node.sunDirection());
             _backdropsArray.append(obj);
         }

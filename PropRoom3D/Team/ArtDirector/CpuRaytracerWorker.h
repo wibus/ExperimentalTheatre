@@ -69,7 +69,7 @@ namespace prop3
         virtual std::shared_ptr<Material> findAmbientMaterial(
                 glm::dvec3 position);
 
-        virtual std::shared_ptr<Prop> findNearestProp(
+        virtual double findNearestProp(
                 const Ray& rayPrototype,
                 prop3::RayHitReport& reportMin);
 
@@ -100,6 +100,7 @@ namespace prop3
 
         double _lightRayIntensityThreshold;
         double _screenRayIntensityThreshold;
+        unsigned int _backdropRayCount;
         unsigned int _diffuseRayCount;
 
         glm::ivec2 _resolution;
@@ -121,8 +122,11 @@ namespace prop3
         std::shared_ptr<Material> _envMaterial;
         std::vector<std::shared_ptr<Prop>> _props;
 
+        std::vector<glm::dvec3> _lightHitColors;
+        std::vector<RayHitReport> _lightHitReports;
+
         // Memory pools
-        std::vector<RayHitReport*> reportPool;
+        std::vector<RayHitReport*> _reportPool;
     };
 }
 

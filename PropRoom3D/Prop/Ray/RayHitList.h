@@ -15,12 +15,12 @@ namespace prop3
         ~RayHitList();
 
         void add(
-            const Ray& ray,
             double distance,
             const glm::dvec3& position,
+            const glm::dvec3& incident,
             const glm::dvec3& normal,
-            const Coating* coating,
-            const glm::dvec3& texCoord = glm::dvec3());
+            const glm::dvec3& texCoord,
+            const Coating* coating);
         void add(RayHitReport* report);
         void clear();
 
@@ -34,34 +34,34 @@ namespace prop3
 
     // IMPLEMENTATION //
     inline void RayHitList::add(
-            const Ray& ray,
             double distance,
             const glm::dvec3& position,
+            const glm::dvec3& incident,
             const glm::dvec3& normal,
-            const Coating* coating,
-            const glm::dvec3& texCoord)
+            const glm::dvec3& texCoord,
+            const Coating* coating)
     {
         RayHitReport* report;
         if(memoryPool.empty())
         {
             report = new RayHitReport(
-                        ray,
                         distance,
                         position,
+                        incident,
                         normal,
-                        coating,
-                        texCoord);
+                        texCoord,
+                        coating);
         }
         else
         {
             report = memoryPool.back();
 
-            report->ray = ray;
             report->distance = distance;
             report->position = position;
+            report->incident = incident;
             report->normal = normal;
-            report->coating = coating;
             report->texCoord = texCoord;
+            report->coating = coating;
 
             memoryPool.pop_back();
         }

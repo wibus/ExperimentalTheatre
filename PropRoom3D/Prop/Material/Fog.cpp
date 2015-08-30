@@ -29,18 +29,27 @@ namespace prop3
 
     }
 
-    void Fog::brdf(
+    void Fog::indirectBrdf(
         std::vector<Raycast>& raycasts,
         const RayHitReport& report,
         const std::shared_ptr<Material>& leavedMaterial,
         const std::shared_ptr<Material>& selfEnteredMaterial,
         unsigned int outRayCountHint) const
     {
-        specularRefraction(
+        indirectSpecularRefraction(
             raycasts,
             report,
             leavedMaterial,
             selfEnteredMaterial);
+    }
+
+    glm::dvec3 Fog::directBrdf(
+        const RayHitReport& report,
+        const glm::dvec3& outDirection,
+        const std::shared_ptr<Material>& leavedMaterial,
+        const std::shared_ptr<Material>& enteredMaterial) const
+    {
+        return directSpecularRefraction(report, outDirection);
     }
 
     double Fog::lightFreePathLength(
@@ -48,7 +57,7 @@ namespace prop3
     {
         if(_concentration == 0.0)
         {
-            return Ray::BACKDROP_DISTANCE;
+            return ray.limit;
         }
         else
         {
@@ -56,13 +65,13 @@ namespace prop3
             double distInFog = getDistanceInFog(ray, ray.limit, enterDist);
 
             if(distInFog <= 0.0)
-                return Ray::BACKDROP_DISTANCE;
+                return ray.limit;
 
             std::exponential_distribution<> distrib(_concentration);
             double distance = distrib(_randomEngine);
 
             if(distance > distInFog)
-                return Ray::BACKDROP_DISTANCE;
+                return ray.limit;
 
             return enterDist + distance;
         }

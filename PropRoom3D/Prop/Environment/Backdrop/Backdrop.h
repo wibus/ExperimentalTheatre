@@ -9,6 +9,7 @@
 namespace prop3
 {
     class Ray;
+    class Raycast;
     class RayHitList;
 
 
@@ -20,7 +21,11 @@ namespace prop3
     public:
         virtual ~Backdrop();
 
-        virtual glm::dvec3 raycast(const Ray& ray) const = 0;
+        virtual glm::dvec3 raycast(const Ray& ray, bool directView) const = 0;
+
+        virtual std::vector<Raycast> fireRays(unsigned int count) const = 0;
+
+        virtual std::vector<Raycast> fireOn(const glm::dvec3& pos, unsigned int count) const = 0;
 
         bool isDirectlyVisible() const;
 
