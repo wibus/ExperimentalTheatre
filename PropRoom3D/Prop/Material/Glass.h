@@ -6,7 +6,6 @@
 
 namespace prop3
 {
-
     class PROP3D_EXPORT Glass :
             public Material
     {
@@ -34,7 +33,7 @@ namespace prop3
             const std::shared_ptr<Material> &enteredMaterial) const;
 
         virtual glm::dvec3 lightAttenuation(
-            const Ray& ray) const override;
+            const Raycast& ray) const override;
 
         glm::dvec3 color() const;
 

@@ -143,7 +143,7 @@ namespace prop3
     }
 
     // ref : http://marctenbosch.com/photon/mbosch_intersection.pdf
-    void Quadric::raycast(const Ray& ray, RayHitList& reports) const
+    void Quadric::raycast(const Raycast& ray, RayHitList& reports) const
     {
         double a, b, c;
         params(ray, a, b, c);
@@ -161,7 +161,7 @@ namespace prop3
                     {
                         glm::dvec3 pt1 = ray.origin + ray.direction*t;
                         glm::dvec3 n1 =  computeNormal(_q, pt1);
-                        reports.add(t, pt1, ray.direction, n1,
+                        reports.add(t, ray, pt1, n1,
                                     RayHitReport::NO_TEXCOORD,
                                     _coating.get());
                     }
@@ -173,7 +173,7 @@ namespace prop3
                     {
                         glm::dvec3 pt2 = ray.origin + ray.direction*t;
                         glm::dvec3 n2 =  computeNormal(_q, pt2);
-                        reports.add(t, pt2, ray.direction, n2,
+                        reports.add(t, ray, pt2, n2,
                                     RayHitReport::NO_TEXCOORD,
                                     _coating.get());
                     }
@@ -186,7 +186,7 @@ namespace prop3
                 {
                     glm::dvec3 pt = ray.origin + ray.direction*t;
                     glm::dvec3 n =  computeNormal(_q, pt);
-                    reports.add(t, pt, ray.direction, n,
+                    reports.add(t, ray, pt, n,
                                 RayHitReport::NO_TEXCOORD,
                                 _coating.get());
                 }
@@ -201,7 +201,7 @@ namespace prop3
                 {
                     glm::dvec3 pt = ray.origin + ray.direction * t;
                     glm::dvec3 n =  computeNormal(_q, pt);
-                    reports.add(t, pt, ray.direction, n,
+                    reports.add(t, ray, pt, n,
                                 RayHitReport::NO_TEXCOORD,
                                 _coating.get());
                 }
@@ -209,7 +209,7 @@ namespace prop3
         }
     }
 
-    bool Quadric::intersects(const Ray& ray, RayHitList& reports) const
+    bool Quadric::intersects(const Raycast& ray, RayHitList& reports) const
     {
         double a, b, c;
         params(ray, a, b, c);
@@ -225,7 +225,7 @@ namespace prop3
     }
 
     void Quadric::params(
-            const Ray& ray,
+            const Raycast& ray,
             double& a,
             double& b,
             double& c) const

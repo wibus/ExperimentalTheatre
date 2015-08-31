@@ -30,7 +30,7 @@ namespace prop3
         for(size_t i=preSize; i<postSize; ++i)
         {
             raycasts[i].color *= _color * glm::max(0.0,
-                glm::dot(raycasts[i].ray.direction, report.normal));
+                glm::dot(raycasts[i].direction, report.normal));
         }
     }
 

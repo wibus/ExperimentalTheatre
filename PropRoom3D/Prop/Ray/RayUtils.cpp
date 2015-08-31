@@ -22,7 +22,9 @@ namespace prop3
         const glm::dvec3& outDir)
     {
         return glm::dvec3(glm::max(0.0,
-            glm::dot(-report.incident, report.normal)));
+            glm::dot(-report.incidentRay.direction, report.normal)) *
+            Raycast::compatibility(report.incidentRay.entropy,
+                                   Raycast::FULLY_DIFFUSIVE_ENTROPY));
     }
 
     glm::dvec3 directGlossyReflection(
@@ -41,14 +43,20 @@ namespace prop3
         else
         {
             glm::dvec3 reflectDir = glm::reflect(
-                    report.incident, report.normal);
+                    report.incidentRay.direction,
+                    report.normal);
 
             double alpha = (glm::dot(reflectDir, outDir) + 1.0) / 2.0;
+            double glossy = glm::pow(alpha, 1.0 / glossiness);
 
-            glm::dvec3 diffuse = directDiffuseReflection(report, outDir);
-            glm::dvec3 glossy = glm::dvec3(glm::pow(alpha, 1.0 / glossiness));
+            double diffuse = glm::max(0.0, glm::dot(
+                -report.incidentRay.direction, report.normal));
 
-            return glm::mix(diffuse, glossy, glossiness);
+            double compatibility = Raycast::compatibility(
+                   report.incidentRay.entropy,
+                   Raycast::FULLY_DIFFUSIVE_ENTROPY);
+
+            return glm::dvec3(glm::mix(diffuse, glossy, glossiness) * compatibility);
         }
     }
 
@@ -69,11 +77,14 @@ namespace prop3
         const std::shared_ptr<Material>& material)
     {
         glm::dvec3 reflectDir = glm::reflect(
-                report.incident, report.normal);
+                report.incidentRay.direction, report.normal);
 
         outRays.push_back(Raycast(
-                Ray(report.reflectionOrigin, reflectDir),
+                Raycast::BACKDROP_DISTANCE,
+                Raycast::FULLY_SPECULAR_ENTROPY,
                 glm::dvec3(1.0),
+                report.reflectionOrigin,
+                reflectDir,
                 material));
     }
 
@@ -95,9 +106,12 @@ namespace prop3
                     glm::dot(direction, report.normal));
 
             outRays.push_back(Raycast(
-                Ray(report.reflectionOrigin, direction),
-                glm::dvec3(attenuation),
-                material));
+                    Raycast::BACKDROP_DISTANCE,
+                    Raycast::FULLY_DIFFUSIVE_ENTROPY,
+                    glm::dvec3(attenuation),
+                    report.reflectionOrigin,
+                    direction,
+                    material));
         }
     }
 
@@ -127,18 +141,25 @@ namespace prop3
                     diffuseDir = -diffuseDir;
 
                 glm::dvec3 reflectDir = glm::reflect(
-                        report.incident, report.normal);
+                        report.incidentRay.direction, report.normal);
 
                 glm::dvec3 direction = glm::mix(diffuseDir, reflectDir, glossiness);
                 direction = glm::normalize(direction);
 
-                double attenuation = glm::max(0.0, splitFactor *
-                        glm::dot(direction, report.normal));
+                glm::dvec3 attenuation = glm::dvec3(glm::max(0.0, splitFactor *
+                        glm::dot(direction, report.normal)));
+
+                double entropy = glm::mix(Raycast::FULLY_DIFFUSIVE_ENTROPY,
+                                          Raycast::FULLY_SPECULAR_ENTROPY,
+                                          glossiness);
 
                 outRays.push_back(Raycast(
-                    Ray(report.reflectionOrigin, direction),
-                    glm::dvec3(attenuation),
-                    material));
+                        Raycast::BACKDROP_DISTANCE,
+                        entropy,
+                        attenuation,
+                        report.reflectionOrigin,
+                        direction,
+                        material));
             }
         }
     }
@@ -149,33 +170,41 @@ namespace prop3
         const std::shared_ptr<Material>& leavedMaterial,
         const std::shared_ptr<Material>& enteredMaterial)
     {
+        const glm::dvec3& incident = report.incidentRay.direction;
+
         double reflectionRatio =
                 computeReflexionRatio(
                     leavedMaterial->refractiveIndex(),
                     enteredMaterial->refractiveIndex(),
-                    report.incident,
+                    incident,
                     report.normal);
 
         glm::dvec3 reflectDir =
                 glm::reflect(
-                    report.incident,
+                    incident,
                     report.normal);
 
         glm::dvec3 refractDir =
                 computeRefraction(
                     leavedMaterial->refractiveIndex(),
                     enteredMaterial->refractiveIndex(),
-                    report.incident,
+                    incident,
                     report.normal);
 
         outRays.push_back(Raycast(
-                Ray(report.reflectionOrigin, glm::normalize(reflectDir)),
+                Raycast::BACKDROP_DISTANCE,
+                Raycast::FULLY_SPECULAR_ENTROPY,
                 glm::dvec3(reflectionRatio),
+                report.reflectionOrigin,
+                glm::normalize(reflectDir),
                 leavedMaterial));
 
         outRays.push_back(Raycast(
-                Ray(report.refractionOrigin, glm::normalize(refractDir)),
+                Raycast::BACKDROP_DISTANCE,
+                Raycast::FULLY_SPECULAR_ENTROPY,
                 glm::dvec3(1 - reflectionRatio),
+                report.refractionOrigin,
+                glm::normalize(refractDir),
                 enteredMaterial));
     }
 

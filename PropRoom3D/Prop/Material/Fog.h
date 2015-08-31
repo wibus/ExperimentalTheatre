@@ -39,11 +39,11 @@ namespace prop3
             const std::shared_ptr<Material> &enteredMaterial) const;
 
         virtual double lightFreePathLength(
-            const Ray& ray) const;
+            const Raycast& ray) const;
 
         virtual void scatterLight(
             std::vector<Raycast>& raycasts,
-            const Ray& ray, double distance,
+            const Raycast& ray, double distance,
             const std::shared_ptr<Material>& self,
             unsigned int outRayCountHint) const;
 
@@ -54,8 +54,8 @@ namespace prop3
         double radius() const;
 
     protected:
-        double getDistanceInFog(const Ray& ray, double rayDistance) const;
-        double getDistanceInFog(const Ray& ray, double rayDistance, double& enterDist) const;
+        double getDistanceInFog(const Raycast& ray, double rayDistance) const;
+        double getDistanceInFog(const Raycast& ray, double rayDistance, double& enterDist) const;
 
 
         glm::dvec3 _color;

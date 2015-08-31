@@ -34,7 +34,7 @@ namespace prop3
         double mirrorRatio = computeReflexionRatio(
             leavedMaterial->refractiveIndex(),
             _varnishRefractiveIndex,
-            report.incident,
+            report.incidentRay.direction,
             report.normal);
 
 
@@ -70,7 +70,7 @@ namespace prop3
         double mirrorRatio = computeReflexionRatio(
             leavedMaterial->refractiveIndex(),
             _varnishRefractiveIndex,
-            report.incident,
+            report.incidentRay.direction,
             report.normal);
 
         return glm::mix(

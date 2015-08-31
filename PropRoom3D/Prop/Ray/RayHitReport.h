@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "Ray.h"
+#include "Raycast.h"
 
 
 namespace prop3
@@ -15,8 +15,8 @@ namespace prop3
     {
         RayHitReport(
             double distance,
+            const Raycast& incidentRay,
             const glm::dvec3& position,
-            const glm::dvec3& incident,
             const glm::dvec3& normal,
             const glm::dvec3& texCoord,
             const Coating* coating);
@@ -24,8 +24,8 @@ namespace prop3
         void compile();
 
         double distance;
+        Raycast incidentRay;
         glm::dvec3 position;
-        glm::dvec3 incident;
         glm::dvec3 normal;
         glm::dvec3 texCoord;
         const Coating* coating;

@@ -11,7 +11,7 @@
 namespace prop3
 {
     const double ProceduralSun::SUN_COS_DIMENSION = 0.99996192306;
-    const double ProceduralSun::SUN_SMOOTH_EDGE = 1.0e5;
+    const double ProceduralSun::SUN_SMOOTH_EDGE = 5.0e4;
     const glm::dvec3 ProceduralSun::SKY_UP = glm::dvec3(0, 0, 1);
 
     const double ProceduralSun::SUN_SIN =
@@ -80,7 +80,7 @@ namespace prop3
         stampCurrentUpdate();
     }
 
-    glm::dvec3 ProceduralSun::raycast(const Ray& ray, bool directView) const
+    glm::dvec3 ProceduralSun::raycast(const Raycast& ray, bool directView) const
     {
         glm::dvec3 color;
 
@@ -103,15 +103,18 @@ namespace prop3
                 color = glm::mix(_groundColor, _skylineColor, a);
             }
 
-            // Sun Color
-            if(directView)
-            {
-                // Sun is only visible when the sky is direclty observed
-                double sunDot = glm::dot(_sunDirection, ray.direction);
-                double sunProb = sunDot / SUN_COS_DIMENSION;
-                double sunPow = glm::pow(glm::abs(sunProb), SUN_SMOOTH_EDGE) * glm::sign(sunProb);
-                color = glm::mix(color, _sunColor, glm::max(0.0, sunPow));
-            }
+
+            // Sun ray compatibility with surface reflexion
+            double sunCompatibility =
+                Raycast::compatibility(
+                   Raycast::FULLY_SPECULAR_ENTROPY,
+                   ray.entropy);
+
+            // Sun is only visible when the sky is direclty observed
+            double sunDot = glm::dot(_sunDirection, ray.direction);
+            double sunProb = sunDot / SUN_COS_DIMENSION;
+            double sunPow = glm::pow(glm::abs(sunProb), SUN_SMOOTH_EDGE) * glm::sign(sunProb);
+            color += _sunColor * glm::max(0.0, sunPow) * sunCompatibility;
         }
         else
         {
@@ -143,8 +146,14 @@ namespace prop3
                 sideward * radDist.x + upward * radDist.y;
 
             glm::dvec3 rayColor = _sunColor * hitIntensity;
-            Ray ray(radPoint, glm::normalize(recPoint - radPoint));
-            raycasts.push_back(Raycast(ray, rayColor, _spaceMaterial));
+            glm::dvec3 direction = glm::normalize(recPoint - radPoint);
+            raycasts.push_back(Raycast(
+                Raycast::BACKDROP_DISTANCE,
+                Raycast::FULLY_DIFFUSIVE_ENTROPY,
+                rayColor,
+                radPoint,
+                direction,
+                _spaceMaterial));
         }
 
         return raycasts;
@@ -171,8 +180,14 @@ namespace prop3
                 upward * radDist.y;
 
             glm::dvec3 rayColor = _sunColor * hitIntensity;
-            Ray ray(radPoint, glm::normalize(pos - radPoint));
-            raycasts.push_back(Raycast(ray, rayColor, _spaceMaterial));
+            glm::dvec3 direction = glm::normalize(pos - radPoint);
+            raycasts.push_back(Raycast(
+                Raycast::BACKDROP_DISTANCE,
+                Raycast::FULLY_DIFFUSIVE_ENTROPY,
+                rayColor,
+                radPoint,
+                direction,
+                _spaceMaterial));
         }
 
         return raycasts;

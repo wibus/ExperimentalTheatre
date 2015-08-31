@@ -41,7 +41,7 @@ namespace prop3
         void setSunDirection(const glm::dvec3& dir);
 
 
-        virtual glm::dvec3 raycast(const Ray& ray, bool directView) const override;
+        virtual glm::dvec3 raycast(const Raycast& ray, bool directView) const override;
 
         virtual std::vector<Raycast> fireRays(unsigned int count) const override;
 

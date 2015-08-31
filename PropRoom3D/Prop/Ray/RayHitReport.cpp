@@ -8,14 +8,14 @@ namespace prop3
 
     RayHitReport::RayHitReport(
             double distance,
+            const Raycast& incidentRay,
             const glm::dvec3& position,
-            const glm::dvec3& incident,
             const glm::dvec3& normal,
             const glm::dvec3& texCoord,
             const Coating* coating) :
         distance(distance),
+        incidentRay(incidentRay),
         position(position),
-        incident(incident),
         normal(normal),
         texCoord(texCoord),
         coating(coating),
@@ -27,7 +27,7 @@ namespace prop3
     {
         isTextured = (texCoord != NO_TEXCOORD);
 
-        if(glm::dot(incident, normal) > 0.0)
+        if(glm::dot(incidentRay.direction, normal) > 0.0)
             normal = - normal;
 
         glm::dvec3 espilonDist = normal * EPSILON_LENGTH;

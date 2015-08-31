@@ -69,7 +69,7 @@ namespace prop3
         return glm::dot(_normal, point) + _d;
     }
 
-    void Plane::raycast(const Ray& ray, RayHitList& reports) const
+    void Plane::raycast(const Raycast& ray, RayHitList& reports) const
     {
         double dirDotNorm = glm::dot(_normal, ray.direction);
         if(dirDotNorm != 0.0)
@@ -78,14 +78,14 @@ namespace prop3
             if(0.0 < t && t < ray.limit)
             {
                 glm::dvec3 pt = ray.origin + ray.direction * t;
-                reports.add(t, pt, ray.direction, _normal,
+                reports.add(t, ray, pt, _normal,
                             RayHitReport::NO_TEXCOORD,
                             _coating.get());
             }
         }
     }
 
-    bool Plane::intersects(const Ray& ray, RayHitList& reports) const
+    bool Plane::intersects(const Raycast& ray, RayHitList& reports) const
     {
         return glm::dot(ray.direction, _normal) != 0.0;
     }
@@ -161,7 +161,7 @@ namespace prop3
                     new PlaneTexture(normal, origin, texU, texV, texOrigin));
     }
 
-    void PlaneTexture::raycast(const Ray& ray, RayHitList& reports) const
+    void PlaneTexture::raycast(const Raycast& ray, RayHitList& reports) const
     {
         RayHitReport* last = reports.head;
         Plane::raycast(ray, reports);

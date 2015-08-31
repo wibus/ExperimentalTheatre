@@ -44,7 +44,7 @@ namespace prop3
         return directSpecularRefraction(report, outDirection);
     }
 
-    glm::dvec3 Glass::lightAttenuation(const Ray& ray) const
+    glm::dvec3 Glass::lightAttenuation(const Raycast& ray) const
     {
         if(_concentration == 0.0)
             return glm::dvec3(1.0);

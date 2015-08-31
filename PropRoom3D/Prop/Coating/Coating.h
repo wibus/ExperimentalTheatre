@@ -37,10 +37,6 @@ namespace prop3
             const std::shared_ptr<Material>& leavedMaterial,
             const std::shared_ptr<Material>& enteredMaterial) const = 0;
     };
-
-
-
-    // IMPLEMENTATION //
 }
 
 #endif // PROPROOM3D_COATING_H

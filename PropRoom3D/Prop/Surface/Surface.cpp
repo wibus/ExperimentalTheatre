@@ -76,13 +76,14 @@ namespace prop3
         return _surf->signedDistance(point);
     }
 
-    void SurfaceGhost::raycast(const Ray&,
+    void SurfaceGhost::raycast(
+        const Raycast&,
         RayHitList&) const
     {
         // Never generates intersection points
     }
 
-    bool SurfaceGhost::intersects(const Ray& ray, RayHitList& reports) const
+    bool SurfaceGhost::intersects(const Raycast& ray, RayHitList& reports) const
     {
         return false;
     }
@@ -128,8 +129,9 @@ namespace prop3
         return -_surf->signedDistance(point);
     }
 
-    void SurfaceInverse::raycast(const Ray& ray,
-                        RayHitList& reports) const
+    void SurfaceInverse::raycast(
+            const Raycast& ray,
+            RayHitList& reports) const
     {
         _surf->raycast(ray, reports);
 
@@ -141,7 +143,7 @@ namespace prop3
         }
     }
 
-    bool SurfaceInverse::intersects(const Ray& ray, RayHitList& reports) const
+    bool SurfaceInverse::intersects(const Raycast& ray, RayHitList& reports) const
     {
         return _surf->intersects(ray, reports);
     }
@@ -200,18 +202,18 @@ namespace prop3
         return minDist;
     }
 
-    void SurfaceOr::raycast(const Ray& ray,
+    void SurfaceOr::raycast(const Raycast& ray,
                             RayHitList& reports) const
     {
         raycast(ray, reports, false);
     }
 
-    bool SurfaceOr::intersects(const Ray& ray, RayHitList& reports) const
+    bool SurfaceOr::intersects(const Raycast& ray, RayHitList& reports) const
     {
         return raycast(ray, reports, true);
     }
 
-    bool SurfaceOr::raycast(const Ray& ray,
+    bool SurfaceOr::raycast(const Raycast& ray,
                            RayHitList& reports,
                            bool isTest) const
     {
@@ -320,18 +322,18 @@ namespace prop3
         return maxDist;
     }
 
-    void SurfaceAnd::raycast(const Ray& ray,
+    void SurfaceAnd::raycast(const Raycast& ray,
                              RayHitList& reports) const
     {
         raycast(ray, reports, false);
     }
 
-    bool SurfaceAnd::intersects(const Ray& ray, RayHitList& reports) const
+    bool SurfaceAnd::intersects(const Raycast& ray, RayHitList& reports) const
     {
         return raycast(ray, reports, true);
     }
 
-    bool SurfaceAnd::raycast(const Ray& ray,
+    bool SurfaceAnd::raycast(const Raycast& ray,
                              RayHitList& reports,
                              bool isTest) const
     {

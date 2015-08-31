@@ -38,8 +38,8 @@ namespace prop3
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
-        virtual void raycast(const Ray& ray, RayHitList& reports) const;
-        virtual bool intersects(const Ray& ray, RayHitList& reports) const;
+        virtual void raycast(const Raycast& ray, RayHitList& reports) const;
+        virtual bool intersects(const Raycast& ray, RayHitList& reports) const;
 
         virtual void setCoating(const std::shared_ptr<Coating>& coating);
 
@@ -89,7 +89,7 @@ namespace prop3
         virtual void accept(StageSetVisitor& visitor) override;
 
 
-        virtual void raycast(const Ray& ray, RayHitList& reports) const;
+        virtual void raycast(const Raycast& ray, RayHitList& reports) const;
 
         glm::dvec3 texOrigin() const;
 

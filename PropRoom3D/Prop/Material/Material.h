@@ -11,7 +11,7 @@
 
 namespace prop3
 {
-    class Ray;
+    class Raycast;
     class Raycast;
     class RayHitReport;
 
@@ -44,14 +44,14 @@ namespace prop3
             const std::shared_ptr<Material>& enteredMaterial) const = 0;
 
         virtual double lightFreePathLength(
-            const Ray& ray) const;
+            const Raycast& ray) const;
 
         virtual glm::dvec3 lightAttenuation(
-            const Ray& ray) const;
+            const Raycast& ray) const;
 
         virtual void scatterLight(
             std::vector<Raycast>& raycasts,
-            const Ray& ray, double distance,
+            const Raycast& ray, double distance,
             const std::shared_ptr<Material>& self,
             unsigned int outRayCountHint) const;
 

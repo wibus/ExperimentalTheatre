@@ -51,7 +51,6 @@ SET(PROP3_MATERIAL_HEADERS
 
 # Rays
 SET(PROP3_RAY_HEADERS
-    ${PROP3_SRC_DIR}/Prop/Ray/Ray.h
     ${PROP3_SRC_DIR}/Prop/Ray/Raycast.h
     ${PROP3_SRC_DIR}/Prop/Ray/RayHitList.h
     ${PROP3_SRC_DIR}/Prop/Ray/RayHitReport.h
@@ -153,7 +152,6 @@ SET(PROP3_MATERIAL_SOURCES
 
 # Rays
 SET(PROP3_RAY_SOURCES
-    ${PROP3_SRC_DIR}/Prop/Ray/Ray.cpp
     ${PROP3_SRC_DIR}/Prop/Ray/Raycast.cpp
     ${PROP3_SRC_DIR}/Prop/Ray/RayHitList.cpp
     ${PROP3_SRC_DIR}/Prop/Ray/RayHitReport.cpp

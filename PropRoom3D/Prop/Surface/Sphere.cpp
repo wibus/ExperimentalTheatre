@@ -49,7 +49,7 @@ namespace prop3
         return glm::length(dist) -  _radius;
     }
 
-    void Sphere::raycast(const Ray& ray, RayHitList& reports) const
+    void Sphere::raycast(const Raycast& ray, RayHitList& reports) const
     {
         double a, b, c;
         params(ray, a, b, c);
@@ -63,7 +63,7 @@ namespace prop3
             {
                 glm::dvec3 pt = ray.origin + ray.direction*t1;
                 glm::dvec3 n = glm::normalize(pt - _center);
-                reports.add(t1, pt, ray.direction, n,
+                reports.add(t1, ray, pt, n,
                             RayHitReport::NO_TEXCOORD,
                              _coating.get());
             }
@@ -73,7 +73,7 @@ namespace prop3
             {
                 glm::dvec3 pt = ray.origin + ray.direction*t2;
                 glm::dvec3 n = glm::normalize(pt - _center);
-                reports.add(t2, pt, ray.direction, n,
+                reports.add(t2, ray, pt, n,
                             RayHitReport::NO_TEXCOORD,
                              _coating.get());
             }
@@ -85,21 +85,21 @@ namespace prop3
             {
                 glm::dvec3 pt = ray.origin + ray.direction*t;
                 glm::dvec3 n = glm::normalize(pt - _center);
-                reports.add(t, pt, ray.direction, n,
+                reports.add(t, ray, pt, n,
                             RayHitReport::NO_TEXCOORD,
                              _coating.get());
             }
         }
     }
 
-    bool Sphere::intersects(const Ray& ray, RayHitList& reports) const
+    bool Sphere::intersects(const Raycast& ray, RayHitList& reports) const
     {
         double a, b, c;
         params(ray, a, b, c);
         return b*b - 4*a*c >= 0.0;
     }
 
-    void Sphere::params(const Ray& ray, double& a, double& b, double& c) const
+    void Sphere::params(const Raycast& ray, double& a, double& b, double& c) const
     {
         glm::dvec3 dist = ray.origin - _center;
 

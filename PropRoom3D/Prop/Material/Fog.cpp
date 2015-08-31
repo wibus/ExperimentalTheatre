@@ -53,7 +53,7 @@ namespace prop3
     }
 
     double Fog::lightFreePathLength(
-        const Ray& ray) const
+        const Raycast& ray) const
     {
         if(_concentration == 0.0)
         {
@@ -79,15 +79,21 @@ namespace prop3
 
     void Fog::scatterLight(
             std::vector<Raycast>& raycasts,
-            const Ray& ray, double distance,
+            const Raycast& ray, double distance,
             const std::shared_ptr<Material>& self,
             unsigned int outRayCountHint) const
     {
         glm::dvec3 origin = ray.origin + ray.direction * distance;
         for(unsigned int i=0; i < outRayCountHint; ++i)
         {
-            Ray scatter(origin, glm::sphericalRand(1.0));
-            raycasts.push_back(Raycast(scatter, _color, self));
+            glm::dvec3 direction = glm::sphericalRand(1.0);
+            raycasts.push_back(Raycast(
+                Raycast::BACKDROP_DISTANCE,
+                Raycast::FULLY_DIFFUSIVE_ENTROPY,
+                _color,
+                origin,
+                direction,
+                self));
         }
     }
 
@@ -96,14 +102,14 @@ namespace prop3
         visitor.visit(*this);
     }
 
-    double Fog::getDistanceInFog(const Ray& ray, double rayDistance) const
+    double Fog::getDistanceInFog(const Raycast& ray, double rayDistance) const
     {
         double enterDist;
         return getDistanceInFog(ray, rayDistance, enterDist);
     }
 
     double Fog::getDistanceInFog(
-            const Ray& ray,
+            const Raycast& ray,
             double rayDistance,
             double& enterDist) const
     {

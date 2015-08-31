@@ -18,7 +18,6 @@
 
 namespace prop3
 {
-    class Ray;
     class Raycast;
     class RayHitReport;
     class Backdrop;
@@ -70,11 +69,11 @@ namespace prop3
                 glm::dvec3 position);
 
         virtual double findNearestProp(
-                const Ray& rayPrototype,
+                const Raycast& rayPrototype,
                 prop3::RayHitReport& reportMin);
 
         virtual glm::dvec3 fireScreenRay(
-                const Raycast& raycast);
+                const Raycast& rayPrototype);
 
         virtual glm::dvec3 draft(
                 const Raycast& raycast,
