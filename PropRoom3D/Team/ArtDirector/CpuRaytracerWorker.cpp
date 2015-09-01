@@ -49,6 +49,7 @@ namespace prop3
         _backdropRayCount(1),
         _diffuseRayCount(1),
         _viewportSize(1, 1),
+        _confusionRadius(0.1),
         _workingColorBuffer(nullptr),
         _team(new WorkerTeam())
     {
@@ -263,24 +264,40 @@ namespace prop3
         std::shared_ptr<Material> ambientMaterial =
                 findAmbientMaterial(_camPos);
 
+        glm::dvec4 apertureBeg = _projInvMatrix * glm::dvec4(0.0, 0.0, -1.0, 1.0);
+        apertureBeg.z /= apertureBeg.w;
+        glm::dvec4 apertureEnd = _projInvMatrix * glm::dvec4(0.0, 0.0, 1.0, 1.0);
+        apertureEnd.z /= apertureEnd.w;
+        double aperture = (apertureBeg.z - apertureEnd.z) - 1.0;
+
+        glm::dvec3 eyeWorldPos = _camPos;
+        if(aperture > 0.0)
+        {
+            glm::dvec3 camDir = glm::dvec3(_viewInvMatrix * glm::dvec4(0.0, 0.0, -1.0, 0.0));
+            glm::dvec3 confusionSide = glm::normalize(glm::cross(camDir, glm::dvec3(0.0, 0.0, 1.0)));
+            glm::dvec3 confusionUp = glm::normalize(glm::cross(confusionSide, camDir));
+            glm::dvec2 confusionPos = glm::diskRand(_confusionRadius * aperture);
+            eyeWorldPos += confusionSide * confusionPos.x + confusionUp * confusionPos.y;
+        }
+
         Raycast raycast(
             Raycast::BACKDROP_DISTANCE,
             Raycast::FULLY_SPECULAR_ENTROPY,
             glm::dvec3(1.0),
-            _camPos,
+            eyeWorldPos,
             glm::dvec3(0.0),
             ambientMaterial);
 
-        glm::dvec4 screenPos(-1, -1, 0, 1);
-        screenPos.y = orig.y;
         int idx = -1;
+        glm::dvec4 screenPos(orig, -1.0, 1);
         for(int j=0; j<_viewportSize.y; ++j, screenPos.y += pixelHeight)
         {
             screenPos.x = orig.x;
             for(int i=0; i<_viewportSize.x; ++i, screenPos.x += pixelWidth)
             {
                 glm::dvec4 dirH = _viewProjInverse * screenPos;
-                raycast.direction = glm::normalize(glm::dvec3(dirH / dirH.w) - _camPos);
+                glm::dvec3 pixWorldPos = glm::dvec3(dirH / dirH.w);
+                raycast.direction = glm::normalize(pixWorldPos - raycast.origin);
 
 
                 glm::dvec3 color = fireScreenRay(raycast);

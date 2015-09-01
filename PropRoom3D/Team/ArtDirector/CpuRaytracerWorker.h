@@ -109,6 +109,7 @@ namespace prop3
         glm::dmat4 _projInvMatrix;
         glm::dmat4 _viewProjInverse;
         glm::dvec3 _camPos;
+        double _confusionRadius;
 
         std::queue<float*> _completedColorBuffers;
         std::vector<float*> _framePool;
