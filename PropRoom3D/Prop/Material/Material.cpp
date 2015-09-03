@@ -40,18 +40,17 @@ namespace prop3
 
     void Material::scatterLight(
             std::vector<Raycast>& raycasts,
-            const Raycast& ray, double distance,
+            const Raycast& ray,
             const std::shared_ptr<Material>& self,
             unsigned int outRayCountHint) const
     {
-        glm::dvec3 origin = ray.direction * distance;
-        raycasts.push_back(Raycast(
-            Raycast::BACKDROP_DISTANCE,
-            Raycast::FULLY_SPECULAR_ENTROPY,
-            glm::dvec3(1.0),
-            origin,
-            ray.direction,
-            self));
+    }
+
+    glm::dvec3 Material::gatherLight(
+            const Raycast& ray,
+            const glm::dvec3& outDirection) const
+    {
+        return glm::dvec3(0.0);
     }
 
     void Material::setDensity(const double& density)

@@ -7,6 +7,14 @@
 
 namespace prop3
 {
+    glm::dvec3 directDiffuseScattering(
+        const Raycast& ray,
+        const glm::dvec3& outDir)
+    {
+        return ray.color * glm::dvec3(Raycast::compatibility(
+            ray.entropy, Raycast::FULLY_DIFFUSIVE_ENTROPY));
+    }
+
     glm::dvec3 directSpecularReflection(
         const RayHitReport& report,
         const glm::dvec3& outDir)
@@ -21,7 +29,7 @@ namespace prop3
         const RayHitReport& report,
         const glm::dvec3& outDir)
     {
-        return glm::dvec3(glm::max(0.0,
+        return report.incidentRay.color * glm::dvec3(glm::max(0.0,
             glm::dot(-report.incidentRay.direction, report.normal)) *
             Raycast::compatibility(report.incidentRay.entropy,
                                    Raycast::FULLY_DIFFUSIVE_ENTROPY));
@@ -56,7 +64,8 @@ namespace prop3
                    report.incidentRay.entropy,
                    Raycast::FULLY_DIFFUSIVE_ENTROPY);
 
-            return glm::dvec3(glm::mix(diffuse, glossy, glossiness) * compatibility);
+            return report.incidentRay.color * (compatibility *
+                    glm::mix(diffuse, glossy, glossiness));
         }
     }
 
@@ -70,6 +79,28 @@ namespace prop3
         return glm::dvec3(0.0);
     }
 
+
+    void indirectDiffuseScattering(std::vector<Raycast>& outRays,
+        const Raycast& ray,
+        const std::shared_ptr<Material>& material,
+        unsigned int rayCount)
+    {
+        double splitFactor(1.0 / rayCount);
+        glm::dvec3 origin = ray.origin + ray.direction * ray.limit;
+
+        for(int i=0; i<rayCount; ++i)
+        {
+            glm::dvec3 direction = glm::sphericalRand(1.0);
+
+            outRays.push_back(Raycast(
+                    Raycast::BACKDROP_DISTANCE,
+                    Raycast::FULLY_DIFFUSIVE_ENTROPY,
+                    glm::dvec3(splitFactor),
+                    origin,
+                    direction,
+                    material));
+        }
+    }
 
     void indirectSpecularReflection(
         std::vector<Raycast>& outRays,

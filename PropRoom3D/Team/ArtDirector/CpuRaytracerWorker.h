@@ -22,6 +22,7 @@ namespace prop3
     class RayHitReport;
     class Backdrop;
     class Material;
+    class Coating;
     class Prop;
 
     class AbstractTeam;
@@ -41,12 +42,12 @@ namespace prop3
         virtual void terminate();
         virtual bool isRunning();
 
+        virtual void updateView(const glm::dmat4& view);
+        virtual void updateProjection(const glm::dmat4& proj);
         virtual void updateViewport(
                 const glm::ivec2& resolution,
                 const glm::ivec2& origin,
                 const glm::ivec2& size);
-        virtual void updateView(const glm::dmat4& view);
-        virtual void updateProjection(const glm::dmat4& proj);
 
         virtual void setStageSetStream(const std::string& stream);
 
@@ -65,15 +66,27 @@ namespace prop3
         virtual void shootFromLights();
         virtual void shootFromScreen();
 
+        virtual void fireLightRay(
+                const Raycast& fromLightRay);
+
+        virtual glm::dvec3 fireScreenRay(
+                const Raycast& fromEyeRay);
+
+        virtual glm::dvec3 gatherScatteredLight(
+                const Material& material,
+                const Raycast& outRay);
+
+        virtual glm::dvec3 gatherReflectedLight(
+                const Coating& coating,
+                const Material& material,
+                const RayHitReport& outReport);
+
         virtual std::shared_ptr<Material> findAmbientMaterial(
                 glm::dvec3 position);
 
         virtual double findNearestProp(
-                const Raycast& rayPrototype,
-                prop3::RayHitReport& reportMin);
-
-        virtual glm::dvec3 fireScreenRay(
-                const Raycast& rayPrototype);
+                const Raycast& raycast,
+                RayHitReport& reportMin);
 
         virtual glm::dvec3 draft(
                 const Raycast& raycast,
@@ -122,7 +135,6 @@ namespace prop3
         std::shared_ptr<Material> _envMaterial;
         std::vector<std::shared_ptr<Prop>> _props;
 
-        std::vector<glm::dvec3> _lightHitColors;
         std::vector<RayHitReport> _lightHitReports;
 
         // Memory pools

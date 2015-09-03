@@ -9,6 +9,10 @@
 
 namespace prop3
 {
+    PROP3D_EXPORT glm::dvec3 directDiffuseScattering(
+            const Raycast& ray,
+            const glm::dvec3& outDir);
+
     PROP3D_EXPORT glm::dvec3 directSpecularReflection(
             const RayHitReport& report,
             const glm::dvec3& outDir);
@@ -26,6 +30,12 @@ namespace prop3
             const RayHitReport& report,
             const glm::dvec3& outDir);
 
+
+    PROP3D_EXPORT void indirectDiffuseScattering(
+            std::vector<Raycast>& outRays,
+            const Raycast& ray,
+            const std::shared_ptr<Material>& material,
+            unsigned int rayCount);
 
     PROP3D_EXPORT void indirectSpecularReflection(
             std::vector<Raycast>& outRays,
@@ -50,6 +60,7 @@ namespace prop3
             const RayHitReport& report,
             const std::shared_ptr<Material>& leavedMaterial,
             const std::shared_ptr<Material>& enteredMaterial);
+
 
     PROP3D_EXPORT double computeReflexionRatio(
             double leavedRefractiveIndex,

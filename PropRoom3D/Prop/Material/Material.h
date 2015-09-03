@@ -51,9 +51,13 @@ namespace prop3
 
         virtual void scatterLight(
             std::vector<Raycast>& raycasts,
-            const Raycast& ray, double distance,
+            const Raycast& ray,
             const std::shared_ptr<Material>& self,
             unsigned int outRayCountHint) const;
+
+        virtual glm::dvec3 gatherLight(
+            const Raycast& ray,
+            const glm::dvec3& outDirection) const;
 
 
         // MECANICAL PROPERTIES

@@ -62,7 +62,7 @@ namespace prop3
         else
         {
             double enterDist;
-            double distInFog = getDistanceInFog(ray, ray.limit, enterDist);
+            double distInFog = getDistanceInFog(ray, enterDist);
 
             if(distInFog <= 0.0)
                 return ray.limit;
@@ -79,22 +79,25 @@ namespace prop3
 
     void Fog::scatterLight(
             std::vector<Raycast>& raycasts,
-            const Raycast& ray, double distance,
+            const Raycast& ray,
             const std::shared_ptr<Material>& self,
             unsigned int outRayCountHint) const
     {
-        glm::dvec3 origin = ray.origin + ray.direction * distance;
-        for(unsigned int i=0; i < outRayCountHint; ++i)
+        size_t preSize = raycasts.size();
+        indirectDiffuseScattering(raycasts, ray, self, outRayCountHint);
+        size_t postSize = raycasts.size();
+
+        for(size_t i=preSize; i<postSize; ++i)
         {
-            glm::dvec3 direction = glm::sphericalRand(1.0);
-            raycasts.push_back(Raycast(
-                Raycast::BACKDROP_DISTANCE,
-                Raycast::FULLY_DIFFUSIVE_ENTROPY,
-                _color,
-                origin,
-                direction,
-                self));
+            raycasts[i].color *= _color;
         }
+    }
+
+    glm::dvec3 Fog::gatherLight(
+            const Raycast& ray,
+            const glm::dvec3& outDirection) const
+    {
+        return _color * directDiffuseScattering(ray, outDirection);
     }
 
     void Fog::accept(StageSetVisitor& visitor)
@@ -102,15 +105,8 @@ namespace prop3
         visitor.visit(*this);
     }
 
-    double Fog::getDistanceInFog(const Raycast& ray, double rayDistance) const
-    {
-        double enterDist;
-        return getDistanceInFog(ray, rayDistance, enterDist);
-    }
-
     double Fog::getDistanceInFog(
             const Raycast& ray,
-            double rayDistance,
             double& enterDist) const
     {
         double distInFog = 0.0;
@@ -125,20 +121,24 @@ namespace prop3
             RayHitReport* report = list.head;
             if(report != nullptr)
             {
-                double maxDist = report->distance;
                 double minDist = report->distance;
+                double maxDist = report->distance;
                 if(report->_next)
                 {
-                    maxDist = glm::max(maxDist, report->_next->distance);
                     minDist = glm::min(minDist, report->_next->distance);
                     minDist = glm::max(minDist, 0.0);
+
+                    maxDist = glm::max(maxDist, report->_next->distance);
+                    maxDist = glm::min(maxDist, ray.limit);
                 }
                 else
                 {
-                    minDist = 0.0;
+                    if(_fogGeometry->isIn(ray.origin) == EPointPosition::IN)
+                        minDist = 0.0;
+                    else
+                        maxDist = ray.limit;
                 }
 
-                maxDist = glm::min(maxDist, rayDistance);
                 distInFog = glm::max(maxDist - minDist, 0.0);
                 enterDist = minDist;
             }

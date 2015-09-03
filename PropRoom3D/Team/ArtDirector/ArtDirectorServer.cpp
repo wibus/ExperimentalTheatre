@@ -16,9 +16,13 @@ namespace prop3
 {
     ArtDirectorServer::ArtDirectorServer() :
         _colorBufferTexId(0),
-        _localRaytracer(new CpuRaytracerEngine(4)),
         _postProdUnit(new GlPostProdUnit())
     {
+#ifdef NDEBUG
+        _localRaytracer.reset(new CpuRaytracerEngine(4));
+#else
+        _localRaytracer.reset(new CpuRaytracerEngine(1));
+#endif
     }
 
     ArtDirectorServer::~ArtDirectorServer()

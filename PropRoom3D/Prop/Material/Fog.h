@@ -21,6 +21,7 @@ namespace prop3
             double refractiveIndex = AIR_REFRACTIVE_INDEX);
         virtual ~Fog();
 
+
         // StageSetNode interface
         virtual void accept(StageSetVisitor& visitor) override;
 
@@ -36,16 +37,20 @@ namespace prop3
             const RayHitReport &report,
             const glm::dvec3& outDirection,
             const std::shared_ptr<Material> &leavedMaterial,
-            const std::shared_ptr<Material> &enteredMaterial) const;
+            const std::shared_ptr<Material> &enteredMaterial) const override;
 
         virtual double lightFreePathLength(
-            const Raycast& ray) const;
+            const Raycast& ray) const override;
 
         virtual void scatterLight(
             std::vector<Raycast>& raycasts,
-            const Raycast& ray, double distance,
+            const Raycast& ray,
             const std::shared_ptr<Material>& self,
-            unsigned int outRayCountHint) const;
+            unsigned int outRayCountHint) const override;
+
+        virtual glm::dvec3 gatherLight(
+            const Raycast& ray,
+            const glm::dvec3& outDirection) const override;
 
         glm::dvec3 color() const;
 
@@ -54,8 +59,7 @@ namespace prop3
         double radius() const;
 
     protected:
-        double getDistanceInFog(const Raycast& ray, double rayDistance) const;
-        double getDistanceInFog(const Raycast& ray, double rayDistance, double& enterDist) const;
+        double getDistanceInFog(const Raycast& ray, double& enterDist) const;
 
 
         glm::dvec3 _color;

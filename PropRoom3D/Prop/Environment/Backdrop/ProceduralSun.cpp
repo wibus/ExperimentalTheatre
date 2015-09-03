@@ -18,7 +18,7 @@ namespace prop3
         glm::sqrt(1.0 - ProceduralSun::SUN_COS_DIMENSION * ProceduralSun::SUN_COS_DIMENSION);
     const glm::dvec3 ProceduralSun::RECEIVE_PLANE_POS =
         glm::dvec3(0.0, 0.0, 0.0);
-    const double ProceduralSun::RECEIVE_PLANE_RADIUS = 80.0;
+    const double ProceduralSun::RECEIVE_PLANE_RADIUS = 30.0;
 
     const double ProceduralSun::RADIATION_PLANE_DISTANCE = 300.0;
     const double ProceduralSun::RADIATION_PLANE_RADIUS =
@@ -84,42 +84,46 @@ namespace prop3
     {
         glm::dvec3 color;
 
+        // Sun ray compatibility with surface reflexion
+        double sunCompatibility =
+            Raycast::compatibility(
+               Raycast::FULLY_SPECULAR_ENTROPY,
+               ray.entropy);
+
         double upDot = glm::dot(SKY_UP, ray.direction);
         if(upDot >= _groundHeight)
         {
-            // Skyline Weight
-            double a = 1.0 - glm::abs(upDot);
-            a *= a *= a *= a;
-
-            if(upDot >= 0.0)
+            if(sunCompatibility != 1.0)
             {
-                // Sky Color
-                glm::dvec3 skyColor = _skyColor * glm::max(0.0, upDot);
-                color = glm::mix(skyColor, _skylineColor, a);
+                // Skyline Weight
+                double a = 1.0 - glm::abs(upDot);
+                a *= a *= a *= a;
+
+                if(upDot >= 0.0)
+                {
+                    // Sky Color
+                    glm::dvec3 skyColor = _skyColor * glm::max(0.0, upDot);
+                    color = glm::mix(skyColor, _skylineColor, a);
+                }
+                else
+                {
+                    // Ground Color
+                    color = glm::mix(_groundColor, _skylineColor, a);
+                }
             }
-            else
+
+            if(sunCompatibility != 0.0)
             {
-                // Ground Color
-                color = glm::mix(_groundColor, _skylineColor, a);
+                // Sun is only visible when the sky is direclty observed
+                double sunDot = glm::dot(_sunDirection, ray.direction);
+                double sunProb = sunDot / SUN_COS_DIMENSION;
+                double sunPow = glm::pow(glm::abs(sunProb), SUN_SMOOTH_EDGE) * glm::sign(sunProb);
+                color += _sunColor * glm::max(0.0, sunPow) * sunCompatibility;
             }
-
-
-            // Sun ray compatibility with surface reflexion
-            double sunCompatibility =
-                Raycast::compatibility(
-                   Raycast::FULLY_SPECULAR_ENTROPY,
-                   ray.entropy);
-
-            // Sun is only visible when the sky is direclty observed
-            double sunDot = glm::dot(_sunDirection, ray.direction);
-            double sunProb = sunDot / SUN_COS_DIMENSION;
-            double sunPow = glm::pow(glm::abs(sunProb), SUN_SMOOTH_EDGE) * glm::sign(sunProb);
-            color += _sunColor * glm::max(0.0, sunPow) * sunCompatibility;
         }
         else
         {
-            // Ground Color
-            color = _groundColor;
+            color = (1.0 - sunCompatibility) * _groundColor;
         }
 
 
@@ -129,7 +133,9 @@ namespace prop3
 
     std::vector<Raycast> ProceduralSun::fireRays(unsigned int count) const
     {
-        double hitIntensity = 1.0 / count;
+        // Fire only sun rays
+        double sunRayProb = (1.0 - (SUN_COS_DIMENSION + 1.0)/2.0);
+        glm::dvec3 rayColor = _sunColor * (sunRayProb / count);
 
         glm::dvec3 sideward = glm::normalize(glm::cross(SKY_UP, _sunDirection));
         glm::dvec3 upward = glm::normalize(glm::cross(sideward, _sunDirection));
@@ -145,7 +151,6 @@ namespace prop3
                 _sunDirection * RADIATION_PLANE_DISTANCE +
                 sideward * radDist.x + upward * radDist.y;
 
-            glm::dvec3 rayColor = _sunColor * hitIntensity;
             glm::dvec3 direction = glm::normalize(recPoint - radPoint);
             raycasts.push_back(Raycast(
                 Raycast::BACKDROP_DISTANCE,
@@ -165,8 +170,7 @@ namespace prop3
     {
         // Fire only sun rays
         double sunRayProb = (1.0 - (SUN_COS_DIMENSION + 1.0)/2.0);
-        double hitIntensity = sunRayProb / count;
-
+        glm::dvec3 rayColor = _sunColor * (sunRayProb / count);
 
         glm::dvec3 sideward = glm::normalize(glm::cross(SKY_UP, _sunDirection));
         glm::dvec3 upward = glm::normalize(glm::cross(sideward, _sunDirection));
@@ -179,7 +183,6 @@ namespace prop3
                 sideward * radDist.x +
                 upward * radDist.y;
 
-            glm::dvec3 rayColor = _sunColor * hitIntensity;
             glm::dvec3 direction = glm::normalize(pos - radPoint);
             raycasts.push_back(Raycast(
                 Raycast::BACKDROP_DISTANCE,
