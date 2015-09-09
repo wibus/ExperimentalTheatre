@@ -81,6 +81,10 @@ namespace prop3
                 const Material& material,
                 const RayHitReport& outReport);
 
+        virtual void gatherLightHitsToward(
+                std::vector<Raycast>& outRaycasts,
+                const glm::dvec3& targetPos);
+
         virtual std::shared_ptr<Material> findAmbientMaterial(
                 glm::dvec3 position);
 
@@ -112,7 +116,8 @@ namespace prop3
 
         double _lightRayIntensityThreshold;
         double _screenRayIntensityThreshold;
-        unsigned int _backdropRayCount;
+        unsigned int _lightDirectRayCount;
+        unsigned int _lightFireRayCount;
         unsigned int _diffuseRayCount;
 
         glm::ivec2 _resolution;
@@ -136,6 +141,7 @@ namespace prop3
         std::vector<std::shared_ptr<Prop>> _props;
 
         std::vector<RayHitReport> _lightHitReports;
+        std::vector<std::shared_ptr<Material>> _lightEnteredMaterials;
 
         // Memory pools
         std::vector<RayHitReport*> _reportPool;

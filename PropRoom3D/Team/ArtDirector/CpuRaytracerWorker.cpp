@@ -46,7 +46,8 @@ namespace prop3
         _useStochasticTracing(true),
         _lightRayIntensityThreshold(1.0 / 32.0),
         _screenRayIntensityThreshold(1.0 / 128.0),
-        _backdropRayCount(1),
+        _lightDirectRayCount(1),
+        _lightFireRayCount(20),
         _diffuseRayCount(1),
         _viewportSize(1, 1),
         _confusionRadius(0.1),
@@ -224,11 +225,11 @@ namespace prop3
 
             // Shoot rays
             if(_runningPredicate &&
-               _lightRayIntensityThreshold != 1.0)
+               _lightRayIntensityThreshold != INFINITY)
                 shootFromLights();
 
             if(_runningPredicate &&
-               _screenRayIntensityThreshold != 1.0)
+               _screenRayIntensityThreshold != INFINITY)
                 shootFromScreen();
 
 
@@ -248,13 +249,14 @@ namespace prop3
     void CpuRaytracerWorker::shootFromLights()
     {
         _lightHitReports.clear();
+        _lightEnteredMaterials.clear();
 
         // If non-stochatic draft is active
         if(!_useStochasticTracing)
             return;
 
         std::vector<Raycast> raycasts =
-                _backdrop->fireRays(_backdropRayCount * 4);
+                _backdrop->fireRays(_lightFireRayCount);
 
         size_t raycastCount = raycasts.size();
         for(size_t i=0; i < raycastCount; ++i)
@@ -389,6 +391,7 @@ namespace prop3
                 //  somewhere int the current ray's material.
                 reportMin.incidentRay = ray;
                 _lightHitReports.push_back(reportMin);
+                _lightEnteredMaterials.push_back(nullptr);
             }
             else
             {
@@ -408,6 +411,7 @@ namespace prop3
 
                 // Adding RayHitReport to lights' hit list
                 _lightHitReports.push_back(reportMin);
+                _lightEnteredMaterials.push_back(enteredMaterial);
             }
 
             for(Raycast& brdf : outRaycasts)
@@ -540,8 +544,10 @@ namespace prop3
         glm::dvec3 scatterPoint = outRay.origin + outRay.direction * outRay.limit;
         glm::dvec3 scatterOutDir = -outRay.direction;
 
-        std::vector<Raycast> lightCasts = _backdrop->fireOn(
-                scatterPoint, _backdropRayCount);
+        std::vector<Raycast> lightCasts =
+            _backdrop->fireOn(scatterPoint, _lightDirectRayCount);
+        gatherLightHitsToward(lightCasts, scatterPoint);
+
         size_t lightCastCount = lightCasts.size();
         for(size_t c=0; c < lightCastCount; ++c)
         {
@@ -585,8 +591,10 @@ namespace prop3
 
         glm::dvec3 outDirirection = -outReport.incidentRay.direction;
 
-        std::vector<Raycast> lightCasts = _backdrop->fireOn(
-                outReport.position, _backdropRayCount);
+        std::vector<Raycast> lightCasts =
+            _backdrop->fireOn(outReport.position, _lightDirectRayCount);
+        gatherLightHitsToward(lightCasts, outReport.position);
+
         size_t lightCastCount = lightCasts.size();
         for(size_t c=0; c < lightCastCount; ++c)
         {
@@ -624,6 +632,54 @@ namespace prop3
         }
 
         return colorSum;
+    }
+
+    void CpuRaytracerWorker::gatherLightHitsToward(
+            std::vector<Raycast>& outRaycasts,
+            const glm::dvec3& targetPos)
+    {
+        size_t lightHitCount = _lightHitReports.size();
+        for(size_t i=0; i < lightHitCount; ++i)
+        {
+            RayHitReport& lightReport = _lightHitReports[i];
+
+            const Raycast& lightRay = lightReport.incidentRay;
+
+            glm::dvec3 outDir = glm::normalize(
+                targetPos - lightReport.position);
+            glm::dvec3 outOrig = lightReport.position +
+                                 outDir * RayHitReport::EPSILON_LENGTH;
+
+            glm::dvec3 outColor;
+
+            // Light hit is a scatter point
+            if(lightReport.coating == nullptr)
+            {
+                outColor = lightRay.material->gatherLight(
+                                lightRay, outDir);
+            }
+            // Light hit is a surface reflection
+            else
+            {
+                outColor = lightReport.coating->directBrdf(
+                                lightReport,
+                                outDir,
+                                lightRay.material,
+                                _lightEnteredMaterials[i]);
+            }
+
+            if(outColor != glm::dvec3(0.0))
+            {
+                outRaycasts.push_back(
+                    Raycast(
+                        Raycast::BACKDROP_DISTANCE,
+                        Raycast::FULLY_DIFFUSIVE_ENTROPY,
+                        outColor,
+                        outOrig,
+                        outDir,
+                        lightRay.material));
+            }
+        }
     }
 
     std::shared_ptr<Material> CpuRaytracerWorker::findAmbientMaterial(

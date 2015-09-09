@@ -6,6 +6,8 @@
 
 #include <QFileDialog>
 
+#include <CellarWorkbench/Image/Image.h>
+#include <CellarWorkbench/GL/GlToolkit.h>
 #include <CellarWorkbench/Misc/StringUtils.h>
 #include <CellarWorkbench/Misc/Log.h>
 
@@ -260,40 +262,10 @@ namespace prop3
 
         if(saveDialog.exec())
         {
+            cellar::Image screenshot;
+            cellar::GlToolkit::takeFramebufferShot(screenshot);
             QString fileName = saveDialog.selectedFiles().at(0);
-
-            GLint viewport[4];
-            glGetIntegerv(GL_VIEWPORT, viewport);
-            int width = viewport[2];
-            int height = viewport[3];
-
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            GLubyte* frags = new GLubyte[width * height * 4];
-            glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3],
-                         GL_RGBA, GL_UNSIGNED_BYTE, frags);
-
-            int pIdx = -1;
-            int fIdx = (height-1) * width * 4;
-            uchar* pixels = new uchar[width * height * 4];
-            for(int j=0; j<height; ++j)
-            {
-                for(int i=0; i<width; ++i)
-                {
-                    pixels[++pIdx] = frags[fIdx+2]; // Blue
-                    pixels[++pIdx] = frags[fIdx+1]; // Green
-                    pixels[++pIdx] = frags[fIdx+0]; // Red
-                    pixels[++pIdx] = 255; // Alpha
-                    fIdx += 4;
-                }
-
-                fIdx -= 2*width * 4;
-            }
-
-            QImage image(pixels, width, height, QImage::Format_RGB32);
-            image.save(fileName);
-
-            delete frags;
-            delete pixels;
+            screenshot.save(fileName.toStdString());
         }
     }
 

@@ -19,7 +19,7 @@ namespace prop3
         _postProdUnit(new GlPostProdUnit())
     {
 #ifdef NDEBUG
-        _localRaytracer.reset(new CpuRaytracerEngine(4));
+        _localRaytracer.reset(new CpuRaytracerEngine(8));
 #else
         _localRaytracer.reset(new CpuRaytracerEngine(1));
 #endif

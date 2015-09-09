@@ -29,8 +29,16 @@ namespace prop3
         const RayHitReport& report,
         const glm::dvec3& outDir)
     {
-        return report.incidentRay.color * glm::dvec3(glm::max(0.0,
-            glm::dot(-report.incidentRay.direction, report.normal)) *
+        double iDotN = glm::dot(report.normal, -report.incidentRay.direction);
+        double rDotN = glm::dot(report.normal, outDir);
+
+        if(iDotN < 0.0 || rDotN < 0.0)
+            return glm::dvec3(0.0);
+
+        if(rDotN > 1.0)
+            rDotN = 1.0;
+
+        return report.incidentRay.color * glm::dvec3(glm::max(0.0, iDotN) *
             Raycast::compatibility(report.incidentRay.entropy,
                                    Raycast::FULLY_DIFFUSIVE_ENTROPY));
     }
@@ -50,6 +58,12 @@ namespace prop3
         }
         else
         {
+            double iDotN = glm::dot(report.normal, -report.incidentRay.direction);
+            double rDotN = glm::dot(report.normal, outDir);
+
+            if(iDotN > 0.0 || rDotN < 0.0)
+                return glm::dvec3(0.0);
+
             glm::dvec3 reflectDir = glm::reflect(
                     report.incidentRay.direction,
                     report.normal);

@@ -135,7 +135,7 @@ namespace prop3
     {
         // Fire only sun rays
         double sunRayProb = (1.0 - (SUN_COS_DIMENSION + 1.0)/2.0);
-        glm::dvec3 rayColor = _sunColor * (sunRayProb / count);
+        glm::dvec3 rayColor = _sunColor * (sunRayProb / count) * 32.0;
 
         glm::dvec3 sideward = glm::normalize(glm::cross(SKY_UP, _sunDirection));
         glm::dvec3 upward = glm::normalize(glm::cross(sideward, _sunDirection));

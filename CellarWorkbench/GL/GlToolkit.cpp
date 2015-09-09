@@ -86,4 +86,31 @@ namespace cellar
 
         return true;
     }
+
+    void GlToolkit::takeFramebufferShot(Image& image, int x, int y, int width, int height)
+    {
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
+        int vpWidth = viewport[2];
+        int vpHeight = viewport[3];
+
+        // If total viewport requested
+        if(width < 0)
+            width = vpWidth;
+        if(height < 0)
+            height = vpHeight;
+
+        // Clamp to viewport borders
+        x = std::min(vpWidth-1, x);
+        y = std::min(vpHeight-1, y);
+        width  = std::min(vpWidth-x,  width);
+        height = std::min(vpHeight-y, height);
+
+        image.resize(width, height);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glReadPixels(x, y, width, height,
+                     GL_RGBA, GL_UNSIGNED_BYTE,
+                     image.pixels());
+    }
 }

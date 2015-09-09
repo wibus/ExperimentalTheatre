@@ -127,17 +127,8 @@ namespace cellar
     {
         if(this != &image)
         {
-            _width = image._width;
-            _height = image._height;
-
-            // Copy pixels
-            if(_pixels != 0x0)
-                    delete[] _pixels;
-            _pixels = 0;
-
-            int size = dataSize();
-            _pixels = new unsigned char[size];
-            memcpy(_pixels, image._pixels, size);
+            resize(image._width, image._height);
+            memcpy(_pixels, image._pixels, dataSize());
         }
 
         return *this;
@@ -145,26 +136,31 @@ namespace cellar
 
     void Image::clear()
     {
-        if(_pixels != nullptr)
-                delete[] _pixels;
-        _pixels = nullptr;
         _width = 0;
         _height = 0;
+
+        delete[] _pixels;
+        _pixels = nullptr;
+    }
+
+    void Image::resize(int width, int height)
+    {
+        _width = width;
+        _height = height;
+
+        delete[] _pixels;
+        _pixels = new unsigned char[dataSize()];
     }
 
     bool Image::load(const string& fileName)
     {
-        clear();
-
         QImage img;
         if(img.load(fileName.c_str()))
         {
             img = img.convertToFormat(QImage::Format_ARGB32);
-            _width = img.width();
-            _height = img.height();
 
-            int size = dataSize();
-            _pixels = new unsigned char[size];
+            resize(img.width(), img.height());
+
             const uchar* bits =  img.bits();
             for(int j=0; j<_height; ++j)
             {
@@ -180,20 +176,29 @@ namespace cellar
             }
             return true;
         }
-
-        return false;
+        else
+        {
+            clear();
+            return false;
+        }
     }
 
     bool Image::save(const std::string& fileName) const
     {
         int size = dataSize();
         unsigned char* tmp = new unsigned char[size];
-        for(int i=0; i<size; i+=4)
+        for(int j=0; j < _height; ++j)
         {
-            tmp[i] = _pixels[i+2];
-            tmp[i+1] = _pixels[i+1];
-            tmp[i+2] = _pixels[i];
-            tmp[i+3] = _pixels[i+3];
+            for(int i=0; i < _width; ++i)
+            {
+                int inIdx = (j*_width + i)*4;
+                int outIdx = ((_height-j-1)*_width + i)*4;
+
+                tmp[outIdx+0] = _pixels[inIdx+2];
+                tmp[outIdx+1] = _pixels[inIdx+1];
+                tmp[outIdx+2] = _pixels[inIdx+0];
+                tmp[outIdx+3] = _pixels[inIdx+3];
+            }
         }
 
         QImage img(tmp,

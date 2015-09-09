@@ -13,12 +13,20 @@ namespace cellar
 
     class CELLAR_EXPORT GlToolkit
     {
-    public:
+    private:
         GlToolkit();
 
+    public:
         static unsigned int genTextureId(const Image& image);
         static unsigned int updateTextureId(const Image& image);
         static bool         deleteTextureId(unsigned int id);
+
+        static void takeFramebufferShot(
+                Image& image,
+                int x = 0,
+                int y = 0,
+                int width = -1,
+                int height = -1);
 
     private:
         static std::map<unsigned int, unsigned int> _imagId_texId;

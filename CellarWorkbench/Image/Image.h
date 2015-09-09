@@ -12,8 +12,6 @@ namespace cellar
     class CELLAR_EXPORT Image
     {
     public :
-        enum class EFormat {GRAY, RGB, RGBA};
-
         Image();
         Image(const Image& image);
         Image(const std::string& fileName);
@@ -26,6 +24,7 @@ namespace cellar
 
         virtual Image& operator=(const Image& image);
 
+        virtual void    resize(int width, int height);
         virtual bool    load(const std::string& fileName);
         virtual bool    save(const std::string& fileName) const;
         virtual Image&  addAlphaColor(unsigned char r,
