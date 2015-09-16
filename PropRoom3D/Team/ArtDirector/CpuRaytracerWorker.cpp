@@ -248,6 +248,11 @@ namespace prop3
 
     void CpuRaytracerWorker::shootFromLights()
     {
+        // !!!! RETURNING !!!!
+        return;
+
+
+
         _lightHitReports.clear();
         _lightEnteredMaterials.clear();
 
@@ -482,9 +487,11 @@ namespace prop3
                         material,
                         outRayCountHint);
 
+                /*
                 // Direct lighting
                 toEyeColorSum += gatherScatteredLight(
                     *material, ray);
+                    * */
             }
             else
             {
@@ -502,9 +509,11 @@ namespace prop3
                         enteredMaterial,
                         outRayCountHint);
 
+                /*
                 // Direct lighting
                 toEyeColorSum += gatherReflectedLight(
                     *coating, *material, reportMin);
+                    * */
             }
 
             for(Raycast& brdf : outRaycasts)

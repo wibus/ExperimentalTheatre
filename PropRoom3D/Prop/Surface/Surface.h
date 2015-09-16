@@ -64,10 +64,44 @@ namespace prop3
 
         virtual void setCoating(const std::shared_ptr<Coating>& coating) = 0;
 
+
     protected:
         static const std::shared_ptr<Coating> NO_COATING;
     };
 
+
+    // Surface shell protects surfaces by intercepting coating assignation
+    // and transformation application by caching those internally
+    class PROP3D_EXPORT SurfaceShell : public Surface
+    {
+        friend std::shared_ptr<Surface> Shell(
+                const std::shared_ptr<Surface>& surf);
+        SurfaceShell(const std::shared_ptr<Surface>& surf);
+
+    public:
+        virtual void transform(const Transform& transform);
+        virtual EPointPosition isIn(const glm::dvec3& point) const;
+        virtual double signedDistance(const glm::dvec3& point) const;
+        virtual void raycast(const Raycast& ray, RayHitList& reports) const;
+        virtual bool intersects(const Raycast& ray, RayHitList& reports) const;
+        virtual void setCoating(const std::shared_ptr<Coating>& coating);
+
+        // StageSetNode interface
+        virtual void accept(StageSetVisitor& visitor) override;
+
+        virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
+
+
+        std::shared_ptr<Coating> coating() const;
+
+        glm::dmat4 transform() const;
+
+    private:
+        std::shared_ptr<Surface> _surf;
+        std::shared_ptr<Coating>_coating;
+        glm::dmat4 _invTransform;
+        glm::dmat4 _transform;
+    };
 
     // Logical surfaces
     class PROP3D_EXPORT SurfaceGhost : public Surface
@@ -183,6 +217,9 @@ namespace prop3
         std::vector<std::shared_ptr<Surface>> _surfs;
     };
 
+    // Surface shell
+    std::shared_ptr<Surface> Shell(
+            const std::shared_ptr<Surface>& surf);
 
     // Logical operators overloading
     // Ghost surface
@@ -212,6 +249,16 @@ namespace prop3
     inline double Surface::signedDistance(double x, double y, double z) const
     {
         return signedDistance(glm::dvec3(x, y, z));
+    }
+
+    inline std::shared_ptr<Coating> SurfaceShell::coating() const
+    {
+        return _coating;
+    }
+
+    inline glm::dmat4 SurfaceShell::transform() const
+    {
+        return _transform;
     }
 
     inline std::shared_ptr<Surface> SurfaceOr::apply(

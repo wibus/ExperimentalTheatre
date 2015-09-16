@@ -55,6 +55,77 @@ namespace prop3
     }
 
 
+    // Surface Shell
+    SurfaceShell::SurfaceShell(const std::shared_ptr<Surface>& surf) :
+        _surf(surf),
+        _coating(nullptr),
+        _invTransform()
+    {
+
+    }
+
+    void SurfaceShell::transform(const Transform& transform)
+    {
+        _transform = transform.mat() * _transform;
+        _invTransform *= transform.inv();
+    }
+
+    EPointPosition SurfaceShell::isIn(const glm::dvec3& point) const
+    {
+        _surf->isIn(glm::dvec3(_invTransform * glm::dvec4(point, 1.0)));
+    }
+
+    double SurfaceShell::signedDistance(const glm::dvec3& point) const
+    {
+        _surf->signedDistance(glm::dvec3(_invTransform * glm::dvec4(point, 1.0)));
+    }
+
+    void SurfaceShell::raycast(const Raycast& ray, RayHitList& reports) const
+    {
+        Raycast tRay = ray;
+        tRay.origin = glm::dvec3(_invTransform * glm::dvec4(ray.origin, 1.0));
+        tRay.direction = glm::dvec3(_invTransform * glm::dvec4(ray.direction, 0.0));
+
+        RayHitReport* last = reports.head;
+        _surf->raycast(tRay, reports);
+        RayHitReport* first = reports.head;
+
+            while(first != last)
+            {
+                RayHitReport& r = *first;
+                r.position = glm::dvec3(_transform * glm::dvec4(r.position, 1.0));
+                r.normal = glm::dvec3(_transform * glm::dvec4(r.normal, 0.0));
+                if(_coating.get() != nullptr)
+                    r.coating = _coating.get();
+
+                first = first->_next;
+            }
+    }
+
+    bool SurfaceShell::intersects(const Raycast& ray, RayHitList& reports) const
+    {
+        Raycast tRay = ray;
+        tRay.origin = glm::dvec3(_invTransform * glm::dvec4(ray.origin, 1.0));
+        tRay.direction = glm::dvec3(_invTransform * glm::dvec4(ray.direction, 0.0));
+        return _surf->intersects(tRay, reports);
+    }
+
+    void SurfaceShell::setCoating(const std::shared_ptr<Coating>& coating)
+    {
+        _coating = coating;
+    }
+
+    void SurfaceShell::accept(StageSetVisitor& visitor)
+    {
+        visitor.visit(*this);
+    }
+
+    std::vector<std::shared_ptr<StageSetNode>> SurfaceShell::children() const
+    {
+        return { _surf, _coating };
+    }
+
+
     // SurfaceGhost
     SurfaceGhost::SurfaceGhost(const std::shared_ptr<Surface>& surf) :
         _surf(surf)
@@ -405,6 +476,12 @@ namespace prop3
 
 
     // Operators
+    std::shared_ptr<Surface> Shell(
+            const std::shared_ptr<Surface>& surf)
+    {
+        return std::shared_ptr<Surface>(new SurfaceShell(surf));
+    }
+
     std::shared_ptr<Surface> operator~ (
             const std::shared_ptr<Surface>& surf)
     {

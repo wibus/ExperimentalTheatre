@@ -25,11 +25,13 @@ namespace prop3
         class SurfaceTreeBuilder : public StageSetVisitor
         {
         public:
-            SurfaceTreeBuilder(std::map<Surface*, int>& surfaceIdMap);
+            SurfaceTreeBuilder(std::map<Surface*, int>& surfaceIdMap,
+                               std::map<Coating*, int>& coatingIdMap);
 
             const QJsonValue& surfaceTree() const;
 
             // Implicit Surfaces
+            virtual void visit(SurfaceShell& node) override;
             virtual void visit(SurfaceGhost& node) override;
             virtual void visit(SurfaceInverse& node) override;
             virtual void visit(SurfaceOr& node) override;
@@ -42,6 +44,7 @@ namespace prop3
         private:
             QJsonValue _subTree;
             std::map<Surface*, int>& _surfaceIdMap;
+            std::map<Coating*, int>& _coatingIdMap;
         };
 
     public :

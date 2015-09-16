@@ -383,25 +383,33 @@ namespace prop3
         else
         {
             QJsonObject obj = surfaceTree.toObject();
-            assert(obj.size() == 1);
-            QString logOpt = obj.begin().key();
 
-            if(logOpt == SURFACE_OPERATOR_GHOST)
+            if(obj.contains(SURFACE_OPERATOR_SHELL))
+            {
+                std::shared_ptr<Surface> shell = Shell(subSurfTree(obj[SURFACE_OPERATOR_SHELL]));
+                shell->transform(dmat4FromJson(obj[SURFACE_TRANSFORM]));
+                if(obj.contains(SURFACE_COATING))
+                {
+                    shell->setCoating(_coatings[obj[SURFACE_COATING].toInt()]);
+                }
+                return shell;
+            }
+            else if(obj.contains(SURFACE_OPERATOR_GHOST))
             {
                 return ~subSurfTree(obj[SURFACE_OPERATOR_GHOST]);
             }
-            else if(logOpt == SURFACE_OPERATOR_INVERSE)
+            else if(obj.contains(SURFACE_OPERATOR_INVERSE))
             {
                 return !subSurfTree(obj[SURFACE_OPERATOR_INVERSE]);
             }
-            else if(logOpt == SURFACE_OPERATOR_OR)
+            else if(obj.contains(SURFACE_OPERATOR_OR))
             {
                 vector<shared_ptr<Surface>> operansSurf;
                 for(QJsonValueRef ref : obj[SURFACE_OPERATOR_OR].toArray())
                     operansSurf.push_back(subSurfTree(ref));
                 return SurfaceOr::apply(operansSurf);
             }
-            else if(logOpt == SURFACE_OPERATOR_AND)
+            else if(obj.contains(SURFACE_OPERATOR_AND))
             {
                 vector<shared_ptr<Surface>> operansSurf;
                 for(QJsonValueRef ref : obj[SURFACE_OPERATOR_AND].toArray())
@@ -410,6 +418,7 @@ namespace prop3
             }
             else
             {
+                QString logOpt = obj.begin().key();
                 getLog().postMessage(new Message('E', false,
                     "Unknown surface operator: " + logOpt.toStdString(), "StageSetJsonReader"));
             }

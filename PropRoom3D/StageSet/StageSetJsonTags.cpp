@@ -24,6 +24,7 @@ namespace prop3
     const QString SURFACE_TYPE_PLANETEXTURE = "Plane Texture";
     const QString SURFACE_TYPE_QUADRIC      = "Quadric";
     const QString SURFACE_TYPE_SPHERE       = "Sphere";
+    const QString SURFACE_OPERATOR_SHELL    = "Shell()";
     const QString SURFACE_OPERATOR_GHOST    = "~";
     const QString SURFACE_OPERATOR_INVERSE  = "!";
     const QString SURFACE_OPERATOR_OR       = "|";
@@ -37,6 +38,7 @@ namespace prop3
     const QString SURFACE_REPRESENTATION    = "Representation";
     const QString SURFACE_RADIUS            = "Radius";
     const QString SURFACE_CENTER            = "Center";
+    const QString SURFACE_TRANSFORM         = "Transform";
 
     // Materials
     const QString MATERIAL_TYPE                 = "Type";

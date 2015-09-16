@@ -21,6 +21,11 @@ namespace prop3
 
 
     // Implicit Surfaces
+    void StageSetVisitor::visit(SurfaceShell& node)
+    {
+
+    }
+
     void StageSetVisitor::visit(SurfaceGhost& node)
     {
 

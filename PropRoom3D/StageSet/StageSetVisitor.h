@@ -11,6 +11,7 @@ namespace prop3
 
     // Implicit Surfaces
     class Surface;
+    class SurfaceShell;
     class SurfaceGhost;
     class SurfaceInverse;
     class SurfaceOr;
@@ -56,6 +57,7 @@ namespace prop3
         virtual void visit(Prop& node);
 
         // Implicit Surfaces
+        virtual void visit(SurfaceShell& node);
         virtual void visit(SurfaceGhost& node);
         virtual void visit(SurfaceInverse& node);
         virtual void visit(SurfaceOr& node);

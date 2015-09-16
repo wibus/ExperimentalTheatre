@@ -163,14 +163,14 @@ namespace prop3
 
         if(node.surface().get() != nullptr)
         {
-            SurfaceTreeBuilder builder(_surfaceIdMap);
+            SurfaceTreeBuilder builder(_surfaceIdMap, _coatingIdMap);
             node.surface()->accept(builder);
             obj[PROP_SURFACE] = builder.surfaceTree();
         }
 
         if(node.boundingSurface().get() != nullptr)
         {
-            SurfaceTreeBuilder builder(_surfaceIdMap);
+            SurfaceTreeBuilder builder(_surfaceIdMap, _coatingIdMap);
             node.boundingSurface()->accept(builder);
             obj[PROP_BOUNDING_SURFACE] = builder.surfaceTree();
         }
@@ -397,8 +397,10 @@ namespace prop3
     // Surface Tree Builder //
     //////////////////////////
     StageSetJsonWriter::SurfaceTreeBuilder::SurfaceTreeBuilder(
-            std::map<Surface*, int>& surfaceIdMap) :
-        _surfaceIdMap(surfaceIdMap)
+            std::map<Surface*, int>& surfaceIdMap,
+            std::map<Coating*, int>& coatingIdMap) :
+        _surfaceIdMap(surfaceIdMap),
+        _coatingIdMap(coatingIdMap)
     {
 
     }
@@ -406,6 +408,21 @@ namespace prop3
     const QJsonValue& StageSetJsonWriter::SurfaceTreeBuilder::surfaceTree() const
     {
         return _subTree;
+    }
+
+    void StageSetJsonWriter::SurfaceTreeBuilder::visit(SurfaceShell& node)
+    {
+        auto children = node.children();
+        assert(children.size() > 1);
+        children[0]->accept(*this);
+
+        QJsonObject logOpt;
+        logOpt[SURFACE_OPERATOR_SHELL] = _subTree;
+        logOpt[SURFACE_TRANSFORM] = toJson(node.transform());
+        if(node.coating().get() != nullptr)
+            logOpt[SURFACE_COATING] = _coatingIdMap[node.coating().get()];
+
+        _subTree = logOpt;
     }
 
     void StageSetJsonWriter::SurfaceTreeBuilder::visit(SurfaceGhost& node)
