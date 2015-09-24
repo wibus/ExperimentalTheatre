@@ -42,7 +42,8 @@ SET(CELLAR_GL_HEADERS
 # Image
 SET(CELLAR_IMAGE_HEADERS
     ${CELLAR_SRC_DIR}/Image/Image.h
-    ${CELLAR_SRC_DIR}/Image/ImageBank.h)
+    ${CELLAR_SRC_DIR}/Image/ImageBank.h
+    ${CELLAR_SRC_DIR}/Image/ImageSampler.h)
 
     
 # Misc
@@ -102,7 +103,8 @@ SET(CELLAR_GL_SOURCES
 # Image
 SET(CELLAR_IMAGE_SOURCES
     ${CELLAR_SRC_DIR}/Image/Image.cpp
-    ${CELLAR_SRC_DIR}/Image/ImageBank.cpp)
+    ${CELLAR_SRC_DIR}/Image/ImageBank.cpp
+    ${CELLAR_SRC_DIR}/Image/ImageSampler.cpp)
 
     
 # Misc

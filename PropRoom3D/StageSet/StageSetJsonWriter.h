@@ -11,6 +11,8 @@
 
 #include <GLM/glm.hpp>
 
+#include <CellarWorkbench/Image/ImageSampler.h>
+
 #include "StageSetVisitor.h"
 
 
@@ -36,6 +38,7 @@ namespace prop3
             virtual void visit(SurfaceInverse& node) override;
             virtual void visit(SurfaceOr& node) override;
             virtual void visit(SurfaceAnd& node) override;
+            virtual void visit(Box& node) override;
             virtual void visit(Plane& node) override;
             virtual void visit(PlaneTexture& node) override;
             virtual void visit(Quadric& node) override;
@@ -58,6 +61,7 @@ namespace prop3
         virtual void visit(Prop& node) override;
 
         // Implicit Surfaces
+        virtual void visit(Box& node) override;
         virtual void visit(Plane& node) override;
         virtual void visit(PlaneTexture& node) override;
         virtual void visit(Quadric& node) override;
@@ -87,6 +91,8 @@ namespace prop3
         static QJsonValue toJson(const glm::dvec3& v);
         static QJsonValue toJson(const glm::dvec4& v);
         static QJsonValue toJson(const glm::dmat4& m);
+        static QJsonValue toJson(const cellar::ESamplerFilter& filter);
+        static QJsonValue toJson(const cellar::ESamplerWrapper& wrapper);
 
     private:
         bool insertBackdrop(Backdrop& node);

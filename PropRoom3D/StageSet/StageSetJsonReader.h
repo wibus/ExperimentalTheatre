@@ -9,6 +9,8 @@
 
 #include <GLM/glm.hpp>
 
+#include <CellarWorkbench/Image/ImageSampler.h>
+
 #include "PropRoom3D/libPropRoom3D_global.h"
 
 
@@ -36,6 +38,8 @@ namespace prop3
         static glm::dvec3 dvec3FromJson(const QJsonValueRef& ref);
         static glm::dvec4 dvec4FromJson(const QJsonValueRef& ref);
         static glm::dmat4 dmat4FromJson(const QJsonValueRef& ref);
+        static cellar::ESamplerFilter  filterFromJson(const QJsonValueRef& ref);
+        static cellar::ESamplerWrapper wrapperFromJson(const QJsonValueRef& ref);
 
     private:
         void deserializeBackdrops(const QJsonObject& stageSetObj);

@@ -16,6 +16,8 @@ namespace prop3
     TexturedGlossyPaint::TexturedGlossyPaint(
             const std::string& texName,
             const std::string& glossName,
+            const cellar::ESamplerFilter& texFilter,
+            const cellar::ESamplerWrapper& texWrapper,
             const glm::dvec3& defaultColor,
             double defaultGlossiness,
             double varnishRefractiveIndex) :
@@ -23,6 +25,7 @@ namespace prop3
         _glossName(glossName),
         _texture(cellar::getImageBank().getImage(texName)),
         _glossMap(cellar::getImageBank().getImage(glossName)),
+        _sampler(texFilter, texWrapper),
         _defaultColor(defaultColor),
         _defaultGlossiness(defaultGlossiness),
         _varnishRefractiveIndex(varnishRefractiveIndex)
@@ -55,14 +58,8 @@ namespace prop3
         if(report.isTextured)
         {
             const glm::dvec3& texCoord = report.texCoord;
-            int i = texCoord.s * _glossMap.width();
-            int j = texCoord.t * _glossMap.height();
-            unsigned char* pixel = _glossMap.pixel(
-                glm::clamp(i, 0,  _glossMap.width()-1),
-                glm::clamp(j, 0, _glossMap.height()-1));
-
-            // Not blended with default color
-            glossiness = pixel[0] / 255.0;
+            glossiness = _sampler.sample(
+                _glossMap, texCoord.s, texCoord.t).r;
             mirrorRatio *= glossiness;
         }
 
@@ -85,16 +82,8 @@ namespace prop3
         if(report.isTextured)
         {
             const glm::dvec3& texCoord = report.texCoord;
-            int i = texCoord.s * _texture.width();
-            int j = texCoord.t * _texture.height();
-            unsigned char* pixel = _texture.pixel(
-                glm::clamp(i, 0,  _texture.width()-1),
-                glm::clamp(j, 0, _texture.height()-1));
-
-            // Not blended with default color
-            color.x = pixel[0] / 255.0;
-            color.y = pixel[1] / 255.0;
-            color.z = pixel[2] / 255.0;
+            color = glm::dvec3(_sampler.sample(
+                _texture, texCoord.x, texCoord.y));
         }
 
         color *= (1.0 - mirrorRatio);
@@ -135,16 +124,8 @@ namespace prop3
         if(report.isTextured)
         {
             const glm::dvec3& texCoord = report.texCoord;
-            int i = texCoord.s * _texture.width();
-            int j = texCoord.t * _texture.height();
-            unsigned char* pixel = _texture.pixel(
-                glm::clamp(i, 0,  _texture.width()-1),
-                glm::clamp(j, 0, _texture.height()-1));
-
-            // Not blended with default color
-            color.x = pixel[0] / 255.0;
-            color.y = pixel[1] / 255.0;
-            color.z = pixel[2] / 255.0;
+            color = glm::dvec3(_sampler.sample(
+                _texture, texCoord.x, texCoord.y));
         }
 
 

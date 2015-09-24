@@ -13,6 +13,7 @@
 
 #include "Prop/Prop.h"
 
+#include "Prop/Surface/Box.h"
 #include "Prop/Surface/Plane.h"
 #include "Prop/Surface/Quadric.h"
 #include "Prop/Surface/Sphere.h"
@@ -128,6 +129,22 @@ namespace prop3
                     array[15].toDouble()));
     }
 
+    cellar::ESamplerFilter StageSetJsonReader::filterFromJson(const QJsonValueRef& ref)
+    {
+        if(ref.toString() == "NEAREST")
+            return cellar::ESamplerFilter::NEAREST;
+        else
+            return cellar::ESamplerFilter::LINEAR;
+    }
+
+    cellar::ESamplerWrapper StageSetJsonReader::wrapperFromJson(const QJsonValueRef& ref)
+    {
+        if(ref.toString() == "CLAMP")
+            return cellar::ESamplerWrapper::CLAMP;
+        else
+            return cellar::ESamplerWrapper::REPEAT;
+    }
+
     void StageSetJsonReader::deserializeBackdrops(const QJsonObject& stageSetObj)
     {
         for(QJsonValueRef ref : stageSetObj[STAGESET_BACKDROP_ARRAY].toArray())
@@ -214,6 +231,8 @@ namespace prop3
             {
                 coating = make_shared<TexturedFlatPaint>(
                     obj[COATING_TEXTURE_NAME].toString().toStdString(),
+                    filterFromJson(obj[COATING_TEXTURE_FILTER]),
+                    wrapperFromJson(obj[COATING_TEXTURE_WRAPPER]),
                     dvec3FromJson(obj[COATING_DEFAULT_COLOR]));
             }
             else if(type == COATING_TYPE_TEXTUREDGLOSSYPAINT)
@@ -221,6 +240,8 @@ namespace prop3
                 coating = make_shared<TexturedGlossyPaint>(
                     obj[COATING_TEXTURE_NAME].toString().toStdString(),
                     obj[COATING_GLOSS_MAP_NAME].toString().toStdString(),
+                    filterFromJson(obj[COATING_TEXTURE_FILTER]),
+                    wrapperFromJson(obj[COATING_TEXTURE_WRAPPER]),
                     dvec3FromJson(obj[COATING_DEFAULT_COLOR]),
                     obj[COATING_DEFAULT_GLOSS].toDouble(),
                     obj[COATING_VARNISH_REFRACTIVE_INDEX].toDouble());
@@ -298,7 +319,13 @@ namespace prop3
             QJsonObject obj = ref.toObject();
             QString type = obj[SURFACE_TYPE].toString();
 
-            if(type == SURFACE_TYPE_PLANE)
+            if(type == SURFACE_TYPE_BOX)
+            {
+                surface = Box::boxCorners(
+                    dvec3FromJson(obj[SURFACE_MIN_CORNER]),
+                    dvec3FromJson(obj[SURFACE_MAX_CORNER]));
+            }
+            else if(type == SURFACE_TYPE_PLANE)
             {
                 surface = Plane::plane(
                     dvec4FromJson(obj[SURFACE_REPRESENTATION]));

@@ -15,6 +15,7 @@
 
 #include "Prop/Prop.h"
 
+#include "Prop/Surface/Box.h"
 #include "Prop/Surface/Plane.h"
 #include "Prop/Surface/Quadric.h"
 #include "Prop/Surface/Sphere.h"
@@ -131,6 +132,31 @@ namespace prop3
         return array;
     }
 
+    QJsonValue StageSetJsonWriter::toJson(const cellar::ESamplerFilter& filter)
+    {
+        switch(filter)
+        {
+        case cellar::ESamplerFilter::NEAREST :
+            return "NEAREST";
+        case cellar::ESamplerFilter::LINEAR :
+            return "LINEAR";
+        default:
+            return "Unknow";
+        }
+    }
+
+    QJsonValue StageSetJsonWriter::toJson(const cellar::ESamplerWrapper& wrapper)
+    {
+        switch(wrapper)
+        {
+        case cellar::ESamplerWrapper::CLAMP :
+            return "CLAMP";
+        case cellar::ESamplerWrapper::REPEAT :
+            return "REPEAT";
+        default:
+            return "Unknow";
+        }
+    }
 
     bool StageSetJsonWriter::insertBackdrop(Backdrop& node)
     {
@@ -180,6 +206,19 @@ namespace prop3
 
 
     // Implicit Surfaces
+    void StageSetJsonWriter::visit(Box& node)
+    {
+        if(insertSurface(node))
+        {
+            QJsonObject obj;
+            obj[SURFACE_TYPE]           = SURFACE_TYPE_BOX;
+            obj[SURFACE_MIN_CORNER]      = toJson(node.minCorner());
+            obj[SURFACE_MAX_CORNER]      = toJson(node.maxCorner());
+            obj[SURFACE_COATING]        = _coatingIdMap[node.coating().get()];
+            _surfacesArray.append(obj);
+        }
+    }
+
     void StageSetJsonWriter::visit(Plane& node)
     {
         if(insertSurface(node))
@@ -338,9 +377,11 @@ namespace prop3
         if(insertCoating(node))
         {
             QJsonObject obj;
-            obj[COATING_TYPE]          = COATING_TYPE_TEXTUREDFLATPAINT;
-            obj[COATING_DEFAULT_COLOR] = toJson(node.defaultColor());
-            obj[COATING_TEXTURE_NAME]  = QString(node.texName().c_str());
+            obj[COATING_TYPE]            = COATING_TYPE_TEXTUREDFLATPAINT;
+            obj[COATING_DEFAULT_COLOR]   = toJson(node.defaultColor());
+            obj[COATING_TEXTURE_NAME]    = QString(node.texName().c_str());
+            obj[COATING_TEXTURE_FILTER]  = toJson(node.texFilter());
+            obj[COATING_TEXTURE_WRAPPER] = toJson(node.texWrapper());
             _coatingsArray.append(obj);
         }
     }
@@ -354,6 +395,8 @@ namespace prop3
             obj[COATING_DEFAULT_COLOR]            = toJson(node.defaultColor());
             obj[COATING_DEFAULT_GLOSS]            = node.defaultGlossiness();
             obj[COATING_TEXTURE_NAME]             = QString(node.texName().c_str());
+            obj[COATING_TEXTURE_FILTER]           = toJson(node.texFilter());
+            obj[COATING_TEXTURE_WRAPPER]          = toJson(node.texWrapper());
             obj[COATING_GLOSS_MAP_NAME]           = QString(node.glossName().c_str());
             obj[COATING_VARNISH_REFRACTIVE_INDEX] = node.varnishRefractiveIndex();
             _coatingsArray.append(obj);
@@ -473,6 +516,11 @@ namespace prop3
         QJsonObject localSubTree;
         localSubTree[SURFACE_OPERATOR_AND] = childArray;
         _subTree = localSubTree;
+    }
+
+    void StageSetJsonWriter::SurfaceTreeBuilder::visit(Box& node)
+    {
+        _subTree = QJsonValue(_surfaceIdMap[&node]);
     }
 
     void StageSetJsonWriter::SurfaceTreeBuilder::visit(Plane& node)

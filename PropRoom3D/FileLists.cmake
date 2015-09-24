@@ -59,6 +59,7 @@ SET(PROP3_RAY_HEADERS
 # Surfaces
 SET(PROP3_SURFACE_HEADERS
     ${PROP3_SRC_DIR}/Prop/Surface/Surface.h
+    ${PROP3_SRC_DIR}/Prop/Surface/Box.h
     ${PROP3_SRC_DIR}/Prop/Surface/Plane.h
     ${PROP3_SRC_DIR}/Prop/Surface/Quadric.h
     ${PROP3_SRC_DIR}/Prop/Surface/Sphere.h)
@@ -160,6 +161,7 @@ SET(PROP3_RAY_SOURCES
 # Surfaces
 SET(PROP3_SURFACE_SOURCES
     ${PROP3_SRC_DIR}/Prop/Surface/Surface.cpp
+    ${PROP3_SRC_DIR}/Prop/Surface/Box.cpp
     ${PROP3_SRC_DIR}/Prop/Surface/Plane.cpp
     ${PROP3_SRC_DIR}/Prop/Surface/Quadric.cpp
     ${PROP3_SRC_DIR}/Prop/Surface/Sphere.cpp)

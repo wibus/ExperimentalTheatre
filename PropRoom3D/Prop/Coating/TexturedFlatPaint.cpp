@@ -12,10 +12,14 @@
 
 namespace prop3
 {
-    TexturedFlatPaint::TexturedFlatPaint(const std::string& texName,
-                                 const glm::dvec3& defaultColor) :
+    TexturedFlatPaint::TexturedFlatPaint(
+            const std::string& texName,
+            const cellar::ESamplerFilter& texFilter,
+            const cellar::ESamplerWrapper& texWrapper,
+            const glm::dvec3& defaultColor) :
         _texName(texName),
         _texture(cellar::getImageBank().getImage(texName)),
+        _sampler(texFilter, texWrapper),
         _defaultColor(defaultColor)
     {
     }
@@ -41,16 +45,8 @@ namespace prop3
         if(report.isTextured)
         {
             const glm::dvec3& texCoord = report.texCoord;
-            int i = texCoord.s * _texture.width();
-            int j = texCoord.t * _texture.height();
-            unsigned char* pixel = _texture.pixel(
-                glm::clamp(i, 0,  _texture.width()-1),
-                glm::clamp(j, 0, _texture.height()-1));
-
-            // Not blended with default color
-            color.x = pixel[0] / 255.0;
-            color.y = pixel[1] / 255.0;
-            color.z = pixel[2] / 255.0;
+            color = glm::dvec3(_sampler.sample(
+                _texture, texCoord.x, texCoord.y));
         }
 
         for(size_t i=preSize; i<postSize; ++i)
@@ -69,16 +65,8 @@ namespace prop3
         if(report.isTextured)
         {
             const glm::dvec3& texCoord = report.texCoord;
-            int i = texCoord.s * _texture.width();
-            int j = texCoord.t * _texture.height();
-            unsigned char* pixel = _texture.pixel(
-                glm::clamp(i, 0,  _texture.width()-1),
-                glm::clamp(j, 0, _texture.height()-1));
-
-            // Not blended with default color
-            color.x = pixel[0] / 255.0;
-            color.y = pixel[1] / 255.0;
-            color.z = pixel[2] / 255.0;
+            color = glm::dvec3(_sampler.sample(
+                _texture, texCoord.x, texCoord.y));
         }
 
         return color * directDiffuseReflection(report, outDirection);

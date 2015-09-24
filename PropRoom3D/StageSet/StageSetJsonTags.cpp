@@ -20,6 +20,7 @@ namespace prop3
 
     // Surfaces
     const QString SURFACE_TYPE              = "Type";
+    const QString SURFACE_TYPE_BOX          = "Box";
     const QString SURFACE_TYPE_PLANE        = "Plane";
     const QString SURFACE_TYPE_PLANETEXTURE = "Plane Texture";
     const QString SURFACE_TYPE_QUADRIC      = "Quadric";
@@ -38,6 +39,8 @@ namespace prop3
     const QString SURFACE_REPRESENTATION    = "Representation";
     const QString SURFACE_RADIUS            = "Radius";
     const QString SURFACE_CENTER            = "Center";
+    const QString SURFACE_MIN_CORNER        = "Min Corner";
+    const QString SURFACE_MAX_CORNER        = "Max Corner";
     const QString SURFACE_TRANSFORM         = "Transform";
 
     // Materials
@@ -65,6 +68,8 @@ namespace prop3
     const QString COATING_DEFAULT_COLOR             = "Default Color";
     const QString COATING_DEFAULT_GLOSS             = "Default Gloss";
     const QString COATING_TEXTURE_NAME              = "Tex Name";
+    const QString COATING_TEXTURE_FILTER            = "Tex Filter";
+    const QString COATING_TEXTURE_WRAPPER           = "Tex Wrapper";
     const QString COATING_GLOSS_MAP_NAME            = "Gloss Name";
     const QString COATING_VARNISH_REFRACTIVE_INDEX  = "Varnish Refractive Index";
 

@@ -23,6 +23,7 @@ namespace prop3
 
     // Surfaces
     extern const QString SURFACE_TYPE;
+    extern const QString SURFACE_TYPE_BOX;
     extern const QString SURFACE_TYPE_PLANE;
     extern const QString SURFACE_TYPE_PLANETEXTURE;
     extern const QString SURFACE_TYPE_QUADRIC;
@@ -39,6 +40,8 @@ namespace prop3
     extern const QString SURFACE_REPRESENTATION;
     extern const QString SURFACE_RADIUS;
     extern const QString SURFACE_CENTER;
+    extern const QString SURFACE_MIN_CORNER;
+    extern const QString SURFACE_MAX_CORNER;
     extern const QString SURFACE_TRANSFORM;
 
     // Materials
@@ -66,6 +69,8 @@ namespace prop3
     extern const QString COATING_DEFAULT_COLOR;
     extern const QString COATING_DEFAULT_GLOSS;
     extern const QString COATING_TEXTURE_NAME;
+    extern const QString COATING_TEXTURE_FILTER;
+    extern const QString COATING_TEXTURE_WRAPPER;
     extern const QString COATING_GLOSS_MAP_NAME;
     extern const QString COATING_VARNISH_REFRACTIVE_INDEX;
 

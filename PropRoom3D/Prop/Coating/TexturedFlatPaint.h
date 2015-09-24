@@ -1,13 +1,9 @@
 #ifndef PROPROOM3D_TEXTUREDFLATPAINT_H
 #define PROPROOM3D_TEXTUREDFLATPAINT_H
 
+#include <CellarWorkbench/Image/ImageSampler.h>
+
 #include "Coating.h"
-
-
-namespace cellar
-{
-    class Image;
-}
 
 
 namespace prop3
@@ -17,8 +13,11 @@ namespace prop3
             public Coating
     {
     public:
-        TexturedFlatPaint(const std::string& texName,
-                          const glm::dvec3& defaultColor = glm::dvec3(1.0));
+        TexturedFlatPaint(
+            const std::string& texName,
+            const cellar::ESamplerFilter& texFilter = cellar::ESamplerFilter::NEAREST,
+            const cellar::ESamplerWrapper& texWrapper = cellar::ESamplerWrapper::CLAMP,
+            const glm::dvec3& defaultColor = glm::dvec3(1.0));
         virtual ~TexturedFlatPaint();
 
         // StageSetNode interface
@@ -41,11 +40,16 @@ namespace prop3
 
         std::string texName() const;
 
+        cellar::ESamplerFilter texFilter() const;
+
+        cellar::ESamplerWrapper texWrapper() const;
+
         glm::dvec3 defaultColor() const;
 
     private:
         std::string _texName;
         cellar::Image& _texture;
+        cellar::ImageSampler _sampler;
         glm::dvec3 _defaultColor;
     };
 
@@ -55,6 +59,16 @@ namespace prop3
     inline std::string TexturedFlatPaint::texName() const
     {
         return _texName;
+    }
+
+    inline cellar::ESamplerFilter TexturedFlatPaint::texFilter() const
+    {
+        return _sampler.filter();
+    }
+
+    inline cellar::ESamplerWrapper TexturedFlatPaint::texWrapper() const
+    {
+        return _sampler.wrapper();
     }
 
     inline glm::dvec3 TexturedFlatPaint::defaultColor() const

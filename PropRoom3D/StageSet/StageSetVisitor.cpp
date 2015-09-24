@@ -46,6 +46,11 @@ namespace prop3
 
     }
 
+    void StageSetVisitor::visit(Box& node)
+    {
+
+    }
+
     void StageSetVisitor::visit(Plane& node)
     {
 

@@ -68,6 +68,8 @@ namespace prop3
     {
         _transform = transform.mat() * _transform;
         _invTransform *= transform.inv();
+
+        stampCurrentUpdate();
     }
 
     EPointPosition SurfaceShell::isIn(const glm::dvec3& point) const
@@ -90,16 +92,16 @@ namespace prop3
         _surf->raycast(tRay, reports);
         RayHitReport* first = reports.head;
 
-            while(first != last)
-            {
-                RayHitReport& r = *first;
-                r.position = glm::dvec3(_transform * glm::dvec4(r.position, 1.0));
-                r.normal = glm::dvec3(_transform * glm::dvec4(r.normal, 0.0));
-                if(_coating.get() != nullptr)
-                    r.coating = _coating.get();
+        while(first != last)
+        {
+            RayHitReport& r = *first;
+            r.position = glm::dvec3(_transform * glm::dvec4(r.position, 1.0));
+            r.normal = glm::dvec3(_transform * glm::dvec4(r.normal, 0.0));
+            if(_coating.get() != nullptr)
+                r.coating = _coating.get();
 
-                first = first->_next;
-            }
+            first = first->_next;
+        }
     }
 
     bool SurfaceShell::intersects(const Raycast& ray, RayHitList& reports) const
@@ -113,6 +115,8 @@ namespace prop3
     void SurfaceShell::setCoating(const std::shared_ptr<Coating>& coating)
     {
         _coating = coating;
+
+        stampCurrentUpdate();
     }
 
     void SurfaceShell::accept(StageSetVisitor& visitor)

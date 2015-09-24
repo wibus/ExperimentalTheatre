@@ -1,13 +1,9 @@
 #ifndef PROPROOM3D_TEXTUREDGLOSSYPAINT_H
 #define PROPROOM3D_TEXTUREDGLOSSYPAINT_H
 
+#include <CellarWorkbench/Image/ImageSampler.h>
+
 #include "Coating.h"
-
-
-namespace cellar
-{
-    class Image;
-}
 
 
 namespace prop3
@@ -18,11 +14,13 @@ namespace prop3
     {
     public:
         TexturedGlossyPaint(
-                const std::string& texName,
-                const std::string& glossName,
-                const glm::dvec3& defaultColor = glm::dvec3(1.0),
-                double defaultGlossiness = 0.0,
-                double varnishRefractiveIndex = 1.55);
+            const std::string& texName,
+            const std::string& glossName,
+            const cellar::ESamplerFilter& texFilter = cellar::ESamplerFilter::NEAREST,
+            const cellar::ESamplerWrapper& texWrapper = cellar::ESamplerWrapper::CLAMP,
+            const glm::dvec3& defaultColor = glm::dvec3(1.0),
+            double defaultGlossiness = 0.0,
+            double varnishRefractiveIndex = 1.55);
         virtual ~TexturedGlossyPaint();
 
         // StageSetNode interface
@@ -49,6 +47,10 @@ namespace prop3
 
         glm::dvec3 defaultColor() const;
 
+        cellar::ESamplerFilter texFilter() const;
+
+        cellar::ESamplerWrapper texWrapper() const;
+
         double defaultGlossiness() const;
 
         double varnishRefractiveIndex() const;
@@ -59,6 +61,7 @@ namespace prop3
         std::string _glossName;
         cellar::Image& _texture;
         cellar::Image& _glossMap;
+        cellar::ImageSampler _sampler;
         glm::dvec3 _defaultColor;
         double _defaultGlossiness;
         double _varnishRefractiveIndex;
@@ -75,6 +78,16 @@ namespace prop3
     inline std::string TexturedGlossyPaint::glossName() const
     {
         return _glossName;
+    }
+
+    inline cellar::ESamplerFilter TexturedGlossyPaint::texFilter() const
+    {
+        return _sampler.filter();
+    }
+
+    inline cellar::ESamplerWrapper TexturedGlossyPaint::texWrapper() const
+    {
+        return _sampler.wrapper();
     }
 
     inline glm::dvec3 TexturedGlossyPaint::defaultColor() const
