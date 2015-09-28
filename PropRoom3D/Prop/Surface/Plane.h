@@ -89,6 +89,7 @@ namespace prop3
         virtual void accept(StageSetVisitor& visitor) override;
 
 
+        virtual void transform(const Transform& transform);
         virtual void raycast(const Raycast& ray, RayHitList& reports) const;
 
         glm::dvec3 texOrigin() const;
