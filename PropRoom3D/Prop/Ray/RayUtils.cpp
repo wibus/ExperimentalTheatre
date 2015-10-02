@@ -192,7 +192,7 @@ namespace prop3
                 direction = glm::normalize(direction);
 
                 glm::dvec3 attenuation = glm::dvec3(glm::max(0.0, splitFactor *
-                        glm::dot(direction, report.normal)));
+                        glm::mix(glm::dot(direction, report.normal), 1.0, glossiness)));
 
                 double entropy = glm::mix(Raycast::FULLY_DIFFUSIVE_ENTROPY,
                                           Raycast::FULLY_SPECULAR_ENTROPY,

@@ -27,7 +27,7 @@ namespace prop3
 
     ProceduralSun::ProceduralSun(bool isDirectlyVisible) :
         Backdrop(isDirectlyVisible),
-        _sunColor(glm::dvec3(1.00, 0.80, 0.68) * 1e5),
+        _sunColor(glm::dvec3(1.00, 0.75, 0.62) * 1e5),
         _skyColor(glm::dvec3(0.25, 0.60, 1.00) * 2.0),
         _skylineColor(glm::dvec3(1.00, 1.00, 1.00) * 2.0),
         _groundColor(glm::dvec3(0.05, 0.05, 0.3)),
@@ -115,9 +115,10 @@ namespace prop3
 
                 double lightDot = glm::dot(_sunDirection, ray.direction);
                 lightDot = lightDot * glm::max(0.0, lightDot);
+                lightDot *= lightDot * lightDot;
                 lightDot *= lightDot;
 
-                color += _sunColor * lightDot / 1.0e4;
+                color += _sunColor * lightDot / 4.0e3;
             }
 
             if(sunCompatibility != 0.0)

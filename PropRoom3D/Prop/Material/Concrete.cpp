@@ -23,14 +23,14 @@ namespace prop3
         const std::shared_ptr<Material>& selfEnteredMaterial,
         unsigned int outRayCountHint) const
     {
+        // Pigment diffuse reflection
         size_t preSize = raycasts.size();
-        indirectDiffuseReflection(raycasts, report, selfEnteredMaterial, outRayCountHint);
+        indirectDiffuseReflection(raycasts, report, leavedMaterial, outRayCountHint);
         size_t postSize = raycasts.size();
 
         for(size_t i=preSize; i<postSize; ++i)
         {
-            raycasts[i].color *= _color * glm::max(0.0,
-                glm::dot(raycasts[i].direction, report.normal));
+            raycasts[i].color *= _color;
         }
     }
 
@@ -41,6 +41,11 @@ namespace prop3
         const std::shared_ptr<Material>& enteredMaterial) const
     {
         return _color * directDiffuseReflection(report, outDirection);
+    }
+
+    glm::dvec3 Concrete::lightAttenuation(const Raycast& ray) const
+    {
+        return glm::dvec3(0);
     }
 
     void Concrete::accept(StageSetVisitor& visitor)

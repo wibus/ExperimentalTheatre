@@ -31,6 +31,9 @@ namespace prop3
             const std::shared_ptr<Material> &leavedMaterial,
             const std::shared_ptr<Material> &enteredMaterial) const;
 
+        virtual glm::dvec3 lightAttenuation(
+            const Raycast& ray) const override;
+
         glm::dvec3 color() const;
 
         double glossiness() const;

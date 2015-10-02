@@ -26,7 +26,7 @@ namespace prop3
         unsigned int outRayCountHint) const
     {
         size_t preSize = raycasts.size();
-        indirectGlossyReflection(raycasts, report, selfEnteredMaterial, _glossiness, outRayCountHint);
+        indirectGlossyReflection(raycasts, report, leavedMaterial, _glossiness, outRayCountHint);
         size_t postSize = raycasts.size();
 
         for(size_t i=preSize; i<postSize; ++i)
@@ -42,6 +42,11 @@ namespace prop3
         const std::shared_ptr<Material>& enteredMaterial) const
     {
         return _color * directGlossyReflection(report, outDirection, _glossiness);
+    }
+
+    glm::dvec3 Metal::lightAttenuation(const Raycast& ray) const
+    {
+        return glm::dvec3(0);
     }
 
     void Metal::accept(StageSetVisitor& visitor)
