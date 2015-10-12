@@ -2,9 +2,9 @@
 
 #include <GLM/gtc/random.hpp>
 
-#include "../Ray/Raycast.h"
-#include "../Ray/RayUtils.h"
-#include "../Ray/RayHitList.h"
+#include "Ray/Raycast.h"
+#include "Ray/RayUtils.h"
+#include "Ray/RayHitList.h"
 #include "../Surface/Sphere.h"
 #include "../../StageSet/StageSetVisitor.h"
 

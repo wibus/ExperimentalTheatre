@@ -70,9 +70,25 @@ namespace prop3
     };
 
 
+    // Physical surfaces
+    class PROP3D_EXPORT PhysicalSurface : public Surface
+    {
+    protected:
+        PhysicalSurface();
+
+    public:
+        virtual void setCoating(const std::shared_ptr<Coating>& coating) override;
+        virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
+        std::shared_ptr<Coating> coating() const;
+
+    protected:
+        std::shared_ptr<Coating>_coating;
+    };
+
+
     // Surface shell protects surfaces by intercepting coating assignation
     // and transformation application by caching those internally
-    class PROP3D_EXPORT SurfaceShell : public Surface
+    class PROP3D_EXPORT SurfaceShell : public PhysicalSurface
     {
         friend std::shared_ptr<Surface> Shell(
                 const std::shared_ptr<Surface>& surf);
@@ -84,21 +100,16 @@ namespace prop3
         virtual double signedDistance(const glm::dvec3& point) const;
         virtual void raycast(const Raycast& ray, RayHitList& reports) const;
         virtual bool intersects(const Raycast& ray, RayHitList& reports) const;
-        virtual void setCoating(const std::shared_ptr<Coating>& coating);
 
         // StageSetNode interface
         virtual void accept(StageSetVisitor& visitor) override;
 
         virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
 
-
-        std::shared_ptr<Coating> coating() const;
-
         glm::dmat4 transform() const;
 
     private:
         std::shared_ptr<Surface> _surf;
-        std::shared_ptr<Coating>_coating;
         glm::dmat4 _invTransform;
         glm::dmat4 _transform;
     };
@@ -251,7 +262,7 @@ namespace prop3
         return signedDistance(glm::dvec3(x, y, z));
     }
 
-    inline std::shared_ptr<Coating> SurfaceShell::coating() const
+    inline std::shared_ptr<Coating> PhysicalSurface::coating() const
     {
         return _coating;
     }

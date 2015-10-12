@@ -1,6 +1,6 @@
 #include "Material.h"
 
-#include "../Ray/Raycast.h"
+#include "Ray/Raycast.h"
 
 
 namespace prop3

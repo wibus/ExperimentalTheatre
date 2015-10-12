@@ -6,7 +6,7 @@
 
 namespace prop3
 {
-    class PROP3D_EXPORT Quadric : public Surface
+    class PROP3D_EXPORT Quadric : public PhysicalSurface
     {
     protected:
         // Constructing a quadric from the equation :
@@ -55,21 +55,13 @@ namespace prop3
         // StageSetNode interface
         virtual void accept(StageSetVisitor& visitor) override;
 
-        virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
-
-
         virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
         virtual void raycast(const Raycast& ray, RayHitList& reports) const;
         virtual bool intersects(const Raycast& ray, RayHitList& reports) const;
 
-        virtual void setCoating(const std::shared_ptr<Coating>& coating);
-
         glm::dmat4 representation() const;
-
-        std::shared_ptr<Coating> coating() const;
-
 
 
     protected:
@@ -77,7 +69,6 @@ namespace prop3
 
     private:
         glm::dmat4 _q;
-        std::shared_ptr<Coating> _coating;
     };
 
 
@@ -86,11 +77,6 @@ namespace prop3
     inline glm::dmat4 Quadric::representation() const
     {
         return _q;
-    }
-
-    inline std::shared_ptr<Coating> Quadric::coating() const
-    {
-        return _coating;
     }
 }
 

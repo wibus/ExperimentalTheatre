@@ -1,7 +1,7 @@
 #include "Glass.h"
 
-#include "../Ray/Raycast.h"
-#include "../Ray/RayUtils.h"
+#include "Ray/Raycast.h"
+#include "Ray/RayUtils.h"
 #include "../../StageSet/StageSetVisitor.h"
 
 

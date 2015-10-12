@@ -3,8 +3,8 @@
 #include <GLM/gtx/transform.hpp>
 
 #include "../Coating/Coating.h"
-#include "../Ray/RayHitList.h"
-#include "../Ray/RayHitReport.h"
+#include "Ray/RayHitList.h"
+#include "Ray/RayHitReport.h"
 #include "../../StageSet/StageSetVisitor.h"
 
 
@@ -14,8 +14,7 @@ namespace prop3
         _center((minCorner + maxCorner) / 2.0),
         _dimensions(maxCorner - minCorner),
         _minCorner(minCorner),
-        _maxCorner(maxCorner),
-        _coating(NO_COATING)
+        _maxCorner(maxCorner)
     {
 
     }
@@ -145,20 +144,8 @@ namespace prop3
         return tmax > glm::max(tmin, 0.0);
     }
 
-    void Box::setCoating(const std::shared_ptr<Coating>& coating)
-    {
-        _coating = coating;
-
-        stampCurrentUpdate();
-    }
-
     void Box::accept(StageSetVisitor& visitor)
     {
         visitor.visit(*this);
-    }
-
-    std::vector<std::shared_ptr<StageSetNode>> Box::children() const
-    {
-        return {_coating};
     }
 }

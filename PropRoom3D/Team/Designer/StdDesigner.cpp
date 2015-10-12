@@ -2,8 +2,8 @@
 
 #include <cassert>
 
-#include "../../Prop/Prop.h"
-#include "../../Prop/Environment/Environment.h"
+#include "Prop/Prop.h"
+#include "Lighting/Environment.h"
 
 
 namespace prop3

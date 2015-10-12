@@ -1,8 +1,8 @@
 #include "Plane.h"
 
 #include "../Coating/Coating.h"
-#include "../Ray/RayHitList.h"
-#include "../Ray/RayHitReport.h"
+#include "Ray/RayHitList.h"
+#include "Ray/RayHitReport.h"
 #include "../../StageSet/StageSetVisitor.h"
 
 
@@ -10,22 +10,19 @@ namespace prop3
 {
     Plane::Plane(const glm::dvec3& normal, const glm::dvec3& origin) :
         _normal(glm::normalize(normal)),
-        _d(-glm::dot(normal, origin)),
-        _coating(Surface::NO_COATING)
+        _d(-glm::dot(normal, origin))
     {
     }
 
     Plane::Plane(const glm::dvec4& representation) :
         _normal(representation),
-        _d(representation.w),
-        _coating(Surface::NO_COATING)
+        _d(representation.w)
     {
     }
 
     Plane::Plane(double a, double b, double c, double d) :
         _normal(a, b, c),
-        _d(d),
-        _coating(Surface::NO_COATING)
+        _d(d)
     {
     }
 
@@ -90,21 +87,9 @@ namespace prop3
         return glm::dot(ray.direction, _normal) != 0.0;
     }
 
-    void Plane::setCoating(const std::shared_ptr<Coating>& coating)
-    {
-        _coating = coating;
-
-        stampCurrentUpdate();
-    }
-
     void Plane::accept(StageSetVisitor& visitor)
     {
         visitor.visit(*this);
-    }
-
-    std::vector<std::shared_ptr<StageSetNode>> Plane::children() const
-    {
-        return { _coating };
     }
 
 

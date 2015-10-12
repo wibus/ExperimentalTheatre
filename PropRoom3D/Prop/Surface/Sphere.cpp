@@ -1,8 +1,8 @@
 #include "Sphere.h"
 
 #include "../Coating/Coating.h"
-#include "../Ray/RayHitList.h"
-#include "../Ray/RayHitReport.h"
+#include "Ray/RayHitList.h"
+#include "Ray/RayHitReport.h"
 #include "../../StageSet/StageSetVisitor.h"
 
 
@@ -11,8 +11,7 @@ namespace prop3
     Sphere::Sphere(const glm::dvec3& center, double radius) :
         _radius(radius),
         _radius2(radius*radius),
-        _center(center),
-        _coating(Surface::NO_COATING)
+        _center(center)
     {
 
     }
@@ -108,20 +107,8 @@ namespace prop3
         c = glm::dot(dist, dist) - _radius2;
     }
 
-    void Sphere::setCoating(const std::shared_ptr<Coating>& coating)
-    {
-        _coating = coating;
-
-        stampCurrentUpdate();
-    }
-
     void Sphere::accept(StageSetVisitor& visitor)
     {
         visitor.visit(*this);
-    }
-
-    std::vector<std::shared_ptr<StageSetNode>> Sphere::children() const
-    {
-        return {_coating};
     }
 }

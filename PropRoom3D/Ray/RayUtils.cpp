@@ -2,7 +2,7 @@
 
 #include <GLM/gtc/random.hpp>
 
-#include "../Material/Material.h"
+#include "Prop/Material/Material.h"
 
 
 namespace prop3

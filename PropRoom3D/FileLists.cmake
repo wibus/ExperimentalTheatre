@@ -1,4 +1,66 @@
 ## Headers ##
+
+# Backdrops
+SET(PROP3_BACKDROP_HEADERS
+    ${PROP3_SRC_DIR}/Lighting/Backdrop/Backdrop.h
+    ${PROP3_SRC_DIR}/Lighting/Backdrop/ProceduralSun.h)
+
+# Lighting
+SET(PROP3_LIGHTING_HEADERS
+    ${PROP3_BACKDROP_HEADERS}
+    ${PROP3_SRC_DIR}/Lighting/Environment.h
+    ${PROP3_SRC_DIR}/Lighting/Light3D.h)
+
+# Coatings
+SET(PROP3_COATING_HEADERS
+    ${PROP3_SRC_DIR}/Prop/Coating/Coating.h
+    ${PROP3_SRC_DIR}/Prop/Coating/NoCoating.h
+    ${PROP3_SRC_DIR}/Prop/Coating/FlatPaint.h
+    ${PROP3_SRC_DIR}/Prop/Coating/GlossyPaint.h
+    ${PROP3_SRC_DIR}/Prop/Coating/TexturedFlatPaint.h
+    ${PROP3_SRC_DIR}/Prop/Coating/TexturedGlossyPaint.h)
+
+# Materials
+SET(PROP3_MATERIAL_HEADERS
+    ${PROP3_SRC_DIR}/Prop/Material/Material.h
+    ${PROP3_SRC_DIR}/Prop/Material/Air.h
+    ${PROP3_SRC_DIR}/Prop/Material/Fog.h
+    ${PROP3_SRC_DIR}/Prop/Material/Metal.h
+    ${PROP3_SRC_DIR}/Prop/Material/Concrete.h
+    ${PROP3_SRC_DIR}/Prop/Material/Glass.h)
+
+# Surfaces
+SET(PROP3_SURFACE_HEADERS
+    ${PROP3_SRC_DIR}/Prop/Surface/Surface.h
+    ${PROP3_SRC_DIR}/Prop/Surface/Box.h
+    ${PROP3_SRC_DIR}/Prop/Surface/Plane.h
+    ${PROP3_SRC_DIR}/Prop/Surface/Quadric.h
+    ${PROP3_SRC_DIR}/Prop/Surface/Sphere.h)
+
+# Prop
+SET(PROP3_PROP_HEADERS
+    ${PROP3_COATING_HEADERS}
+    ${PROP3_HARDWARE_HEADERS}
+    ${PROP3_MATERIAL_HEADERS}
+    ${PROP3_SURFACE_HEADERS}
+    ${PROP3_SRC_DIR}/Prop/Prop.h)
+
+# Rays
+SET(PROP3_RAY_HEADERS
+    ${PROP3_SRC_DIR}/Ray/Raycast.h
+    ${PROP3_SRC_DIR}/Ray/RayHitList.h
+    ${PROP3_SRC_DIR}/Ray/RayHitReport.h
+    ${PROP3_SRC_DIR}/Ray/RayUtils.h)
+
+# StageSet
+SET(PROP3_STAGESET_HEADERS
+    ${PROP3_SRC_DIR}/StageSet/StageSet.h
+    ${PROP3_SRC_DIR}/StageSet/StageSetNode.h
+    ${PROP3_SRC_DIR}/StageSet/StageSetVisitor.h
+    ${PROP3_SRC_DIR}/StageSet/StageSetJsonTags.h
+    ${PROP3_SRC_DIR}/StageSet/StageSetJsonReader.h
+    ${PROP3_SRC_DIR}/StageSet/StageSetJsonWriter.h)
+
 # Art Director
 SET(PROP3_ART_DIRECTOR_HEADERS
     ${PROP3_SRC_DIR}/Team/ArtDirector/AbstractArtDirector.h
@@ -27,83 +89,80 @@ SET(PROP3_TEAM_HEADERS
     ${PROP3_SRC_DIR}/Team/AbstractTeam.h
     ${PROP3_SRC_DIR}/Team/StdTeam.h)
 
-# Coatings
-SET(PROP3_COATING_HEADERS
-    ${PROP3_SRC_DIR}/Prop/Coating/Coating.h
-    ${PROP3_SRC_DIR}/Prop/Coating/NoCoating.h
-    ${PROP3_SRC_DIR}/Prop/Coating/FlatPaint.h
-    ${PROP3_SRC_DIR}/Prop/Coating/GlossyPaint.h
-    ${PROP3_SRC_DIR}/Prop/Coating/TexturedFlatPaint.h
-    ${PROP3_SRC_DIR}/Prop/Coating/TexturedGlossyPaint.h)
-
-# Lighting
-SET(PROP3_LIGHTING_HEADERS
-    ${PROP3_SRC_DIR}/Prop/Lighting/Light3D.h)
-
-# Materials
-SET(PROP3_MATERIAL_HEADERS
-    ${PROP3_SRC_DIR}/Prop/Material/Material.h
-    ${PROP3_SRC_DIR}/Prop/Material/Air.h
-    ${PROP3_SRC_DIR}/Prop/Material/Fog.h
-    ${PROP3_SRC_DIR}/Prop/Material/Metal.h
-    ${PROP3_SRC_DIR}/Prop/Material/Concrete.h
-    ${PROP3_SRC_DIR}/Prop/Material/Glass.h)
-
-# Rays
-SET(PROP3_RAY_HEADERS
-    ${PROP3_SRC_DIR}/Prop/Ray/Raycast.h
-    ${PROP3_SRC_DIR}/Prop/Ray/RayHitList.h
-    ${PROP3_SRC_DIR}/Prop/Ray/RayHitReport.h
-    ${PROP3_SRC_DIR}/Prop/Ray/RayUtils.h)
-
-# Surfaces
-SET(PROP3_SURFACE_HEADERS
-    ${PROP3_SRC_DIR}/Prop/Surface/Surface.h
-    ${PROP3_SRC_DIR}/Prop/Surface/Box.h
-    ${PROP3_SRC_DIR}/Prop/Surface/Plane.h
-    ${PROP3_SRC_DIR}/Prop/Surface/Quadric.h
-    ${PROP3_SRC_DIR}/Prop/Surface/Sphere.h)
-
-# Backdrops
-SET(PROP3_BACKDROP_HEADERS
-    ${PROP3_SRC_DIR}/Prop/Environment/Backdrop/Backdrop.h
-    ${PROP3_SRC_DIR}/Prop/Environment/Backdrop/ProceduralSun.h)
-
-# Environments
-SET(PROP3_ENVIRONMENT_HEADERS
-    ${PROP3_BACKDROP_HEADERS}
-    ${PROP3_SRC_DIR}/Prop/Environment/Environment.h)
-
-# Prop
-SET(PROP3_PROP_HEADERS
-    ${PROP3_COATING_HEADERS}
-    ${PROP3_HARDWARE_HEADERS}
-    ${PROP3_LIGHTING_HEADERS}
-    ${PROP3_MATERIAL_HEADERS}
-    ${PROP3_RAY_HEADERS}
-    ${PROP3_SURFACE_HEADERS}
-    ${PROP3_ENVIRONMENT_HEADERS}
-    ${PROP3_SRC_DIR}/Prop/Prop.h)
-
-# StageSet
-SET(PROP3_STAGESET_HEADERS
-    ${PROP3_SRC_DIR}/StageSet/StageSet.h
-    ${PROP3_SRC_DIR}/StageSet/StageSetNode.h
-    ${PROP3_SRC_DIR}/StageSet/StageSetVisitor.h
-    ${PROP3_SRC_DIR}/StageSet/StageSetJsonTags.h
-    ${PROP3_SRC_DIR}/StageSet/StageSetJsonReader.h
-    ${PROP3_SRC_DIR}/StageSet/StageSetJsonWriter.h)
-
 
 # All the header files #
 SET(PROP3_HEADERS
-    ${PROP3_TEAM_HEADERS}
+    ${PROP3_LIGHTING_HEADERS}
     ${PROP3_PROP_HEADERS}
+    ${PROP3_RAY_HEADERS}
     ${PROP3_STAGESET_HEADERS}
+    ${PROP3_TEAM_HEADERS}
     ${PROP3_SRC_DIR}/libPropRoom3D_global.h)
     
 
 ## Sources ##
+
+# Backdrops
+SET(PROP3_BACKDROP_SOURCES
+    ${PROP3_SRC_DIR}/Lighting/Backdrop/Backdrop.cpp
+    ${PROP3_SRC_DIR}/Lighting/Backdrop/ProceduralSun.cpp)
+
+# Lighting
+SET(PROP3_LIGHTING_SOURCES
+    ${PROP3_BACKDROP_SOURCES}
+    ${PROP3_SRC_DIR}/Lighting/Environment.cpp
+    ${PROP3_SRC_DIR}/Lighting/Light3D.cpp)
+
+# Coatings
+SET(PROP3_COATING_SOURCES
+    ${PROP3_SRC_DIR}/Prop/Coating/Coating.cpp
+    ${PROP3_SRC_DIR}/Prop/Coating/NoCoating.cpp
+    ${PROP3_SRC_DIR}/Prop/Coating/FlatPaint.cpp
+    ${PROP3_SRC_DIR}/Prop/Coating/GlossyPaint.cpp
+    ${PROP3_SRC_DIR}/Prop/Coating/TexturedFlatPaint.cpp
+    ${PROP3_SRC_DIR}/Prop/Coating/TexturedGlossyPaint.cpp)
+
+# Materials
+SET(PROP3_MATERIAL_SOURCES
+    ${PROP3_SRC_DIR}/Prop/Material/Material.cpp
+    ${PROP3_SRC_DIR}/Prop/Material/Air.cpp
+    ${PROP3_SRC_DIR}/Prop/Material/Fog.cpp
+    ${PROP3_SRC_DIR}/Prop/Material/Metal.cpp
+    ${PROP3_SRC_DIR}/Prop/Material/Concrete.cpp
+    ${PROP3_SRC_DIR}/Prop/Material/Glass.cpp)
+
+# Surfaces
+SET(PROP3_SURFACE_SOURCES
+    ${PROP3_SRC_DIR}/Prop/Surface/Surface.cpp
+    ${PROP3_SRC_DIR}/Prop/Surface/Box.cpp
+    ${PROP3_SRC_DIR}/Prop/Surface/Plane.cpp
+    ${PROP3_SRC_DIR}/Prop/Surface/Quadric.cpp
+    ${PROP3_SRC_DIR}/Prop/Surface/Sphere.cpp)
+
+# Props
+SET(PROP3_PROP_SOURCES
+    ${PROP3_COATING_SOURCES}
+    ${PROP3_HARDWARE_SOURCES}
+    ${PROP3_MATERIAL_SOURCES}
+    ${PROP3_SURFACE_SOURCES}
+    ${PROP3_SRC_DIR}/Prop/Prop.cpp)
+
+# Rays
+SET(PROP3_RAY_SOURCES
+    ${PROP3_SRC_DIR}/Ray/Raycast.cpp
+    ${PROP3_SRC_DIR}/Ray/RayHitList.cpp
+    ${PROP3_SRC_DIR}/Ray/RayHitReport.cpp
+    ${PROP3_SRC_DIR}/Ray/RayUtils.cpp)
+
+# StageSet
+SET(PROP3_STAGESET_SOURCES
+    ${PROP3_SRC_DIR}/StageSet/StageSet.cpp
+    ${PROP3_SRC_DIR}/StageSet/StageSetNode.cpp
+    ${PROP3_SRC_DIR}/StageSet/StageSetVisitor.cpp
+    ${PROP3_SRC_DIR}/StageSet/StageSetJsonTags.cpp
+    ${PROP3_SRC_DIR}/StageSet/StageSetJsonReader.cpp
+    ${PROP3_SRC_DIR}/StageSet/StageSetJsonWriter.cpp)
+
 # Art Director
 SET(PROP3_ART_DIRECTOR_SOURCES
     ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorClient.cpp
@@ -129,79 +188,14 @@ SET(PROP3_TEAM_SOURCES
     ${PROP3_SRC_DIR}/Team/AbstractTeam.cpp
     ${PROP3_SRC_DIR}/Team/StdTeam.cpp)
 
-# Coatings
-SET(PROP3_COATING_SOURCES
-    ${PROP3_SRC_DIR}/Prop/Coating/Coating.cpp
-    ${PROP3_SRC_DIR}/Prop/Coating/NoCoating.cpp
-    ${PROP3_SRC_DIR}/Prop/Coating/FlatPaint.cpp
-    ${PROP3_SRC_DIR}/Prop/Coating/GlossyPaint.cpp
-    ${PROP3_SRC_DIR}/Prop/Coating/TexturedFlatPaint.cpp
-    ${PROP3_SRC_DIR}/Prop/Coating/TexturedGlossyPaint.cpp)
-
-# Lighting
-SET(PROP3_LIGHTING_SOURCES
-    ${PROP3_SRC_DIR}/Prop/Lighting/Light3D.cpp)
-
-# Materials
-SET(PROP3_MATERIAL_SOURCES
-    ${PROP3_SRC_DIR}/Prop/Material/Material.cpp
-    ${PROP3_SRC_DIR}/Prop/Material/Air.cpp
-    ${PROP3_SRC_DIR}/Prop/Material/Fog.cpp
-    ${PROP3_SRC_DIR}/Prop/Material/Metal.cpp
-    ${PROP3_SRC_DIR}/Prop/Material/Concrete.cpp
-    ${PROP3_SRC_DIR}/Prop/Material/Glass.cpp)
-
-# Rays
-SET(PROP3_RAY_SOURCES
-    ${PROP3_SRC_DIR}/Prop/Ray/Raycast.cpp
-    ${PROP3_SRC_DIR}/Prop/Ray/RayHitList.cpp
-    ${PROP3_SRC_DIR}/Prop/Ray/RayHitReport.cpp
-    ${PROP3_SRC_DIR}/Prop/Ray/RayUtils.cpp)
-
-# Surfaces
-SET(PROP3_SURFACE_SOURCES
-    ${PROP3_SRC_DIR}/Prop/Surface/Surface.cpp
-    ${PROP3_SRC_DIR}/Prop/Surface/Box.cpp
-    ${PROP3_SRC_DIR}/Prop/Surface/Plane.cpp
-    ${PROP3_SRC_DIR}/Prop/Surface/Quadric.cpp
-    ${PROP3_SRC_DIR}/Prop/Surface/Sphere.cpp)
-
-# Backdrops
-SET(PROP3_BACKDROP_SOURCES
-    ${PROP3_SRC_DIR}/Prop/Environment/Backdrop/Backdrop.cpp
-    ${PROP3_SRC_DIR}/Prop/Environment/Backdrop/ProceduralSun.cpp)
-
-# Environments
-SET(PROP3_ENVIRONMENT_SOURCES
-    ${PROP3_BACKDROP_SOURCES}
-    ${PROP3_SRC_DIR}/Prop/Environment/Environment.cpp)
-
-
-# Props
-SET(PROP3_PROP_SOURCES
-    ${PROP3_COATING_SOURCES}
-    ${PROP3_HARDWARE_SOURCES}
-    ${PROP3_LIGHTING_SOURCES}
-    ${PROP3_MATERIAL_SOURCES}
-    ${PROP3_RAY_SOURCES}
-    ${PROP3_SURFACE_SOURCES}
-    ${PROP3_ENVIRONMENT_SOURCES}
-    ${PROP3_SRC_DIR}/Prop/Prop.cpp)
-
-# StageSet
-SET(PROP3_STAGESET_SOURCES
-    ${PROP3_SRC_DIR}/StageSet/StageSet.cpp
-    ${PROP3_SRC_DIR}/StageSet/StageSetNode.cpp
-    ${PROP3_SRC_DIR}/StageSet/StageSetVisitor.cpp
-    ${PROP3_SRC_DIR}/StageSet/StageSetJsonTags.cpp
-    ${PROP3_SRC_DIR}/StageSet/StageSetJsonReader.cpp
-    ${PROP3_SRC_DIR}/StageSet/StageSetJsonWriter.cpp)
-
 # All the source files #
 SET(PROP3_SOURCES
-    ${PROP3_TEAM_SOURCES}
+    ${PROP3_LIGHTING_SOURCES}
     ${PROP3_PROP_SOURCES}
-    ${PROP3_STAGESET_SOURCES})
+    ${PROP3_RAY_SOURCES}
+    ${PROP3_STAGESET_SOURCES}
+    ${PROP3_TEAM_SOURCES})
+
 
 ## Resources
 SET(PROP3_RCC_FILES

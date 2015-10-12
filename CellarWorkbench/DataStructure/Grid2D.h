@@ -52,15 +52,13 @@ public:
     /// Subscript operator overloaded to get a line of the grid
     /// \param[in] y Line index
     /// \return A pointer to the first element of the line
-    /// \note For access with grid initialization and bound checks,
-    ///       use get(x, y)
+    /// \note For access with grid initialization and bound checks, use get(x, y)
     T* operator [](int y);
 
     /// Subscript operator overloaded to get a line of the grid
     /// \param[in] y Line index
     /// \return A pointer to constant values to the first element of the line
-    /// \note For access with grid initialization and bound checks,
-    ///       use get(x, y)
+    /// \note For access with grid initialization and bound checks, use get(x, y)
     const T* operator [](int y) const;
 
     /// Element access with grid initialization and bound checks
@@ -74,6 +72,18 @@ public:
     /// \param[in] y Row index of the element
     /// \return Const reference to the specified element
     const T& get(int x, int y) const;
+
+    /// Subscript operator overloaded to get an element of the grid
+    /// \param[in] pos Row and Column of the element
+    /// \return Const reference to the specified element
+    /// \note For access with grid initialization and bound checks, use get(pos)
+    T& operator [](const glm::ivec2& pos);
+
+    /// Subscript operator overloaded to get an element of the grid
+    /// \param[in] pos Row and Column of the element
+    /// \return Const reference to the specified element
+    /// \note For access with grid initialization and bound checks, use get(pos)
+    const T& operator [](const glm::ivec2& pos) const;
 
     /// Element access with grid initialization and bound checks
     /// \param[in] pos Row and Column of the element
@@ -213,6 +223,18 @@ const T& Grid2D<T>::get(int x, int y) const
     assert(0 <= x && x < _width);
     assert(0 <= y && y < _height);
     return (*this)[y][x];
+}
+
+template <typename T>
+inline T& Grid2D<T>::operator [](const glm::ivec2& pos)
+{
+    return _grid[pos.y][pos.x];
+}
+
+template <typename T>
+inline const T& Grid2D<T>::operator [](const glm::ivec2& pos) const
+{
+    return _grid[pos.y][pos.x];
 }
 
 template <typename T>

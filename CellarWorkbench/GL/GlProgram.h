@@ -52,7 +52,7 @@ namespace cellar
         static unsigned int popProgram();
         static unsigned int currentProgramId();
 
-        void pushProgram();
+        void pushProgram() const;
         bool isCurrentProgram() const;
 
         // Attributes
@@ -80,9 +80,9 @@ namespace cellar
         bool setMat4f(const std::string& var, const glm::mat4& mat);
 
     private:
-        void applyState();
+        void applyState() const;
 
-        static std::stack<std::pair<GLuint, GlProgram*> > _progStack;
+        static std::stack<std::pair<GLuint, const GlProgram*> > _progStack;
 
         GLuint _id;
         int _linked;

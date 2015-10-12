@@ -82,15 +82,27 @@ public:
     /// \return Const reference to the specified element
     const T& get(int x, int y, int z) const;
 
+    /// Subscript operator overloaded to get an element of the grid
+    /// \param[in] pos Row, Column and Level of the element
+    /// \return Const reference to the specified element
+    /// \note For access with grid initialization and bound checks, use get(pos)
+    T& operator [](const glm::ivec3& pos);
+
+    /// Subscript operator overloaded to get an element of the grid
+    /// \param[in] pos Row, Column and Level of the element
+    /// \return Const reference to the specified element
+    /// \note For access with grid initialization and bound checks, use get(pos)
+    const T& operator [](const glm::ivec3& pos) const;
+
     /// Element access with grid initialization and bound checks
     /// \param[in] pos Row, Column and Level of the element
     /// \return Reference to the specified element
-    T& get(const Vec3i& pos);
+    T& get(const glm::ivec3& pos);
 
     /// Element access with grid initialization and bound checks
     /// \param[in] pos Row, Column and Level of the element
     /// \return Const reference to the specified element
-    const T& get(const Vec3i& pos) const;
+    const T& get(const glm::ivec3& pos) const;
 
     /// Modification of an element
     /// \param[in] x Column index of the element
@@ -105,7 +117,7 @@ public:
     /// \param[in] pos Row, Column and Level of the element
     /// \param[in] value New value of the element
     /// \note Equivalent to "grid.get(pos) = value;"
-    void set(const Vec3i& pos, const T& value);
+    void set(const glm::ivec3& pos, const T& value);
 
 
 protected:
@@ -236,16 +248,28 @@ const T& Grid3D<T>::get(int x, int y, int z) const
     return _grids[z][y][x];
 }
 
+template <typename T>
+inline T& Grid3D<T>::operator [](const glm::ivec3& pos)
+{
+    return _grids[pos.z][pos.y][pos.x];
+}
+
+template <typename T>
+inline const T& Grid3D<T>::operator [](const glm::ivec3& pos) const
+{
+    return _grids[pos.z][pos.y][pos.x];
+}
+
 template<typename T>
-inline T& Grid3D<T>::get(const Vec3i& pos)
+inline T& Grid3D<T>::get(const glm::ivec3& pos)
 {
     return const_cast<T&>(const_cast< const Grid3D<T>& >(*this).get(pos));
 }
 
 template<typename T>
-inline const T& Grid3D<T>::get(const Vec3i& pos) const
+inline const T& Grid3D<T>::get(const glm::ivec3& pos) const
 {
-    return get(pos.x, pos.y, pos.z());
+    return get(pos.x, pos.y, pos.z);
 }
 
 template<typename T>
@@ -255,7 +279,7 @@ inline void Grid3D<T>::set(int x, int y, int z, const T& value)
 }
 
 template<typename T>
-inline void Grid3D<T>::set(const Vec3i& pos, const T& value)
+inline void Grid3D<T>::set(const glm::ivec3& pos, const T& value)
 {
     set(pos.x, pos.y, pos.z(), value);
 }

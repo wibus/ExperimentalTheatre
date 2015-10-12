@@ -5,8 +5,8 @@
 #include <vector>
 #include <memory>
 
-#include "../Prop/Prop.h"
-#include "../Prop/Environment/Environment.h"
+#include <PropRoom3D/Prop/Prop.h>
+#include <PropRoom3D/Lighting/Environment.h>
 
 
 namespace prop3

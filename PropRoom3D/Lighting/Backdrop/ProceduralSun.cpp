@@ -4,8 +4,8 @@
 #include <GLM/gtc/constants.hpp>
 
 #include "Prop/Material/Air.h"
-#include "Prop/Ray/Raycast.h"
-#include "Prop/Ray/RayHitList.h"
+#include "Ray/Raycast.h"
+#include "Ray/RayHitList.h"
 #include "StageSet/StageSetVisitor.h"
 
 namespace prop3
@@ -82,6 +82,9 @@ namespace prop3
 
     glm::dvec3 ProceduralSun::raycast(const Raycast& ray, bool directView) const
     {
+        if(directView)
+            return glm::dvec3(0);
+
         glm::dvec3 color;
 
         // Sun ray compatibility with surface reflexion

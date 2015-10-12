@@ -5,8 +5,8 @@
 #include <CellarWorkbench/Image/Image.h>
 #include <CellarWorkbench/Image/ImageBank.h>
 
-#include "../Ray/Raycast.h"
-#include "../Ray/RayUtils.h"
+#include "Ray/Raycast.h"
+#include "Ray/RayUtils.h"
 #include "../../StageSet/StageSetVisitor.h"
 
 

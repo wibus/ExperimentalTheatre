@@ -2,20 +2,21 @@
 
 #include <GLM/gtc/random.hpp>
 
-#include "../../Prop/Prop.h"
-#include "../../Prop/Ray/Raycast.h"
-#include "../../Prop/Ray/RayHitList.h"
-#include "../../Prop/Ray/RayHitReport.h"
-#include "../../Prop/Surface/Surface.h"
-#include "../../Prop/Coating/Coating.h"
-#include "../../Prop/Material/Material.h"
-#include "../../Prop/Material/Air.h"
+#include "Prop/Prop.h"
+#include "Prop/Surface/Surface.h"
+#include "Prop/Coating/Coating.h"
+#include "Prop/Material/Material.h"
+#include "Prop/Material/Air.h"
 
-#include "../../Prop/Environment/Environment.h"
-#include "../../Prop/Environment/Backdrop/Backdrop.h"
+#include "Ray/Raycast.h"
+#include "Ray/RayHitList.h"
+#include "Ray/RayHitReport.h"
 
-#include "../../StageSet/StageSet.h"
-#include "../../StageSet/StageSetJsonReader.h"
+#include "Lighting/Environment.h"
+#include "Lighting/Backdrop/Backdrop.h"
+
+#include "StageSet/StageSet.h"
+#include "StageSet/StageSetJsonReader.h"
 
 #include "../AbstractTeam.h"
 #include "../Designer/StdDesigner.h"

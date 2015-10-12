@@ -32,8 +32,8 @@
 #include "Prop/Material/Glass.h"
 #include "Prop/Material/Metal.h"
 
-#include "Prop/Environment/Environment.h"
-#include "Prop/Environment/Backdrop/ProceduralSun.h"
+#include "Lighting/Environment.h"
+#include "Lighting/Backdrop/ProceduralSun.h"
 
 using namespace std;
 using namespace cellar;

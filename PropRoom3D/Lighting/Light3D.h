@@ -3,7 +3,7 @@
 
 #include <GLM/glm.hpp>
 
-#include "../../libPropRoom3D_global.h"
+#include <PropRoom3D/libPropRoom3D_global.h>
 
 
 namespace prop3

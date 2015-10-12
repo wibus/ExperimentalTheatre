@@ -20,8 +20,8 @@ using namespace cellar;
 
 namespace cellar
 {
-    stack<pair<GLuint, GlProgram*> > GlProgram::_progStack =
-            stack<pair<GLuint, GlProgram*> >();
+    stack<pair<GLuint, const GlProgram*> > GlProgram::_progStack =
+            stack<pair<GLuint, const GlProgram*> >();
 
     GlProgram::GlProgram() :
         _id(0),
@@ -213,7 +213,7 @@ namespace cellar
         else
         {
             id = _progStack.top().first;
-            GlProgram* prog = _progStack.top().second;
+            const GlProgram* prog = _progStack.top().second;
             if(prog != nullptr)
             {
                 prog->applyState();
@@ -230,7 +230,7 @@ namespace cellar
         return id;
     }
 
-    void GlProgram::pushProgram()
+    void GlProgram::pushProgram() const
     {
         _progStack.push( make_pair(_id, this) );
         applyState();
@@ -477,7 +477,7 @@ namespace cellar
         return true;
     }
 
-    void GlProgram::applyState()
+    void GlProgram::applyState() const
     {
         // Program
         glUseProgram(_id);

@@ -1,8 +1,8 @@
 #include "Quadric.h"
 
 #include "../Coating/Coating.h"
-#include "../Ray/RayHitList.h"
-#include "../Ray/RayHitReport.h"
+#include "Ray/RayHitList.h"
+#include "Ray/RayHitReport.h"
 #include "../../StageSet/StageSetVisitor.h"
 
 
@@ -29,8 +29,7 @@ namespace prop3
     }
 
     Quadric::Quadric(const glm::dmat4& Q) :
-        _q(Q),
-        _coating(Surface::NO_COATING)
+        _q(Q)
     {
 
     }
@@ -42,8 +41,7 @@ namespace prop3
         _q(A, B, C, D,
            B, E, F, G,
            C, F, H, I,
-           D, G, I, J),
-        _coating(Surface::NO_COATING)
+           D, G, I, J)
     {
 
     }
@@ -238,20 +236,8 @@ namespace prop3
         c = glm::dot(homoOrg, _q * homoOrg);
     }
 
-    void Quadric::setCoating(const std::shared_ptr<Coating>& coating)
-    {
-        _coating = coating;
-
-        stampCurrentUpdate();
-    }
-
     void Quadric::accept(StageSetVisitor& visitor)
     {
         visitor.visit(*this);
-    }
-
-    std::vector<std::shared_ptr<StageSetNode>> Quadric::children() const
-    {
-        return {_coating};
     }
 }

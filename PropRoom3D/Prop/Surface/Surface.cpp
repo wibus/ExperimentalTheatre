@@ -2,8 +2,8 @@
 
 #include <GLM/gtc/matrix_transform.hpp>
 
-#include "../Ray/RayHitList.h"
-#include "../Ray/RayHitReport.h"
+#include "Ray/RayHitList.h"
+#include "Ray/RayHitReport.h"
 #include "../Coating/NoCoating.h"
 #include "../../StageSet/StageSetVisitor.h"
 
@@ -55,13 +55,34 @@ namespace prop3
     }
 
 
+    // Physical surfaces
+    PhysicalSurface::PhysicalSurface() :
+        _coating(NO_COATING)
+    {
+
+    }
+
+    void PhysicalSurface::setCoating(const std::shared_ptr<Coating>& coating)
+    {
+        _coating = coating;
+
+        stampCurrentUpdate();
+    }
+
+    std::vector<std::shared_ptr<StageSetNode>> PhysicalSurface::children() const
+    {
+        return { _coating };
+    }
+
+
     // Surface Shell
     SurfaceShell::SurfaceShell(const std::shared_ptr<Surface>& surf) :
         _surf(surf),
-        _coating(nullptr),
         _invTransform()
     {
-
+        // When _coating == nullptr,
+        // use child surface's coating
+        _coating.reset();
     }
 
     void SurfaceShell::transform(const Transform& transform)
@@ -110,13 +131,6 @@ namespace prop3
         tRay.origin = glm::dvec3(_invTransform * glm::dvec4(ray.origin, 1.0));
         tRay.direction = glm::dvec3(_invTransform * glm::dvec4(ray.direction, 0.0));
         return _surf->intersects(tRay, reports);
-    }
-
-    void SurfaceShell::setCoating(const std::shared_ptr<Coating>& coating)
-    {
-        _coating = coating;
-
-        stampCurrentUpdate();
     }
 
     void SurfaceShell::accept(StageSetVisitor& visitor)
