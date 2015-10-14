@@ -148,9 +148,9 @@ namespace prop3
 
     void PlaneTexture::transform(const Transform& transform)
     {
+        _texOrigin = glm::dvec3(transform.mat() * glm::dvec4(_texOrigin, 1.0));
         _texU = glm::dvec3(transform.mat() * glm::dvec4(_texU, 0.0));
         _texV = glm::dvec3(transform.mat() * glm::dvec4(_texV, 0.0));
-        _texOrigin = glm::dvec3(transform.mat() * glm::dvec4(_texOrigin, 1.0));
 
         Plane::transform(transform);
     }

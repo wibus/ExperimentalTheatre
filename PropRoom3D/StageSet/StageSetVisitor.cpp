@@ -51,6 +51,11 @@ namespace prop3
 
     }
 
+    void StageSetVisitor::visit(BoxTexture& node)
+    {
+
+    }
+
     void StageSetVisitor::visit(Plane& node)
     {
 

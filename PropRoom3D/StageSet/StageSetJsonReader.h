@@ -54,9 +54,9 @@ namespace prop3
                 const QJsonValue& surfaceTree);
 
         std::vector<std::shared_ptr<Backdrop>> _backdrops;
-        std::vector<std::shared_ptr<Surface>> _surfaces;
+        std::vector<std::shared_ptr<Surface>>  _surfaces;
         std::vector<std::shared_ptr<Material>> _materials;
-        std::vector<std::shared_ptr<Coating>> _coatings;
+        std::vector<std::shared_ptr<Coating>>  _coatings;
     };
 }
 

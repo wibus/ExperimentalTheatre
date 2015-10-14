@@ -8,6 +8,7 @@ namespace prop3
 {
     class PROP3D_EXPORT Sphere : public PhysicalSurface
     {
+    protected:
         Sphere(const glm::dvec3& center, double radius);
 
     public:
@@ -28,8 +29,9 @@ namespace prop3
         glm::dvec3 center() const;
 
 
-protected:
+    protected:
         void params(const Raycast& ray, double& a, double& b, double& c) const;
+
 
     private:
         double _radius;

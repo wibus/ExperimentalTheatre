@@ -80,7 +80,6 @@ namespace prop3
         // StageSetNode interface
         virtual void accept(StageSetVisitor& visitor) override;
 
-
         virtual void transform(const Transform& transform);
         virtual void raycast(const Raycast& ray, RayHitList& reports) const;
 

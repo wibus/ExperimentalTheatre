@@ -8,6 +8,7 @@ namespace prop3
 {
     class PROP3D_EXPORT Box : public PhysicalSurface
     {
+    protected:
         Box(const glm::dvec3& minCorner, const glm::dvec3& maxCorner);
 
     public:
@@ -39,6 +40,55 @@ namespace prop3
     };
 
 
+    class PROP3D_EXPORT BoxTexture : public Box
+    {
+    protected:
+        BoxTexture(const glm::dvec3& minCorner,
+                   const glm::dvec3& maxCorner,
+                   const glm::dvec3& texOrigin,
+                   const glm::dvec3& texU,
+                   const glm::dvec3& texV,
+                   bool texMainSideOnly);
+
+    public:
+        static std::shared_ptr<Surface>
+            boxCorners(const glm::dvec3& minCorner,
+                       const glm::dvec3& maxCorner,
+                       const glm::dvec3& texOrigin,
+                       const glm::dvec3& texU,
+                       const glm::dvec3& texV,
+                       bool texMainSideOnly);
+
+        static std::shared_ptr<Surface>
+            boxPosDims(const glm::dvec3& center,
+                       const glm::dvec3& dimensions,
+                       const glm::dvec3& texOrigin,
+                       const glm::dvec3& texU,
+                       const glm::dvec3& texV,
+                       bool texMainSideOnly);
+
+        // StageSetNode interface
+        virtual void accept(StageSetVisitor& visitor) override;
+
+        virtual void transform(const Transform& transform) override;
+        virtual void raycast(const Raycast& ray, RayHitList& reports) const override;
+
+
+        glm::dvec3 texOrigin() const;
+
+        glm::dvec3 texU() const;
+
+        glm::dvec3 texV() const;
+
+        bool texMainSideOnly() const;
+
+    private:
+        glm::dvec3 _texOrigin;
+        glm::dvec3 _texU, _texV;
+        bool _texMainSideOnly;
+    };
+
+
 
     // IMPLEMENTATION //
     inline glm::dvec3 Box::minCorner() const
@@ -49,6 +99,26 @@ namespace prop3
     inline glm::dvec3 Box::maxCorner() const
     {
         return _maxCorner;
+    }
+
+    inline glm::dvec3 BoxTexture::texOrigin() const
+    {
+        return _texOrigin;
+    }
+
+    inline glm::dvec3 BoxTexture::texU() const
+    {
+        return _texU;
+    }
+
+    inline glm::dvec3 BoxTexture::texV() const
+    {
+        return _texV;
+    }
+
+    inline bool BoxTexture::texMainSideOnly() const
+    {
+        return _texMainSideOnly;
     }
 }
 

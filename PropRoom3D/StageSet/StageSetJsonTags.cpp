@@ -19,29 +19,31 @@ namespace prop3
     const QString PROP_BOUNDING_SURFACE = "Bounding Surface";
 
     // Surfaces
-    const QString SURFACE_TYPE              = "Type";
-    const QString SURFACE_TYPE_BOX          = "Box";
-    const QString SURFACE_TYPE_PLANE        = "Plane";
-    const QString SURFACE_TYPE_PLANETEXTURE = "Plane Texture";
-    const QString SURFACE_TYPE_QUADRIC      = "Quadric";
-    const QString SURFACE_TYPE_SPHERE       = "Sphere";
-    const QString SURFACE_OPERATOR_SHELL    = "Shell()";
-    const QString SURFACE_OPERATOR_GHOST    = "~";
-    const QString SURFACE_OPERATOR_INVERSE  = "!";
-    const QString SURFACE_OPERATOR_OR       = "|";
-    const QString SURFACE_OPERATOR_AND      = "&";
-    const QString SURFACE_DISTANCE          = "Distance";
-    const QString SURFACE_NORMAL            = "Normal";
-    const QString SURFACE_COATING           = "Coating";
-    const QString SURFACE_TEX_ORIGIN        = "Tex Origin";
-    const QString SURFACE_TEX_U_DIR         = "Tex U Dir";
-    const QString SURFACE_TEX_V_DIR         = "Tex V Dir";
-    const QString SURFACE_REPRESENTATION    = "Representation";
-    const QString SURFACE_RADIUS            = "Radius";
-    const QString SURFACE_CENTER            = "Center";
-    const QString SURFACE_MIN_CORNER        = "Min Corner";
-    const QString SURFACE_MAX_CORNER        = "Max Corner";
-    const QString SURFACE_TRANSFORM         = "Transform";
+    const QString SURFACE_TYPE                  = "Type";
+    const QString SURFACE_TYPE_BOX              = "Box";
+    const QString SURFACE_TYPE_BOX_TEXTURE      = "Box Texture";
+    const QString SURFACE_TYPE_PLANE            = "Plane";
+    const QString SURFACE_TYPE_PLANETEXTURE     = "Plane Texture";
+    const QString SURFACE_TYPE_QUADRIC          = "Quadric";
+    const QString SURFACE_TYPE_SPHERE           = "Sphere";
+    const QString SURFACE_OPERATOR_SHELL        = "Shell()";
+    const QString SURFACE_OPERATOR_GHOST        = "~";
+    const QString SURFACE_OPERATOR_INVERSE      = "!";
+    const QString SURFACE_OPERATOR_OR           = "|";
+    const QString SURFACE_OPERATOR_AND          = "&";
+    const QString SURFACE_DISTANCE              = "Distance";
+    const QString SURFACE_NORMAL                = "Normal";
+    const QString SURFACE_COATING               = "Coating";
+    const QString SURFACE_TEX_ORIGIN            = "Tex Origin";
+    const QString SURFACE_TEX_U_DIR             = "Tex U Dir";
+    const QString SURFACE_TEX_V_DIR             = "Tex V Dir";
+    const QString SURFACE_TEX_MAIN_SIDE_ONLY    = "Tex Main Side Only";
+    const QString SURFACE_REPRESENTATION        = "Representation";
+    const QString SURFACE_RADIUS                = "Radius";
+    const QString SURFACE_CENTER                = "Center";
+    const QString SURFACE_MIN_CORNER            = "Min Corner";
+    const QString SURFACE_MAX_CORNER            = "Max Corner";
+    const QString SURFACE_TRANSFORM             = "Transform";
 
     // Materials
     const QString MATERIAL_TYPE                 = "Type";

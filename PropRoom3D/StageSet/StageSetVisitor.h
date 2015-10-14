@@ -17,6 +17,7 @@ namespace prop3
     class SurfaceOr;
     class SurfaceAnd;
     class Box;
+    class BoxTexture;
     class Plane;
     class PlaneTexture;
     class Quadric;
@@ -64,6 +65,7 @@ namespace prop3
         virtual void visit(SurfaceOr& node);
         virtual void visit(SurfaceAnd& node);
         virtual void visit(Box& node);
+        virtual void visit(BoxTexture& node);
         virtual void visit(Plane& node);
         virtual void visit(PlaneTexture& node);
         virtual void visit(Quadric& node);

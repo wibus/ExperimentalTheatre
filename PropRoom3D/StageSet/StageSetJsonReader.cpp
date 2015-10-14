@@ -325,6 +325,16 @@ namespace prop3
                     dvec3FromJson(obj[SURFACE_MIN_CORNER]),
                     dvec3FromJson(obj[SURFACE_MAX_CORNER]));
             }
+            else if(type == SURFACE_TYPE_BOX_TEXTURE)
+            {
+                surface = BoxTexture::boxCorners(
+                    dvec3FromJson(obj[SURFACE_MIN_CORNER]),
+                    dvec3FromJson(obj[SURFACE_MAX_CORNER]),
+                    dvec3FromJson(obj[SURFACE_TEX_ORIGIN]),
+                    dvec3FromJson(obj[SURFACE_TEX_U_DIR]),
+                    dvec3FromJson(obj[SURFACE_TEX_V_DIR]),
+                    obj[SURFACE_TEX_MAIN_SIDE_ONLY].toBool());
+            }
             else if(type == SURFACE_TYPE_PLANE)
             {
                 surface = Plane::plane(

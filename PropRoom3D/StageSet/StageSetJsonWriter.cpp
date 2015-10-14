@@ -212,9 +212,26 @@ namespace prop3
         {
             QJsonObject obj;
             obj[SURFACE_TYPE]           = SURFACE_TYPE_BOX;
-            obj[SURFACE_MIN_CORNER]      = toJson(node.minCorner());
-            obj[SURFACE_MAX_CORNER]      = toJson(node.maxCorner());
+            obj[SURFACE_MIN_CORNER]     = toJson(node.minCorner());
+            obj[SURFACE_MAX_CORNER]     = toJson(node.maxCorner());
             obj[SURFACE_COATING]        = _coatingIdMap[node.coating().get()];
+            _surfacesArray.append(obj);
+        }
+    }
+
+    void StageSetJsonWriter::visit(BoxTexture& node)
+    {
+        if(insertSurface(node))
+        {
+            QJsonObject obj;
+            obj[SURFACE_TYPE]               = SURFACE_TYPE_BOX_TEXTURE;
+            obj[SURFACE_MIN_CORNER]         = toJson(node.minCorner());
+            obj[SURFACE_MAX_CORNER]         = toJson(node.maxCorner());
+            obj[SURFACE_COATING]            = _coatingIdMap[node.coating().get()];
+            obj[SURFACE_TEX_ORIGIN]         = toJson(node.texOrigin());
+            obj[SURFACE_TEX_U_DIR]          = toJson(node.texU());
+            obj[SURFACE_TEX_V_DIR]          = toJson(node.texV());
+            obj[SURFACE_TEX_MAIN_SIDE_ONLY] = node.texMainSideOnly();
             _surfacesArray.append(obj);
         }
     }
@@ -519,6 +536,11 @@ namespace prop3
     }
 
     void StageSetJsonWriter::SurfaceTreeBuilder::visit(Box& node)
+    {
+        _subTree = QJsonValue(_surfaceIdMap[&node]);
+    }
+
+    void StageSetJsonWriter::SurfaceTreeBuilder::visit(BoxTexture& node)
     {
         _subTree = QJsonValue(_surfaceIdMap[&node]);
     }

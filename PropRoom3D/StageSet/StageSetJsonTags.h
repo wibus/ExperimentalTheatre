@@ -24,6 +24,7 @@ namespace prop3
     // Surfaces
     extern const QString SURFACE_TYPE;
     extern const QString SURFACE_TYPE_BOX;
+    extern const QString SURFACE_TYPE_BOX_TEXTURE;
     extern const QString SURFACE_TYPE_PLANE;
     extern const QString SURFACE_TYPE_PLANETEXTURE;
     extern const QString SURFACE_TYPE_QUADRIC;
@@ -37,6 +38,7 @@ namespace prop3
     extern const QString SURFACE_TEX_ORIGIN;
     extern const QString SURFACE_TEX_U_DIR;
     extern const QString SURFACE_TEX_V_DIR;
+    extern const QString SURFACE_TEX_MAIN_SIDE_ONLY;
     extern const QString SURFACE_REPRESENTATION;
     extern const QString SURFACE_RADIUS;
     extern const QString SURFACE_CENTER;
