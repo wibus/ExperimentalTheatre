@@ -44,13 +44,9 @@ namespace prop3
         return std::shared_ptr<Surface>(new Plane(normal, origin));
     }
 
-    void Plane::transform(const Transform& transform)
+    void Plane::accept(StageSetVisitor& visitor)
     {
-        glm::dvec3 pt = glm::dvec3(transform.mat() * glm::dvec4((-_d) * _normal, 1.0));
-        _normal = glm::normalize(glm::dvec3(transform.mat() * glm::dvec4(_normal, 0.0)));
-        _d = -glm::dot(_normal, pt);
-
-        stampCurrentUpdate();
+        visitor.visit(*this);
     }
 
     EPointPosition Plane::isIn(const glm::dvec3& point) const
@@ -87,9 +83,13 @@ namespace prop3
         return glm::dot(ray.direction, _normal) != 0.0;
     }
 
-    void Plane::accept(StageSetVisitor& visitor)
+    void Plane::transform(const Transform& transform)
     {
-        visitor.visit(*this);
+        glm::dvec3 pt = glm::dvec3(transform.mat() * glm::dvec4((-_d) * _normal, 1.0));
+        _normal = glm::normalize(glm::dvec3(transform.mat() * glm::dvec4(_normal, 0.0)));
+        _d = -glm::dot(_normal, pt);
+
+        stampCurrentUpdate();
     }
 
 
@@ -146,13 +146,9 @@ namespace prop3
                     new PlaneTexture(normal, origin, texU, texV, texOrigin));
     }
 
-    void PlaneTexture::transform(const Transform& transform)
+    void PlaneTexture::accept(StageSetVisitor& visitor)
     {
-        _texOrigin = glm::dvec3(transform.mat() * glm::dvec4(_texOrigin, 1.0));
-        _texU = glm::dvec3(transform.mat() * glm::dvec4(_texU, 0.0));
-        _texV = glm::dvec3(transform.mat() * glm::dvec4(_texV, 0.0));
-
-        Plane::transform(transform);
+        visitor.visit(*this);
     }
 
     void PlaneTexture::raycast(const Raycast& ray, RayHitList& reports) const
@@ -172,8 +168,12 @@ namespace prop3
         }
     }
 
-    void PlaneTexture::accept(StageSetVisitor& visitor)
+    void PlaneTexture::transform(const Transform& transform)
     {
-        visitor.visit(*this);
+        _texOrigin = glm::dvec3(transform.mat() * glm::dvec4(_texOrigin, 1.0));
+        _texU = glm::dvec3(transform.mat() * glm::dvec4(_texU, 0.0));
+        _texV = glm::dvec3(transform.mat() * glm::dvec4(_texV, 0.0));
+
+        Plane::transform(transform);
     }
 }

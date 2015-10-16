@@ -28,9 +28,6 @@ namespace prop3
     struct PROP3D_EXPORT Transform
     {
         Transform(const glm::dmat4& mat);
-        Transform(double scale,
-                  const glm::dquat& rotation,
-                  const glm::dvec3& translation);
 
         const glm::dmat4& mat() const { return _mat; }
         const glm::dmat4& inv() const;
@@ -45,13 +42,15 @@ namespace prop3
 
     class PROP3D_EXPORT Surface : public StageSetNode
     {
+        friend void applyTransformation(
+                const std::shared_ptr<Surface>& surf,
+                const Transform& transform);
+
     protected:
         Surface();
 
     public:
         virtual ~Surface();
-
-        virtual void transform(const Transform& transform) = 0;
 
         EPointPosition isIn(double x, double y, double z) const;
         virtual EPointPosition isIn(const glm::dvec3& point) const = 0;
@@ -64,8 +63,20 @@ namespace prop3
 
         virtual void setCoating(const std::shared_ptr<Coating>& coating) = 0;
 
+        static std::shared_ptr<Surface> shell(const std::shared_ptr<Surface>& surf);
+        static std::shared_ptr<Surface> transform(std::shared_ptr<Surface>& surf, const glm::dmat4& mat);
+        static std::shared_ptr<Surface> translate(std::shared_ptr<Surface>& surf, const glm::dvec3& dis);
+        static std::shared_ptr<Surface> rotate(std::shared_ptr<Surface>& surf, double angle, const glm::dvec3& axis);
+        static std::shared_ptr<Surface> scale(std::shared_ptr<Surface>& surf, double coeff);
+
+        virtual bool isAffineTransformable() const {return false;}
+        virtual bool isTranslatable() const {return false;}
+        virtual bool isRotatable() const {return false;}
+        virtual bool isScalable() const {return false;}
 
     protected:
+        virtual void transform(const Transform& transform) = 0;
+
         static const std::shared_ptr<Coating> NO_COATING;
     };
 
@@ -90,12 +101,12 @@ namespace prop3
     // and transformation application by caching those internally
     class PROP3D_EXPORT SurfaceShell : public PhysicalSurface
     {
-        friend std::shared_ptr<Surface> Shell(
-                const std::shared_ptr<Surface>& surf);
+    protected:
+        friend std::shared_ptr<Surface> Surface::shell(
+                const std::shared_ptr<Surface> &surf);
         SurfaceShell(const std::shared_ptr<Surface>& surf);
 
     public:
-        virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
         virtual void raycast(const Raycast& ray, RayHitList& reports) const;
@@ -108,11 +119,20 @@ namespace prop3
 
         glm::dmat4 transform() const;
 
+        virtual bool isAffineTransformable() const override {return true;}
+        virtual bool isTranslatable() const override {return true;}
+        virtual bool isRotatable() const override {return true;}
+        virtual bool isScalable() const override {return true;}
+
+    protected:
+        virtual void transform(const Transform& transform) override;
+
     private:
         std::shared_ptr<Surface> _surf;
         glm::dmat4 _invTransform;
         glm::dmat4 _transform;
     };
+
 
     // Logical surfaces
     class PROP3D_EXPORT SurfaceGhost : public Surface
@@ -122,7 +142,6 @@ namespace prop3
         SurfaceGhost(const std::shared_ptr<Surface>& surf);
 
     public:
-        virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
         virtual void raycast(const Raycast& ray, RayHitList& reports) const;
@@ -134,6 +153,13 @@ namespace prop3
 
         virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
 
+        virtual bool isAffineTransformable() const override;
+        virtual bool isTranslatable() const override;
+        virtual bool isRotatable() const override;
+        virtual bool isScalable() const override;
+
+    protected:
+        virtual void transform(const Transform& transform) override;
 
     private:
         std::shared_ptr<Surface> _surf;
@@ -147,7 +173,6 @@ namespace prop3
         SurfaceInverse(const std::shared_ptr<Surface>& surf);
 
     public:
-        virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
         virtual void raycast(const Raycast& ray, RayHitList& reports) const;
@@ -159,6 +184,13 @@ namespace prop3
 
         virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
 
+        virtual bool isAffineTransformable() const override;
+        virtual bool isTranslatable() const override;
+        virtual bool isRotatable() const override;
+        virtual bool isScalable() const override;
+
+    protected:
+        virtual void transform(const Transform& transform) override;
 
     private:
         std::shared_ptr<Surface> _surf;
@@ -176,7 +208,6 @@ namespace prop3
         static std::shared_ptr<Surface> apply(
                 const std::vector<std::shared_ptr<Surface>>& surfs);
 
-        virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
         virtual void raycast(const Raycast& ray, RayHitList& reports) const;
@@ -188,6 +219,13 @@ namespace prop3
 
         virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
 
+        virtual bool isAffineTransformable() const override;
+        virtual bool isTranslatable() const override;
+        virtual bool isRotatable() const override;
+        virtual bool isScalable() const override;
+
+    protected:
+        virtual void transform(const Transform& transform) override;
 
     private:
         void add(const std::shared_ptr<Surface>& surface);
@@ -208,7 +246,6 @@ namespace prop3
         static std::shared_ptr<Surface> apply(
                 const std::vector<std::shared_ptr<Surface>>& surfs);
 
-        virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
         virtual void raycast(const Raycast& ray, RayHitList& reports) const;
@@ -220,6 +257,13 @@ namespace prop3
 
         virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
 
+        virtual bool isAffineTransformable() const override;
+        virtual bool isTranslatable() const override;
+        virtual bool isRotatable() const override;
+        virtual bool isScalable() const override;
+
+    protected:
+        virtual void transform(const Transform& transform) override;
 
     private:
         void add(const std::shared_ptr<Surface>& surface);
@@ -228,9 +272,6 @@ namespace prop3
         std::vector<std::shared_ptr<Surface>> _surfs;
     };
 
-    // Surface shell
-    std::shared_ptr<Surface> Shell(
-            const std::shared_ptr<Surface>& surf);
 
     // Logical operators overloading
     // Ghost surface

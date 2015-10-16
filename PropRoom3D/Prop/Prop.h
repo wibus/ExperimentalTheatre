@@ -111,6 +111,7 @@ namespace prop3
         // Constant attributes
         static const double INFINITE_INERTIA;
         static const glm::dmat3 INFINITE_MOMENT_OF_INERTIA;
+        static const std::shared_ptr<Material> DEFAULT_MATERIAL;
 
     protected:
         // Cached attributes update

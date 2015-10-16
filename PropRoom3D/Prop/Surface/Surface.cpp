@@ -17,19 +17,6 @@ namespace prop3
 
     }
 
-    Transform::Transform(double scale,
-                         const glm::dquat& rotation,
-                         const glm::dvec3& translation) :
-        _mat(),
-        _isInvComputed(false)
-    {
-        _mat[0][0] = scale;
-        _mat[1][1] = scale;
-        _mat[2][2] = scale;
-        _mat = glm::mat4_cast(rotation) * _mat;
-        _mat[3] = glm::dvec4(translation, 1);
-    }
-
     const glm::dmat4& Transform::inv() const
     {
         if(_isInvComputed)
@@ -39,6 +26,12 @@ namespace prop3
         _inv = glm::inverse(_mat);
 
         return _inv;
+    }
+
+    void applyTransformation(const std::shared_ptr<Surface>& surf,
+                             const Transform& transform)
+    {
+        surf->transform(transform);
     }
 
 
@@ -52,6 +45,44 @@ namespace prop3
     Surface::~Surface()
     {
 
+    }
+
+    std::shared_ptr<Surface> Surface::shell(
+            const std::shared_ptr<Surface>& surf)
+    {
+        return std::shared_ptr<Surface>(new SurfaceShell(surf));
+    }
+
+    std::shared_ptr<Surface> Surface::transform(std::shared_ptr<Surface>& surf, const glm::dmat4& mat)
+    {
+        if(!surf->isAffineTransformable())
+            surf = shell(surf);
+        surf->transform(mat);
+        return surf;
+    }
+
+    std::shared_ptr<Surface> Surface::translate(std::shared_ptr<Surface>& surf, const glm::dvec3& dis)
+    {
+        if(!surf->isTranslatable())
+            surf = shell(surf);
+        surf->transform(glm::translate(glm::dmat4(), dis));
+        return surf;
+    }
+
+    std::shared_ptr<Surface> Surface::rotate(std::shared_ptr<Surface>& surf, double angle, const glm::dvec3& axis)
+    {
+        if(!surf->isRotatable())
+            surf = shell(surf);
+        surf->transform(glm::rotate(glm::dmat4(), angle, axis));
+        return surf;
+    }
+
+    std::shared_ptr<Surface> Surface::scale(std::shared_ptr<Surface>& surf, double coeff)
+    {
+        if(!surf->isRotatable())
+            surf = shell(surf);
+        surf->transform(glm::scale(glm::dmat4(), glm::dvec3(coeff)));
+        return surf;
     }
 
 
@@ -85,22 +116,14 @@ namespace prop3
         _coating.reset();
     }
 
-    void SurfaceShell::transform(const Transform& transform)
-    {
-        _transform = transform.mat() * _transform;
-        _invTransform *= transform.inv();
-
-        stampCurrentUpdate();
-    }
-
     EPointPosition SurfaceShell::isIn(const glm::dvec3& point) const
     {
-        _surf->isIn(glm::dvec3(_invTransform * glm::dvec4(point, 1.0)));
+        return _surf->isIn(glm::dvec3(_invTransform * glm::dvec4(point, 1.0)));
     }
 
     double SurfaceShell::signedDistance(const glm::dvec3& point) const
     {
-        _surf->signedDistance(glm::dvec3(_invTransform * glm::dvec4(point, 1.0)));
+        return _surf->signedDistance(glm::dvec3(_invTransform * glm::dvec4(point, 1.0)));
     }
 
     void SurfaceShell::raycast(const Raycast& ray, RayHitList& reports) const
@@ -118,6 +141,8 @@ namespace prop3
             RayHitReport& r = *first;
             r.position = glm::dvec3(_transform * glm::dvec4(r.position, 1.0));
             r.normal = glm::dvec3(_transform * glm::dvec4(r.normal, 0.0));
+            r.normal  = glm::normalize(r.normal);
+            r.incidentRay = ray;
             if(_coating.get() != nullptr)
                 r.coating = _coating.get();
 
@@ -143,16 +168,19 @@ namespace prop3
         return { _surf, _coating };
     }
 
+    void SurfaceShell::transform(const Transform& transform)
+    {
+        _transform = transform.mat() * _transform;
+        _invTransform = _invTransform * transform.inv();
+
+        stampCurrentUpdate();
+    }
+
 
     // SurfaceGhost
     SurfaceGhost::SurfaceGhost(const std::shared_ptr<Surface>& surf) :
         _surf(surf)
     {
-    }
-
-    void SurfaceGhost::transform(const Transform& transform)
-    {
-        _surf->transform(transform);
     }
 
     EPointPosition SurfaceGhost::isIn(const glm::dvec3& point) const
@@ -191,16 +219,36 @@ namespace prop3
         return { _surf };
     }
 
+    bool SurfaceGhost::isAffineTransformable() const
+    {
+        return _surf->isAffineTransformable();
+    }
+
+    bool SurfaceGhost::isTranslatable() const
+    {
+        return _surf->isTranslatable();
+    }
+
+    bool SurfaceGhost::isRotatable() const
+    {
+        return _surf->isRotatable();
+    }
+
+    bool SurfaceGhost::isScalable() const
+    {
+        return _surf->isScalable();
+    }
+
+    void SurfaceGhost::transform(const Transform& transform)
+    {
+        applyTransformation(_surf, transform);
+    }
+
 
     // SurfaceNot
     SurfaceInverse::SurfaceInverse(const std::shared_ptr<Surface>& surf) :
         _surf(surf)
     {
-    }
-
-    void SurfaceInverse::transform(const Transform& transform)
-    {
-        _surf->transform(transform);
     }
 
     EPointPosition SurfaceInverse::isIn(const glm::dvec3& point) const
@@ -252,17 +300,36 @@ namespace prop3
         return { _surf };
     }
 
+    bool SurfaceInverse::isAffineTransformable() const
+    {
+        return _surf->isAffineTransformable();
+    }
+
+    bool SurfaceInverse::isTranslatable() const
+    {
+        return _surf->isTranslatable();
+    }
+
+    bool SurfaceInverse::isRotatable() const
+    {
+        return _surf->isRotatable();
+    }
+
+    bool SurfaceInverse::isScalable() const
+    {
+        return _surf->isScalable();
+    }
+
+    void SurfaceInverse::transform(const Transform& transform)
+    {
+        applyTransformation(_surf, transform);
+    }
+
 
     // SurfaceOr
     SurfaceOr::SurfaceOr(const std::vector<std::shared_ptr<Surface>>& surfs) :
         _surfs(surfs)
     {
-    }
-
-    void SurfaceOr::transform(const Transform& transform)
-    {
-        for(auto& surf : _surfs)
-            surf->transform(transform);
     }
 
     EPointPosition SurfaceOr::isIn(const glm::dvec3& point) const
@@ -372,17 +439,49 @@ namespace prop3
         return std::vector<std::shared_ptr<StageSetNode>>(_surfs.begin(), _surfs.end());
     }
 
+    bool SurfaceOr::isAffineTransformable() const
+    {
+        for(const auto& s : _surfs)
+            if(!s->isAffineTransformable())
+                return false;
+        return true;
+    }
+
+    bool SurfaceOr::isTranslatable() const
+    {
+        for(const auto& s : _surfs)
+            if(!s->isTranslatable())
+                return false;
+        return true;
+    }
+
+    bool SurfaceOr::isRotatable() const
+    {
+        for(const auto& s : _surfs)
+            if(!s->isRotatable())
+                return false;
+        return true;
+    }
+
+    bool SurfaceOr::isScalable() const
+    {
+        for(const auto& s : _surfs)
+            if(!s->isScalable())
+                return false;
+        return true;
+    }
+
+    void SurfaceOr::transform(const Transform& transform)
+    {
+        for(auto& surf : _surfs)
+            applyTransformation(surf, transform);
+    }
+
 
     // SurfaceAnd
     SurfaceAnd::SurfaceAnd(const std::vector<std::shared_ptr<Surface>>& surfs) :
         _surfs(surfs)
     {
-    }
-
-    void SurfaceAnd::transform(const Transform& transform)
-    {
-        for(auto& surf : _surfs)
-            surf->transform(transform);
     }
 
     EPointPosition SurfaceAnd::isIn(const glm::dvec3& point) const
@@ -492,14 +591,46 @@ namespace prop3
         return std::vector<std::shared_ptr<StageSetNode>>(_surfs.begin(), _surfs.end());
     }
 
-
-    // Operators
-    std::shared_ptr<Surface> Shell(
-            const std::shared_ptr<Surface>& surf)
+    bool SurfaceAnd::isAffineTransformable() const
     {
-        return std::shared_ptr<Surface>(new SurfaceShell(surf));
+        for(const auto& s : _surfs)
+            if(!s->isAffineTransformable())
+                return false;
+        return true;
     }
 
+    bool SurfaceAnd::isTranslatable() const
+    {
+        for(const auto& s : _surfs)
+            if(!s->isTranslatable())
+                return false;
+        return true;
+    }
+
+    bool SurfaceAnd::isRotatable() const
+    {
+        for(const auto& s : _surfs)
+            if(!s->isRotatable())
+                return false;
+        return true;
+    }
+
+    bool SurfaceAnd::isScalable() const
+    {
+        for(const auto& s : _surfs)
+            if(!s->isScalable())
+                return false;
+        return true;
+    }
+
+    void SurfaceAnd::transform(const Transform& transform)
+    {
+        for(auto& surf : _surfs)
+            applyTransformation(surf, transform);
+    }
+
+
+    // Operators
     std::shared_ptr<Surface> operator~ (
             const std::shared_ptr<Surface>& surf)
     {

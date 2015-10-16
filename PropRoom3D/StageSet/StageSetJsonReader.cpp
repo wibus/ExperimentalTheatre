@@ -423,8 +423,8 @@ namespace prop3
 
             if(obj.contains(SURFACE_OPERATOR_SHELL))
             {
-                std::shared_ptr<Surface> shell = Shell(subSurfTree(obj[SURFACE_OPERATOR_SHELL]));
-                shell->transform(dmat4FromJson(obj[SURFACE_TRANSFORM]));
+                std::shared_ptr<Surface> shell = Surface::shell(subSurfTree(obj[SURFACE_OPERATOR_SHELL]));
+                Surface::transform(shell, dmat4FromJson(obj[SURFACE_TRANSFORM]));
                 if(obj.contains(SURFACE_COATING))
                 {
                     shell->setCoating(_coatings[obj[SURFACE_COATING].toInt()]);

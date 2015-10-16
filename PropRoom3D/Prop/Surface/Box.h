@@ -20,17 +20,22 @@ namespace prop3
         // StageSetNode interface
         virtual void accept(StageSetVisitor& visitor) override;
 
-        virtual void transform(const Transform& transform);
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
         virtual void raycast(const Raycast& ray, RayHitList& reports) const;
         virtual bool intersects(const Raycast& ray, RayHitList& reports) const;
 
-
         glm::dvec3 minCorner() const;
 
         glm::dvec3 maxCorner() const;
 
+        virtual bool isAffineTransformable() const override {return false;}
+        virtual bool isTranslatable() const override {return true;}
+        virtual bool isRotatable() const override {return false;}
+        virtual bool isScalable() const override {return true;}
+
+    protected:
+        virtual void transform(const Transform& transform) override;
 
     private:
         glm::dvec3 _center;
@@ -70,7 +75,6 @@ namespace prop3
         // StageSetNode interface
         virtual void accept(StageSetVisitor& visitor) override;
 
-        virtual void transform(const Transform& transform) override;
         virtual void raycast(const Raycast& ray, RayHitList& reports) const override;
 
 
@@ -81,6 +85,9 @@ namespace prop3
         glm::dvec3 texV() const;
 
         bool texMainSideOnly() const;
+
+    protected:
+        virtual void transform(const Transform& transform) override;
 
     private:
         glm::dvec3 _texOrigin;

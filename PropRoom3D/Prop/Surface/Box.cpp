@@ -35,14 +35,9 @@ namespace prop3
         return std::shared_ptr<Surface>(new Box(minCorner, maxCorner));
     }
 
-    void Box::transform(const Transform& transform)
+    void Box::accept(StageSetVisitor& visitor)
     {
-        _minCorner = glm::dvec3(transform.mat() * glm::dvec4(_minCorner, 1.0));
-        _maxCorner = glm::dvec3(transform.mat() * glm::dvec4(_maxCorner, 1.0));
-        _center = (_minCorner + _maxCorner) / 2.0;
-        _dimensions = _maxCorner - _minCorner;
-
-        stampCurrentUpdate();
+        visitor.visit(*this);
     }
 
     EPointPosition Box::isIn(const glm::dvec3& point) const
@@ -91,15 +86,14 @@ namespace prop3
                 glm::dvec3 absN = glm::abs(n);
                 if(absN.x > absN.y)
                     if(absN.x > absN.z)
-                        n = glm::dvec3(n.x, 0, 0);
+                        n = glm::dvec3(glm::sign(n.x), 0, 0);
                     else
-                        n = glm::dvec3(0, 0, n.z);
+                        n = glm::dvec3(0, 0, glm::sign(n.z));
                 else
                     if(absN.y > absN.z)
-                        n = glm::dvec3(0, n.y, 0);
+                        n = glm::dvec3(0, glm::sign(n.y), 0);
                     else
-                        n = glm::dvec3(0, 0, n.z);
-                n = glm::normalize(n);
+                        n = glm::dvec3(0, 0, glm::sign(n.z));
 
                 reports.add(tmin, ray, pt, n,
                             RayHitReport::NO_TEXCOORD,
@@ -113,15 +107,14 @@ namespace prop3
                 glm::dvec3 absN = glm::abs(n);
                 if(absN.x > absN.y)
                     if(absN.x > absN.z)
-                        n = glm::dvec3(n.x, 0, 0);
+                        n = glm::dvec3(glm::sign(n.x), 0, 0);
                     else
-                        n = glm::dvec3(0, 0, n.z);
+                        n = glm::dvec3(0, 0, glm::sign(n.z));
                 else
                     if(absN.y > absN.z)
-                        n = glm::dvec3(0, n.y, 0);
+                        n = glm::dvec3(0, glm::sign(n.y), 0);
                     else
-                        n = glm::dvec3(0, 0, n.z);
-                n = glm::normalize(n);
+                        n = glm::dvec3(0, 0, glm::sign(n.z));
 
                 reports.add(tmax, ray, pt, n,
                             RayHitReport::NO_TEXCOORD,
@@ -144,9 +137,14 @@ namespace prop3
         return tmax > glm::max(tmin, 0.0);
     }
 
-    void Box::accept(StageSetVisitor& visitor)
+    void Box::transform(const Transform& transform)
     {
-        visitor.visit(*this);
+        _minCorner = glm::dvec3(transform.mat() * glm::dvec4(_minCorner, 1.0));
+        _maxCorner = glm::dvec3(transform.mat() * glm::dvec4(_maxCorner, 1.0));
+        _center = (_minCorner + _maxCorner) / 2.0;
+        _dimensions = _maxCorner - _minCorner;
+
+        stampCurrentUpdate();
     }
 
 
@@ -210,15 +208,6 @@ namespace prop3
         visitor.visit(*this);
     }
 
-    void BoxTexture::transform(const Transform& transform)
-    {
-        _texOrigin = glm::dvec3(transform.mat() * glm::dvec4(_texOrigin, 1.0));
-        _texU = glm::dvec3(transform.mat() * glm::dvec4(_texU, 0.0));
-        _texV = glm::dvec3(transform.mat() * glm::dvec4(_texV, 0.0));
-
-        Box::transform(transform);
-    }
-
     void BoxTexture::raycast(const Raycast& ray, RayHitList& reports) const
     {
         RayHitReport* last = reports.head;
@@ -240,5 +229,14 @@ namespace prop3
 
             first = first->_next;
         }
+    }
+
+    void BoxTexture::transform(const Transform& transform)
+    {
+        _texOrigin = glm::dvec3(transform.mat() * glm::dvec4(_texOrigin, 1.0));
+        _texU = glm::dvec3(transform.mat() * glm::dvec4(_texU, 0.0));
+        _texV = glm::dvec3(transform.mat() * glm::dvec4(_texV, 0.0));
+
+        Box::transform(transform);
     }
 }

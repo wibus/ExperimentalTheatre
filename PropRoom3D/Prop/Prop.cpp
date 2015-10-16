@@ -15,12 +15,13 @@ namespace prop3
     // Inertia
     const double Prop::INFINITE_INERTIA = 0.0;
     const glm::dmat3 Prop::INFINITE_MOMENT_OF_INERTIA(0.0);
+    const std::shared_ptr<Material> Prop::DEFAULT_MATERIAL(new Concrete(glm::vec3(1)));
 
 
     Prop::Prop() :
         _id(_assigneId_()),
         _isVisible(true),
-        _material(new Concrete(glm::vec3(1))),
+        _material(DEFAULT_MATERIAL),
         _bodyType(EBodyType::GRAPHIC),
         _transformMatrix(1.0),
         _invMass(INFINITE_INERTIA),

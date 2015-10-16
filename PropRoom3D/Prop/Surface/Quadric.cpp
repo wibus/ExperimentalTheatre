@@ -117,12 +117,9 @@ namespace prop3
                 -1));          // J
     }
 
-
-    void Quadric::transform(const Transform& transform)
+    void Quadric::accept(StageSetVisitor& visitor)
     {
-        _q = glm::transpose(transform.inv()) * _q * transform.inv();
-
-        stampCurrentUpdate();
+        visitor.visit(*this);
     }
 
     EPointPosition Quadric::isIn(const glm::dvec3& point) const
@@ -222,6 +219,13 @@ namespace prop3
         }
     }
 
+    void Quadric::transform(const Transform& transform)
+    {
+        _q = glm::transpose(transform.inv()) * _q * transform.inv();
+
+        stampCurrentUpdate();
+    }
+
     void Quadric::params(
             const Raycast& ray,
             double& a,
@@ -234,10 +238,5 @@ namespace prop3
         a = glm::dot(homoDir, _q * homoDir);
         b = glm::dot(homoDir, _q * homoOrg) * 2.0;
         c = glm::dot(homoOrg, _q * homoOrg);
-    }
-
-    void Quadric::accept(StageSetVisitor& visitor)
-    {
-        visitor.visit(*this);
     }
 }

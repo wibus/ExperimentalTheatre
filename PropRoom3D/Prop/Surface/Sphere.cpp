@@ -22,15 +22,9 @@ namespace prop3
         return std::shared_ptr<Surface>(new Sphere(center, radius));
     }
 
-    void Sphere::transform(const Transform& transform)
+    void Sphere::accept(StageSetVisitor& visitor)
     {
-        _center = glm::dvec3(transform.mat() * glm::dvec4(_center, 1.0));
-
-        glm::dvec4 unit = glm::dvec4(1.0, 0.0, 0.0, 0.0);
-        _radius *= glm::length(transform.mat() * unit);
-        _radius2 = _radius*_radius;
-
-        stampCurrentUpdate();
+        visitor.visit(*this);
     }
 
     EPointPosition Sphere::isIn(const glm::dvec3& point) const
@@ -98,6 +92,17 @@ namespace prop3
         return b*b - 4*a*c >= 0.0;
     }
 
+    void Sphere::transform(const Transform& transform)
+    {
+        _center = glm::dvec3(transform.mat() * glm::dvec4(_center, 1.0));
+
+        glm::dvec4 unit = glm::dvec4(1.0, 0.0, 0.0, 0.0);
+        _radius *= glm::length(transform.mat() * unit);
+        _radius2 = _radius*_radius;
+
+        stampCurrentUpdate();
+    }
+
     void Sphere::params(const Raycast& ray, double& a, double& b, double& c) const
     {
         glm::dvec3 dist = ray.origin - _center;
@@ -105,10 +110,5 @@ namespace prop3
         a = glm::dot(ray.direction, ray.direction);
         b = 2 * glm::dot(ray.direction, dist);
         c = glm::dot(dist, dist) - _radius2;
-    }
-
-    void Sphere::accept(StageSetVisitor& visitor)
-    {
-        visitor.visit(*this);
     }
 }
