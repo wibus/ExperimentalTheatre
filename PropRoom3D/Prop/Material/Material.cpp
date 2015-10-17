@@ -41,7 +41,6 @@ namespace prop3
     void Material::scatterLight(
             std::vector<Raycast>& raycasts,
             const Raycast& ray,
-            const std::shared_ptr<Material>& self,
             unsigned int outRayCountHint) const
     {
     }

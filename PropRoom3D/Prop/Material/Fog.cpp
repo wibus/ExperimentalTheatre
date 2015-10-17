@@ -32,22 +32,22 @@ namespace prop3
     void Fog::indirectBrdf(
         std::vector<Raycast>& raycasts,
         const RayHitReport& report,
-        const std::shared_ptr<Material>& leavedMaterial,
-        const std::shared_ptr<Material>& selfEnteredMaterial,
+        const Material& leavedMaterial,
+        const Material& enteredMaterial,
         unsigned int outRayCountHint) const
     {
         indirectSpecularRefraction(
             raycasts,
             report,
-            leavedMaterial,
-            selfEnteredMaterial);
+            leavedMaterial.refractiveIndex(),
+            enteredMaterial.refractiveIndex());
     }
 
     glm::dvec3 Fog::directBrdf(
         const RayHitReport& report,
         const glm::dvec3& outDirection,
-        const std::shared_ptr<Material>& leavedMaterial,
-        const std::shared_ptr<Material>& enteredMaterial) const
+        const Material& leavedMaterial,
+        const Material& enteredMaterial) const
     {
         return directSpecularRefraction(report, outDirection);
     }
@@ -80,11 +80,10 @@ namespace prop3
     void Fog::scatterLight(
             std::vector<Raycast>& raycasts,
             const Raycast& ray,
-            const std::shared_ptr<Material>& self,
             unsigned int outRayCountHint) const
     {
         size_t preSize = raycasts.size();
-        indirectDiffuseScattering(raycasts, ray, self, outRayCountHint);
+        indirectDiffuseScattering(raycasts, ray, outRayCountHint);
         size_t postSize = raycasts.size();
 
         for(size_t i=preSize; i<postSize; ++i)

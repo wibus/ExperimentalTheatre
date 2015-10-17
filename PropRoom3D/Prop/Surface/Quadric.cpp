@@ -158,7 +158,9 @@ namespace prop3
                         glm::dvec3 n1 =  computeNormal(_q, pt1);
                         reports.add(t, ray, pt1, n1,
                                     RayHitReport::NO_TEXCOORD,
-                                    _coating.get());
+                                    _coating.get(),
+                                    _innerMat.get(),
+                                    _outerMat.get());
                     }
                 }
 
@@ -170,7 +172,9 @@ namespace prop3
                         glm::dvec3 n2 =  computeNormal(_q, pt2);
                         reports.add(t, ray, pt2, n2,
                                     RayHitReport::NO_TEXCOORD,
-                                    _coating.get());
+                                    _coating.get(),
+                                    _innerMat.get(),
+                                    _outerMat.get());
                     }
                 }
             }
@@ -183,7 +187,9 @@ namespace prop3
                     glm::dvec3 n =  computeNormal(_q, pt);
                     reports.add(t, ray, pt, n,
                                 RayHitReport::NO_TEXCOORD,
-                                _coating.get());
+                                _coating.get(),
+                                _innerMat.get(),
+                                _outerMat.get());
                 }
             }
         }
@@ -198,7 +204,9 @@ namespace prop3
                     glm::dvec3 n =  computeNormal(_q, pt);
                     reports.add(t, ray, pt, n,
                                 RayHitReport::NO_TEXCOORD,
-                                _coating.get());
+                                _coating.get(),
+                                _innerMat.get(),
+                                _outerMat.get());
                 }
             }
         }

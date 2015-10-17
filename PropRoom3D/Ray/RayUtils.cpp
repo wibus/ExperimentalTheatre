@@ -94,9 +94,9 @@ namespace prop3
     }
 
 
-    void indirectDiffuseScattering(std::vector<Raycast>& outRays,
+    void indirectDiffuseScattering(
+        std::vector<Raycast>& outRays,
         const Raycast& ray,
-        const std::shared_ptr<Material>& material,
         unsigned int rayCount)
     {
         double splitFactor(1.0 / rayCount);
@@ -111,15 +111,13 @@ namespace prop3
                     Raycast::FULLY_DIFFUSIVE_ENTROPY,
                     glm::dvec3(splitFactor),
                     origin,
-                    direction,
-                    material));
+                    direction));
         }
     }
 
     void indirectSpecularReflection(
         std::vector<Raycast>& outRays,
-        const RayHitReport& report,
-        const std::shared_ptr<Material>& material)
+        const RayHitReport& report)
     {
         glm::dvec3 reflectDir = glm::reflect(
                 report.incidentRay.direction, report.normal);
@@ -129,14 +127,12 @@ namespace prop3
                 Raycast::FULLY_SPECULAR_ENTROPY,
                 glm::dvec3(1.0),
                 report.reflectionOrigin,
-                reflectDir,
-                material));
+                reflectDir));
     }
 
     void indirectDiffuseReflection(
         std::vector<Raycast>& outRays,
         const RayHitReport& report,
-        const std::shared_ptr<Material>& material,
         unsigned int rayCount)
     {
         double splitFactor(1.0 / rayCount);
@@ -155,25 +151,23 @@ namespace prop3
                     Raycast::FULLY_DIFFUSIVE_ENTROPY,
                     glm::dvec3(attenuation),
                     report.reflectionOrigin,
-                    direction,
-                    material));
+                    direction));
         }
     }
 
     void indirectGlossyReflection(
         std::vector<Raycast>& outRays,
         const RayHitReport& report,
-        const std::shared_ptr<Material>& material,
         double glossiness,
         unsigned int rayCount)
     {
         if(glossiness <= 0.0)
         {
-            indirectDiffuseReflection(outRays, report, material, rayCount);
+            indirectDiffuseReflection(outRays, report, rayCount);
         }
         else if(glossiness >= 1.0)
         {
-            indirectSpecularReflection(outRays, report, material);
+            indirectSpecularReflection(outRays, report);
         }
         else
         {
@@ -203,8 +197,7 @@ namespace prop3
                         entropy,
                         attenuation,
                         report.reflectionOrigin,
-                        direction,
-                        material));
+                        direction));
             }
         }
     }
@@ -212,15 +205,15 @@ namespace prop3
     void indirectSpecularRefraction(
         std::vector<Raycast>& outRays,
         const RayHitReport& report,
-        const std::shared_ptr<Material>& leavedMaterial,
-        const std::shared_ptr<Material>& enteredMaterial)
+        double leavedRefractiveIndex,
+        double enteredRefractiveIndex)
     {
         const glm::dvec3& incident = report.incidentRay.direction;
 
         double reflectionRatio =
                 computeReflexionRatio(
-                    leavedMaterial->refractiveIndex(),
-                    enteredMaterial->refractiveIndex(),
+                    leavedRefractiveIndex,
+                    enteredRefractiveIndex,
                     incident,
                     report.normal);
 
@@ -231,8 +224,8 @@ namespace prop3
 
         glm::dvec3 refractDir =
                 computeRefraction(
-                    leavedMaterial->refractiveIndex(),
-                    enteredMaterial->refractiveIndex(),
+                    leavedRefractiveIndex,
+                    enteredRefractiveIndex,
                     incident,
                     report.normal);
 
@@ -241,16 +234,14 @@ namespace prop3
                 Raycast::FULLY_SPECULAR_ENTROPY,
                 glm::dvec3(reflectionRatio),
                 report.reflectionOrigin,
-                glm::normalize(reflectDir),
-                leavedMaterial));
+                glm::normalize(reflectDir)));
 
         outRays.push_back(Raycast(
                 Raycast::BACKDROP_DISTANCE,
                 Raycast::FULLY_SPECULAR_ENTROPY,
                 glm::dvec3(1 - reflectionRatio),
                 report.refractionOrigin,
-                glm::normalize(refractDir),
-                enteredMaterial));
+                glm::normalize(refractDir)));
     }
 
     double computeReflexionRatio(

@@ -12,13 +12,19 @@ namespace prop3
             const glm::dvec3& position,
             const glm::dvec3& normal,
             const glm::dvec3& texCoord,
-            const Coating* coating) :
+            const Coating* coating,
+            const Material* innerMat,
+            const Material* outerMat) :
         distance(distance),
         incidentRay(incidentRay),
         position(position),
         normal(normal),
         texCoord(texCoord),
         coating(coating),
+        innerMat(innerMat),
+        outerMat(outerMat),
+        nextMaterial(nullptr),
+        currMaterial(nullptr),
         _next(nullptr)
     {
     }
@@ -28,7 +34,16 @@ namespace prop3
         isTextured = (texCoord != NO_TEXCOORD);
 
         if(glm::dot(incidentRay.direction, normal) > 0.0)
-            normal = - normal;
+        {
+            normal = -normal;
+            nextMaterial = outerMat;
+            currMaterial = innerMat;
+        }
+        else
+        {
+            nextMaterial = innerMat;
+            currMaterial = outerMat;
+        }
 
         glm::dvec3 espilonDist = normal * EPSILON_LENGTH;
         reflectionOrigin = position +  espilonDist;

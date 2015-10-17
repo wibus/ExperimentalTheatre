@@ -21,12 +21,12 @@ namespace prop3
     void Metal::indirectBrdf(
         std::vector<Raycast>& raycasts,
         const RayHitReport& report,
-        const std::shared_ptr<Material>& leavedMaterial,
-        const std::shared_ptr<Material>& selfEnteredMaterial,
+        const Material& leavedMaterial,
+        const Material& enteredMaterial,
         unsigned int outRayCountHint) const
     {
         size_t preSize = raycasts.size();
-        indirectGlossyReflection(raycasts, report, leavedMaterial, _glossiness, outRayCountHint);
+        indirectGlossyReflection(raycasts, report, _glossiness, outRayCountHint);
         size_t postSize = raycasts.size();
 
         for(size_t i=preSize; i<postSize; ++i)
@@ -38,8 +38,8 @@ namespace prop3
     glm::dvec3 Metal::directBrdf(
         const RayHitReport& report,
         const glm::dvec3& outDirection,
-        const std::shared_ptr<Material>& leavedMaterial,
-        const std::shared_ptr<Material>& enteredMaterial) const
+        const Material& leavedMaterial,
+        const Material& enteredMaterial) const
     {
         return _color * directGlossyReflection(report, outDirection, _glossiness);
     }

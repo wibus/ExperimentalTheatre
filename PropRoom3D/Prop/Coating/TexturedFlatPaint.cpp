@@ -32,13 +32,13 @@ namespace prop3
     void TexturedFlatPaint::indirectBrdf(
             std::vector<Raycast>& raycasts,
             const RayHitReport& report,
-            const std::shared_ptr<Material>& leavedMaterial,
-            const std::shared_ptr<Material>& enteredMaterial,
+            const Material& leavedMaterial,
+            const Material& enteredMaterial,
             unsigned int outRayCountHint) const
     {
         // Pigment diffuse reflection
         size_t preSize = raycasts.size();
-        indirectDiffuseReflection(raycasts, report, leavedMaterial, outRayCountHint);
+        indirectDiffuseReflection(raycasts, report, outRayCountHint);
         size_t postSize = raycasts.size();
 
         glm::dvec3 color = _defaultColor;
@@ -58,8 +58,8 @@ namespace prop3
     glm::dvec3 TexturedFlatPaint::directBrdf(
             const RayHitReport& report,
             const glm::dvec3& outDirection,
-            const std::shared_ptr<Material>& leavedMaterial,
-            const std::shared_ptr<Material>& enteredMaterial) const
+            const Material& leavedMaterial,
+            const Material& enteredMaterial) const
     {
         glm::dvec3 color = _defaultColor;
         if(report.isTextured)

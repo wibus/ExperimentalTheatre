@@ -4,6 +4,8 @@
 
 #include "Ray/RayHitList.h"
 #include "Ray/RayHitReport.h"
+#include "../Material/Air.h"
+#include "../Material/Concrete.h"
 #include "../Coating/NoCoating.h"
 #include "../../StageSet/StageSetVisitor.h"
 
@@ -35,7 +37,9 @@ namespace prop3
     }
 
 
-    const std::shared_ptr<Coating> Surface::NO_COATING(new NoCoating());
+    const std::shared_ptr<Coating>  Surface::NO_COATING(new NoCoating());
+    const std::shared_ptr<Material> Surface::DEFAULT_MATERIAL(new Concrete(glm::dvec3(1)));
+    const std::shared_ptr<Material> Surface::ENVIRONMENT_MATERIAL(new Air());
 
     Surface::Surface()
     {
@@ -88,9 +92,16 @@ namespace prop3
 
     // Physical surfaces
     PhysicalSurface::PhysicalSurface() :
-        _coating(NO_COATING)
+        _coating(NO_COATING),
+        _innerMat(DEFAULT_MATERIAL),
+        _outerMat(ENVIRONMENT_MATERIAL)
     {
 
+    }
+
+    std::vector<std::shared_ptr<StageSetNode>> PhysicalSurface::children() const
+    {
+        return { _coating, _innerMat, _outerMat };
     }
 
     void PhysicalSurface::setCoating(const std::shared_ptr<Coating>& coating)
@@ -100,9 +111,18 @@ namespace prop3
         stampCurrentUpdate();
     }
 
-    std::vector<std::shared_ptr<StageSetNode>> PhysicalSurface::children() const
+    void PhysicalSurface::setInnerMaterial(const std::shared_ptr<Material>& mat)
     {
-        return { _coating };
+        _innerMat = mat;
+
+        stampCurrentUpdate();
+    }
+
+    void PhysicalSurface::setOuterMaterial(const std::shared_ptr<Material>& mat)
+    {
+        _outerMat = mat;
+
+        stampCurrentUpdate();
     }
 
 
@@ -114,6 +134,25 @@ namespace prop3
         // When _coating == nullptr,
         // use child surface's coating
         _coating.reset();
+
+        // When inner (outer) material is nullptr
+        // don't exchange with child surface's material
+        _innerMat.reset();
+        _outerMat.reset();
+    }
+
+    void SurfaceShell::accept(StageSetVisitor& visitor)
+    {
+        visitor.visit(*this);
+    }
+
+    std::vector<std::shared_ptr<StageSetNode>> SurfaceShell::children() const
+    {
+        std::vector<std::shared_ptr<StageSetNode>> c{_surf};
+        if(_coating.get() != nullptr) c.push_back( _coating );
+        if(_innerMat.get() != nullptr) c.push_back( _innerMat );
+        if(_outerMat.get() != nullptr) c.push_back( _outerMat );
+        return c;
     }
 
     EPointPosition SurfaceShell::isIn(const glm::dvec3& point) const
@@ -143,8 +182,13 @@ namespace prop3
             r.normal = glm::dvec3(_transform * glm::dvec4(r.normal, 0.0));
             r.normal  = glm::normalize(r.normal);
             r.incidentRay = ray;
+
             if(_coating.get() != nullptr)
                 r.coating = _coating.get();
+            if(_innerMat.get() != nullptr)
+                r.innerMat = _innerMat.get();
+            if(_outerMat.get() != nullptr)
+                r.outerMat = _outerMat.get();
 
             first = first->_next;
         }
@@ -156,16 +200,6 @@ namespace prop3
         tRay.origin = glm::dvec3(_invTransform * glm::dvec4(ray.origin, 1.0));
         tRay.direction = glm::dvec3(_invTransform * glm::dvec4(ray.direction, 0.0));
         return _surf->intersects(tRay, reports);
-    }
-
-    void SurfaceShell::accept(StageSetVisitor& visitor)
-    {
-        visitor.visit(*this);
-    }
-
-    std::vector<std::shared_ptr<StageSetNode>> SurfaceShell::children() const
-    {
-        return { _surf, _coating };
     }
 
     void SurfaceShell::transform(const Transform& transform)
@@ -183,6 +217,16 @@ namespace prop3
     {
     }
 
+    void SurfaceGhost::accept(StageSetVisitor& visitor)
+    {
+        visitor.visit(*this);
+    }
+
+    std::vector<std::shared_ptr<StageSetNode>> SurfaceGhost::children() const
+    {
+        return { _surf };
+    }
+
     EPointPosition SurfaceGhost::isIn(const glm::dvec3& point) const
     {
         return _surf->isIn(point);
@@ -193,30 +237,29 @@ namespace prop3
         return _surf->signedDistance(point);
     }
 
-    void SurfaceGhost::raycast(
-        const Raycast&,
-        RayHitList&) const
+    void SurfaceGhost::raycast(const Raycast&, RayHitList&) const
     {
         // Never generates intersection points
     }
 
-    bool SurfaceGhost::intersects(const Raycast& ray, RayHitList& reports) const
+    bool SurfaceGhost::intersects(const Raycast&, RayHitList&) const
     {
         return false;
     }
 
-    void SurfaceGhost::setCoating(const std::shared_ptr<Coating>& coating)
+    void SurfaceGhost::setCoating(const std::shared_ptr<Coating>&)
     {
+        // No intersection, no coating
     }
 
-    void SurfaceGhost::accept(StageSetVisitor& visitor)
+    void SurfaceGhost::setInnerMaterial(const std::shared_ptr<Material>&)
     {
-        visitor.visit(*this);
+        // No intersection, no material interface
     }
 
-    std::vector<std::shared_ptr<StageSetNode>> SurfaceGhost::children() const
+    void SurfaceGhost::setOuterMaterial(const std::shared_ptr<Material>&)
     {
-        return { _surf };
+        // No intersection, no material interface
     }
 
     bool SurfaceGhost::isAffineTransformable() const
@@ -249,6 +292,16 @@ namespace prop3
     SurfaceInverse::SurfaceInverse(const std::shared_ptr<Surface>& surf) :
         _surf(surf)
     {
+    }
+
+    void SurfaceInverse::accept(StageSetVisitor& visitor)
+    {
+        visitor.visit(*this);
+    }
+
+    std::vector<std::shared_ptr<StageSetNode>> SurfaceInverse::children() const
+    {
+        return { _surf };
     }
 
     EPointPosition SurfaceInverse::isIn(const glm::dvec3& point) const
@@ -290,14 +343,14 @@ namespace prop3
         _surf->setCoating(coating);
     }
 
-    void SurfaceInverse::accept(StageSetVisitor& visitor)
+    void SurfaceInverse::setInnerMaterial(const std::shared_ptr<Material>& mat)
     {
-        visitor.visit(*this);
+        _surf->setInnerMaterial(mat);
     }
 
-    std::vector<std::shared_ptr<StageSetNode>> SurfaceInverse::children() const
+    void SurfaceInverse::setOuterMaterial(const std::shared_ptr<Material>& mat)
     {
-        return { _surf };
+        _surf->setOuterMaterial(mat);
     }
 
     bool SurfaceInverse::isAffineTransformable() const
@@ -330,6 +383,16 @@ namespace prop3
     SurfaceOr::SurfaceOr(const std::vector<std::shared_ptr<Surface>>& surfs) :
         _surfs(surfs)
     {
+    }
+
+    void SurfaceOr::accept(StageSetVisitor& visitor)
+    {
+        visitor.visit(*this);
+    }
+
+    std::vector<std::shared_ptr<StageSetNode>> SurfaceOr::children() const
+    {
+        return std::vector<std::shared_ptr<StageSetNode>>(_surfs.begin(), _surfs.end());
     }
 
     EPointPosition SurfaceOr::isIn(const glm::dvec3& point) const
@@ -429,14 +492,16 @@ namespace prop3
             surf->setCoating(coating);
     }
 
-    void SurfaceOr::accept(StageSetVisitor& visitor)
+    void SurfaceOr::setInnerMaterial(const std::shared_ptr<Material>& mat)
     {
-        visitor.visit(*this);
+        for(auto& surf : _surfs)
+            surf->setInnerMaterial(mat);
     }
 
-    std::vector<std::shared_ptr<StageSetNode>> SurfaceOr::children() const
+    void SurfaceOr::setOuterMaterial(const std::shared_ptr<Material>& mat)
     {
-        return std::vector<std::shared_ptr<StageSetNode>>(_surfs.begin(), _surfs.end());
+        for(auto& surf : _surfs)
+            surf->setOuterMaterial(mat);
     }
 
     bool SurfaceOr::isAffineTransformable() const
@@ -482,6 +547,16 @@ namespace prop3
     SurfaceAnd::SurfaceAnd(const std::vector<std::shared_ptr<Surface>>& surfs) :
         _surfs(surfs)
     {
+    }
+
+    void SurfaceAnd::accept(StageSetVisitor& visitor)
+    {
+        visitor.visit(*this);
+    }
+
+    std::vector<std::shared_ptr<StageSetNode>> SurfaceAnd::children() const
+    {
+        return std::vector<std::shared_ptr<StageSetNode>>(_surfs.begin(), _surfs.end());
     }
 
     EPointPosition SurfaceAnd::isIn(const glm::dvec3& point) const
@@ -581,14 +656,16 @@ namespace prop3
             surf->setCoating(coating);
     }
 
-    void SurfaceAnd::accept(StageSetVisitor& visitor)
+    void SurfaceAnd::setInnerMaterial(const std::shared_ptr<Material>& mat)
     {
-        visitor.visit(*this);
+        for(auto& surf : _surfs)
+            surf->setInnerMaterial(mat);
     }
 
-    std::vector<std::shared_ptr<StageSetNode>> SurfaceAnd::children() const
+    void SurfaceAnd::setOuterMaterial(const std::shared_ptr<Material>& mat)
     {
-        return std::vector<std::shared_ptr<StageSetNode>>(_surfs.begin(), _surfs.end());
+        for(auto& surf : _surfs)
+            surf->setOuterMaterial(mat);
     }
 
     bool SurfaceAnd::isAffineTransformable() const
@@ -683,5 +760,16 @@ namespace prop3
         }
 
         return std::shared_ptr<Surface>(new SurfaceAnd({surf1, surf2}));
+    }
+
+    std::shared_ptr<Surface> operator^ (
+            std::shared_ptr<Surface>& surf1,
+            std::shared_ptr<Surface>& surf2)
+    {
+        std::shared_ptr<Surface> juction = Surface::shell(surf1 & ~surf2);
+        std::shared_ptr<Surface> surf1Tmp = Surface::shell(surf1 & ~!surf2);
+        surf2 = Surface::shell(surf2 & ~!surf1);
+        surf1 = surf1Tmp;
+        return juction;
     }
 }

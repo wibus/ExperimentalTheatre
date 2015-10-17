@@ -34,32 +34,28 @@ namespace prop3
     PROP3D_EXPORT void indirectDiffuseScattering(
             std::vector<Raycast>& outRays,
             const Raycast& ray,
-            const std::shared_ptr<Material>& material,
             unsigned int rayCount);
 
     PROP3D_EXPORT void indirectSpecularReflection(
             std::vector<Raycast>& outRays,
-            const RayHitReport& report,
-            const std::shared_ptr<Material>& material);
+            const RayHitReport& report);
 
     PROP3D_EXPORT void indirectDiffuseReflection(
             std::vector<Raycast>& outRays,
             const RayHitReport& report,
-            const std::shared_ptr<Material>& material,
             unsigned int rayCount);
 
     PROP3D_EXPORT void indirectGlossyReflection(
             std::vector<Raycast>& outRays,
             const RayHitReport& report,
-            const std::shared_ptr<Material>& material,
             double glossiness,
             unsigned int rayCount);
 
     PROP3D_EXPORT void indirectSpecularRefraction(
             std::vector<Raycast>& outRays,
             const RayHitReport& report,
-            const std::shared_ptr<Material>& leavedMaterial,
-            const std::shared_ptr<Material>& enteredMaterial);
+            double leavedRefractiveIndex,
+            double enteredRefractiveIndex);
 
 
     PROP3D_EXPORT double computeReflexionRatio(

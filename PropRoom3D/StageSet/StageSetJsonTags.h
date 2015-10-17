@@ -17,8 +17,7 @@ namespace prop3
     // Props
     extern const QString PROP_TYPE;
     extern const QString PROP_TYPE_PROP;
-    extern const QString PROP_MATERIAL;
-    extern const QString PROP_SURFACE;
+    extern const QString PROP_SURFACE_ELEMENTS;
     extern const QString PROP_BOUNDING_SURFACE;
 
     // Surfaces
@@ -35,6 +34,8 @@ namespace prop3
     extern const QString SURFACE_OPERATOR_OR;
     extern const QString SURFACE_OPERATOR_AND;
     extern const QString SURFACE_COATING;
+    extern const QString SURFACE_INNER_MATERIAL;
+    extern const QString SURFACE_OUTER_MATERIAL;
     extern const QString SURFACE_TEX_ORIGIN;
     extern const QString SURFACE_TEX_U_DIR;
     extern const QString SURFACE_TEX_V_DIR;

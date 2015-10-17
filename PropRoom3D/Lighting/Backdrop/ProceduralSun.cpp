@@ -169,8 +169,7 @@ namespace prop3
                 Raycast::FULLY_DIFFUSIVE_ENTROPY,
                 rayColor,
                 radPoint,
-                direction,
-                _spaceMaterial));
+                direction));
         }
 
         return raycasts;
@@ -201,8 +200,7 @@ namespace prop3
                 Raycast::FULLY_DIFFUSIVE_ENTROPY,
                 rayColor,
                 radPoint,
-                direction,
-                _spaceMaterial));
+                direction));
         }
 
         return raycasts;

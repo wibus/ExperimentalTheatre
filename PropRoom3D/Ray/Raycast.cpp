@@ -12,14 +12,12 @@ namespace prop3
             double entropy,
             const glm::dvec3& color,
             const glm::dvec3& origin,
-            const glm::dvec3& direction,
-            const std::shared_ptr<Material>& material) :
+            const glm::dvec3& direction) :
         limit(limit),
         entropy(entropy),
         color(color),
         origin(origin),
-        direction(direction),
-        material(material)
+        direction(direction)
     {}
 
     double Raycast::mixEntropies(double inEntropy, double outEntropy)

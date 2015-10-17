@@ -73,7 +73,9 @@ namespace prop3
                 glm::dvec3 pt = ray.origin + ray.direction * t;
                 reports.add(t, ray, pt, _normal,
                             RayHitReport::NO_TEXCOORD,
-                            _coating.get());
+                            _coating.get(),
+                            _innerMat.get(),
+                            _outerMat.get());
             }
         }
     }

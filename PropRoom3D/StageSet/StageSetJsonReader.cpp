@@ -63,8 +63,8 @@ namespace prop3
         QJsonObject docObj = jsonDoc.object();
 
         // Deserialize coatings, materials, surfaces and backdrops
-        deserializeCoatings(docObj);
         deserializeMaterials(docObj);
+        deserializeCoatings(docObj);
         deserializeSurfaces(docObj);
         deserializeBackdrops(docObj);
 
@@ -368,6 +368,8 @@ namespace prop3
             if(surface.get() != nullptr)
             {
                 surface->setCoating(_coatings[obj[SURFACE_COATING].toInt()]);
+                surface->setInnerMaterial(_materials[obj[SURFACE_INNER_MATERIAL].toInt()]);
+                surface->setOuterMaterial(_materials[obj[SURFACE_OUTER_MATERIAL].toInt()]);
                 _surfaces.push_back(surface);
             }
         }
@@ -375,10 +377,10 @@ namespace prop3
 
     void StageSetJsonReader::deserializeProps(const QJsonObject& stageSetObj, AbstractTeam& team)
     {
-        for(QJsonValueRef ref : stageSetObj[STAGESET_PROP_ARRAY].toArray())
+        for(QJsonValueRef propRef : stageSetObj[STAGESET_PROP_ARRAY].toArray())
         {
             std::shared_ptr<Prop> prop;
-            QJsonObject obj = ref.toObject();
+            QJsonObject obj = propRef.toObject();
             QString type = obj[PROP_TYPE].toString();
 
             if(type == PROP_TYPE_PROP)
@@ -393,12 +395,12 @@ namespace prop3
 
             if(prop.get() != nullptr)
             {
-                prop->setMaterial(_materials[obj[PROP_MATERIAL].toInt()]);
-
-                if(obj.contains(PROP_SURFACE))
+                if(obj.contains(PROP_SURFACE_ELEMENTS))
                 {
-                    prop->setSurface(subSurfTree(
-                        obj[PROP_SURFACE]));
+                    for(QJsonValueRef surfRef : obj[PROP_SURFACE_ELEMENTS].toArray())
+                    {
+                        prop->pushSurface(subSurfTree( surfRef ));
+                    }
                 }
 
                 if(obj.contains(PROP_BOUNDING_SURFACE))
@@ -425,10 +427,14 @@ namespace prop3
             {
                 std::shared_ptr<Surface> shell = Surface::shell(subSurfTree(obj[SURFACE_OPERATOR_SHELL]));
                 Surface::transform(shell, dmat4FromJson(obj[SURFACE_TRANSFORM]));
+
                 if(obj.contains(SURFACE_COATING))
-                {
                     shell->setCoating(_coatings[obj[SURFACE_COATING].toInt()]);
-                }
+                if(obj.contains(SURFACE_INNER_MATERIAL))
+                    shell->setInnerMaterial(_materials[obj[SURFACE_INNER_MATERIAL].toInt()]);
+                if(obj.contains(SURFACE_OUTER_MATERIAL))
+                    shell->setOuterMaterial(_materials[obj[SURFACE_OUTER_MATERIAL].toInt()]);
+
                 return shell;
             }
             else if(obj.contains(SURFACE_OPERATOR_GHOST))

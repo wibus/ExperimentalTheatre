@@ -4,19 +4,18 @@
 namespace prop3
 {
     // StageSet object
-    const QString STAGESET_ENVIRONMENT_OBJECT = "Environment";
-    const QString STAGESET_BACKDROP_ARRAY     = "Backdrops";
-    const QString STAGESET_MATERIAL_ARRAY     = "Materials";
-    const QString STAGESET_COATING_ARRAY      = "Coatings";
-    const QString STAGESET_SURFACE_ARRAY      = "Surfaces";
-    const QString STAGESET_PROP_ARRAY         = "Props";
+    const QString STAGESET_ENVIRONMENT_OBJECT   = "Environment";
+    const QString STAGESET_BACKDROP_ARRAY       = "Backdrops";
+    const QString STAGESET_MATERIAL_ARRAY       = "Materials";
+    const QString STAGESET_COATING_ARRAY        = "Coatings";
+    const QString STAGESET_SURFACE_ARRAY        = "Surfaces";
+    const QString STAGESET_PROP_ARRAY           = "Props";
 
     // Props
-    const QString PROP_TYPE             = "Type";
-    const QString PROP_TYPE_PROP        = "Prop";
-    const QString PROP_MATERIAL         = "Material";
-    const QString PROP_SURFACE          = "Surface";
-    const QString PROP_BOUNDING_SURFACE = "Bounding Surface";
+    const QString PROP_TYPE                     = "Type";
+    const QString PROP_TYPE_PROP                = "Prop";
+    const QString PROP_SURFACE_ELEMENTS         = "Surface Elements";
+    const QString PROP_BOUNDING_SURFACE         = "Bounding Surface";
 
     // Surfaces
     const QString SURFACE_TYPE                  = "Type";
@@ -34,6 +33,8 @@ namespace prop3
     const QString SURFACE_DISTANCE              = "Distance";
     const QString SURFACE_NORMAL                = "Normal";
     const QString SURFACE_COATING               = "Coating";
+    const QString SURFACE_INNER_MATERIAL        = "Inner Material";
+    const QString SURFACE_OUTER_MATERIAL        = "Outer Material";
     const QString SURFACE_TEX_ORIGIN            = "Tex Origin";
     const QString SURFACE_TEX_U_DIR             = "Tex U Dir";
     const QString SURFACE_TEX_V_DIR             = "Tex V Dir";

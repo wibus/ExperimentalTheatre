@@ -85,9 +85,6 @@ namespace prop3
                 std::vector<Raycast>& outRaycasts,
                 const glm::dvec3& targetPos);
 
-        virtual std::shared_ptr<Material> findAmbientMaterial(
-                glm::dvec3 position);
-
         virtual double findNearestProp(
                 const Raycast& raycast,
                 RayHitReport& reportMin);
@@ -141,7 +138,6 @@ namespace prop3
         std::vector<std::shared_ptr<Prop>> _props;
 
         std::vector<RayHitReport> _lightHitReports;
-        std::vector<std::shared_ptr<Material>> _lightEnteredMaterials;
 
         // Memory pools
         std::vector<RayHitReport*> _reportPool;

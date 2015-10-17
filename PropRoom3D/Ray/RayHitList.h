@@ -20,7 +20,9 @@ namespace prop3
             const glm::dvec3& position,
             const glm::dvec3& normal,
             const glm::dvec3& texCoord,
-            const Coating* coating);
+            const Coating* coating,
+            const Material* innerMat,
+            const Material* outerMat);
         void add(RayHitReport* report);
         void clear();
 
@@ -39,7 +41,9 @@ namespace prop3
             const glm::dvec3& position,
             const glm::dvec3& normal,
             const glm::dvec3& texCoord,
-            const Coating* coating)
+            const Coating* coating,
+            const Material* innerMat,
+            const Material* outerMat)
     {
         RayHitReport* report;
         if(memoryPool.empty())
@@ -50,7 +54,9 @@ namespace prop3
                         position,
                         normal,
                         texCoord,
-                        coating);
+                        coating,
+                        innerMat,
+                        outerMat);
         }
         else
         {
@@ -62,6 +68,8 @@ namespace prop3
             report->normal = normal;
             report->texCoord = texCoord;
             report->coating = coating;
+            report->innerMat = innerMat;
+            report->outerMat = outerMat;
 
             memoryPool.pop_back();
         }

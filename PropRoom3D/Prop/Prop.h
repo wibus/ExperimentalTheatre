@@ -12,7 +12,6 @@
 
 namespace prop3
 {
-    class Material;
     class Surface;
 
 
@@ -36,16 +35,16 @@ namespace prop3
         virtual void setIsVisible(bool isVisible);
 
         // Surface
-        std::shared_ptr<Surface> surface() const;
-        virtual void setSurface(const std::shared_ptr<Surface>& surface);
+        std::shared_ptr<Surface> surface(size_t sId) const;
+        const std::vector<std::shared_ptr<Surface>>& surfaceElements() const;
+        virtual void setSurface(const std::shared_ptr<Surface>& surface, int sId);
+        virtual void pushSurface(const std::shared_ptr<Surface>& surface);
+        virtual std::shared_ptr<Surface> removeSurface(size_t sId);
+        virtual std::shared_ptr<Surface> popSurface();
 
         // Bounding Surface
         std::shared_ptr<Surface> boundingSurface() const;
         virtual void setBoundingSurface(const std::shared_ptr<Surface>& surface);
-
-        // Material
-        const std::shared_ptr<Material>& material() const;
-        virtual const void setMaterial(const std::shared_ptr<Material>& material);
 
         // Body type
         EBodyType bodyType() const;
@@ -111,7 +110,6 @@ namespace prop3
         // Constant attributes
         static const double INFINITE_INERTIA;
         static const glm::dmat3 INFINITE_MOMENT_OF_INERTIA;
-        static const std::shared_ptr<Material> DEFAULT_MATERIAL;
 
     protected:
         // Cached attributes update
@@ -120,9 +118,8 @@ namespace prop3
 
 
         // Attributes
-        std::shared_ptr<Surface> _surface;
+        std::vector<std::shared_ptr<Surface>> _surfaceElements;
         std::shared_ptr<Surface> _boundingSurface;
-        std::shared_ptr<Material> _material;
         EBodyType _bodyType;
 
         double _invMass;
@@ -163,19 +160,21 @@ namespace prop3
         return _isVisible;
     }
 
-    inline std::shared_ptr<Surface> Prop::surface() const
+    inline std::shared_ptr<Surface> Prop::surface(size_t sId) const
     {
-        return _surface;
+        if(sId < _surfaceElements.size())
+            return _surfaceElements[sId];
+        return std::shared_ptr<Surface>();
+    }
+
+    inline const std::vector<std::shared_ptr<Surface>>& Prop::surfaceElements() const
+    {
+        return _surfaceElements;
     }
 
     inline std::shared_ptr<Surface> Prop::boundingSurface() const
     {
         return _boundingSurface;
-    }
-
-    inline const std::shared_ptr<Material>& Prop::material() const
-    {
-        return _material;
     }
 
     inline EBodyType Prop::bodyType() const

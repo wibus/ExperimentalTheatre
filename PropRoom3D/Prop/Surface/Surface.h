@@ -15,6 +15,7 @@ namespace prop3
     class Raycast;
     class RayHitList;
     class Coating;
+    class Material;
 
 
     enum class EPointPosition
@@ -62,22 +63,28 @@ namespace prop3
         virtual bool intersects(const Raycast& ray, RayHitList& reports) const = 0;
 
         virtual void setCoating(const std::shared_ptr<Coating>& coating) = 0;
-
-        static std::shared_ptr<Surface> shell(const std::shared_ptr<Surface>& surf);
-        static std::shared_ptr<Surface> transform(std::shared_ptr<Surface>& surf, const glm::dmat4& mat);
-        static std::shared_ptr<Surface> translate(std::shared_ptr<Surface>& surf, const glm::dvec3& dis);
-        static std::shared_ptr<Surface> rotate(std::shared_ptr<Surface>& surf, double angle, const glm::dvec3& axis);
-        static std::shared_ptr<Surface> scale(std::shared_ptr<Surface>& surf, double coeff);
+        virtual void setInnerMaterial(const std::shared_ptr<Material>& mat) = 0;
+        virtual void setOuterMaterial(const std::shared_ptr<Material>& mat) = 0;
 
         virtual bool isAffineTransformable() const {return false;}
         virtual bool isTranslatable() const {return false;}
         virtual bool isRotatable() const {return false;}
         virtual bool isScalable() const {return false;}
 
+        // Transform tools
+        static std::shared_ptr<Surface> shell(const std::shared_ptr<Surface>& surf);
+        static std::shared_ptr<Surface> transform(std::shared_ptr<Surface>& surf, const glm::dmat4& mat);
+        static std::shared_ptr<Surface> translate(std::shared_ptr<Surface>& surf, const glm::dvec3& dis);
+        static std::shared_ptr<Surface> rotate(std::shared_ptr<Surface>& surf, double angle, const glm::dvec3& axis);
+        static std::shared_ptr<Surface> scale(std::shared_ptr<Surface>& surf, double coeff);
+
+        // Default coatings and materials
+        static const std::shared_ptr<Coating>  NO_COATING;
+        static const std::shared_ptr<Material> DEFAULT_MATERIAL;
+        static const std::shared_ptr<Material> ENVIRONMENT_MATERIAL;
+
     protected:
         virtual void transform(const Transform& transform) = 0;
-
-        static const std::shared_ptr<Coating> NO_COATING;
     };
 
 
@@ -88,12 +95,20 @@ namespace prop3
         PhysicalSurface();
 
     public:
-        virtual void setCoating(const std::shared_ptr<Coating>& coating) override;
         virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
+
+        virtual void setCoating(const std::shared_ptr<Coating>& coating) override;
+        virtual void setInnerMaterial(const std::shared_ptr<Material>& mat) override;
+        virtual void setOuterMaterial(const std::shared_ptr<Material>& mat) override;
+
         std::shared_ptr<Coating> coating() const;
+        std::shared_ptr<Material> innerMaterial() const;
+        std::shared_ptr<Material> outerMaterial() const;
 
     protected:
-        std::shared_ptr<Coating>_coating;
+        std::shared_ptr<Coating>  _coating;
+        std::shared_ptr<Material> _innerMat;
+        std::shared_ptr<Material> _outerMat;
     };
 
 
@@ -107,22 +122,22 @@ namespace prop3
         SurfaceShell(const std::shared_ptr<Surface>& surf);
 
     public:
-        virtual EPointPosition isIn(const glm::dvec3& point) const;
-        virtual double signedDistance(const glm::dvec3& point) const;
-        virtual void raycast(const Raycast& ray, RayHitList& reports) const;
-        virtual bool intersects(const Raycast& ray, RayHitList& reports) const;
-
         // StageSetNode interface
         virtual void accept(StageSetVisitor& visitor) override;
-
         virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
 
-        glm::dmat4 transform() const;
+        virtual EPointPosition isIn(const glm::dvec3& point) const;
+        virtual double signedDistance(const glm::dvec3& point) const;
+
+        virtual void raycast(const Raycast& ray, RayHitList& reports) const;
+        virtual bool intersects(const Raycast& ray, RayHitList& reports) const;
 
         virtual bool isAffineTransformable() const override {return true;}
         virtual bool isTranslatable() const override {return true;}
         virtual bool isRotatable() const override {return true;}
         virtual bool isScalable() const override {return true;}
+
+        glm::dmat4 transform() const;
 
     protected:
         virtual void transform(const Transform& transform) override;
@@ -142,16 +157,19 @@ namespace prop3
         SurfaceGhost(const std::shared_ptr<Surface>& surf);
 
     public:
-        virtual EPointPosition isIn(const glm::dvec3& point) const;
-        virtual double signedDistance(const glm::dvec3& point) const;
-        virtual void raycast(const Raycast& ray, RayHitList& reports) const;
-        virtual bool intersects(const Raycast& ray, RayHitList& reports) const;
-        virtual void setCoating(const std::shared_ptr<Coating>& coating);
-
         // StageSetNode interface
         virtual void accept(StageSetVisitor& visitor) override;
-
         virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
+
+        virtual EPointPosition isIn(const glm::dvec3& point) const;
+        virtual double signedDistance(const glm::dvec3& point) const;
+
+        virtual void raycast(const Raycast& ray, RayHitList& reports) const;
+        virtual bool intersects(const Raycast& ray, RayHitList& reports) const;
+
+        virtual void setCoating(const std::shared_ptr<Coating>& coating);
+        virtual void setInnerMaterial(const std::shared_ptr<Material>& mat) override;
+        virtual void setOuterMaterial(const std::shared_ptr<Material>& mat) override;
 
         virtual bool isAffineTransformable() const override;
         virtual bool isTranslatable() const override;
@@ -173,16 +191,19 @@ namespace prop3
         SurfaceInverse(const std::shared_ptr<Surface>& surf);
 
     public:
-        virtual EPointPosition isIn(const glm::dvec3& point) const;
-        virtual double signedDistance(const glm::dvec3& point) const;
-        virtual void raycast(const Raycast& ray, RayHitList& reports) const;
-        virtual bool intersects(const Raycast& ray, RayHitList& reports) const;
-        virtual void setCoating(const std::shared_ptr<Coating>& coating);
-
         // StageSetNode interface
         virtual void accept(StageSetVisitor& visitor) override;
-
         virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
+
+        virtual EPointPosition isIn(const glm::dvec3& point) const;
+        virtual double signedDistance(const glm::dvec3& point) const;
+
+        virtual void raycast(const Raycast& ray, RayHitList& reports) const;
+        virtual bool intersects(const Raycast& ray, RayHitList& reports) const;
+
+        virtual void setCoating(const std::shared_ptr<Coating>& coating);
+        virtual void setInnerMaterial(const std::shared_ptr<Material>& mat) override;
+        virtual void setOuterMaterial(const std::shared_ptr<Material>& mat) override;
 
         virtual bool isAffineTransformable() const override;
         virtual bool isTranslatable() const override;
@@ -208,16 +229,18 @@ namespace prop3
         static std::shared_ptr<Surface> apply(
                 const std::vector<std::shared_ptr<Surface>>& surfs);
 
+        virtual void accept(StageSetVisitor& visitor) override;
+        virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
+
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
+
         virtual void raycast(const Raycast& ray, RayHitList& reports) const;
         virtual bool intersects(const Raycast& ray, RayHitList& reports) const;
+
         virtual void setCoating(const std::shared_ptr<Coating>& coating);
-
-        // StageSetNode interface
-        virtual void accept(StageSetVisitor& visitor) override;
-
-        virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
+        virtual void setInnerMaterial(const std::shared_ptr<Material>& mat) override;
+        virtual void setOuterMaterial(const std::shared_ptr<Material>& mat) override;
 
         virtual bool isAffineTransformable() const override;
         virtual bool isTranslatable() const override;
@@ -246,16 +269,18 @@ namespace prop3
         static std::shared_ptr<Surface> apply(
                 const std::vector<std::shared_ptr<Surface>>& surfs);
 
+        virtual void accept(StageSetVisitor& visitor) override;
+        virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
+
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
+
         virtual void raycast(const Raycast& ray, RayHitList& reports) const;
         virtual bool intersects(const Raycast& ray, RayHitList& reports) const;
+
         virtual void setCoating(const std::shared_ptr<Coating>& coating);
-
-        // StageSetNode interface
-        virtual void accept(StageSetVisitor& visitor) override;
-
-        virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
+        virtual void setInnerMaterial(const std::shared_ptr<Material>& mat) override;
+        virtual void setOuterMaterial(const std::shared_ptr<Material>& mat) override;
 
         virtual bool isAffineTransformable() const override;
         virtual bool isTranslatable() const override;
@@ -288,6 +313,10 @@ namespace prop3
     std::shared_ptr<Surface> operator& (
             const std::shared_ptr<Surface>& surf1,
             const std::shared_ptr<Surface>& surf2);
+    // Surface junction
+    std::shared_ptr<Surface> operator^ (
+            std::shared_ptr<Surface>& surf1,
+            std::shared_ptr<Surface>& surf2);
 
 
 
@@ -306,6 +335,16 @@ namespace prop3
     inline std::shared_ptr<Coating> PhysicalSurface::coating() const
     {
         return _coating;
+    }
+
+    inline std::shared_ptr<Material> PhysicalSurface::innerMaterial() const
+    {
+        return _innerMat;
+    }
+
+    inline std::shared_ptr<Material> PhysicalSurface::outerMaterial() const
+    {
+        return _outerMat;
     }
 
     inline glm::dmat4 SurfaceShell::transform() const

@@ -19,6 +19,7 @@
 namespace prop3
 {
     class StageSet;
+    class PhysicalSurface;
 
 
     class PROP3D_EXPORT StageSetJsonWriter : public StageSetVisitor
@@ -27,8 +28,9 @@ namespace prop3
         class SurfaceTreeBuilder : public StageSetVisitor
         {
         public:
-            SurfaceTreeBuilder(std::map<Surface*, int>& surfaceIdMap,
-                               std::map<Coating*, int>& coatingIdMap);
+            SurfaceTreeBuilder(std::map<Surface*, int>&  surfaceIdMap,
+                               std::map<Coating*, int>&  coatingIdMap,
+                               std::map<Material*, int>& materialIdMap);
 
             const QJsonValue& surfaceTree() const;
 
@@ -47,8 +49,9 @@ namespace prop3
 
         private:
             QJsonValue _subTree;
-            std::map<Surface*, int>& _surfaceIdMap;
-            std::map<Coating*, int>& _coatingIdMap;
+            std::map<Surface*, int>&  _surfaceIdMap;
+            std::map<Coating*, int>&  _coatingIdMap;
+            std::map<Material*, int>& _materialIdMap;
         };
 
     public :
@@ -101,6 +104,8 @@ namespace prop3
         bool insertSurface(Surface& node);
         bool insertMaterial(Material& node);
         bool insertCoating(Coating& node);
+
+        void addPhysicalProperties(PhysicalSurface& node, QJsonObject& obj);
 
         std::map<Backdrop*, int> _backdropIdMap;
         std::map<Coating*, int> _coatingIdMap;

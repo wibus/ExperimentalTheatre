@@ -25,14 +25,14 @@ namespace prop3
     void GlossyPaint::indirectBrdf(
         std::vector<Raycast>& raycasts,
         const RayHitReport& report,
-        const std::shared_ptr<Material>& leavedMaterial,
-        const std::shared_ptr<Material>& enteredMaterial,
+        const Material& leavedMaterial,
+        const Material& enteredMaterial,
         unsigned int outRayCountHint) const
     {
         size_t preSize, postSize;
 
         double mirrorRatio = computeReflexionRatio(
-            leavedMaterial->refractiveIndex(),
+            leavedMaterial.refractiveIndex(),
             _varnishRefractiveIndex,
             report.incidentRay.direction,
             report.normal);
@@ -40,7 +40,7 @@ namespace prop3
 
         // Varnish glossy reflection
         preSize = raycasts.size();
-        indirectGlossyReflection(raycasts, report, leavedMaterial, _glossiness, outRayCountHint);
+        indirectGlossyReflection(raycasts, report, _glossiness, outRayCountHint);
         postSize = raycasts.size();
 
         for(size_t i=preSize; i<postSize; ++i)
@@ -51,7 +51,7 @@ namespace prop3
 
         // Pigment diffuse reflection
         preSize = raycasts.size();
-        indirectDiffuseReflection(raycasts, report, leavedMaterial, outRayCountHint);
+        indirectDiffuseReflection(raycasts, report, outRayCountHint);
         postSize = raycasts.size();
 
         glm::dvec3 color = _color * (1.0 - mirrorRatio);
@@ -64,11 +64,11 @@ namespace prop3
     glm::dvec3 GlossyPaint::directBrdf(
             const RayHitReport& report,
             const glm::dvec3& outDirection,
-            const std::shared_ptr<Material>& leavedMaterial,
-            const std::shared_ptr<Material>& enteredMaterial) const
+            const Material& leavedMaterial,
+            const Material& enteredMaterial) const
     {
         double mirrorRatio = computeReflexionRatio(
-            leavedMaterial->refractiveIndex(),
+            leavedMaterial.refractiveIndex(),
             _varnishRefractiveIndex,
             report.incidentRay.direction,
             report.normal);

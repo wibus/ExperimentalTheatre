@@ -58,7 +58,9 @@ namespace prop3
                 glm::dvec3 n = glm::normalize(pt - _center);
                 reports.add(t1, ray, pt, n,
                             RayHitReport::NO_TEXCOORD,
-                             _coating.get());
+                            _coating.get(),
+                            _innerMat.get(),
+                            _outerMat.get());
             }
 
             double t2 = (-b + disrcSqrt) / (2 * a);
@@ -68,7 +70,9 @@ namespace prop3
                 glm::dvec3 n = glm::normalize(pt - _center);
                 reports.add(t2, ray, pt, n,
                             RayHitReport::NO_TEXCOORD,
-                             _coating.get());
+                            _coating.get(),
+                            _innerMat.get(),
+                            _outerMat.get());
             }
         }
         else if(discr == 0.0)
@@ -80,7 +84,9 @@ namespace prop3
                 glm::dvec3 n = glm::normalize(pt - _center);
                 reports.add(t, ray, pt, n,
                             RayHitReport::NO_TEXCOORD,
-                             _coating.get());
+                            _coating.get(),
+                            _innerMat.get(),
+                            _outerMat.get());
             }
         }
     }

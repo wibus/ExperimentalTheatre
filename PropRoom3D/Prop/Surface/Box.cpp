@@ -97,7 +97,9 @@ namespace prop3
 
                 reports.add(tmin, ray, pt, n,
                             RayHitReport::NO_TEXCOORD,
-                            _coating.get());
+                            _coating.get(),
+                            _innerMat.get(),
+                            _outerMat.get());
             }
 
             if(0.0 < tmax && tmax < ray.limit)
@@ -118,7 +120,9 @@ namespace prop3
 
                 reports.add(tmax, ray, pt, n,
                             RayHitReport::NO_TEXCOORD,
-                            _coating.get());
+                            _coating.get(),
+                            _innerMat.get(),
+                            _outerMat.get());
             }
         }
     }

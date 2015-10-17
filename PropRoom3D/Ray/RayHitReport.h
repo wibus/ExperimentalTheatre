@@ -19,7 +19,9 @@ namespace prop3
             const glm::dvec3& position,
             const glm::dvec3& normal,
             const glm::dvec3& texCoord,
-            const Coating* coating);
+            const Coating* coating,
+            const Material* innerMat,
+            const Material* outerMat);
 
         void compile();
 
@@ -29,9 +31,13 @@ namespace prop3
         glm::dvec3 normal;
         glm::dvec3 texCoord;
         const Coating* coating;
+        const Material* innerMat;
+        const Material* outerMat;
 
         // Compiled data
         bool isTextured;
+        const Material* nextMaterial;
+        const Material* currMaterial;
         glm::dvec3 reflectionOrigin;
         glm::dvec3 refractionOrigin;
 

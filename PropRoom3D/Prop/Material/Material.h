@@ -33,15 +33,15 @@ namespace prop3
         virtual void indirectBrdf(
             std::vector<Raycast>& raycasts,
             const RayHitReport& report,
-            const std::shared_ptr<Material>& leavedMaterial,
-            const std::shared_ptr<Material>& selfEnteredMaterial,
+            const Material& leavedMaterial,
+            const Material& enteredMaterial,
             unsigned int outRayCountHint) const = 0;
 
         virtual glm::dvec3 directBrdf(
             const RayHitReport& report,
             const glm::dvec3& outDirection,
-            const std::shared_ptr<Material>& leavedMaterial,
-            const std::shared_ptr<Material>& enteredMaterial) const = 0;
+            const Material& leavedMaterial,
+            const Material& enteredMaterial) const = 0;
 
         virtual double lightFreePathLength(
             const Raycast& ray) const;
@@ -52,7 +52,6 @@ namespace prop3
         virtual void scatterLight(
             std::vector<Raycast>& raycasts,
             const Raycast& ray,
-            const std::shared_ptr<Material>& self,
             unsigned int outRayCountHint) const;
 
         virtual glm::dvec3 gatherLight(

@@ -178,6 +178,13 @@ namespace prop3
         return _coatingIdMap.insert(make_pair(&node, _coatingIdMap.size())).second;
     }
 
+    void StageSetJsonWriter::addPhysicalProperties(PhysicalSurface& node, QJsonObject& obj)
+    {
+        obj[SURFACE_COATING]        = _coatingIdMap[node.coating().get()];
+        obj[SURFACE_INNER_MATERIAL] = _materialIdMap[node.innerMaterial().get()];
+        obj[SURFACE_OUTER_MATERIAL] = _materialIdMap[node.outerMaterial().get()];
+    }
+
 
     // Props
     void StageSetJsonWriter::visit(Prop& node)
@@ -185,18 +192,18 @@ namespace prop3
         QJsonObject obj;
         obj[PROP_TYPE] = PROP_TYPE_PROP;
 
-        obj[PROP_MATERIAL] = _materialIdMap[node.material().get()];
-
-        if(node.surface().get() != nullptr)
+        QJsonArray surfElem;
+        for(const auto& surf : node.surfaceElements())
         {
-            SurfaceTreeBuilder builder(_surfaceIdMap, _coatingIdMap);
-            node.surface()->accept(builder);
-            obj[PROP_SURFACE] = builder.surfaceTree();
+            SurfaceTreeBuilder builder(_surfaceIdMap, _coatingIdMap, _materialIdMap);
+            surf->accept( builder );
+            surfElem.append(builder.surfaceTree());
         }
+        obj[PROP_SURFACE_ELEMENTS] = surfElem;
 
         if(node.boundingSurface().get() != nullptr)
         {
-            SurfaceTreeBuilder builder(_surfaceIdMap, _coatingIdMap);
+            SurfaceTreeBuilder builder(_surfaceIdMap, _coatingIdMap, _materialIdMap);
             node.boundingSurface()->accept(builder);
             obj[PROP_BOUNDING_SURFACE] = builder.surfaceTree();
         }
@@ -211,10 +218,10 @@ namespace prop3
         if(insertSurface(node))
         {
             QJsonObject obj;
+            addPhysicalProperties(node, obj);
             obj[SURFACE_TYPE]           = SURFACE_TYPE_BOX;
             obj[SURFACE_MIN_CORNER]     = toJson(node.minCorner());
             obj[SURFACE_MAX_CORNER]     = toJson(node.maxCorner());
-            obj[SURFACE_COATING]        = _coatingIdMap[node.coating().get()];
             _surfacesArray.append(obj);
         }
     }
@@ -224,10 +231,10 @@ namespace prop3
         if(insertSurface(node))
         {
             QJsonObject obj;
+            addPhysicalProperties(node, obj);
             obj[SURFACE_TYPE]               = SURFACE_TYPE_BOX_TEXTURE;
             obj[SURFACE_MIN_CORNER]         = toJson(node.minCorner());
             obj[SURFACE_MAX_CORNER]         = toJson(node.maxCorner());
-            obj[SURFACE_COATING]            = _coatingIdMap[node.coating().get()];
             obj[SURFACE_TEX_ORIGIN]         = toJson(node.texOrigin());
             obj[SURFACE_TEX_U_DIR]          = toJson(node.texU());
             obj[SURFACE_TEX_V_DIR]          = toJson(node.texV());
@@ -241,9 +248,9 @@ namespace prop3
         if(insertSurface(node))
         {
             QJsonObject obj;
+            addPhysicalProperties(node, obj);
             obj[SURFACE_TYPE]           = SURFACE_TYPE_PLANE;
             obj[SURFACE_REPRESENTATION] = toJson(node.representation());
-            obj[SURFACE_COATING]        = _coatingIdMap[node.coating().get()];
             _surfacesArray.append(obj);
         }
     }
@@ -253,9 +260,9 @@ namespace prop3
         if(insertSurface(node))
         {
             QJsonObject obj;
+            addPhysicalProperties(node, obj);
             obj[SURFACE_TYPE]           = SURFACE_TYPE_PLANETEXTURE;
             obj[SURFACE_REPRESENTATION] = toJson(node.representation());
-            obj[SURFACE_COATING]        = _coatingIdMap[node.coating().get()];
             obj[SURFACE_TEX_ORIGIN]     = toJson(node.texOrigin());
             obj[SURFACE_TEX_U_DIR]      = toJson(node.texU());
             obj[SURFACE_TEX_V_DIR]      = toJson(node.texV());
@@ -268,9 +275,9 @@ namespace prop3
         if(insertSurface(node))
         {
             QJsonObject obj;
+            addPhysicalProperties(node, obj);
             obj[SURFACE_TYPE]           = SURFACE_TYPE_QUADRIC;
             obj[SURFACE_REPRESENTATION] = toJson(node.representation());
-            obj[SURFACE_COATING]        = _coatingIdMap[node.coating().get()];
             _surfacesArray.append(obj);
         }
     }
@@ -280,10 +287,10 @@ namespace prop3
         if(insertSurface(node))
         {
             QJsonObject obj;
+            addPhysicalProperties(node, obj);
             obj[SURFACE_TYPE]    = SURFACE_TYPE_SPHERE;
             obj[SURFACE_RADIUS]  = node.radius();
             obj[SURFACE_CENTER]  = toJson(node.center());
-            obj[SURFACE_COATING] = _coatingIdMap[node.coating().get()];
             _surfacesArray.append(obj);
         }
     }
@@ -458,9 +465,11 @@ namespace prop3
     //////////////////////////
     StageSetJsonWriter::SurfaceTreeBuilder::SurfaceTreeBuilder(
             std::map<Surface*, int>& surfaceIdMap,
-            std::map<Coating*, int>& coatingIdMap) :
+            std::map<Coating*, int>& coatingIdMap,
+            std::map<Material*, int>& materialIdMap) :
         _surfaceIdMap(surfaceIdMap),
-        _coatingIdMap(coatingIdMap)
+        _coatingIdMap(coatingIdMap),
+        _materialIdMap(materialIdMap)
     {
 
     }
@@ -481,6 +490,10 @@ namespace prop3
         logOpt[SURFACE_TRANSFORM] = toJson(node.transform());
         if(node.coating().get() != nullptr)
             logOpt[SURFACE_COATING] = _coatingIdMap[node.coating().get()];
+        if(node.innerMaterial().get() != nullptr)
+            logOpt[SURFACE_INNER_MATERIAL] = _materialIdMap[node.innerMaterial().get()];
+        if(node.outerMaterial().get() != nullptr)
+            logOpt[SURFACE_OUTER_MATERIAL] = _materialIdMap[node.outerMaterial().get()];
 
         _subTree = logOpt;
     }

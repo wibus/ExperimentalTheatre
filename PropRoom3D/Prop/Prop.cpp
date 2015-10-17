@@ -15,13 +15,11 @@ namespace prop3
     // Inertia
     const double Prop::INFINITE_INERTIA = 0.0;
     const glm::dmat3 Prop::INFINITE_MOMENT_OF_INERTIA(0.0);
-    const std::shared_ptr<Material> Prop::DEFAULT_MATERIAL(new Concrete(glm::vec3(1)));
 
 
     Prop::Prop() :
         _id(_assigneId_()),
         _isVisible(true),
-        _material(DEFAULT_MATERIAL),
         _bodyType(EBodyType::GRAPHIC),
         _transformMatrix(1.0),
         _invMass(INFINITE_INERTIA),
@@ -48,11 +46,9 @@ namespace prop3
 
     std::vector<std::shared_ptr<StageSetNode>> Prop::children() const
     {
-        return {
-            _surface,
-            _boundingSurface,
-            _material
-        };
+        std::vector<std::shared_ptr<StageSetNode>> c(_surfaceElements.begin(), _surfaceElements.end());
+        c.push_back(_boundingSurface);
+        return c;
     }
 
     void Prop::setIsVisible(bool isVisible)
@@ -60,19 +56,42 @@ namespace prop3
         _isVisible = isVisible;
     }
 
-    void Prop::setSurface(const std::shared_ptr<Surface>& surface)
+    void Prop::setSurface(const std::shared_ptr<Surface>& surface, int sId)
     {
-        _surface = surface;
+        if(sId < _surfaceElements.size())
+            _surfaceElements[sId] = surface;
+    }
+
+    void Prop::pushSurface(const std::shared_ptr<Surface>& surface)
+    {
+        _surfaceElements.push_back(surface);
+    }
+
+    std::shared_ptr<Surface> Prop::removeSurface(size_t sId)
+    {
+        std::shared_ptr<Surface> surf;
+        if(sId < _surfaceElements.size())
+        {
+            surf = _surfaceElements[sId];
+            _surfaceElements.erase(_surfaceElements.begin() + sId);
+        }
+        return surf;
+    }
+
+    std::shared_ptr<Surface> Prop::popSurface()
+    {
+        std::shared_ptr<Surface> surf;
+        if(!_surfaceElements.empty())
+        {
+            surf = _surfaceElements.back();
+            _surfaceElements.pop_back();
+        }
+        return surf;
     }
 
     void Prop::setBoundingSurface(const std::shared_ptr<Surface>& surface)
     {
         _boundingSurface = surface;
-    }
-
-    const void Prop::setMaterial(const std::shared_ptr<Material>& material)
-    {
-        _material = material;
     }
 
     void Prop::setBodyType(const EBodyType& type)

@@ -24,22 +24,22 @@ namespace prop3
     void Glass::indirectBrdf(
         std::vector<Raycast>& raycasts,
         const RayHitReport& report,
-        const std::shared_ptr<Material>& leavedMaterial,
-        const std::shared_ptr<Material>& selfEnteredMaterial,
+        const Material& leavedMaterial,
+        const Material& enteredMaterial,
         unsigned int outRayCountHint) const
     {
         indirectSpecularRefraction(
             raycasts,
             report,
-            leavedMaterial,
-            selfEnteredMaterial);
+            leavedMaterial.refractiveIndex(),
+            enteredMaterial.refractiveIndex());
     }
 
     glm::dvec3 Glass::directBrdf(
         const RayHitReport& report,
         const glm::dvec3& outDirection,
-        const std::shared_ptr<Material>& leavedMaterial,
-        const std::shared_ptr<Material>& enteredMaterial) const
+        const Material& leavedMaterial,
+        const Material& enteredMaterial) const
     {
         return directSpecularRefraction(report, outDirection);
     }
