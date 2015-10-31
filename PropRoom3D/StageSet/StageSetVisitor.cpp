@@ -78,54 +78,19 @@ namespace prop3
 
 
     // Materials
-    void StageSetVisitor::visit(Air& node)
-    {
-
-    }
-
-    void StageSetVisitor::visit(Fog& node)
-    {
-
-    }
-
-    void StageSetVisitor::visit(Concrete& node)
-    {
-
-    }
-
-    void StageSetVisitor::visit(Glass& node)
-    {
-
-    }
-
-    void StageSetVisitor::visit(Metal& node)
+    void StageSetVisitor::visit(UniformStdMaterial& node)
     {
 
     }
 
 
     // Coatings
-    void StageSetVisitor::visit(NoCoating& node)
+    void StageSetVisitor::visit(UniformStdCoating& node)
     {
 
     }
 
-    void StageSetVisitor::visit(FlatPaint& node)
-    {
-
-    }
-
-    void StageSetVisitor::visit(GlossyPaint& node)
-    {
-
-    }
-
-    void StageSetVisitor::visit(TexturedFlatPaint& node)
-    {
-
-    }
-
-    void StageSetVisitor::visit(TexturedGlossyPaint& node)
+    void StageSetVisitor::visit(TexturedStdCoating& node)
     {
 
     }

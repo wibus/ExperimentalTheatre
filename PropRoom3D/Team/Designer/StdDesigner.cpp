@@ -3,7 +3,7 @@
 #include <cassert>
 
 #include "Prop/Prop.h"
-#include "Lighting/Environment.h"
+#include "Light/Environment.h"
 
 
 namespace prop3

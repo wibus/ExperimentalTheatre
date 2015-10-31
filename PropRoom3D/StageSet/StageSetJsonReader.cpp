@@ -18,20 +18,13 @@
 #include "Prop/Surface/Quadric.h"
 #include "Prop/Surface/Sphere.h"
 
-#include "Prop/Coating/NoCoating.h"
-#include "Prop/Coating/FlatPaint.h"
-#include "Prop/Coating/GlossyPaint.h"
-#include "Prop/Coating/TexturedFlatPaint.h"
-#include "Prop/Coating/TexturedGlossyPaint.h"
+#include "Prop/Material/UniformStdMaterial.h"
 
-#include "Prop/Material/Air.h"
-#include "Prop/Material/Fog.h"
-#include "Prop/Material/Concrete.h"
-#include "Prop/Material/Glass.h"
-#include "Prop/Material/Metal.h"
+#include "Prop/Coating/UniformStdCoating.h"
+#include "Prop/Coating/TexturedStdCoating.h"
 
-#include "Lighting/Environment.h"
-#include "Lighting/Backdrop/ProceduralSun.h"
+#include "Light/Environment.h"
+#include "Light/Backdrop/ProceduralSun.h"
 
 using namespace std;
 using namespace cellar;
@@ -211,40 +204,25 @@ namespace prop3
             QJsonObject obj = ref.toObject();
             QString type = obj[COATING_TYPE].toString();
 
-            if(type == COATING_TYPE_NOCOATING)
+            if(type == COATING_TYPE_UNIFORMSTD)
             {
-                coating = make_shared<NoCoating>();
+                UniformStdCoating* coat = new UniformStdCoating();
+                coat->setRoughness( obj[COATING_ROUGHNESS].toDouble() );
+                coat->setPaintColor( dvec4FromJson(obj[COATING_PAINT_COLOR]) );
+                coat->setPaintRefractiveIndex( obj[COATING_PAINT_REFRACTIVE_INDEX].toDouble() );
+                coating.reset(coat);
             }
-            else if(type == COATING_TYPE_FLATPAINT)
+            else if(type == COATING_TYPE_TEXTUREDSTD)
             {
-                coating = make_shared<FlatPaint>(
-                    dvec3FromJson(obj[COATING_COLOR]));
-            }
-            else if(type == COATING_TYPE_GLOSSYPAINT)
-            {
-                coating = make_shared<GlossyPaint>(
-                    dvec3FromJson(obj[COATING_COLOR]),
-                    obj[COATING_GLOSSINESS].toDouble(),
-                    obj[COATING_VARNISH_REFRACTIVE_INDEX].toDouble());
-            }
-            else if(type == COATING_TYPE_TEXTUREDFLATPAINT)
-            {
-                coating = make_shared<TexturedFlatPaint>(
-                    obj[COATING_TEXTURE_NAME].toString().toStdString(),
-                    filterFromJson(obj[COATING_TEXTURE_FILTER]),
-                    wrapperFromJson(obj[COATING_TEXTURE_WRAPPER]),
-                    dvec3FromJson(obj[COATING_DEFAULT_COLOR]));
-            }
-            else if(type == COATING_TYPE_TEXTUREDGLOSSYPAINT)
-            {
-                coating = make_shared<TexturedGlossyPaint>(
-                    obj[COATING_TEXTURE_NAME].toString().toStdString(),
-                    obj[COATING_GLOSS_MAP_NAME].toString().toStdString(),
-                    filterFromJson(obj[COATING_TEXTURE_FILTER]),
-                    wrapperFromJson(obj[COATING_TEXTURE_WRAPPER]),
-                    dvec3FromJson(obj[COATING_DEFAULT_COLOR]),
-                    obj[COATING_DEFAULT_GLOSS].toDouble(),
-                    obj[COATING_VARNISH_REFRACTIVE_INDEX].toDouble());
+                TexturedStdCoating* coat = new TexturedStdCoating();
+                coat->setDefaultRoughness( obj[COATING_DEFAULT_ROUGHNESS].toDouble() );
+                coat->setDefaultPaintColor( dvec4FromJson(obj[COATING_DEFAULT_PAINT_COLOR]) );
+                coat->setRoughnessTexName( obj[COATING_ROUGHNESS_TEX_NAME].toString().toStdString() );
+                coat->setPaintColorTexName( obj[COATING_PAINT_COLOR_TEX_NAME].toString().toStdString() );
+                coat->setPaintRefractiveIndex( obj[COATING_PAINT_REFRACTIVE_INDEX].toDouble() );
+                coat->setTexFilter(  filterFromJson(obj[COATING_TEXTURE_FILTER]) );
+                coat->setTexWrapper( wrapperFromJson(obj[COATING_TEXTURE_WRAPPER]) );
+                coating.reset(coat);
             }
             else
             {
@@ -267,33 +245,15 @@ namespace prop3
             QJsonObject obj = ref.toObject();
             QString type = obj[MATERIAL_TYPE].toString();
 
-            if(type == MATERIAL_TYPE_AIR)
+            if(type == MATERIAL_TYPE_UNIFORMSTD)
             {
-                material = make_shared<Air>();
-            }
-            else if(type == MATERIAL_TYPE_FOG)
-            {
-                material = make_shared<Fog>(
-                    dvec3FromJson(obj[MATERIAL_COLOR]),
-                    obj[MATERIAL_CONCENTRATION].toDouble(),
-                    obj[MATERIAL_RADIUS].toDouble());
-            }
-            else if(type == MATERIAL_TYPE_CONCRETE)
-            {
-                material = make_shared<Concrete>(
-                    dvec3FromJson(obj[MATERIAL_COLOR]));
-            }
-            else if(type == MATERIAL_TYPE_GLASS)
-            {
-                material = make_shared<Glass>(
-                    dvec3FromJson(obj[MATERIAL_COLOR]),
-                    obj[MATERIAL_CONCENTRATION].toDouble());
-            }
-            else if(type == MATERIAL_TYPE_METAL)
-            {
-                material = make_shared<Metal>(
-                    dvec3FromJson(obj[MATERIAL_COLOR]),
-                    obj[MATERIAL_GLOSSINESS].toDouble());
+                UniformStdMaterial* mat = new UniformStdMaterial();
+                mat->setOpacity( obj[MATERIAL_OPACITY].toDouble() );
+                mat->setConductivity( obj[MATERIAL_CONDUCTIVITY].toDouble() );
+                mat->setRefractiveIndex( obj[MATERIAL_REFRACTIVE_INDEX].toDouble() );
+                mat->setScattering( obj[MATERIAL_SCATTERING].toDouble() );
+                mat->setColor( dvec3FromJson(obj[MATERIAL_COLOR]) );
+                material.reset(mat);
             }
             else
             {
@@ -303,9 +263,6 @@ namespace prop3
 
             if(material.get() != nullptr)
             {
-                material->setRefractiveIndex(
-                    obj[MATERIAL_REFRACTIVE_INDEX].toDouble());
-
                 _materials.push_back(material);
             }
         }

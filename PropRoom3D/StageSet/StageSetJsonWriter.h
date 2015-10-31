@@ -73,18 +73,11 @@ namespace prop3
         virtual void visit(Sphere& node) override;
 
         // Materials
-        virtual void visit(Air& node) override;
-        virtual void visit(Fog& node) override;
-        virtual void visit(Concrete& node) override;
-        virtual void visit(Glass& node) override;
-        virtual void visit(Metal& node) override;
+        virtual void visit(UniformStdMaterial& node);
 
         // Coatings
-        virtual void visit(NoCoating& node) override;
-        virtual void visit(FlatPaint& node) override;
-        virtual void visit(GlossyPaint& node) override;
-        virtual void visit(TexturedFlatPaint& node) override;
-        virtual void visit(TexturedGlossyPaint& node) override;
+        virtual void visit(UniformStdCoating& node);
+        virtual void visit(TexturedStdCoating& node);
 
         // Environments
         virtual void visit(Environment& node) override;

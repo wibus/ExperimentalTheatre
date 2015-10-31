@@ -2,32 +2,27 @@
 
 # Backdrops
 SET(PROP3_BACKDROP_HEADERS
-    ${PROP3_SRC_DIR}/Lighting/Backdrop/Backdrop.h
-    ${PROP3_SRC_DIR}/Lighting/Backdrop/ProceduralSun.h)
+    ${PROP3_SRC_DIR}/Light/Backdrop/Backdrop.h
+    ${PROP3_SRC_DIR}/Light/Backdrop/ProceduralSun.h)
 
-# Lighting
-SET(PROP3_LIGHTING_HEADERS
+# Light
+SET(PROP3_LIGHT_HEADERS
     ${PROP3_BACKDROP_HEADERS}
-    ${PROP3_SRC_DIR}/Lighting/Environment.h
-    ${PROP3_SRC_DIR}/Lighting/Light3D.h)
+    ${PROP3_SRC_DIR}/Light/Environment.h
+    ${PROP3_SRC_DIR}/Light/Light3D.h)
 
 # Coatings
 SET(PROP3_COATING_HEADERS
     ${PROP3_SRC_DIR}/Prop/Coating/Coating.h
-    ${PROP3_SRC_DIR}/Prop/Coating/NoCoating.h
-    ${PROP3_SRC_DIR}/Prop/Coating/FlatPaint.h
-    ${PROP3_SRC_DIR}/Prop/Coating/GlossyPaint.h
-    ${PROP3_SRC_DIR}/Prop/Coating/TexturedFlatPaint.h
-    ${PROP3_SRC_DIR}/Prop/Coating/TexturedGlossyPaint.h)
+    ${PROP3_SRC_DIR}/Prop/Coating/StdCoating.h
+    ${PROP3_SRC_DIR}/Prop/Coating/UniformStdCoating.h
+    ${PROP3_SRC_DIR}/Prop/Coating/TexturedStdCoating.h)
 
 # Materials
 SET(PROP3_MATERIAL_HEADERS
     ${PROP3_SRC_DIR}/Prop/Material/Material.h
-    ${PROP3_SRC_DIR}/Prop/Material/Air.h
-    ${PROP3_SRC_DIR}/Prop/Material/Fog.h
-    ${PROP3_SRC_DIR}/Prop/Material/Metal.h
-    ${PROP3_SRC_DIR}/Prop/Material/Concrete.h
-    ${PROP3_SRC_DIR}/Prop/Material/Glass.h)
+    ${PROP3_SRC_DIR}/Prop/Material/StdMaterial.h
+    ${PROP3_SRC_DIR}/Prop/Material/UniformStdMaterial.h)
 
 # Surfaces
 SET(PROP3_SURFACE_HEADERS
@@ -92,7 +87,7 @@ SET(PROP3_TEAM_HEADERS
 
 # All the header files #
 SET(PROP3_HEADERS
-    ${PROP3_LIGHTING_HEADERS}
+    ${PROP3_LIGHT_HEADERS}
     ${PROP3_PROP_HEADERS}
     ${PROP3_RAY_HEADERS}
     ${PROP3_STAGESET_HEADERS}
@@ -104,32 +99,27 @@ SET(PROP3_HEADERS
 
 # Backdrops
 SET(PROP3_BACKDROP_SOURCES
-    ${PROP3_SRC_DIR}/Lighting/Backdrop/Backdrop.cpp
-    ${PROP3_SRC_DIR}/Lighting/Backdrop/ProceduralSun.cpp)
+    ${PROP3_SRC_DIR}/Light/Backdrop/Backdrop.cpp
+    ${PROP3_SRC_DIR}/Light/Backdrop/ProceduralSun.cpp)
 
-# Lighting
-SET(PROP3_LIGHTING_SOURCES
+# Light
+SET(PROP3_LIGHT_SOURCES
     ${PROP3_BACKDROP_SOURCES}
-    ${PROP3_SRC_DIR}/Lighting/Environment.cpp
-    ${PROP3_SRC_DIR}/Lighting/Light3D.cpp)
+    ${PROP3_SRC_DIR}/Light/Environment.cpp
+    ${PROP3_SRC_DIR}/Light/Light3D.cpp)
 
 # Coatings
 SET(PROP3_COATING_SOURCES
     ${PROP3_SRC_DIR}/Prop/Coating/Coating.cpp
-    ${PROP3_SRC_DIR}/Prop/Coating/NoCoating.cpp
-    ${PROP3_SRC_DIR}/Prop/Coating/FlatPaint.cpp
-    ${PROP3_SRC_DIR}/Prop/Coating/GlossyPaint.cpp
-    ${PROP3_SRC_DIR}/Prop/Coating/TexturedFlatPaint.cpp
-    ${PROP3_SRC_DIR}/Prop/Coating/TexturedGlossyPaint.cpp)
+    ${PROP3_SRC_DIR}/Prop/Coating/StdCoating.cpp
+    ${PROP3_SRC_DIR}/Prop/Coating/UniformStdCoating.cpp
+    ${PROP3_SRC_DIR}/Prop/Coating/TexturedStdCoating.cpp)
 
 # Materials
 SET(PROP3_MATERIAL_SOURCES
     ${PROP3_SRC_DIR}/Prop/Material/Material.cpp
-    ${PROP3_SRC_DIR}/Prop/Material/Air.cpp
-    ${PROP3_SRC_DIR}/Prop/Material/Fog.cpp
-    ${PROP3_SRC_DIR}/Prop/Material/Metal.cpp
-    ${PROP3_SRC_DIR}/Prop/Material/Concrete.cpp
-    ${PROP3_SRC_DIR}/Prop/Material/Glass.cpp)
+    ${PROP3_SRC_DIR}/Prop/Material/StdMaterial.cpp
+    ${PROP3_SRC_DIR}/Prop/Material/UniformStdMaterial.cpp)
 
 # Surfaces
 SET(PROP3_SURFACE_SOURCES
@@ -190,7 +180,7 @@ SET(PROP3_TEAM_SOURCES
 
 # All the source files #
 SET(PROP3_SOURCES
-    ${PROP3_LIGHTING_SOURCES}
+    ${PROP3_LIGHT_SOURCES}
     ${PROP3_PROP_SOURCES}
     ${PROP3_RAY_SOURCES}
     ${PROP3_STAGESET_SOURCES}

@@ -48,33 +48,26 @@ namespace prop3
 
     // Materials
     const QString MATERIAL_TYPE                 = "Type";
-    const QString MATERIAL_TYPE_AIR             = "Air";
-    const QString MATERIAL_TYPE_FOG             = "Fog";
-    const QString MATERIAL_TYPE_CONCRETE        = "Concrete";
-    const QString MATERIAL_TYPE_GLASS           = "Glass";
-    const QString MATERIAL_TYPE_METAL           = "Metal";
+    const QString MATERIAL_TYPE_UNIFORMSTD      = "Uniform Std";
+    const QString MATERIAL_OPACITY              = "Opacity";
+    const QString MATERIAL_CONDUCTIVITY         = "Conductivity";
     const QString MATERIAL_REFRACTIVE_INDEX     = "Refractive Index";
+    const QString MATERIAL_SCATTERING    = "Scattering";
     const QString MATERIAL_COLOR                = "Color";
-    const QString MATERIAL_CONCENTRATION        = "Concentration";
-    const QString MATERIAL_GLOSSINESS           = "Glossiness";
-    const QString MATERIAL_RADIUS               = "Radius";
 
     // Coatings
     const QString COATING_TYPE                      = "Type";
-    const QString COATING_TYPE_NOCOATING            = "NoCoating";
-    const QString COATING_TYPE_FLATPAINT            = "FlatPaint";
-    const QString COATING_TYPE_GLOSSYPAINT          = "GlossyPaint";
-    const QString COATING_TYPE_TEXTUREDFLATPAINT    = "TexturedFlatPaint";
-    const QString COATING_TYPE_TEXTUREDGLOSSYPAINT  = "TexturedGlossyPaint";
-    const QString COATING_COLOR                     = "Color";
-    const QString COATING_GLOSSINESS                = "Glossiness";
-    const QString COATING_DEFAULT_COLOR             = "Default Color";
-    const QString COATING_DEFAULT_GLOSS             = "Default Gloss";
-    const QString COATING_TEXTURE_NAME              = "Tex Name";
-    const QString COATING_TEXTURE_FILTER            = "Tex Filter";
-    const QString COATING_TEXTURE_WRAPPER           = "Tex Wrapper";
-    const QString COATING_GLOSS_MAP_NAME            = "Gloss Name";
-    const QString COATING_VARNISH_REFRACTIVE_INDEX  = "Varnish Refractive Index";
+    const QString COATING_TYPE_UNIFORMSTD           = "Uniform Std";
+    const QString COATING_TYPE_TEXTUREDSTD          = "Textured Std";
+    const QString COATING_ROUGHNESS                 = "Roughness";
+    const QString COATING_PAINT_COLOR               = "Paint Color";
+    const QString COATING_PAINT_REFRACTIVE_INDEX    = "Paint Refractive Index";
+    const QString COATING_DEFAULT_ROUGHNESS         = "Default Roughness";
+    const QString COATING_DEFAULT_PAINT_COLOR       = "Default Paint Color";
+    const QString COATING_ROUGHNESS_TEX_NAME        = "Roughness Tex Name";
+    const QString COATING_PAINT_COLOR_TEX_NAME      = "Paint Color Tex Name";
+    const QString COATING_TEXTURE_FILTER            = "Texture Filter";
+    const QString COATING_TEXTURE_WRAPPER           = "Texture Wrapper";
 
     // Environments
     const QString ENVIRONMENT_TYPE                  = "Type";

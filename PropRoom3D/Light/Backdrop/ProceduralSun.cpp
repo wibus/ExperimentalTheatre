@@ -3,7 +3,7 @@
 #include <GLM/gtc/random.hpp>
 #include <GLM/gtc/constants.hpp>
 
-#include "Prop/Material/Air.h"
+#include "Prop/Material/Material.h"
 #include "Ray/Raycast.h"
 #include "Ray/RayHitList.h"
 #include "StageSet/StageSetVisitor.h"
@@ -33,7 +33,7 @@ namespace prop3
         _groundColor(glm::dvec3(0.05, 0.05, 0.3)),
         _groundHeight(-0.2),
         _sunDirection(glm::normalize(glm::dvec3(0.8017, 0.2673, 0.5345))),
-        _spaceMaterial(new Air())
+        _spaceMaterial(material::AIR)
     {
 
     }

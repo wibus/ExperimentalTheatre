@@ -6,7 +6,7 @@
 #include <memory>
 
 #include <PropRoom3D/Prop/Prop.h>
-#include <PropRoom3D/Lighting/Environment.h>
+#include <PropRoom3D/Light/Environment.h>
 
 
 namespace prop3

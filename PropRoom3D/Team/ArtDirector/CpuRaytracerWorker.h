@@ -71,7 +71,7 @@ namespace prop3
 
         virtual glm::dvec3 fireScreenRay(
                 const Raycast& fromEyeRay);
-
+/*
         virtual glm::dvec3 gatherScatteredLight(
                 const Material& material,
                 const Raycast& outRay);
@@ -84,7 +84,7 @@ namespace prop3
         virtual void gatherLightHitsToward(
                 std::vector<Raycast>& outRaycasts,
                 const glm::dvec3& targetPos);
-
+*/
         virtual double findNearestProp(
                 const Raycast& raycast,
                 RayHitReport& reportMin);

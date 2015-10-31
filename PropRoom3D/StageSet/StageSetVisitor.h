@@ -25,19 +25,12 @@ namespace prop3
 
     // Materials
     class Material;
-    class Air;
-    class Fog;
-    class Concrete;
-    class Glass;
-    class Metal;
+    class UniformStdMaterial;
 
     // Coatings
     class Coating;
-    class NoCoating;
-    class FlatPaint;
-    class GlossyPaint;
-    class TexturedFlatPaint;
-    class TexturedGlossyPaint;
+    class UniformStdCoating;
+    class TexturedStdCoating;
 
     // Environments
     class Environment;
@@ -72,18 +65,11 @@ namespace prop3
         virtual void visit(Sphere& node);
 
         // Materials
-        virtual void visit(Air& node);
-        virtual void visit(Fog& node);
-        virtual void visit(Concrete& node);
-        virtual void visit(Glass& node);
-        virtual void visit(Metal& node);
+        virtual void visit(UniformStdMaterial& node);
 
         // Coatings
-        virtual void visit(NoCoating& node);
-        virtual void visit(FlatPaint& node);
-        virtual void visit(GlossyPaint& node);
-        virtual void visit(TexturedFlatPaint& node);
-        virtual void visit(TexturedGlossyPaint& node);
+        virtual void visit(UniformStdCoating& node);
+        virtual void visit(TexturedStdCoating& node);
 
         // Environments
         virtual void visit(Environment& node);

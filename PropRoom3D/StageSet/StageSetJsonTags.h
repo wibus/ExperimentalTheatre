@@ -49,33 +49,26 @@ namespace prop3
 
     // Materials
     extern const QString MATERIAL_TYPE;
-    extern const QString MATERIAL_TYPE_AIR;
-    extern const QString MATERIAL_TYPE_FOG;
-    extern const QString MATERIAL_TYPE_CONCRETE;
-    extern const QString MATERIAL_TYPE_GLASS;
-    extern const QString MATERIAL_TYPE_METAL;
+    extern const QString MATERIAL_TYPE_UNIFORMSTD;
+    extern const QString MATERIAL_OPACITY;
+    extern const QString MATERIAL_CONDUCTIVITY;
     extern const QString MATERIAL_REFRACTIVE_INDEX;
+    extern const QString MATERIAL_SCATTERING;
     extern const QString MATERIAL_COLOR;
-    extern const QString MATERIAL_CONCENTRATION;
-    extern const QString MATERIAL_GLOSSINESS;
-    extern const QString MATERIAL_RADIUS;
 
     // Coatings
     extern const QString COATING_TYPE;
-    extern const QString COATING_TYPE_NOCOATING;
-    extern const QString COATING_TYPE_FLATPAINT;
-    extern const QString COATING_TYPE_GLOSSYPAINT;
-    extern const QString COATING_TYPE_TEXTUREDFLATPAINT;
-    extern const QString COATING_TYPE_TEXTUREDGLOSSYPAINT;
-    extern const QString COATING_COLOR;
-    extern const QString COATING_GLOSSINESS;
-    extern const QString COATING_DEFAULT_COLOR;
-    extern const QString COATING_DEFAULT_GLOSS;
-    extern const QString COATING_TEXTURE_NAME;
+    extern const QString COATING_TYPE_UNIFORMSTD;
+    extern const QString COATING_TYPE_TEXTUREDSTD;
+    extern const QString COATING_ROUGHNESS;
+    extern const QString COATING_PAINT_COLOR;
+    extern const QString COATING_PAINT_REFRACTIVE_INDEX;
+    extern const QString COATING_DEFAULT_ROUGHNESS;
+    extern const QString COATING_DEFAULT_PAINT_COLOR;
+    extern const QString COATING_ROUGHNESS_TEX_NAME;
+    extern const QString COATING_PAINT_COLOR_TEX_NAME;
     extern const QString COATING_TEXTURE_FILTER;
     extern const QString COATING_TEXTURE_WRAPPER;
-    extern const QString COATING_GLOSS_MAP_NAME;
-    extern const QString COATING_VARNISH_REFRACTIVE_INDEX;
 
     // Environments
     extern const QString ENVIRONMENT_TYPE;

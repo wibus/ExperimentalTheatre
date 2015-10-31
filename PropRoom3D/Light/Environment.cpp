@@ -1,7 +1,7 @@
 #include "Environment.h"
 
 #include "Backdrop/Backdrop.h"
-#include "Prop/Material/Air.h"
+#include "Prop/Material/Material.h"
 #include "StageSet/StageSetVisitor.h"
 
 namespace prop3
@@ -9,7 +9,7 @@ namespace prop3
 
     Environment::Environment() :
         _backdrop(nullptr),
-        _ambientMaterial(new Air())
+        _ambientMaterial(material::AIR)
     {
 
     }

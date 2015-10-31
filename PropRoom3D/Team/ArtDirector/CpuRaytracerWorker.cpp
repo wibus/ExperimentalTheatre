@@ -6,14 +6,13 @@
 #include "Prop/Surface/Surface.h"
 #include "Prop/Coating/Coating.h"
 #include "Prop/Material/Material.h"
-#include "Prop/Material/Air.h"
 
 #include "Ray/Raycast.h"
 #include "Ray/RayHitList.h"
 #include "Ray/RayHitReport.h"
 
-#include "Lighting/Environment.h"
-#include "Lighting/Backdrop/Backdrop.h"
+#include "Light/Environment.h"
+#include "Light/Backdrop/Backdrop.h"
 
 #include "StageSet/StageSet.h"
 #include "StageSet/StageSetJsonReader.h"
@@ -549,7 +548,7 @@ namespace prop3
 
         return glm::dvec3(0.0);
     }
-
+/*
     glm::dvec3 CpuRaytracerWorker::gatherScatteredLight(
             const Material& material,
             const Raycast& outRay)
@@ -699,7 +698,7 @@ namespace prop3
             }
         }
     }
-
+*/
     double CpuRaytracerWorker::findNearestProp(
             const Raycast& raycast,
             RayHitReport& reportMin)

@@ -1,18 +1,14 @@
 #include "Material.h"
 
 #include "Ray/Raycast.h"
+#include "Ray/RayUtils.h"
+
+#include "UniformStdMaterial.h"
 
 
 namespace prop3
 {
-    const double Material::INFINITE_DENSITY = 0.0;
-
-    Material::Material() :
-        _refractiveIndex(1.0),
-        _density(1.0),
-        _bounciness(1.0),
-        _staticFrictionCoefficient(1.0),
-        _dynamicFrictionCoefficient(1.0)
+    Material::Material()
     {
 
     }
@@ -22,53 +18,66 @@ namespace prop3
 
     }
 
-    void Material::setRefractiveIndex(double refractiveIndex)
+
+    namespace material
     {
-        _refractiveIndex = refractiveIndex;
+        const double AIR_REFRACTIVE_INDEX = 1.0002772;
+        const double GLASS_REFRACTIVE_INDEX = 1.50000;
+        const double WATER_REFRACTIVE_INDEX = 1.33000;
+
+
+        const std::shared_ptr<Material> AIR   = createInsulator(color::white, AIR_REFRACTIVE_INDEX,   0.0, 0.0);
+        const std::shared_ptr<Material> GLASS = createInsulator(color::white, GLASS_REFRACTIVE_INDEX, 0.0, 0.0);
+        const std::shared_ptr<Material> WATER = createInsulator(color::white, WATER_REFRACTIVE_INDEX, 0.0, 0.0);
+
+        const std::shared_ptr<Material> GOLD     = createMetal(glm::dvec3(1.000000, 0.765557, 0.336057));
+        const std::shared_ptr<Material> SILVER   = createMetal(glm::dvec3(0.89803,  0.89411,  0.88627));
+        const std::shared_ptr<Material> TITANIUM = createMetal(glm::dvec3(0.541931, 0.496791, 0.449419));
+
+
+        std::shared_ptr<Material> createMetal(
+                const glm::dvec3& color)
+        {
+            UniformStdMaterial* mat = new UniformStdMaterial();
+
+            mat->setOpacity(1.0);
+            mat->setConductivity(1.0);
+            mat->setRefractiveIndex(1.40);
+            mat->setScattering(1.0);
+            mat->setColor(color);
+
+            return std::shared_ptr<Material>(mat);
+        }
+
+        std::shared_ptr<Material> createInsulator(
+                const glm::dvec3 &color,
+                double refractiveIndex,
+                double opacity,
+                double scattering)
+        {
+            UniformStdMaterial* mat = new UniformStdMaterial();
+
+            mat->setOpacity(opacity);
+            mat->setConductivity(0.0);
+            mat->setRefractiveIndex(refractiveIndex);
+            mat->setScattering(scattering);
+            mat->setColor(color);
+
+            return std::shared_ptr<Material>(mat);
+        }
     }
 
-
-    double Material::lightFreePathLength(const Raycast& ray) const
+    namespace color
     {
-        return ray.limit;
-    }
+        const glm::dvec3 black          = glm::dvec3(0.000, 0.000, 0.000);
+        const glm::dvec3 white          = glm::dvec3(1.000, 1.000, 1.000);
 
-    glm::dvec3 Material::lightAttenuation(const Raycast& ray) const
-    {
-        return glm::dvec3(1.0);
-    }
+        const glm::dvec3 red            = glm::dvec3(1.000, 0.000, 0.000);
+        const glm::dvec3 green          = glm::dvec3(0.000, 1.000, 0.000);
+        const glm::dvec3 blue           = glm::dvec3(0.000, 0.000, 1.000);
 
-    void Material::scatterLight(
-            std::vector<Raycast>& raycasts,
-            const Raycast& ray,
-            unsigned int outRayCountHint) const
-    {
-    }
-
-    glm::dvec3 Material::gatherLight(
-            const Raycast& ray,
-            const glm::dvec3& outDirection) const
-    {
-        return glm::dvec3(0.0);
-    }
-
-    void Material::setDensity(const double& density)
-    {
-        _density = density;
-    }
-
-    void Material::setBounciness(const double& bounciness)
-    {
-        _bounciness = bounciness;
-    }
-
-    void Material::setStaticFrictionCoefficient(const double& us)
-    {
-        _staticFrictionCoefficient = us;
-    }
-
-    void Material::setDynamicFrictionCoefficient(const double& ud)
-    {
-        _dynamicFrictionCoefficient = ud;
+        const glm::dvec3 cyan           = glm::dvec3(0.000, 1.000, 1.000);
+        const glm::dvec3 magenta        = glm::dvec3(1.000, 0.000, 1.000);
+        const glm::dvec3 yellow         = glm::dvec3(1.000, 1.000, 0.000);
     }
 }

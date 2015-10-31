@@ -29,46 +29,6 @@ namespace prop3
     PROP3D_EXPORT glm::dvec3 directSpecularRefraction(
             const RayHitReport& report,
             const glm::dvec3& outDir);
-
-
-    PROP3D_EXPORT void indirectDiffuseScattering(
-            std::vector<Raycast>& outRays,
-            const Raycast& ray,
-            unsigned int rayCount);
-
-    PROP3D_EXPORT void indirectSpecularReflection(
-            std::vector<Raycast>& outRays,
-            const RayHitReport& report);
-
-    PROP3D_EXPORT void indirectDiffuseReflection(
-            std::vector<Raycast>& outRays,
-            const RayHitReport& report,
-            unsigned int rayCount);
-
-    PROP3D_EXPORT void indirectGlossyReflection(
-            std::vector<Raycast>& outRays,
-            const RayHitReport& report,
-            double glossiness,
-            unsigned int rayCount);
-
-    PROP3D_EXPORT void indirectSpecularRefraction(
-            std::vector<Raycast>& outRays,
-            const RayHitReport& report,
-            double leavedRefractiveIndex,
-            double enteredRefractiveIndex);
-
-
-    PROP3D_EXPORT double computeReflexionRatio(
-            double leavedRefractiveIndex,
-            double enteredRefractiveIndex,
-            const glm::dvec3& incident,
-            const glm::dvec3& normal);
-
-    PROP3D_EXPORT glm::dvec3 computeRefraction(
-            double leavedRefractiveIndex,
-            double enteredRefractiveIndex,
-            const glm::dvec3& incident,
-            const glm::dvec3& normal);
 }
 
 #endif // PROPROOM3D_RAYUTILS_H

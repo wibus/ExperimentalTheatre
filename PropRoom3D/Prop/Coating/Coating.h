@@ -1,7 +1,6 @@
 #ifndef PROPROOM3D_COATING_H
 #define PROPROOM3D_COATING_H
 
-#include <memory>
 #include <vector>
 
 #include <GLM/glm.hpp>
@@ -36,7 +35,35 @@ namespace prop3
             const glm::dvec3& outDirection,
             const Material& leavedMaterial,
             const Material& enteredMaterial) const = 0;
+
+
+    protected:
+        static double computeReflexionRatio(
+                double leavedRefractiveIndex,
+                double enteredRefractiveIndex,
+                const glm::dvec3& incident,
+                const glm::dvec3& normal);
+
+        static glm::dvec3 computeRefraction(
+                double leavedRefractiveIndex,
+                double enteredRefractiveIndex,
+                const glm::dvec3& incident,
+                const glm::dvec3& normal);
     };
+
+
+    namespace coating
+    {
+        extern const std::shared_ptr<Coating> CLEAR_POLISH;
+        extern const std::shared_ptr<Coating> CLEAR_ROUGH;
+
+        std::shared_ptr<Coating> createClearCoat(
+                double roughness);
+
+        std::shared_ptr<Coating> createClearPaint(
+                const glm::dvec3& color,
+                double roughness);
+    }
 }
 
 #endif // PROPROOM3D_COATING_H

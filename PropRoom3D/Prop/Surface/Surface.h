@@ -315,8 +315,8 @@ namespace prop3
             const std::shared_ptr<Surface>& surf2);
     // Surface junction
     std::shared_ptr<Surface> operator^ (
-            std::shared_ptr<Surface>& surf1,
-            std::shared_ptr<Surface>& surf2);
+            const std::shared_ptr<Surface>& surf1,
+            const std::shared_ptr<Surface>& surf2);
 
 
 

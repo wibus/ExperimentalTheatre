@@ -20,20 +20,13 @@
 #include "Prop/Surface/Quadric.h"
 #include "Prop/Surface/Sphere.h"
 
-#include "Prop/Coating/NoCoating.h"
-#include "Prop/Coating/FlatPaint.h"
-#include "Prop/Coating/GlossyPaint.h"
-#include "Prop/Coating/TexturedFlatPaint.h"
-#include "Prop/Coating/TexturedGlossyPaint.h"
+#include "Prop/Material/UniformStdMaterial.h"
 
-#include "Prop/Material/Air.h"
-#include "Prop/Material/Fog.h"
-#include "Prop/Material/Concrete.h"
-#include "Prop/Material/Glass.h"
-#include "Prop/Material/Metal.h"
+#include "Prop/Coating/UniformStdCoating.h"
+#include "Prop/Coating/TexturedStdCoating.h"
 
-#include "Lighting/Environment.h"
-#include "Lighting/Backdrop/ProceduralSun.h"
+#include "Light/Environment.h"
+#include "Light/Backdrop/ProceduralSun.h"
 
 using namespace std;
 using namespace cellar;
@@ -297,132 +290,49 @@ namespace prop3
 
 
     // Materials
-    void StageSetJsonWriter::visit(Air& node)
+    void StageSetJsonWriter::visit(UniformStdMaterial& node)
     {
         if(insertMaterial(node))
         {
             QJsonObject obj;
-            obj[MATERIAL_TYPE]             = MATERIAL_TYPE_AIR;
-            obj[MATERIAL_REFRACTIVE_INDEX] = node.refractiveIndex();
-            _materialsArray.append(obj);
-        }
-    }
-
-    void StageSetJsonWriter::visit(Fog& node)
-    {
-        if(insertMaterial(node))
-        {
-            QJsonObject obj;
-            obj[MATERIAL_TYPE]              = MATERIAL_TYPE_FOG;
+            obj[MATERIAL_TYPE]              = MATERIAL_TYPE_UNIFORMSTD;
+            obj[MATERIAL_OPACITY]           = node.opacity();
+            obj[MATERIAL_CONDUCTIVITY]      = node.conductivity();
             obj[MATERIAL_REFRACTIVE_INDEX]  = node.refractiveIndex();
+            obj[MATERIAL_SCATTERING]        = node.scattering();
             obj[MATERIAL_COLOR]             = toJson(node.color());
-            obj[MATERIAL_CONCENTRATION]     = node.concentration();
-            obj[MATERIAL_RADIUS]            = node.radius();
-            _materialsArray.append(obj);
-        }
-    }
-
-    void StageSetJsonWriter::visit(Concrete& node)
-    {
-        if(insertMaterial(node))
-        {
-            QJsonObject obj;
-            obj[MATERIAL_TYPE]             = MATERIAL_TYPE_CONCRETE;
-            obj[MATERIAL_REFRACTIVE_INDEX] = node.refractiveIndex();
-            obj[MATERIAL_COLOR]            = toJson(node.color());
-            _materialsArray.append(obj);
-        }
-    }
-
-    void StageSetJsonWriter::visit(Glass& node)
-    {
-        if(insertMaterial(node))
-        {
-            QJsonObject obj;
-            obj[MATERIAL_TYPE]              = MATERIAL_TYPE_GLASS;
-            obj[MATERIAL_REFRACTIVE_INDEX]  = node.refractiveIndex();
-            obj[MATERIAL_COLOR]             = toJson(node.color());
-            obj[MATERIAL_CONCENTRATION]     = node.concentration();
-            _materialsArray.append(obj);
-        }
-    }
-
-    void StageSetJsonWriter::visit(Metal& node)
-    {
-        if(insertMaterial(node))
-        {
-            QJsonObject obj;
-            obj[MATERIAL_TYPE]             = MATERIAL_TYPE_METAL;
-            obj[MATERIAL_REFRACTIVE_INDEX] = node.refractiveIndex();
-            obj[MATERIAL_COLOR]            = toJson(node.color());
-            obj[MATERIAL_GLOSSINESS]       = node.glossiness();
             _materialsArray.append(obj);
         }
     }
 
 
     // Coatings
-    void StageSetJsonWriter::visit(NoCoating& node)
+    void StageSetJsonWriter::visit(UniformStdCoating& node)
     {
         if(insertCoating(node))
         {
             QJsonObject obj;
-            obj[COATING_TYPE] = COATING_TYPE_NOCOATING;
+            obj[COATING_TYPE]                   = COATING_TYPE_UNIFORMSTD;
+            obj[COATING_ROUGHNESS]              = node.roughness();
+            obj[COATING_PAINT_COLOR]            = toJson(node.paintColor());
+            obj[COATING_PAINT_REFRACTIVE_INDEX] = node.paintRefractiveIndex();
             _coatingsArray.append(obj);
         }
     }
 
-    void StageSetJsonWriter::visit(FlatPaint& node)
+    void StageSetJsonWriter::visit(TexturedStdCoating& node)
     {
         if(insertCoating(node))
         {
             QJsonObject obj;
-            obj[COATING_TYPE]  = COATING_TYPE_FLATPAINT;
-            obj[COATING_COLOR] = toJson(node.color());
-            _coatingsArray.append(obj);
-        }
-    }
-
-    void StageSetJsonWriter::visit(GlossyPaint& node)
-    {
-        if(insertCoating(node))
-        {
-            QJsonObject obj;
-            obj[COATING_TYPE]                     = COATING_TYPE_GLOSSYPAINT;
-            obj[COATING_COLOR]                    = toJson(node.color());
-            obj[COATING_GLOSSINESS]               = node.glossiness();
-            obj[COATING_VARNISH_REFRACTIVE_INDEX] = node.varnishRefractiveIndex();
-            _coatingsArray.append(obj);
-        }
-    }
-
-    void StageSetJsonWriter::visit(TexturedFlatPaint& node)
-    {
-        if(insertCoating(node))
-        {
-            QJsonObject obj;
-            obj[COATING_TYPE]            = COATING_TYPE_TEXTUREDFLATPAINT;
-            obj[COATING_DEFAULT_COLOR]   = toJson(node.defaultColor());
-            obj[COATING_TEXTURE_NAME]    = QString(node.texName().c_str());
-            obj[COATING_TEXTURE_FILTER]  = toJson(node.texFilter());
-            obj[COATING_TEXTURE_WRAPPER] = toJson(node.texWrapper());
-            _coatingsArray.append(obj);
-        }
-    }
-
-    void StageSetJsonWriter::visit(TexturedGlossyPaint& node)
-    {
-        if(insertCoating(node))
-        {
-            QJsonObject obj;
-            obj[COATING_TYPE]                     = COATING_TYPE_TEXTUREDGLOSSYPAINT;
-            obj[COATING_DEFAULT_COLOR]            = toJson(node.defaultColor());
-            obj[COATING_DEFAULT_GLOSS]            = node.defaultGlossiness();
-            obj[COATING_TEXTURE_NAME]             = QString(node.texName().c_str());
+            obj[COATING_TYPE]                     = COATING_TYPE_TEXTUREDSTD;
+            obj[COATING_DEFAULT_ROUGHNESS]        = node.defaultRoughness();
+            obj[COATING_DEFAULT_PAINT_COLOR]      = toJson(node.defaultPaintColor());
+            obj[COATING_ROUGHNESS_TEX_NAME]       = QString(node.roughnessTexName().c_str());
+            obj[COATING_PAINT_COLOR_TEX_NAME]     = QString(node.paintColorTexName().c_str());
             obj[COATING_TEXTURE_FILTER]           = toJson(node.texFilter());
             obj[COATING_TEXTURE_WRAPPER]          = toJson(node.texWrapper());
-            obj[COATING_GLOSS_MAP_NAME]           = QString(node.glossName().c_str());
-            obj[COATING_VARNISH_REFRACTIVE_INDEX] = node.varnishRefractiveIndex();
+            obj[COATING_PAINT_REFRACTIVE_INDEX]   = node.paintRefractiveIndex();
             _coatingsArray.append(obj);
         }
     }
@@ -482,7 +392,7 @@ namespace prop3
     void StageSetJsonWriter::SurfaceTreeBuilder::visit(SurfaceShell& node)
     {
         auto children = node.children();
-        assert(children.size() > 1);
+        assert(children.size() >= 1);
         children[0]->accept(*this);
 
         QJsonObject logOpt;

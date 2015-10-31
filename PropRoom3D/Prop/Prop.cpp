@@ -3,7 +3,6 @@
 #include <cassert>
 
 #include "Surface/Surface.h"
-#include "Material/Concrete.h"
 #include "../StageSet/StageSetVisitor.h"
 
 

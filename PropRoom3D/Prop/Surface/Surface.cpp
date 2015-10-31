@@ -4,9 +4,8 @@
 
 #include "Ray/RayHitList.h"
 #include "Ray/RayHitReport.h"
-#include "../Material/Air.h"
-#include "../Material/Concrete.h"
-#include "../Coating/NoCoating.h"
+#include "../Material/UniformStdMaterial.h"
+#include "../Coating/UniformStdCoating.h"
 #include "../../StageSet/StageSetVisitor.h"
 
 
@@ -37,9 +36,9 @@ namespace prop3
     }
 
 
-    const std::shared_ptr<Coating>  Surface::NO_COATING(new NoCoating());
-    const std::shared_ptr<Material> Surface::DEFAULT_MATERIAL(new Concrete(glm::dvec3(1)));
-    const std::shared_ptr<Material> Surface::ENVIRONMENT_MATERIAL(new Air());
+    const std::shared_ptr<Coating>  Surface::NO_COATING(new UniformStdCoating());
+    const std::shared_ptr<Material> Surface::DEFAULT_MATERIAL(material::createInsulator(color::white, 1.40, 1.0, 1.0));
+    const std::shared_ptr<Material> Surface::ENVIRONMENT_MATERIAL(material::createInsulator(color::white, 1.0, 0.0, 0.0));
 
     Surface::Surface()
     {
@@ -763,13 +762,9 @@ namespace prop3
     }
 
     std::shared_ptr<Surface> operator^ (
-            std::shared_ptr<Surface>& surf1,
-            std::shared_ptr<Surface>& surf2)
+            const std::shared_ptr<Surface>& surf1,
+            const std::shared_ptr<Surface>& surf2)
     {
-        std::shared_ptr<Surface> juction = Surface::shell(surf1 & ~surf2);
-        std::shared_ptr<Surface> surf1Tmp = Surface::shell(surf1 & ~!surf2);
-        surf2 = Surface::shell(surf2 & ~!surf1);
-        surf1 = surf1Tmp;
-        return juction;
+        return Surface::shell(surf1 & ~surf2);
     }
 }
