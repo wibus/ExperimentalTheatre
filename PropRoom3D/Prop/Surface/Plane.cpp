@@ -157,16 +157,16 @@ namespace prop3
     {
         RayHitReport* last = reports.head;
         Plane::raycast(ray, reports);
-        RayHitReport* first = reports.head;
+        RayHitReport* node = reports.head;
 
-        while(first != last)
+        while(node != last)
         {
-            RayHitReport& r = *first;
+            RayHitReport& r = *node;
             glm::dvec3 dist = r.position - _texOrigin;
             r.texCoord.s = glm::dot(dist, _texU) / glm::dot(_texU, _texU);
             r.texCoord.t = glm::dot(dist, _texV) / glm::dot(_texV, _texV);
 
-            first = first->_next;
+            node = node->_next;
         }
     }
 

@@ -11,7 +11,7 @@ namespace prop3
     class RayHitList
     {
     public:
-        RayHitList(std::vector<RayHitReport*>& memoryPool);
+        RayHitList();
         ~RayHitList();
 
         void add(
@@ -26,10 +26,14 @@ namespace prop3
         void add(RayHitReport* report);
         void clear();
 
-        static void releaseMemoryPool(std::vector<RayHitReport*>& pool);
+        void dispose(RayHitReport* node);
+
+        void releaseMemoryPool();
 
         RayHitReport* head;
-        std::vector<RayHitReport*>& memoryPool;
+
+    private:
+        std::vector<RayHitReport*> _memoryPool;
     };
 
 
@@ -46,7 +50,7 @@ namespace prop3
             const Material* outerMat)
     {
         RayHitReport* report;
-        if(memoryPool.empty())
+        if(_memoryPool.empty())
         {
             report = new RayHitReport(
                         distance,
@@ -60,7 +64,7 @@ namespace prop3
         }
         else
         {
-            report = memoryPool.back();
+            report = _memoryPool.back();
 
             report->distance = distance;
             report->incidentRay = incidentRay;
@@ -71,7 +75,7 @@ namespace prop3
             report->innerMat = innerMat;
             report->outerMat = outerMat;
 
-            memoryPool.pop_back();
+            _memoryPool.pop_back();
         }
 
         add(report);
@@ -88,10 +92,15 @@ namespace prop3
         RayHitReport* report = head;
         while(report != nullptr)
         {
-            memoryPool.push_back(report);
+            _memoryPool.push_back(report);
             report = report->_next;
         }
         head = nullptr;
+    }
+
+    inline void RayHitList::dispose(RayHitReport* node)
+    {
+        _memoryPool.push_back(node);
     }
 }
 

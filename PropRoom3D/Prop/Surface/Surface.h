@@ -253,7 +253,6 @@ namespace prop3
 
     private:
         void add(const std::shared_ptr<Surface>& surface);
-        virtual bool raycast(const Raycast& ray, RayHitList& reports, bool isTest) const;
 
         std::vector<std::shared_ptr<Surface>> _surfs;
     };
@@ -293,7 +292,6 @@ namespace prop3
 
     private:
         void add(const std::shared_ptr<Surface>& surface);
-        virtual bool raycast(const Raycast& ray, RayHitList& reports, bool isTest) const;
 
         std::vector<std::shared_ptr<Surface>> _surfs;
     };

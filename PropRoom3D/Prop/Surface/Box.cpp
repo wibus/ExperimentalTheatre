@@ -216,11 +216,11 @@ namespace prop3
     {
         RayHitReport* last = reports.head;
         Box::raycast(ray, reports);
-        RayHitReport* first = reports.head;
+        RayHitReport* node = reports.head;
 
-        while(first != last)
+        while(node != last)
         {
-            RayHitReport& r = *first;
+            RayHitReport& r = *node;
 
             if(!_texMainSideOnly ||
                glm::dot(r.normal, glm::cross(_texU, _texV)) >
@@ -231,7 +231,7 @@ namespace prop3
                 r.texCoord.t = glm::dot(dist, _texV) / glm::dot(_texV, _texV);
             }
 
-            first = first->_next;
+            node = node->_next;
         }
     }
 

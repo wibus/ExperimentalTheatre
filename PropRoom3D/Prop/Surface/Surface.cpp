@@ -172,11 +172,11 @@ namespace prop3
 
         RayHitReport* last = reports.head;
         _surf->raycast(tRay, reports);
-        RayHitReport* first = reports.head;
+        RayHitReport* node = reports.head;
 
-        while(first != last)
+        while(node != last)
         {
-            RayHitReport& r = *first;
+            RayHitReport& r = *node;
             r.position = glm::dvec3(_transform * glm::dvec4(r.position, 1.0));
             r.normal = glm::dvec3(_transform * glm::dvec4(r.normal, 0.0));
             r.normal  = glm::normalize(r.normal);
@@ -189,7 +189,7 @@ namespace prop3
             if(_outerMat.get() != nullptr)
                 r.outerMat = _outerMat.get();
 
-            first = first->_next;
+            node = node->_next;
         }
     }
 
@@ -322,10 +322,11 @@ namespace prop3
             const Raycast& ray,
             RayHitList& reports) const
     {
+        RayHitReport* last = reports.head;
         _surf->raycast(ray, reports);
-
         RayHitReport* node = reports.head;
-        while(node != nullptr)
+
+        while(node != last)
         {
             node->normal = -node->normal;
             node = node->_next;
@@ -423,34 +424,24 @@ namespace prop3
     void SurfaceOr::raycast(const Raycast& ray,
                             RayHitList& reports) const
     {
-        raycast(ray, reports, false);
-    }
-
-    bool SurfaceOr::intersects(const Raycast& ray, RayHitList& reports) const
-    {
-        return raycast(ray, reports, true);
-    }
-
-    bool SurfaceOr::raycast(const Raycast& ray,
-                           RayHitList& reports,
-                           bool isTest) const
-    {
-        RayHitList surfReports(reports.memoryPool);
-        for(const auto& surf : _surfs)
+        size_t surfCount = _surfs.size();
+        for(size_t i=0; i < surfCount; ++i)
         {
-            surfReports.clear();
-            surf->raycast(ray, surfReports);
+            Surface* surf = _surfs[i].get();
 
+            RayHitReport* last = reports.head;
+            surf->raycast(ray, reports);
+            RayHitReport* node = reports.head;
             RayHitReport* parent = nullptr;
-            RayHitReport* node = surfReports.head;
-            while(node != nullptr)
+
+            while(node != last)
             {
                 bool isIn = false;
-                for(const auto& surfTest : _surfs)
+                for(size_t j=0; j < surfCount; ++j)
                 {
-                    if(surf.get() != surfTest.get())
+                    if(i != j)
                     {
-                        if(surfTest->isIn(node->position) ==
+                        if(_surfs[j]->isIn(node->position) ==
                            EPointPosition::IN)
                         {
                             isIn = true;
@@ -461,28 +452,32 @@ namespace prop3
 
                 RayHitReport* next = node->_next;
 
-                if(!isIn)
+                bool keep = !isIn;
+                if(keep)
                 {
-                    if(isTest)
-                        return true;
-
-                    if(parent == nullptr)
-                        surfReports.head = node->_next;
-                    else
-                        parent->_next = node->_next;
-
-                    reports.add(node);
+                    // Keep ray hit
+                    parent = node;
                 }
                 else
                 {
-                    parent = node;
+                    // Dispose ray hit
+                    if(parent == nullptr)
+                        reports.head = next;
+                    else
+                        parent->_next = next;
+
+                    reports.dispose(node);
                 }
 
                 node = next;
             }
         }
+    }
 
-        return false;
+    bool SurfaceOr::intersects(const Raycast& ray, RayHitList& reports) const
+    {
+        assert(false /*Intersects not implemented for SurfaceOr*/);
+        //return raycast(ray, reports, true);
     }
 
     void SurfaceOr::setCoating(const std::shared_ptr<Coating>& coating)
@@ -587,34 +582,24 @@ namespace prop3
     void SurfaceAnd::raycast(const Raycast& ray,
                              RayHitList& reports) const
     {
-        raycast(ray, reports, false);
-    }
-
-    bool SurfaceAnd::intersects(const Raycast& ray, RayHitList& reports) const
-    {
-        return raycast(ray, reports, true);
-    }
-
-    bool SurfaceAnd::raycast(const Raycast& ray,
-                             RayHitList& reports,
-                             bool isTest) const
-    {
-        RayHitList surfReports(reports.memoryPool);
-        for(const auto& surf : _surfs)
+        size_t surfCount = _surfs.size();
+        for(size_t i=0; i < surfCount; ++i)
         {
-            surfReports.clear();
-            surf->raycast(ray, surfReports);
+            Surface* surf = _surfs[i].get();
 
+            RayHitReport* last = reports.head;
+            surf->raycast(ray, reports);
+            RayHitReport* node = reports.head;
             RayHitReport* parent = nullptr;
-            RayHitReport* node = surfReports.head;
-            while(node != nullptr)
+
+            while(node != last)
             {
                 bool isIn = true;
-                for(const auto& surfTest : _surfs)
+                for(size_t j=0; j < surfCount; ++j)
                 {
-                    if(surf.get() != surfTest.get())
+                    if(i != j)
                     {
-                        if(surfTest->isIn(node->position) ==
+                        if(_surfs[j]->isIn(node->position) ==
                            EPointPosition::OUT)
                         {
                             isIn = false;
@@ -625,28 +610,32 @@ namespace prop3
 
                 RayHitReport* next = node->_next;
 
-                if(isIn)
+                bool keep = isIn;
+                if(keep)
                 {
-                    if(isTest)
-                        return true;
-
-                    if(parent == nullptr)
-                        surfReports.head = node->_next;
-                    else
-                        parent->_next = node->_next;
-
-                    reports.add(node);
+                    // Keep ray hit
+                    parent = node;
                 }
                 else
                 {
-                    parent = node;
+                    // Dispose ray hit
+                    if(parent == nullptr)
+                        reports.head = next;
+                    else
+                        parent->_next = next;
+
+                    reports.dispose(node);
                 }
 
                 node = next;
             }
         }
+    }
 
-        return false;
+    bool SurfaceAnd::intersects(const Raycast& ray, RayHitList& reports) const
+    {
+        assert(false /*Intersects not implemented for SurfaceAnd*/);
+        //return raycast(ray, reports, true);
     }
 
     void SurfaceAnd::setCoating(const std::shared_ptr<Coating>& coating)

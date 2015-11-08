@@ -29,6 +29,7 @@ namespace prop3
         // Report's shorthands
         const glm::dvec3& pos = report.position;
         const glm::dvec3& tex = report.texCoord;
+        const glm::dvec3& wallNormal = report.normal;
         const glm::dvec3& incident = report.incidentRay.direction;
         const glm::dvec3& reflectOrig = report.reflectionOrigin;
         const glm::dvec3& refractOrig = report.refractionOrigin;
@@ -60,12 +61,12 @@ namespace prop3
             for(int r=0; r < rayCount; ++r)
             {
                 glm::dvec3 diffuseNormal = getMicrofacetNormal(
-                        report.normal,
+                        wallNormal,
                         incident,
                         1.0); // Fully diffusive
 
                 glm::dvec3 reflectNormal = getMicrofacetNormal(
-                        report.normal,
+                        wallNormal,
                         incident,
                         rough);
 
@@ -87,7 +88,7 @@ namespace prop3
                 // half is scattered further into material's depths...
                 const double CONST = 0.61803398876;
                 glm::dvec3 attenuation = diffuseColor * (1 - reflectionRatio)
-                       * (glm::dot(diffuseDirection, report.normal)) * CONST;
+                       * (glm::dot(diffuseDirection, wallNormal)) * CONST;
 
 
                 raycasts.push_back(Raycast(
@@ -118,7 +119,7 @@ namespace prop3
             for(int r=0; r < rayCount; ++r)
             {
                 glm::dvec3 reflectNormal = getMicrofacetNormal(
-                        report.normal,
+                        wallNormal,
                         incident,
                         rough);
 
@@ -164,12 +165,12 @@ namespace prop3
                 for(int r=0; r < outRayCountHint; ++r)
                 {
                     glm::dvec3 diffuseNormal = getMicrofacetNormal(
-                            report.normal,
+                            wallNormal,
                             incident,
                             1.0); // Fully diffusive
 
                     glm::dvec3 reflectNormal = getMicrofacetNormal(
-                            report.normal,
+                            wallNormal,
                             incident,
                             rough);
 
@@ -188,7 +189,7 @@ namespace prop3
 
 
                     glm::dvec3 attenuation = diffuseColor * (1 - reflectionRatio)
-                           * (glm::dot(diffuseDirection, report.normal) * CONST);
+                           * (glm::dot(diffuseDirection, wallNormal) * CONST);
 
 
                     raycasts.push_back(Raycast(
@@ -214,7 +215,7 @@ namespace prop3
                 for(int r=0; r < rayCount; ++r)
                 {
                     glm::dvec3 reflectNormal = getMicrofacetNormal(
-                            report.normal,
+                            wallNormal,
                             incident,
                             rough);
 
@@ -228,7 +229,7 @@ namespace prop3
                                 reflectNormal);
 
                     glm::dvec3 currRefractOrig = refractOrig;
-                    if(glm::dot(refractDir, report.normal) > 0.0)
+                    if(glm::dot(refractDir, wallNormal) > 0.0)
                         currRefractOrig = reflectOrig;
 
                     double reflectionRatio =
@@ -266,7 +267,7 @@ namespace prop3
         assert(false);
     }
 
-    glm::dvec3 StdCoating::getMicrofacetNormal(
+    inline glm::dvec3 StdCoating::getMicrofacetNormal(
             const glm::dvec3& wallNormal,
             const glm::dvec3& incidentDir,
             double rough)
@@ -274,29 +275,17 @@ namespace prop3
         if(rough <= 0.0)
             return wallNormal;
 
-        // Half vector (cone center)
-        glm::dvec3 h = (wallNormal - incidentDir) / 2.0;
+        glm::dvec3 diffuse = glm::sphericalRand(1.0);
+        if(glm::dot(diffuse, wallNormal) < 0.0)
+            diffuse = -diffuse;
 
-        // Cone parameters
-        double z = glm::linearRand(0.70710678118, 1.0);
-        double t = glm::linearRand(0.0, 2*glm::pi<double>());
-        double z_rec = glm::sqrt(1 - z*z);
+        if(rough >= 1.0)
+            return glm::normalize((diffuse - incidentDir) / 2.0);
 
-        // Diffuse normal
-        glm::dvec3 c(z_rec*glm::cos(t), z_rec*glm::sin(t), z);
+        glm::dvec3 specular = glm::reflect(incidentDir, wallNormal);
+        glm::dvec3 glossy = glm::mix(specular, diffuse, rough);
 
-        // Cone orientation
-        glm::dvec3 n = c;
-        double p = glm::acos(glm::dot(h, glm::dvec3(0, 0, 1)));
-        if(p != 0.0)
-        {
-            glm::dvec3 b = glm::cross(h, glm::dvec3(0, 0, 1));
-            n = glm::dmat3(glm::rotate(glm::dmat4(), -p, b)) * c;
-        }
-
-        // Microfacet normal
-        glm::dvec3 normal = glm::mix(wallNormal, n, rough);
-
-        return glm::normalize(normal);
+        glm::dvec3 normal = glm::normalize((glossy - incidentDir) / 2.0);
+        return normal;
     }
 }

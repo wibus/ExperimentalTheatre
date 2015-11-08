@@ -7,6 +7,7 @@
 #include "Ray/Raycast.h"
 #include "Ray/RayHitList.h"
 #include "Serial/Visitor.h"
+#include "Light/Light.h"
 
 
 namespace prop3
@@ -83,60 +84,37 @@ namespace prop3
 
     glm::dvec3 ProceduralSun::raycast(const Raycast& ray, bool directView) const
     {
-        if(directView)
-            return glm::dvec3(0);
-
         glm::dvec3 color;
 
-        // Sun ray compatibility with surface reflexion
-        double sunCompatibility = 0.0;
-        /*
-            Raycast::compatibility(
-               Raycast::FULLY_SPECULAR_ENTROPY,
-               ray.entropy);
-               */
+        double dotNormTop = ray.direction.z;
+        double dotSunTop = _sunDirection.z;
+        double dotDirSun = glm::dot(ray.direction, _sunDirection);
 
-        double upDot = glm::dot(SKY_UP, ray.direction);
-        if(upDot >= _groundHeight)
+        // Diffuse scattering
         {
-            if(sunCompatibility != 1.0)
-            {
-                // Skyline Weight
-                double a = 1.0 - glm::abs(upDot);
-                a *= a *= a *= a;
+            glm::dvec3 topColor = kelvinToRgb(100000);
+            glm::dvec3 bottomColor = kelvinToRgb(glm::mix(1000, 6600, dotSunTop));
 
-                if(upDot >= 0.0)
-                {
-                    // Sky Color
-                    glm::dvec3 skyColor = _skyColor * glm::max(0.0, upDot);
-                    color = glm::mix(skyColor, _skylineColor, a);
-                }
-                else
-                {
-                    // Ground Color
-                    color = glm::mix(_groundColor, _skylineColor, a);
-                }
+            double daylighIntens = 1.0 - glm::pow(1.0 - glm::max(0.0, (dotSunTop + 0.05) / 1.05), 5.0);
 
-                double lightDot = glm::dot(_sunDirection, ray.direction);
-                lightDot = lightDot * glm::max(0.0, lightDot);
-                lightDot *= lightDot * lightDot;
-                lightDot *= lightDot;
-
-                color += _sunColor * lightDot / 4.0e3;
-            }
-
-            if(sunCompatibility != 0.0)
-            {
-                // Sun is only visible when the sky is direclty observed
-                double sunDot = glm::dot(_sunDirection, ray.direction);
-                double sunProb = sunDot / SUN_COS_DIMENSION;
-                double sunPow = glm::pow(glm::abs(sunProb), SUN_SMOOTH_EDGE) * glm::sign(sunProb);
-                color += _sunColor * glm::max(0.0, sunPow) * sunCompatibility;
-            }
+            color += glm::mix(bottomColor, topColor, (1 + dotNormTop) / 2.0)
+                        * daylighIntens;
         }
-        else
+
+        // Halo scattering
         {
-            color = (1.0 - sunCompatibility) * _groundColor;
+            double sunMinHeight = -0.1;
+            double sunHeightRatio = glm::max(0.0, (dotSunTop - sunMinHeight) / (1.0 - sunMinHeight));
+            double intMinHeight = 0.1;
+            double dirSunRatio = glm::max(0.0, (dotDirSun - intMinHeight) / (1.0 - intMinHeight));
+
+            double haloTemp = glm::pow(sunHeightRatio, 16.0);
+            glm::dvec3 haloColor = kelvinToRgb(glm::mix(1000, 6600, haloTemp));
+
+            double haloIntens = glm::pow(dirSunRatio, 16.0);
+            haloIntens *= 1.0 - glm::pow(glm::abs(dotNormTop), 2.0);
+
+            color += haloColor * haloIntens * 0.5;
         }
 
 

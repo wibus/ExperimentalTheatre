@@ -3,24 +3,24 @@
 
 namespace prop3
 {
-    RayHitList::RayHitList(std::vector<RayHitReport*>& memoryPool) :
-        head(nullptr),
-        memoryPool(memoryPool)
+    RayHitList::RayHitList() :
+        head(nullptr)
     {
     }
 
     RayHitList::~RayHitList()
     {
         clear();
+        releaseMemoryPool();
     }
 
-    void RayHitList::releaseMemoryPool(std::vector<RayHitReport*>& pool)
+    void RayHitList::releaseMemoryPool()
     {
-        int count = pool.size();
+        int count = _memoryPool.size();
         for(int i=0; i < count; ++i)
-            delete pool[i];
+            delete _memoryPool[i];
 
-        pool.clear();
-        pool.shrink_to_fit();
+        _memoryPool.clear();
+        _memoryPool.shrink_to_fit();
     }
 }

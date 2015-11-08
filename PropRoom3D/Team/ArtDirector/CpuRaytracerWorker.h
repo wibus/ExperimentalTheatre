@@ -15,6 +15,8 @@
 
 #include "../../libPropRoom3D_global.h"
 
+#include "Ray/RayHitList.h"
+
 
 namespace prop3
 {
@@ -148,7 +150,7 @@ namespace prop3
         std::vector<std::shared_ptr<Surface>> _searchSurfaces;
 
         // Memory pools
-        std::vector<RayHitReport*> _reportPool;
+        RayHitList _rayHitList;
     };
 }
 

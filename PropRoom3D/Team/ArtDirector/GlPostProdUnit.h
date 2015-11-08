@@ -39,7 +39,6 @@ namespace prop3
 
 
     private:
-        static glm::vec3 kelvinToRgb(int kelvin);
         virtual void updateKernel(double variance, int size);
         static void buildLowpassKernel(float kernel[], double variance, int size);
         static void updateLowpassKernelUniform(cellar::GlProgram& prog, float kernel[], int size);

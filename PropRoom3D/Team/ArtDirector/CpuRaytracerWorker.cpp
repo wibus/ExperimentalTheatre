@@ -811,7 +811,6 @@ namespace prop3
             RayHitReport& reportMin)
     {
         Raycast ray(raycast);
-        RayHitList reports(_reportPool);
 
         size_t z = 0;
         size_t zoneCount = _searchZones.size();
@@ -821,17 +820,16 @@ namespace prop3
 
             if(zone.begSurf != zone.endSurf)
             {
-                reports.clear();
                 if(zone.bounds == StageZone::UNBOUNDED ||
-                   zone.bounds->intersects(ray, reports))
+                   zone.bounds->intersects(ray, _rayHitList))
                 {
                     for(size_t s = zone.begSurf; s < zone.endSurf; ++s)
                     {
-                        reports.clear();
+                        _rayHitList.clear();
 
-                        _searchSurfaces[s]->raycast(ray, reports);
+                        _searchSurfaces[s]->raycast(ray, _rayHitList);
 
-                        RayHitReport* node = reports.head;
+                        RayHitReport* node = _rayHitList.head;
                         while(node != nullptr)
                         {
                             if(0.0 < node->distance && node->distance < ray.limit)
