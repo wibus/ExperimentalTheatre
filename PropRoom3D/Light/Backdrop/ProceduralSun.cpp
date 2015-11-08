@@ -6,7 +6,8 @@
 #include "Prop/Material/Material.h"
 #include "Ray/Raycast.h"
 #include "Ray/RayHitList.h"
-#include "StageSet/StageSetVisitor.h"
+#include "Serial/Visitor.h"
+
 
 namespace prop3
 {
@@ -206,7 +207,7 @@ namespace prop3
         return raycasts;
     }
 
-    void ProceduralSun::accept(StageSetVisitor& visitor)
+    void ProceduralSun::accept(Visitor& visitor)
     {
         visitor.visit(*this);
     }

@@ -1,36 +1,13 @@
 #include "Prop.h"
 
-#include <cassert>
-
 #include "Surface/Surface.h"
-#include "../StageSet/StageSetVisitor.h"
+#include "Serial/Visitor.h"
 
 
 namespace prop3
 {
-    // First assigned ID will be '0'
-    PropId Prop::_nextId_ = 0;
-
-    // Inertia
-    const double Prop::INFINITE_INERTIA = 0.0;
-    const glm::dmat3 Prop::INFINITE_MOMENT_OF_INERTIA(0.0);
-
-
-    Prop::Prop() :
-        _id(_assigneId_()),
-        _isVisible(true),
-        _bodyType(EBodyType::GRAPHIC),
-        _transformMatrix(1.0),
-        _invMass(INFINITE_INERTIA),
-        _invMomentOfInertia(INFINITE_MOMENT_OF_INERTIA),
-        _centroid(0.0),
-        _linearVelocity(0.0),
-        _linearAcceleration(0.0),
-        _linearFirctionCoefficients(0.0),
-        _angle(glm::vec3(0.0)),
-        _angularVelocity(glm::vec3(0.0)),
-        _angularAcceleration(glm::vec3(0.0)),
-        _angularFirctionCoefficients(0.0)
+    Prop::Prop(const std::string& name) :
+        HandleNode(name)
     {
     }
 
@@ -38,224 +15,58 @@ namespace prop3
     {
     }
 
-    void Prop::accept(StageSetVisitor& visitor)
+    void Prop::accept(Visitor& visitor)
     {
         visitor.visit(*this);
     }
 
-    std::vector<std::shared_ptr<StageSetNode>> Prop::children() const
+    std::vector<std::shared_ptr<Node>> Prop::children() const
     {
-        std::vector<std::shared_ptr<StageSetNode>> c(_surfaceElements.begin(), _surfaceElements.end());
-        c.push_back(_boundingSurface);
-        return c;
+        return std::vector<std::shared_ptr<Node>>(
+            _surfaces.begin(), _surfaces.end());
     }
 
-    void Prop::setIsVisible(bool isVisible)
+    void Prop::addSurface(const std::shared_ptr<Surface>& surface)
     {
-        _isVisible = isVisible;
+        _surfaces.push_back(surface);
+
+        stampCurrentUpdate();
     }
 
-    void Prop::setSurface(const std::shared_ptr<Surface>& surface, int sId)
+    void Prop::clear()
     {
-        if(sId < _surfaceElements.size())
-            _surfaceElements[sId] = surface;
+        _surfaces.clear();
     }
 
-    void Prop::pushSurface(const std::shared_ptr<Surface>& surface)
+    void Prop::transform(const glm::dmat4& mat)
     {
-        _surfaceElements.push_back(surface);
+        for(auto& surf : _surfaces)
+            Surface::transform(surf, mat);
+
+        stampCurrentUpdate();
     }
 
-    std::shared_ptr<Surface> Prop::removeSurface(size_t sId)
+    void Prop::translate(const glm::dvec3& dis)
     {
-        std::shared_ptr<Surface> surf;
-        if(sId < _surfaceElements.size())
-        {
-            surf = _surfaceElements[sId];
-            _surfaceElements.erase(_surfaceElements.begin() + sId);
-        }
-        return surf;
+        for(auto& surf : _surfaces)
+            Surface::translate(surf, dis);
+
+        stampCurrentUpdate();
     }
 
-    std::shared_ptr<Surface> Prop::popSurface()
+    void Prop::rotate(double angle, const glm::dvec3& axis)
     {
-        std::shared_ptr<Surface> surf;
-        if(!_surfaceElements.empty())
-        {
-            surf = _surfaceElements.back();
-            _surfaceElements.pop_back();
-        }
-        return surf;
+        for(auto& surf : _surfaces)
+            Surface::rotate(surf, angle, axis);
+
+        stampCurrentUpdate();
     }
 
-    void Prop::setBoundingSurface(const std::shared_ptr<Surface>& surface)
+    void Prop::scale(double coeff)
     {
-        _boundingSurface = surface;
-    }
+        for(auto& surf : _surfaces)
+            Surface::scale(surf, coeff);
 
-    void Prop::setBodyType(const EBodyType& type)
-    {
-        if(_bodyType != type)
-        {
-            _bodyType = type;
-        }
-    }
-
-    void Prop::moveBy(const glm::dvec3& displacement)
-    {
-        if(displacement != glm::dvec3(0.0))
-        {
-            _centroid += displacement;
-            updateTransformMatrix();
-        }
-    }
-
-    void Prop::setCentroid(const glm::dvec3& position)
-    {
-        if(_centroid != position)
-        {
-            _centroid = position;
-            updateTransformMatrix();
-        }
-    }
-
-    void Prop::setLinearVelocity(const glm::dvec3& velocity)
-    {
-        _linearVelocity = velocity;
-    }
-
-    void Prop::addLinearVelocity(const glm::dvec3& velocity)
-    {
-        _linearVelocity += velocity;
-    }
-
-    void Prop::setLinearAcceleration(const glm::dvec3& acceleration)
-    {
-        _linearAcceleration = acceleration;
-    }
-
-    void Prop::addLinearAcceleration(const glm::dvec3& acceleration)
-    {
-        _linearAcceleration += acceleration;
-    }
-
-    void Prop::setLinearFrictionCoefficients(const glm::dvec3& coeffs)
-    {
-        _linearFirctionCoefficients = coeffs;
-    }
-
-    void Prop::setLinearFrictionCoefficient(int order, double coeff)
-    {
-        assert(order < 3);
-        _linearFirctionCoefficients[order] = coeff;
-    }
-
-    void Prop::rotate(const glm::dquat& angle)
-    {
-        if(angle != glm::dquat(glm::dvec3(0.0)))
-        {
-            _angle = angle * _angle;
-            updateTransformMatrix();
-        }
-    }
-
-    void Prop::setAngle(const glm::dquat& angle)
-    {
-        if(_angle != angle)
-        {
-            _angle = angle;
-            updateTransformMatrix();
-        }
-    }
-
-    void Prop::setAngularVelocity(const glm::dquat& velocity)
-    {
-        _angularVelocity = velocity;
-    }
-
-    void Prop::addAngularVelocity(const glm::dquat& velocity)
-    {
-        _angularVelocity = velocity * _angularVelocity;
-    }
-
-    void Prop::setAngularAcceleration(const glm::dquat& acceleration)
-    {
-        _angularAcceleration = acceleration;
-    }
-
-    void Prop::addAngularAcceleration(const glm::dquat& acceleration)
-    {
-        _angularAcceleration = acceleration * _angularAcceleration;
-    }
-
-    void Prop::setAngularFrictionCoefficients(const glm::dvec3& coeffs)
-    {
-        _angularFirctionCoefficients = coeffs;
-    }
-
-    void Prop::setAngularFrictionCoefficient(int order, double coeff)
-    {
-        assert(order < 3);
-        _angularFirctionCoefficients[order] = coeff;
-    }
-
-    void Prop::addLinearForce(const glm::dvec3& force)
-    {
-        if(_bodyType == EBodyType::DYNAMIC)
-            _linearAcceleration += force * _invMass;
-    }
-
-    void Prop::addAngularForce(const glm::dvec3& force)
-    {
-        if(_bodyType == EBodyType::DYNAMIC)
-        {
-            glm::dvec3 acc = _invRotMomentOfInertia * force;
-            double accLen = length(acc);
-            if(accLen != 0.0)
-                _angularAcceleration = glm::angleAxis(accLen, acc / accLen) * _angularAcceleration;
-        }
-    }
-
-    void Prop::addForceAt(const glm::dvec3& force, const glm::dvec3& at)
-    {
-        addLinearForce(force);
-
-        glm::dvec3 radius = at - _centroid;
-        addAngularForce(glm::cross(radius, force));
-    }
-
-    void Prop::applyLinearImpulse(const glm::dvec3& impulse)
-    {
-        if(_bodyType == EBodyType::DYNAMIC)
-            _linearVelocity += impulse * _invMass;
-    }
-
-    void Prop::applyAngularImpulse(const glm::dvec3& impulse)
-    {
-        if(_bodyType == EBodyType::DYNAMIC)
-        {
-            glm::dvec3 imp = _invRotMomentOfInertia * impulse;
-            double impLen = length(imp);
-            if(impLen != 0.0)
-                _angularVelocity = glm::angleAxis(impLen, imp / impLen) * _angularVelocity;
-        }
-    }
-
-    void Prop::applyImpulseAt(const glm::dvec3& impulse, const glm::dvec3& at)
-    {
-        applyLinearImpulse(impulse);
-
-        glm::dvec3 radius = at - _centroid;
-        applyAngularImpulse(glm::cross(radius, impulse));
-    }
-
-    void Prop::updateTransformMatrix()
-    {
-        assert(false /* Not Implemented */);
-    }
-
-    void Prop::updateInertia()
-    {
-        assert(false /* Not Implemented */);
+        stampCurrentUpdate();
     }
 }

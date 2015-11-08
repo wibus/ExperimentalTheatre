@@ -22,16 +22,11 @@ namespace prop3
         virtual ~ArtDirectorServer();
 
         virtual void setup(const std::shared_ptr<StageSet>& stageSet) override;
-        virtual void reset() override;
-        virtual void draw(double dt) override;
         virtual void update(double dt) override;
+        virtual void draw(double dt) override;
+        virtual void reset() override;
 
         virtual void notify(cellar::CameraMsg &msg) override;
-
-        virtual void manageProp(const std::shared_ptr<Prop>& prop) override;
-        virtual void unmanageProp(const std::shared_ptr<Prop>& prop) override;
-
-        virtual void setEnvironment(const std::shared_ptr<Environment>& env) override;
 
         std::shared_ptr<GlPostProdUnit> postProdUnit() const;
 

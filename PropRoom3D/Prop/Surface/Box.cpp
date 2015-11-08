@@ -5,7 +5,7 @@
 #include "../Coating/Coating.h"
 #include "Ray/RayHitList.h"
 #include "Ray/RayHitReport.h"
-#include "../../StageSet/StageSetVisitor.h"
+#include "Serial/Visitor.h"
 
 
 namespace prop3
@@ -35,7 +35,7 @@ namespace prop3
         return std::shared_ptr<Surface>(new Box(minCorner, maxCorner));
     }
 
-    void Box::accept(StageSetVisitor& visitor)
+    void Box::accept(Visitor& visitor)
     {
         visitor.visit(*this);
     }
@@ -207,7 +207,7 @@ namespace prop3
                 texMainSideOnly));
     }
 
-    void BoxTexture::accept(StageSetVisitor& visitor)
+    void BoxTexture::accept(Visitor& visitor)
     {
         visitor.visit(*this);
     }

@@ -32,20 +32,15 @@ namespace prop3
         virtual ~AbstractArtDirector() {}
 
         virtual void setup(const std::shared_ptr<StageSet>& stageSet) =0;
-        virtual void reset() =0;
-        virtual void draw(double dt) =0;
         virtual void update(double dt) =0;
+        virtual void draw(double dt) =0;
+        virtual void reset() =0;
 
         virtual void notify(cellar::CameraMsg &msg) = 0;
 
         virtual void resize(int width, int height);
         virtual const std::shared_ptr<cellar::Camera>& camera() const;
         virtual void setCamera(const std::shared_ptr<cellar::Camera>& camera);
-
-        virtual void manageProp(const std::shared_ptr<Prop>& prop) =0;
-        virtual void unmanageProp(const std::shared_ptr<Prop>& prop) =0;
-
-        virtual void setEnvironment(const std::shared_ptr<Environment>& env) = 0;
 
 
     private:

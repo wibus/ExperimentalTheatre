@@ -1,5 +1,7 @@
 #include "CpuRaytracerWorker.h"
 
+#include <list>
+
 #include <GLM/gtc/random.hpp>
 
 #include "Prop/Prop.h"
@@ -14,11 +16,10 @@
 #include "Light/Environment.h"
 #include "Light/Backdrop/Backdrop.h"
 
-#include "StageSet/StageSet.h"
-#include "StageSet/StageSetJsonReader.h"
+#include "Node/StageSet.h"
+#include "Serial/JsonReader.h"
 
 #include "../AbstractTeam.h"
-#include "../Designer/StdDesigner.h"
 
 
 namespace prop3
@@ -27,7 +28,7 @@ namespace prop3
     {
     public:
         WorkerTeam() :
-            AbstractTeam(new StdDesigner(), nullptr /* Choreographer */)
+            AbstractTeam(nullptr /* Choreographer */)
         {
         }
     };
@@ -200,7 +201,7 @@ namespace prop3
             std::unique_lock<std::mutex> lk(_flowMutex);
             _cv.wait(lk, [this]{
                 return (_runningPredicate &&
-                            (!_props.empty() ||
+                            (!_searchSurfaces.empty() ||
                              !_stageSetStream.empty())) ||
                         _terminatePredicate;
             });
@@ -218,8 +219,10 @@ namespace prop3
                 reader.deserialize(*_team, _stageSetStream);
                 _envMaterial = _team->stageSet()->environment()->ambientMaterial();
                 _backdrop = _team->stageSet()->environment()->backdrop();
-                _props = _team->stageSet()->props();
+                _stageSet = _team->stageSet();
                 _stageSetStream.clear();
+
+                compileSearchStructures();
             }
 
 
@@ -699,45 +702,161 @@ namespace prop3
         }
     }
 */
+
+    struct SearchZone
+    {
+        size_t parent;
+        size_t begSurf;
+        size_t endSurf;
+        size_t endZone;
+
+        std::shared_ptr<Surface> bounds;
+    };
+
+    void CpuRaytracerWorker::compileSearchStructures()
+    {
+        _searchZones.clear();
+        _searchSurfaces.clear();
+
+        if(!_stageSet->isVisible())
+            return;
+
+        std::vector<std::pair<StageZone*, size_t>> zoneStack;
+        zoneStack.push_back(std::make_pair(_stageSet.get(), -1));
+        while(!zoneStack.empty())
+        {
+            StageZone* zone = zoneStack.back().first;
+            size_t parentId = zoneStack.back().second;
+            zoneStack.pop_back();
+
+            size_t addedSubzones = 0;
+            for(size_t s=0; s < zone->subzones().size(); ++s)
+            {
+                StageZone* subz = zone->subzones()[s].get();
+
+                if(!subz->isVisible())
+                    continue;
+
+                // Bubble up unbounded subzones
+                if(subz->bounds() == StageZone::UNBOUNDED)
+                {
+                    // Bubble up props
+                    size_t propCount = subz->props().size();
+                    for(size_t p=0; p < propCount; ++p)
+                    {
+                        auto prop = subz->props()[p];
+                        if(prop->isVisible())
+                            zone->addProp(subz->props()[p]);
+                    }
+
+                    // Bubble up subzones
+                    size_t subzCount = subz->subzones().size();
+                    for(size_t z=0; z < subzCount; ++z)
+                    {
+                        auto subsubz = subz->subzones()[z];
+                        if(subsubz->isVisible())
+                            zone->addSubzone(subsubz);
+                    }
+                }
+                else
+                {
+                    size_t currId = _searchZones.size();
+                    zoneStack.push_back(std::make_pair(subz, currId));
+                    ++addedSubzones;
+                }
+            }
+
+            size_t addedSurfaces = 0;
+            size_t propCount = zone->props().size();
+            for(size_t p=0; p < propCount; ++p)
+            {
+                auto prop = zone->props()[p];
+                if(prop->isVisible())
+                {
+                    size_t surfCount = prop->surfaces().size();
+                    for(size_t s=0; s < surfCount; ++s)
+                    {
+                        _searchSurfaces.push_back(prop->surfaces()[s]);
+                        ++addedSurfaces;
+                    }
+                }
+            }
+
+            if(addedSubzones == 0 && addedSurfaces == 0)
+                continue;
+
+            SearchZone searchZone;
+            searchZone.parent = parentId;
+            searchZone.bounds = zone->bounds();
+            searchZone.endSurf = _searchSurfaces.size();
+            searchZone.begSurf = searchZone.endSurf - addedSurfaces;
+            searchZone.endZone = _searchZones.size() + 1;
+            _searchZones.push_back(searchZone);
+        }
+
+        for(int i = _searchZones.size()-1; i >= 0; --i)
+        {
+            const SearchZone& zone = _searchZones[i];
+            if(zone.parent != -1)
+            {
+                SearchZone& parent = _searchZones[zone.parent];
+                parent.endZone = glm::max(parent.endZone, zone.endZone);
+                parent.endSurf = glm::max(parent.endSurf, zone.endSurf);
+            }
+        }
+    }
+
     double CpuRaytracerWorker::findNearestProp(
             const Raycast& raycast,
             RayHitReport& reportMin)
     {
         Raycast ray(raycast);
+        RayHitList reports(_reportPool);
 
-        size_t propCount = _props.size();
-        for(size_t p=0; p < propCount; ++p)
+        size_t z = 0;
+        size_t zoneCount = _searchZones.size();
+        while(z < zoneCount)
         {
-            const auto& prop = _props[p];
-            RayHitList reports(_reportPool);
+            const SearchZone& zone = _searchZones[z];
 
-            // Check for bounding surface for fast discard
-            const std::shared_ptr<Surface>& bounds = prop->boundingSurface();
-            if(bounds.get() != nullptr && !bounds->intersects(ray, reports))
-                continue;
-
-            const auto& surfElems = prop->surfaceElements();
-            size_t surfCount = prop->surfaceElements().size();
-            for(size_t s=0; s < surfCount; ++s)
+            if(zone.begSurf != zone.endSurf)
             {
-                const auto& surf = surfElems[s];
-
                 reports.clear();
-                surf->raycast(ray, reports);
-
-                RayHitReport* node = reports.head;
-                while(node != nullptr)
+                if(zone.bounds == StageZone::UNBOUNDED ||
+                   zone.bounds->intersects(ray, reports))
                 {
-                    if(0.0 < node->distance && node->distance < ray.limit)
+                    for(size_t s = zone.begSurf; s < zone.endSurf; ++s)
                     {
-                        ray.limit = node->distance;
-                        reportMin = *node;
+                        reports.clear();
+
+                        _searchSurfaces[s]->raycast(ray, reports);
+
+                        RayHitReport* node = reports.head;
+                        while(node != nullptr)
+                        {
+                            if(0.0 < node->distance && node->distance < ray.limit)
+                            {
+                                ray.limit = node->distance;
+                                reportMin = *node;
+                            }
+
+                            node = node->_next;
+                        }
                     }
 
-                    node = node->_next;
+                    ++z;
+                }
+                else
+                {
+                    z = zone.endZone;
                 }
             }
+            else
+            {
+                ++z;
+            }
         }
+
 
         return reportMin.distance;
     }

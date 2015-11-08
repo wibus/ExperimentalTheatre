@@ -29,8 +29,8 @@ namespace prop3
             plane(const glm::dvec3& normal, const glm::dvec3& origin);
 
 
-        // StageSetNode interface
-        virtual void accept(StageSetVisitor& visitor) override;
+        // Node interface
+        virtual void accept(Visitor& visitor) override;
 
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
@@ -83,8 +83,8 @@ namespace prop3
                   const glm::dvec3& texU, const glm::dvec3& texV, const glm::dvec3& texOrigin);
 
 
-        // StageSetNode interface
-        virtual void accept(StageSetVisitor& visitor) override;
+        // Node interface
+        virtual void accept(Visitor& visitor) override;
 
         virtual void raycast(const Raycast& ray, RayHitList& reports) const;
 

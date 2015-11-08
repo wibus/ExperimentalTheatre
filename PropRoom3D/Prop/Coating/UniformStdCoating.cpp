@@ -1,6 +1,6 @@
 #include "UniformStdCoating.h"
 
-#include "../../StageSet/StageSetVisitor.h"
+#include "Serial/Visitor.h"
 
 
 namespace prop3
@@ -17,7 +17,7 @@ namespace prop3
 
     }
 
-    void UniformStdCoating::accept(StageSetVisitor& visitor)
+    void UniformStdCoating::accept(Visitor& visitor)
     {
         visitor.visit(*this);
     }

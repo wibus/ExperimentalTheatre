@@ -7,7 +7,7 @@
 #include <GLM/glm.hpp>
 #include <GLM/gtc/quaternion.hpp>
 
-#include "PropRoom3D/StageSet/StageSetNode.h"
+#include <PropRoom3D/Node/Node.h>
 
 
 namespace prop3
@@ -41,7 +41,7 @@ namespace prop3
 
 
 
-    class PROP3D_EXPORT Surface : public StageSetNode
+    class PROP3D_EXPORT Surface : public Node
     {
         friend void applyTransformation(
                 const std::shared_ptr<Surface>& surf,
@@ -83,6 +83,7 @@ namespace prop3
         static const std::shared_ptr<Material> DEFAULT_MATERIAL;
         static const std::shared_ptr<Material> ENVIRONMENT_MATERIAL;
 
+
     protected:
         virtual void transform(const Transform& transform) = 0;
     };
@@ -95,7 +96,7 @@ namespace prop3
         PhysicalSurface();
 
     public:
-        virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
+        virtual std::vector<std::shared_ptr<Node>> children() const override;
 
         virtual void setCoating(const std::shared_ptr<Coating>& coating) override;
         virtual void setInnerMaterial(const std::shared_ptr<Material>& mat) override;
@@ -122,9 +123,9 @@ namespace prop3
         SurfaceShell(const std::shared_ptr<Surface>& surf);
 
     public:
-        // StageSetNode interface
-        virtual void accept(StageSetVisitor& visitor) override;
-        virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
+        // Node interface
+        virtual void accept(Visitor& visitor) override;
+        virtual std::vector<std::shared_ptr<Node>> children() const override;
 
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
@@ -157,9 +158,9 @@ namespace prop3
         SurfaceGhost(const std::shared_ptr<Surface>& surf);
 
     public:
-        // StageSetNode interface
-        virtual void accept(StageSetVisitor& visitor) override;
-        virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
+        // Node interface
+        virtual void accept(Visitor& visitor) override;
+        virtual std::vector<std::shared_ptr<Node>> children() const override;
 
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
@@ -191,9 +192,9 @@ namespace prop3
         SurfaceInverse(const std::shared_ptr<Surface>& surf);
 
     public:
-        // StageSetNode interface
-        virtual void accept(StageSetVisitor& visitor) override;
-        virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
+        // Node interface
+        virtual void accept(Visitor& visitor) override;
+        virtual std::vector<std::shared_ptr<Node>> children() const override;
 
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
@@ -229,8 +230,8 @@ namespace prop3
         static std::shared_ptr<Surface> apply(
                 const std::vector<std::shared_ptr<Surface>>& surfs);
 
-        virtual void accept(StageSetVisitor& visitor) override;
-        virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
+        virtual void accept(Visitor& visitor) override;
+        virtual std::vector<std::shared_ptr<Node>> children() const override;
 
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;
@@ -269,8 +270,8 @@ namespace prop3
         static std::shared_ptr<Surface> apply(
                 const std::vector<std::shared_ptr<Surface>>& surfs);
 
-        virtual void accept(StageSetVisitor& visitor) override;
-        virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
+        virtual void accept(Visitor& visitor) override;
+        virtual std::vector<std::shared_ptr<Node>> children() const override;
 
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;

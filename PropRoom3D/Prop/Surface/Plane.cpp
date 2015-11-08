@@ -3,7 +3,7 @@
 #include "../Coating/Coating.h"
 #include "Ray/RayHitList.h"
 #include "Ray/RayHitReport.h"
-#include "../../StageSet/StageSetVisitor.h"
+#include "Serial/Visitor.h"
 
 
 namespace prop3
@@ -44,7 +44,7 @@ namespace prop3
         return std::shared_ptr<Surface>(new Plane(normal, origin));
     }
 
-    void Plane::accept(StageSetVisitor& visitor)
+    void Plane::accept(Visitor& visitor)
     {
         visitor.visit(*this);
     }
@@ -148,7 +148,7 @@ namespace prop3
                     new PlaneTexture(normal, origin, texU, texV, texOrigin));
     }
 
-    void PlaneTexture::accept(StageSetVisitor& visitor)
+    void PlaneTexture::accept(Visitor& visitor)
     {
         visitor.visit(*this);
     }

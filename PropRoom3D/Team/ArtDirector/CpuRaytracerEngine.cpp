@@ -7,8 +7,8 @@
 #include <CellarWorkbench/Misc/Log.h>
 
 #include "Prop/Prop.h"
-#include "StageSet/StageSet.h"
-#include "StageSet/StageSetJsonWriter.h"
+#include "Node/StageSet.h"
+#include "Serial/JsonWriter.h"
 #include "CpuRaytracerWorker.h"
 #include "RaytracerState.h"
 
@@ -410,6 +410,9 @@ namespace prop3
             glm::length(glm::sqrt(totalVariance)) * sampleCount);
 
         _isUpdated = true;
+
+        //if(nextSampleCount == 8)
+        //    exit(0);
     }
 
     void CpuRaytracerEngine::performNonStochasticSyncronousDraf()

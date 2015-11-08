@@ -13,8 +13,8 @@ namespace prop3
         virtual ~UniformStdMaterial();
 
 
-        // StageSetNode interface
-        virtual void accept(StageSetVisitor& visitor) override;
+        // Node interface
+        virtual void accept(Visitor& visitor) override;
 
 
         // OPTICAL PROPERTIES

@@ -20,12 +20,16 @@ namespace prop3
 {
     class Raycast;
     class RayHitReport;
+    class StageSet;
     class Backdrop;
     class Material;
     class Coating;
+    class Surface;
     class Prop;
 
     class AbstractTeam;
+
+    class SearchZone;
 
 
     class PROP3D_EXPORT CpuRaytracerWorker
@@ -85,6 +89,9 @@ namespace prop3
                 std::vector<Raycast>& outRaycasts,
                 const glm::dvec3& targetPos);
 */
+
+        virtual void compileSearchStructures();
+
         virtual double findNearestProp(
                 const Raycast& raycast,
                 RayHitReport& reportMin);
@@ -92,7 +99,6 @@ namespace prop3
         virtual glm::dvec3 draft(
                 const Raycast& raycast,
                 const RayHitReport& report);
-
 
     private:
         void resetBuffers();
@@ -135,9 +141,11 @@ namespace prop3
         std::shared_ptr<AbstractTeam> _team;
         std::shared_ptr<Backdrop> _backdrop;
         std::shared_ptr<Material> _envMaterial;
-        std::vector<std::shared_ptr<Prop>> _props;
+        std::shared_ptr<StageSet> _stageSet;
 
         std::vector<RayHitReport> _lightHitReports;
+        std::vector<SearchZone> _searchZones;
+        std::vector<std::shared_ptr<Surface>> _searchSurfaces;
 
         // Memory pools
         std::vector<RayHitReport*> _reportPool;

@@ -3,7 +3,7 @@
 #include "../Coating/Coating.h"
 #include "Ray/RayHitList.h"
 #include "Ray/RayHitReport.h"
-#include "../../StageSet/StageSetVisitor.h"
+#include "Serial/Visitor.h"
 
 
 namespace prop3
@@ -22,7 +22,7 @@ namespace prop3
         return std::shared_ptr<Surface>(new Sphere(center, radius));
     }
 
-    void Sphere::accept(StageSetVisitor& visitor)
+    void Sphere::accept(Visitor& visitor)
     {
         visitor.visit(*this);
     }

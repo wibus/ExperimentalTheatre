@@ -50,7 +50,7 @@ namespace prop3
                 unsigned int count) const override;
 
 
-        virtual void accept(StageSetVisitor& visito) override;
+        virtual void accept(Visitor& visito) override;
 
     protected:
         static const double SUN_COS_DIMENSION;

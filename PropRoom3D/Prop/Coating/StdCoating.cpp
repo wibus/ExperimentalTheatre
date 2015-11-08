@@ -151,8 +151,9 @@ namespace prop3
                 // near the surface, we prevent the ray from entering the
                 // material by averaging the effect by a diffuse reflexion.
                 double eScat = enteredMaterial.scattering(pos);
-                glm::dvec3 diffuseColor = glm::mix(color::black, eColor, eScat)
-                                            * ((1.0 - eCond) / outRayCountHint);
+                glm::dvec3 diffuseColor = glm::mix(color::black,
+                        glm::pow(eColor, glm::dvec3(1/(1/(1-eScat) - 1) + 1)), eScat)
+                    * ((1.0 - eCond) / outRayCountHint);
 
                 // The constant represents the fact that subsurface
                 // scattering only returns half of the rays while the other

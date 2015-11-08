@@ -13,17 +13,7 @@
 
 namespace prop3
 {
-    // Shapes attributes
-    typedef unsigned int PropId;
 
-    // Body types
-    enum class EBodyType
-    {
-        GRAPHIC,
-        KINEMATIC,
-        DYNAMIC,
-        NB_TYPES
-    };
 }
 
 #endif // PROPROOM3D_LIBPROPROOM3D_GLOBAL_H

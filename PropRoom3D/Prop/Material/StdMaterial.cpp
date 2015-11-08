@@ -32,7 +32,7 @@ namespace prop3
         }
         else
         {
-            double scatterRate = 1 / (1 / (1 - opa) - 1);
+            double scatterRate = 1 / (1 / (opa) - 1);
             std::exponential_distribution<> distrib(scatterRate);
             double distance = distrib(_randomEngine);
             return glm::min(distance, ray.limit);

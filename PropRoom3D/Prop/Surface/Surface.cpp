@@ -6,7 +6,7 @@
 #include "Ray/RayHitReport.h"
 #include "../Material/UniformStdMaterial.h"
 #include "../Coating/UniformStdCoating.h"
-#include "../../StageSet/StageSetVisitor.h"
+#include "Serial/Visitor.h"
 
 
 namespace prop3
@@ -98,7 +98,7 @@ namespace prop3
 
     }
 
-    std::vector<std::shared_ptr<StageSetNode>> PhysicalSurface::children() const
+    std::vector<std::shared_ptr<Node>> PhysicalSurface::children() const
     {
         return { _coating, _innerMat, _outerMat };
     }
@@ -140,14 +140,14 @@ namespace prop3
         _outerMat.reset();
     }
 
-    void SurfaceShell::accept(StageSetVisitor& visitor)
+    void SurfaceShell::accept(Visitor& visitor)
     {
         visitor.visit(*this);
     }
 
-    std::vector<std::shared_ptr<StageSetNode>> SurfaceShell::children() const
+    std::vector<std::shared_ptr<Node>> SurfaceShell::children() const
     {
-        std::vector<std::shared_ptr<StageSetNode>> c{_surf};
+        std::vector<std::shared_ptr<Node>> c{_surf};
         if(_coating.get() != nullptr) c.push_back( _coating );
         if(_innerMat.get() != nullptr) c.push_back( _innerMat );
         if(_outerMat.get() != nullptr) c.push_back( _outerMat );
@@ -216,12 +216,12 @@ namespace prop3
     {
     }
 
-    void SurfaceGhost::accept(StageSetVisitor& visitor)
+    void SurfaceGhost::accept(Visitor& visitor)
     {
         visitor.visit(*this);
     }
 
-    std::vector<std::shared_ptr<StageSetNode>> SurfaceGhost::children() const
+    std::vector<std::shared_ptr<Node>> SurfaceGhost::children() const
     {
         return { _surf };
     }
@@ -293,12 +293,12 @@ namespace prop3
     {
     }
 
-    void SurfaceInverse::accept(StageSetVisitor& visitor)
+    void SurfaceInverse::accept(Visitor& visitor)
     {
         visitor.visit(*this);
     }
 
-    std::vector<std::shared_ptr<StageSetNode>> SurfaceInverse::children() const
+    std::vector<std::shared_ptr<Node>> SurfaceInverse::children() const
     {
         return { _surf };
     }
@@ -384,14 +384,14 @@ namespace prop3
     {
     }
 
-    void SurfaceOr::accept(StageSetVisitor& visitor)
+    void SurfaceOr::accept(Visitor& visitor)
     {
         visitor.visit(*this);
     }
 
-    std::vector<std::shared_ptr<StageSetNode>> SurfaceOr::children() const
+    std::vector<std::shared_ptr<Node>> SurfaceOr::children() const
     {
-        return std::vector<std::shared_ptr<StageSetNode>>(_surfs.begin(), _surfs.end());
+        return std::vector<std::shared_ptr<Node>>(_surfs.begin(), _surfs.end());
     }
 
     EPointPosition SurfaceOr::isIn(const glm::dvec3& point) const
@@ -548,14 +548,14 @@ namespace prop3
     {
     }
 
-    void SurfaceAnd::accept(StageSetVisitor& visitor)
+    void SurfaceAnd::accept(Visitor& visitor)
     {
         visitor.visit(*this);
     }
 
-    std::vector<std::shared_ptr<StageSetNode>> SurfaceAnd::children() const
+    std::vector<std::shared_ptr<Node>> SurfaceAnd::children() const
     {
-        return std::vector<std::shared_ptr<StageSetNode>>(_surfs.begin(), _surfs.end());
+        return std::vector<std::shared_ptr<Node>>(_surfs.begin(), _surfs.end());
     }
 
     EPointPosition SurfaceAnd::isIn(const glm::dvec3& point) const

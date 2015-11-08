@@ -10,9 +10,7 @@
 
 namespace prop3
 {
-    class Prop;
     class StageSet;
-    class Environment;
 
 
     class PROP3D_EXPORT AbstractChoreographer
@@ -23,14 +21,9 @@ namespace prop3
     public:
         virtual ~AbstractChoreographer() {}
 
-        virtual void setup() =0;
-        virtual void reset() =0;
+        virtual void setup(const std::shared_ptr<StageSet>& stageSet) =0;
         virtual void update(double dt) =0;
-
-        virtual void manageProp(const std::shared_ptr<Prop>& prop) =0;
-        virtual void unmanageProp(const std::shared_ptr<Prop>& prop) =0;
-
-        virtual void setEnvironment(const std::shared_ptr<Environment>& env) = 0;
+        virtual void reset() =0;
     };
 }
 

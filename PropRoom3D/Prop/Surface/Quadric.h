@@ -52,8 +52,8 @@ namespace prop3
             cylinder(double rx, double ry);
 
 
-        // StageSetNode interface
-        virtual void accept(StageSetVisitor& visitor) override;
+        // Node interface
+        virtual void accept(Visitor& visitor) override;
 
         virtual EPointPosition isIn(const glm::dvec3& point) const;
         virtual double signedDistance(const glm::dvec3& point) const;

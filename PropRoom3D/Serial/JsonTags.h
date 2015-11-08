@@ -6,19 +6,42 @@
 
 namespace prop3
 {
-    // StageSet object
-    extern const QString STAGESET_ENVIRONMENT_OBJECT;
-    extern const QString STAGESET_BACKDROP_ARRAY;
-    extern const QString STAGESET_MATERIAL_ARRAY;
-    extern const QString STAGESET_COATING_ARRAY;
-    extern const QString STAGESET_SURFACE_ARRAY;
-    extern const QString STAGESET_PROP_ARRAY;
+    // Document object
+    extern const QString DOCUMENT_MATERIAL_ARRAY;
+    extern const QString DOCUMENT_COATING_ARRAY;
+    extern const QString DOCUMENT_SURFACE_ARRAY;
+    extern const QString DOCUMENT_STAGE_SET;
+
+    // Environments
+    extern const QString ENVIRONMENT_BACKDROP;
+    extern const QString ENVIRONMENT_AMBIENT_MATERIAL;
+
+    // Backdrops
+    extern const QString BACKDROP_TYPE;
+    extern const QString BACKDROP_TYPE_PROCEDURALSUN;
+    extern const QString BACKDROP_IS_DIRECTLY_VISIBLE;
+    extern const QString BACKDROP_SUN_COLOR;
+    extern const QString BACKDROP_SKY_COLOR;
+    extern const QString BACKDROP_SKYLINE_COLOR;
+    extern const QString BACKDROP_GROUND_COLOR;
+    extern const QString BACKDROP_GROUND_HEIGHT;
+    extern const QString BACKDROP_SUN_DIR;
+
+    // Handle nodes
+    extern const QString HANDLE_NAME;
+    extern const QString HANDLE_IS_VISIBLE;
+
+    // Zones
+    extern const QString ZONE_BOUNDS;
+    extern const QString ZONE_PROPS;
+    extern const QString ZONE_SUBZONES;
+
+    // Stage set
+    extern const QString STAGESET_ENVIRONMENT;
+
 
     // Props
-    extern const QString PROP_TYPE;
-    extern const QString PROP_TYPE_PROP;
-    extern const QString PROP_SURFACE_ELEMENTS;
-    extern const QString PROP_BOUNDING_SURFACE;
+    extern const QString PROP_SURFACES;
 
     // Surfaces
     extern const QString SURFACE_TYPE;
@@ -33,6 +56,8 @@ namespace prop3
     extern const QString SURFACE_OPERATOR_INVERSE;
     extern const QString SURFACE_OPERATOR_OR;
     extern const QString SURFACE_OPERATOR_AND;
+    extern const QString SURFACE_DISTANCE;
+    extern const QString SURFACE_NORMAL;
     extern const QString SURFACE_COATING;
     extern const QString SURFACE_INNER_MATERIAL;
     extern const QString SURFACE_OUTER_MATERIAL;
@@ -69,23 +94,6 @@ namespace prop3
     extern const QString COATING_PAINT_COLOR_TEX_NAME;
     extern const QString COATING_TEXTURE_FILTER;
     extern const QString COATING_TEXTURE_WRAPPER;
-
-    // Environments
-    extern const QString ENVIRONMENT_TYPE;
-    extern const QString ENVIRONMENT_TYPE_ENVIRONMENT;
-    extern const QString ENVIRONMENT_BACKDROP;
-    extern const QString ENVIRONMENT_AMBIENT_MATERIAL;
-
-    // Backdrops
-    extern const QString BACKDROP_TYPE;
-    extern const QString BACKDROP_TYPE_PROCEDURALSUN;
-    extern const QString BACKDROP_IS_DIRECTLY_VISIBLE;
-    extern const QString BACKDROP_SUN_COLOR;
-    extern const QString BACKDROP_SKY_COLOR;
-    extern const QString BACKDROP_SKYLINE_COLOR;
-    extern const QString BACKDROP_GROUND_COLOR;
-    extern const QString BACKDROP_GROUND_HEIGHT;
-    extern const QString BACKDROP_SUN_DIR;
 }
 
 #endif // PROPROOM3D_STAGESETJSONTAGS_H

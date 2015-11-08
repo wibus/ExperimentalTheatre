@@ -14,8 +14,8 @@ namespace prop3
         virtual ~UniformStdCoating();
 
 
-        // StageSetNode interface
-        virtual void accept(StageSetVisitor& visitor) override;
+        // Node interface
+        virtual void accept(Visitor& visitor) override;
 
 
         virtual double roughness(const glm::dvec3& tex) const override;

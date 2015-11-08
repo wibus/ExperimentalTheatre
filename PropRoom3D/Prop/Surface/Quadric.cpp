@@ -3,7 +3,7 @@
 #include "../Coating/Coating.h"
 #include "Ray/RayHitList.h"
 #include "Ray/RayHitReport.h"
-#include "../../StageSet/StageSetVisitor.h"
+#include "Serial/Visitor.h"
 
 
 namespace prop3
@@ -117,7 +117,7 @@ namespace prop3
                 -1));          // J
     }
 
-    void Quadric::accept(StageSetVisitor& visitor)
+    void Quadric::accept(Visitor& visitor)
     {
         visitor.visit(*this);
     }

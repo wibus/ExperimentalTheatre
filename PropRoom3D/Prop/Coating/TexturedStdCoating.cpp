@@ -4,7 +4,7 @@
 #include <CellarWorkbench/Image/ImageBank.h>
 
 #include "Ray/RayHitReport.h"
-#include "../../StageSet/StageSetVisitor.h"
+#include "Serial/Visitor.h"
 
 
 namespace prop3
@@ -29,7 +29,7 @@ namespace prop3
 
     }
 
-    void TexturedStdCoating::accept(StageSetVisitor& visitor)
+    void TexturedStdCoating::accept(Visitor& visitor)
     {
         visitor.visit(*this);
     }

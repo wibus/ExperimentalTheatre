@@ -1,4 +1,4 @@
-#include "StageSetJsonReader.h"
+#include "JsonReader.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -6,10 +6,11 @@
 
 #include <CellarWorkbench/Misc/Log.h>
 
-#include "StageSet.h"
-#include "StageSetJsonTags.h"
+#include "JsonTags.h"
 
-#include <Team/AbstractTeam.h>
+#include "Team/AbstractTeam.h"
+
+#include "Node/StageSet.h"
 
 #include "Prop/Prop.h"
 
@@ -44,32 +45,23 @@ namespace prop3
 
     bool StageSetJsonReader::deserialize(
             AbstractTeam& team,
-            const std::string& stream,
-            bool clearStageSet)
+            const std::string& stream)
     {
-        if(clearStageSet)
-        {
-            team.clearProps();
-        }
+        team.stageSet()->clear();
 
         QJsonDocument jsonDoc = QJsonDocument::fromJson(stream.c_str());
         QJsonObject docObj = jsonDoc.object();
 
-        // Deserialize coatings, materials, surfaces and backdrops
+        // Deserialize hardware (coatings, materials and surfaces)
         deserializeMaterials(docObj);
         deserializeCoatings(docObj);
         deserializeSurfaces(docObj);
-        deserializeBackdrops(docObj);
 
-        // Fill-in props
-        deserializeProps(docObj, team);
-
-        // Fill-in environment
-        deserializeEnvironment(docObj, team);
+        // Deserialize stage set tree
+        deserializeStageSet(docObj[DOCUMENT_STAGE_SET], team);
 
 
         //Clean-up structures
-        _backdrops.clear();
         _surfaces.clear();
         _materials.clear();
         _coatings.clear();
@@ -138,110 +130,11 @@ namespace prop3
             return cellar::ESamplerWrapper::REPEAT;
     }
 
-    void StageSetJsonReader::deserializeBackdrops(const QJsonObject& stageSetObj)
+    void StageSetJsonReader::deserializeMaterials(const QJsonObject& docObj)
     {
-        for(QJsonValueRef ref : stageSetObj[STAGESET_BACKDROP_ARRAY].toArray())
+        for(QJsonValueRef ref : docObj[DOCUMENT_MATERIAL_ARRAY].toArray())
         {
-            std::shared_ptr<Backdrop> backdrop;
-            QJsonObject obj = ref.toObject();
-            QString type = obj[COATING_TYPE].toString();
-
-            if(type == BACKDROP_TYPE_PROCEDURALSUN)
-            {
-                ProceduralSun* proceduralSun = new ProceduralSun();
-                proceduralSun->setSunColor(dvec3FromJson(obj[BACKDROP_SUN_COLOR]));
-                proceduralSun->setSkyColor(dvec3FromJson(obj[BACKDROP_SKY_COLOR]));
-                proceduralSun->setSkylineColor(dvec3FromJson(obj[BACKDROP_SKYLINE_COLOR]));
-                proceduralSun->setGroundColor(dvec3FromJson(obj[BACKDROP_GROUND_COLOR]));
-                proceduralSun->setGroundHeight(obj[BACKDROP_GROUND_HEIGHT].toDouble());
-                proceduralSun->setSunDirection(dvec3FromJson(obj[BACKDROP_SUN_DIR]));
-                backdrop.reset(proceduralSun);
-            }
-            else
-            {
-                getLog().postMessage(new Message('E', false,
-                    "Unknown backdrop type: " + type.toStdString(), "StageSetJsonReader"));
-            }
-
-            if(backdrop.get() != nullptr)
-            {
-                backdrop->setIsDirectlyVisible(obj[BACKDROP_IS_DIRECTLY_VISIBLE].toBool());
-                _backdrops.push_back(backdrop);
-            }
-        }
-    }
-
-    void StageSetJsonReader::deserializeEnvironment(const QJsonObject& stageSetObj, AbstractTeam& team)
-    {
-        std::shared_ptr<Environment> environment;
-        QJsonObject obj = stageSetObj[STAGESET_ENVIRONMENT_OBJECT].toObject();
-        QString type = obj[ENVIRONMENT_TYPE].toString();
-
-        if(type == ENVIRONMENT_TYPE_ENVIRONMENT)
-        {
-            environment = team.stageSet()->environment();
-        }
-        else
-        {
-            getLog().postMessage(new Message('E', false,
-                "Unknown environment type: " + type.toStdString(), "StageSetJsonReader"));
-        }
-
-        if(environment.get() != nullptr)
-        {
-            if(obj.contains(ENVIRONMENT_BACKDROP))
-                environment->setBackdrop(_backdrops[obj[ENVIRONMENT_BACKDROP].toInt()]);
-            environment->setAmbientMaterial(
-                _materials[obj[ENVIRONMENT_AMBIENT_MATERIAL].toInt()]);
-        }
-    }
-
-    void StageSetJsonReader::deserializeCoatings(const QJsonObject& stageSetObj)
-    {
-        for(QJsonValueRef ref : stageSetObj[STAGESET_COATING_ARRAY].toArray())
-        {
-            std::shared_ptr<Coating> coating;
-            QJsonObject obj = ref.toObject();
-            QString type = obj[COATING_TYPE].toString();
-
-            if(type == COATING_TYPE_UNIFORMSTD)
-            {
-                UniformStdCoating* coat = new UniformStdCoating();
-                coat->setRoughness( obj[COATING_ROUGHNESS].toDouble() );
-                coat->setPaintColor( dvec4FromJson(obj[COATING_PAINT_COLOR]) );
-                coat->setPaintRefractiveIndex( obj[COATING_PAINT_REFRACTIVE_INDEX].toDouble() );
-                coating.reset(coat);
-            }
-            else if(type == COATING_TYPE_TEXTUREDSTD)
-            {
-                TexturedStdCoating* coat = new TexturedStdCoating();
-                coat->setDefaultRoughness( obj[COATING_DEFAULT_ROUGHNESS].toDouble() );
-                coat->setDefaultPaintColor( dvec4FromJson(obj[COATING_DEFAULT_PAINT_COLOR]) );
-                coat->setRoughnessTexName( obj[COATING_ROUGHNESS_TEX_NAME].toString().toStdString() );
-                coat->setPaintColorTexName( obj[COATING_PAINT_COLOR_TEX_NAME].toString().toStdString() );
-                coat->setPaintRefractiveIndex( obj[COATING_PAINT_REFRACTIVE_INDEX].toDouble() );
-                coat->setTexFilter(  filterFromJson(obj[COATING_TEXTURE_FILTER]) );
-                coat->setTexWrapper( wrapperFromJson(obj[COATING_TEXTURE_WRAPPER]) );
-                coating.reset(coat);
-            }
-            else
-            {
-                getLog().postMessage(new Message('E', false,
-                    "Unknown coating type: " + type.toStdString(), "StageSetJsonReader"));
-            }
-
-            if(coating.get() != nullptr)
-            {
-                _coatings.push_back(coating);
-            }
-        }
-    }
-
-    void StageSetJsonReader::deserializeMaterials(const QJsonObject& stageSetObj)
-    {
-        for(QJsonValueRef ref : stageSetObj[STAGESET_MATERIAL_ARRAY].toArray())
-        {
-            std::shared_ptr<Material> material;
+            std::shared_ptr<Material> node;
             QJsonObject obj = ref.toObject();
             QString type = obj[MATERIAL_TYPE].toString();
 
@@ -253,7 +146,7 @@ namespace prop3
                 mat->setRefractiveIndex( obj[MATERIAL_REFRACTIVE_INDEX].toDouble() );
                 mat->setScattering( obj[MATERIAL_SCATTERING].toDouble() );
                 mat->setColor( dvec3FromJson(obj[MATERIAL_COLOR]) );
-                material.reset(mat);
+                node.reset(mat);
             }
             else
             {
@@ -261,30 +154,71 @@ namespace prop3
                     "Unknown material type: " + type.toStdString(), "StageSetJsonReader"));
             }
 
-            if(material.get() != nullptr)
+            if(node.get() != nullptr)
             {
-                _materials.push_back(material);
+                _materials.push_back(node);
             }
         }
     }
 
-    void StageSetJsonReader::deserializeSurfaces(const QJsonObject& stageSetObj)
+    void StageSetJsonReader::deserializeCoatings(const QJsonObject& docObj)
     {
-        for(QJsonValueRef ref : stageSetObj[STAGESET_SURFACE_ARRAY].toArray())
+        for(QJsonValueRef ref : docObj[DOCUMENT_COATING_ARRAY].toArray())
         {
-            std::shared_ptr<Surface> surface;
+            std::shared_ptr<Coating> node;
+            QJsonObject obj = ref.toObject();
+            QString type = obj[COATING_TYPE].toString();
+
+            if(type == COATING_TYPE_UNIFORMSTD)
+            {
+                UniformStdCoating* coat = new UniformStdCoating();
+                coat->setRoughness( obj[COATING_ROUGHNESS].toDouble() );
+                coat->setPaintColor( dvec4FromJson(obj[COATING_PAINT_COLOR]) );
+                coat->setPaintRefractiveIndex( obj[COATING_PAINT_REFRACTIVE_INDEX].toDouble() );
+                node.reset(coat);
+            }
+            else if(type == COATING_TYPE_TEXTUREDSTD)
+            {
+                TexturedStdCoating* coat = new TexturedStdCoating();
+                coat->setDefaultRoughness( obj[COATING_DEFAULT_ROUGHNESS].toDouble() );
+                coat->setDefaultPaintColor( dvec4FromJson(obj[COATING_DEFAULT_PAINT_COLOR]) );
+                coat->setRoughnessTexName( obj[COATING_ROUGHNESS_TEX_NAME].toString().toStdString() );
+                coat->setPaintColorTexName( obj[COATING_PAINT_COLOR_TEX_NAME].toString().toStdString() );
+                coat->setPaintRefractiveIndex( obj[COATING_PAINT_REFRACTIVE_INDEX].toDouble() );
+                coat->setTexFilter(  filterFromJson(obj[COATING_TEXTURE_FILTER]) );
+                coat->setTexWrapper( wrapperFromJson(obj[COATING_TEXTURE_WRAPPER]) );
+                node.reset(coat);
+            }
+            else
+            {
+                getLog().postMessage(new Message('E', false,
+                    "Unknown coating type: " + type.toStdString(), "StageSetJsonReader"));
+            }
+
+            if(node.get() != nullptr)
+            {
+                _coatings.push_back(node);
+            }
+        }
+    }
+
+    void StageSetJsonReader::deserializeSurfaces(const QJsonObject& docObj)
+    {
+        for(QJsonValueRef ref : docObj[DOCUMENT_SURFACE_ARRAY].toArray())
+        {
+            std::shared_ptr<Surface> node;
             QJsonObject obj = ref.toObject();
             QString type = obj[SURFACE_TYPE].toString();
 
             if(type == SURFACE_TYPE_BOX)
             {
-                surface = Box::boxCorners(
+                node = Box::boxCorners(
                     dvec3FromJson(obj[SURFACE_MIN_CORNER]),
                     dvec3FromJson(obj[SURFACE_MAX_CORNER]));
             }
             else if(type == SURFACE_TYPE_BOX_TEXTURE)
             {
-                surface = BoxTexture::boxCorners(
+                node = BoxTexture::boxCorners(
                     dvec3FromJson(obj[SURFACE_MIN_CORNER]),
                     dvec3FromJson(obj[SURFACE_MAX_CORNER]),
                     dvec3FromJson(obj[SURFACE_TEX_ORIGIN]),
@@ -294,12 +228,12 @@ namespace prop3
             }
             else if(type == SURFACE_TYPE_PLANE)
             {
-                surface = Plane::plane(
+                node = Plane::plane(
                     dvec4FromJson(obj[SURFACE_REPRESENTATION]));
             }
             else if(type == SURFACE_TYPE_PLANETEXTURE)
             {
-                surface = PlaneTexture::plane(
+                node = PlaneTexture::plane(
                     dvec4FromJson(obj[SURFACE_REPRESENTATION]),
                     dvec3FromJson(obj[SURFACE_TEX_U_DIR]),
                     dvec3FromJson(obj[SURFACE_TEX_V_DIR]),
@@ -307,12 +241,12 @@ namespace prop3
             }
             else if(type == SURFACE_TYPE_QUADRIC)
             {
-                surface = Quadric::fromMatrix(
+                node = Quadric::fromMatrix(
                     dmat4FromJson(obj[SURFACE_REPRESENTATION]));
             }
             else if(type == SURFACE_TYPE_SPHERE)
             {
-                surface = Sphere::sphere(
+                node = Sphere::sphere(
                     dvec3FromJson(obj[SURFACE_CENTER]),
                     obj[SURFACE_RADIUS].toDouble());
             }
@@ -322,51 +256,102 @@ namespace prop3
                     "Unknown surface type: " + type.toStdString(), "StageSetJsonReader"));
             }
 
-            if(surface.get() != nullptr)
+            if(node.get() != nullptr)
             {
-                surface->setCoating(_coatings[obj[SURFACE_COATING].toInt()]);
-                surface->setInnerMaterial(_materials[obj[SURFACE_INNER_MATERIAL].toInt()]);
-                surface->setOuterMaterial(_materials[obj[SURFACE_OUTER_MATERIAL].toInt()]);
-                _surfaces.push_back(surface);
+                node->setCoating(_coatings[obj[SURFACE_COATING].toInt()]);
+                node->setInnerMaterial(_materials[obj[SURFACE_INNER_MATERIAL].toInt()]);
+                node->setOuterMaterial(_materials[obj[SURFACE_OUTER_MATERIAL].toInt()]);
+                _surfaces.push_back(node);
             }
         }
     }
 
-    void StageSetJsonReader::deserializeProps(const QJsonObject& stageSetObj, AbstractTeam& team)
+    void StageSetJsonReader::deserializeStageSet(const QJsonValueRef& ref, AbstractTeam& team)
     {
-        for(QJsonValueRef propRef : stageSetObj[STAGESET_PROP_ARRAY].toArray())
+        QJsonObject obj = ref.toObject();
+        std::shared_ptr<StageSet> node = team.stageSet();
+        setStageZoneProperties(*node, obj, team);
+
+        if(obj.contains(STAGESET_ENVIRONMENT))
+            node->setEnvironment(deserializeEnvironment(obj[STAGESET_ENVIRONMENT], team));
+        else
+            node->setEnvironment( make_shared<Environment>() );
+    }
+
+    std::shared_ptr<StageZone> StageSetJsonReader::deserializeZone(const QJsonValueRef& ref, AbstractTeam& team)
+    {
+        QJsonObject obj = ref.toObject();
+        std::shared_ptr<StageZone> node(new StageZone(""));
+
+        setStageZoneProperties(*node, obj, team);
+
+        return node;
+    }
+
+    std::shared_ptr<Prop> StageSetJsonReader::deserializeProp(const QJsonValueRef& ref, AbstractTeam& team)
+    {
+        QJsonObject obj = ref.toObject();
+        std::shared_ptr<Prop> node(new Prop(""));
+        setHandleNodeProperties(*node, obj);
+
+        if(obj.contains(PROP_SURFACES))
         {
-            std::shared_ptr<Prop> prop;
-            QJsonObject obj = propRef.toObject();
-            QString type = obj[PROP_TYPE].toString();
-
-            if(type == PROP_TYPE_PROP)
+            for(QJsonValueRef surfRef : obj[PROP_SURFACES].toArray())
             {
-                prop = team.createProp();
-            }
-            else
-            {
-                getLog().postMessage(new Message('E', false,
-                    "Unknown prop type: " + type.toStdString(), "StageSetJsonReader"));
-            }
-
-            if(prop.get() != nullptr)
-            {
-                if(obj.contains(PROP_SURFACE_ELEMENTS))
-                {
-                    for(QJsonValueRef surfRef : obj[PROP_SURFACE_ELEMENTS].toArray())
-                    {
-                        prop->pushSurface(subSurfTree( surfRef ));
-                    }
-                }
-
-                if(obj.contains(PROP_BOUNDING_SURFACE))
-                {
-                    prop->setBoundingSurface(subSurfTree(
-                        obj[PROP_BOUNDING_SURFACE]));
-                }
+                auto surf = subSurfTree( surfRef );
+                node->addSurface( surf );
             }
         }
+
+        return node;
+    }
+
+    std::shared_ptr<Environment> StageSetJsonReader::deserializeEnvironment(const QJsonValueRef& ref, AbstractTeam& team)
+    {
+        QJsonObject obj = ref.toObject();
+        std::shared_ptr<Environment> node(new Environment());
+
+        if(obj.contains(ENVIRONMENT_BACKDROP))
+            node->setBackdrop(deserializeBackdrop(obj[ENVIRONMENT_BACKDROP], team));
+
+        if(obj.contains(ENVIRONMENT_AMBIENT_MATERIAL))
+            node->setAmbientMaterial(_materials[obj[ENVIRONMENT_AMBIENT_MATERIAL].toInt()]);
+        else
+            node->setAmbientMaterial(material::AIR);
+
+        return node;
+    }
+
+    std::shared_ptr<Backdrop> StageSetJsonReader::deserializeBackdrop(const QJsonValueRef& ref, AbstractTeam& team)
+    {
+        QJsonObject obj = ref.toObject();
+        std::shared_ptr<Backdrop> node;
+        QString type = obj[BACKDROP_TYPE].toString();
+
+        if(type == BACKDROP_TYPE_PROCEDURALSUN)
+        {
+            ProceduralSun* proceduralSun = new ProceduralSun();
+            proceduralSun->setSunColor(dvec3FromJson(obj[BACKDROP_SUN_COLOR]));
+            proceduralSun->setSkyColor(dvec3FromJson(obj[BACKDROP_SKY_COLOR]));
+            proceduralSun->setSkylineColor(dvec3FromJson(obj[BACKDROP_SKYLINE_COLOR]));
+            proceduralSun->setGroundColor(dvec3FromJson(obj[BACKDROP_GROUND_COLOR]));
+            proceduralSun->setGroundHeight(obj[BACKDROP_GROUND_HEIGHT].toDouble());
+            proceduralSun->setSunDirection(dvec3FromJson(obj[BACKDROP_SUN_DIR]));
+            node.reset(proceduralSun);
+        }
+        else
+        {
+            getLog().postMessage(new Message('E', false,
+                "Unknown backdrop type: " + type.toStdString(), "StageSetJsonReader"));
+        }
+
+        // Abstract properties
+        if(node.get() != nullptr)
+        {
+            node->setIsDirectlyVisible(obj[BACKDROP_IS_DIRECTLY_VISIBLE].toBool());
+        }
+
+        return node;
     }
 
     std::shared_ptr<Surface> StageSetJsonReader::subSurfTree(
@@ -378,49 +363,97 @@ namespace prop3
         }
         else
         {
+            std::shared_ptr<Surface> node;
             QJsonObject obj = surfaceTree.toObject();
 
             if(obj.contains(SURFACE_OPERATOR_SHELL))
             {
-                std::shared_ptr<Surface> shell = Surface::shell(subSurfTree(obj[SURFACE_OPERATOR_SHELL]));
-                Surface::transform(shell, dmat4FromJson(obj[SURFACE_TRANSFORM]));
+                node = Surface::shell(subSurfTree(obj[SURFACE_OPERATOR_SHELL]));
+                Surface::transform(node, dmat4FromJson(obj[SURFACE_TRANSFORM]));
 
                 if(obj.contains(SURFACE_COATING))
-                    shell->setCoating(_coatings[obj[SURFACE_COATING].toInt()]);
+                    node->setCoating(_coatings[obj[SURFACE_COATING].toInt()]);
                 if(obj.contains(SURFACE_INNER_MATERIAL))
-                    shell->setInnerMaterial(_materials[obj[SURFACE_INNER_MATERIAL].toInt()]);
+                    node->setInnerMaterial(_materials[obj[SURFACE_INNER_MATERIAL].toInt()]);
                 if(obj.contains(SURFACE_OUTER_MATERIAL))
-                    shell->setOuterMaterial(_materials[obj[SURFACE_OUTER_MATERIAL].toInt()]);
-
-                return shell;
+                    node->setOuterMaterial(_materials[obj[SURFACE_OUTER_MATERIAL].toInt()]);
             }
             else if(obj.contains(SURFACE_OPERATOR_GHOST))
             {
-                return ~subSurfTree(obj[SURFACE_OPERATOR_GHOST]);
+                node = ~subSurfTree(obj[SURFACE_OPERATOR_GHOST]);
             }
             else if(obj.contains(SURFACE_OPERATOR_INVERSE))
             {
-                return !subSurfTree(obj[SURFACE_OPERATOR_INVERSE]);
+                node = !subSurfTree(obj[SURFACE_OPERATOR_INVERSE]);
             }
             else if(obj.contains(SURFACE_OPERATOR_OR))
             {
                 vector<shared_ptr<Surface>> operansSurf;
                 for(QJsonValueRef ref : obj[SURFACE_OPERATOR_OR].toArray())
                     operansSurf.push_back(subSurfTree(ref));
-                return SurfaceOr::apply(operansSurf);
+                node = SurfaceOr::apply(operansSurf);
             }
             else if(obj.contains(SURFACE_OPERATOR_AND))
             {
                 vector<shared_ptr<Surface>> operansSurf;
                 for(QJsonValueRef ref : obj[SURFACE_OPERATOR_AND].toArray())
                     operansSurf.push_back(subSurfTree(ref));
-                return SurfaceAnd::apply(operansSurf);
+                node = SurfaceAnd::apply(operansSurf);
             }
             else
             {
                 QString logOpt = obj.begin().key();
                 getLog().postMessage(new Message('E', false,
                     "Unknown surface operator: " + logOpt.toStdString(), "StageSetJsonReader"));
+            }
+
+            if(node.get() != nullptr)
+            {
+
+            }
+
+            return node;
+        }
+    }
+
+    void StageSetJsonReader::setHandleNodeProperties(
+            HandleNode& node,
+            const QJsonObject& obj)
+    {
+        if(obj.contains(HANDLE_NAME))
+            node.setName(obj[HANDLE_NAME].toString().toStdString());
+
+        if(obj.contains((HANDLE_IS_VISIBLE)))
+            node.setIsVisible(obj[HANDLE_IS_VISIBLE].toBool());
+    }
+
+    void StageSetJsonReader::setStageZoneProperties(
+            StageZone& node,
+            const QJsonObject& obj,
+            AbstractTeam& team)
+    {
+        setHandleNodeProperties(node, obj);
+
+        if(obj.contains(ZONE_BOUNDS))
+            node.setBounds(subSurfTree( obj[ZONE_BOUNDS] ));
+        else
+            node.setBounds(StageZone::UNBOUNDED);
+
+        if(obj.contains(ZONE_PROPS))
+        {
+            for(QJsonValueRef propRef : obj[ZONE_PROPS].toArray())
+            {
+                auto prop = deserializeProp(propRef, team);
+                node.addProp(prop);
+            }
+        }
+
+        if(obj.contains(ZONE_SUBZONES))
+        {
+            for(QJsonValueRef zoneRef : obj[ZONE_SUBZONES].toArray())
+            {
+                auto subzone = deserializeZone(zoneRef, team);
+                node.addSubzone(subzone);
             }
         }
     }

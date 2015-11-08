@@ -35,7 +35,6 @@ SET(PROP3_SURFACE_HEADERS
 # Prop
 SET(PROP3_PROP_HEADERS
     ${PROP3_COATING_HEADERS}
-    ${PROP3_HARDWARE_HEADERS}
     ${PROP3_MATERIAL_HEADERS}
     ${PROP3_SURFACE_HEADERS}
     ${PROP3_SRC_DIR}/Prop/Prop.h)
@@ -47,14 +46,19 @@ SET(PROP3_RAY_HEADERS
     ${PROP3_SRC_DIR}/Ray/RayHitReport.h
     ${PROP3_SRC_DIR}/Ray/RayUtils.h)
 
-# StageSet
-SET(PROP3_STAGESET_HEADERS
-    ${PROP3_SRC_DIR}/StageSet/StageSet.h
-    ${PROP3_SRC_DIR}/StageSet/StageSetNode.h
-    ${PROP3_SRC_DIR}/StageSet/StageSetVisitor.h
-    ${PROP3_SRC_DIR}/StageSet/StageSetJsonTags.h
-    ${PROP3_SRC_DIR}/StageSet/StageSetJsonReader.h
-    ${PROP3_SRC_DIR}/StageSet/StageSetJsonWriter.h)
+# Nodes
+SET(PROP3_NODE_HEADERS
+    ${PROP3_SRC_DIR}/Node/Node.h
+    ${PROP3_SRC_DIR}/Node/HandleNode.h
+    ${PROP3_SRC_DIR}/Node/StageZone.h
+    ${PROP3_SRC_DIR}/Node/StageSet.h)
+
+# Serialization
+SET(PROP3_SERIAL_HEADERS
+    ${PROP3_SRC_DIR}/Serial/Visitor.h
+    ${PROP3_SRC_DIR}/Serial/JsonTags.h
+    ${PROP3_SRC_DIR}/Serial/JsonReader.h
+    ${PROP3_SRC_DIR}/Serial/JsonWriter.h)
 
 # Art Director
 SET(PROP3_ART_DIRECTOR_HEADERS
@@ -71,26 +75,21 @@ SET(PROP3_CHOREOGRAPHER_HEADERS
     ${PROP3_SRC_DIR}/Team/Choreographer/AbstractChoreographer.h
     ${PROP3_SRC_DIR}/Team/Choreographer/StdChoreographer.h)
 
-# Designer
-SET(PROP3_DESIGNER_HEADERS
-    ${PROP3_SRC_DIR}/Team/Designer/AbstractDesigner.h
-    ${PROP3_SRC_DIR}/Team/Designer/StdDesigner.h)
-
 # Team
 SET(PROP3_TEAM_HEADERS
     ${PROP3_ART_DIRECTOR_HEADERS}
     ${PROP3_CHOREOGRAPHER_HEADERS}
-    ${PROP3_DESIGNER_HEADERS}
     ${PROP3_SRC_DIR}/Team/AbstractTeam.h
     ${PROP3_SRC_DIR}/Team/StdTeam.h)
 
 
 # All the header files #
 SET(PROP3_HEADERS
+    ${PROP3_NODE_HEADERS}
     ${PROP3_LIGHT_HEADERS}
     ${PROP3_PROP_HEADERS}
     ${PROP3_RAY_HEADERS}
-    ${PROP3_STAGESET_HEADERS}
+    ${PROP3_SERIAL_HEADERS}
     ${PROP3_TEAM_HEADERS}
     ${PROP3_SRC_DIR}/libPropRoom3D_global.h)
     
@@ -132,7 +131,6 @@ SET(PROP3_SURFACE_SOURCES
 # Props
 SET(PROP3_PROP_SOURCES
     ${PROP3_COATING_SOURCES}
-    ${PROP3_HARDWARE_SOURCES}
     ${PROP3_MATERIAL_SOURCES}
     ${PROP3_SURFACE_SOURCES}
     ${PROP3_SRC_DIR}/Prop/Prop.cpp)
@@ -144,14 +142,19 @@ SET(PROP3_RAY_SOURCES
     ${PROP3_SRC_DIR}/Ray/RayHitReport.cpp
     ${PROP3_SRC_DIR}/Ray/RayUtils.cpp)
 
-# StageSet
-SET(PROP3_STAGESET_SOURCES
-    ${PROP3_SRC_DIR}/StageSet/StageSet.cpp
-    ${PROP3_SRC_DIR}/StageSet/StageSetNode.cpp
-    ${PROP3_SRC_DIR}/StageSet/StageSetVisitor.cpp
-    ${PROP3_SRC_DIR}/StageSet/StageSetJsonTags.cpp
-    ${PROP3_SRC_DIR}/StageSet/StageSetJsonReader.cpp
-    ${PROP3_SRC_DIR}/StageSet/StageSetJsonWriter.cpp)
+# Nodes
+SET(PROP3_NODE_SOURCES
+    ${PROP3_SRC_DIR}/Node/Node.cpp
+    ${PROP3_SRC_DIR}/Node/HandleNode.cpp
+    ${PROP3_SRC_DIR}/Node/StageZone.cpp
+    ${PROP3_SRC_DIR}/Node/StageSet.cpp)
+
+# Serialization
+SET(PROP3_SERIAL_SOURCES
+    ${PROP3_SRC_DIR}/Serial/Visitor.cpp
+    ${PROP3_SRC_DIR}/Serial/JsonTags.cpp
+    ${PROP3_SRC_DIR}/Serial/JsonReader.cpp
+    ${PROP3_SRC_DIR}/Serial/JsonWriter.cpp)
 
 # Art Director
 SET(PROP3_ART_DIRECTOR_SOURCES
@@ -166,24 +169,20 @@ SET(PROP3_ART_DIRECTOR_SOURCES
 SET(PROP3_CHOREOGRAPHER_SOURCES
     ${PROP3_SRC_DIR}/Team/Choreographer/StdChoreographer.cpp)
 
-# Designer
-SET(PROP3_DESIGNER_SOURCES
-    ${PROP3_SRC_DIR}/Team/Designer/StdDesigner.cpp)
-
 # Team
 SET(PROP3_TEAM_SOURCES
     ${PROP3_ART_DIRECTOR_SOURCES}
     ${PROP3_CHOREOGRAPHER_SOURCES}
-    ${PROP3_DESIGNER_SOURCES}
     ${PROP3_SRC_DIR}/Team/AbstractTeam.cpp
     ${PROP3_SRC_DIR}/Team/StdTeam.cpp)
 
 # All the source files #
 SET(PROP3_SOURCES
+    ${PROP3_NODE_SOURCES}
     ${PROP3_LIGHT_SOURCES}
     ${PROP3_PROP_SOURCES}
     ${PROP3_RAY_SOURCES}
-    ${PROP3_STAGESET_SOURCES}
+    ${PROP3_SERIAL_SOURCES}
     ${PROP3_TEAM_SOURCES})
 
 

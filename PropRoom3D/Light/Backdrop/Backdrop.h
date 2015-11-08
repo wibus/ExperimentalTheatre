@@ -3,7 +3,7 @@
 
 #include <GLM/glm.hpp>
 
-#include "PropRoom3D/StageSet/StageSetNode.h"
+#include <PropRoom3D/Node/Node.h>
 
 
 namespace prop3
@@ -13,7 +13,7 @@ namespace prop3
     class RayHitList;
 
 
-    class PROP3D_EXPORT Backdrop : public StageSetNode
+    class PROP3D_EXPORT Backdrop : public Node
     {
     protected:
         Backdrop(bool isDirectlyVisible = true);

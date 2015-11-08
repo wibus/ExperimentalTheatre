@@ -12,14 +12,9 @@ namespace prop3
         StdChoreographer();
         virtual ~StdChoreographer();
 
-        virtual void setup();
-        virtual void reset();
-        virtual void update(double dt);
-
-        virtual void manageProp(const std::shared_ptr<Prop>& prop) override;
-        virtual void unmanageProp(const std::shared_ptr<Prop>& prop) override;
-
-        virtual void setEnvironment(const std::shared_ptr<Environment>& env) override;
+        virtual void setup(const std::shared_ptr<StageSet>& stageSet) override;
+        virtual void update(double dt) override;
+        virtual void reset() override;
 
     private:
 

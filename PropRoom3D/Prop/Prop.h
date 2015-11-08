@@ -5,9 +5,8 @@
 #include <vector>
 
 #include <GLM/glm.hpp>
-#include <GLM/gtc/quaternion.hpp>
 
-#include "PropRoom3D/StageSet/StageSetNode.h"
+#include <PropRoom3D/Node/HandleNode.h>
 
 
 namespace prop3
@@ -15,245 +14,44 @@ namespace prop3
     class Surface;
 
 
-    class PROP3D_EXPORT Prop : public StageSetNode
+    class PROP3D_EXPORT Prop : public HandleNode
     {
     public:
-        Prop();
+        Prop(const std::string& name);
         virtual ~Prop();
 
-        // StageSetNode interface
-        virtual void accept(StageSetVisitor& visitor) override;
 
-        virtual std::vector<std::shared_ptr<StageSetNode>> children() const override;
+        // Node interface
+        virtual void accept(Visitor& visitor) override;
 
+        virtual std::vector<std::shared_ptr<Node>> children() const override;
 
-        // Identification
-        PropId id() const;
-
-        // Visibility
-        bool isVisible() const;
-        virtual void setIsVisible(bool isVisible);
 
         // Surface
-        std::shared_ptr<Surface> surface(size_t sId) const;
-        const std::vector<std::shared_ptr<Surface>>& surfaceElements() const;
-        virtual void setSurface(const std::shared_ptr<Surface>& surface, int sId);
-        virtual void pushSurface(const std::shared_ptr<Surface>& surface);
-        virtual std::shared_ptr<Surface> removeSurface(size_t sId);
-        virtual std::shared_ptr<Surface> popSurface();
-
-        // Bounding Surface
-        std::shared_ptr<Surface> boundingSurface() const;
-        virtual void setBoundingSurface(const std::shared_ptr<Surface>& surface);
-
-        // Body type
-        EBodyType bodyType() const;
-        virtual void setBodyType(const EBodyType& type);
-
-        // Inertia
-        double mass() const;
-        double inverseMass() const;
-        glm::dmat3 momentOfInertia() const;
-        glm::dmat3 inverseMomentOfInertia() const;
-
-        // Position
-        glm::dvec3 centroid() const;
-        virtual void moveBy(const glm::dvec3& displacement);
-        virtual void setCentroid(const glm::dvec3& position);
-
-        // Linear velocity
-        glm::dvec3 linearVelocity() const;
-        virtual void setLinearVelocity(const glm::dvec3& velocity);
-        virtual void addLinearVelocity(const glm::dvec3& velocity);
-
-        // Linear acceleration
-        glm::dvec3 linearAcceleration() const;
-        virtual void setLinearAcceleration(const glm::dvec3& acceleration);
-        virtual void addLinearAcceleration(const glm::dvec3& acceleration);
-
-        // Linear friction
-        glm::dvec3 linearFrictionCoefficients() const;
-        virtual void setLinearFrictionCoefficients(const glm::dvec3& coeffs);
-        virtual void setLinearFrictionCoefficient(int order, double coeff);
-
-        // Rotation
-        glm::dquat angle() const;
-        virtual void rotate(const glm::dquat& angle);
-        virtual void setAngle(const glm::dquat& angle);
-
-        // Angular velocity
-        glm::dquat angularVelocity() const;
-        virtual void setAngularVelocity(const glm::dquat& velocity);
-        virtual void addAngularVelocity(const glm::dquat& velocity);
-
-        // Angular acceleration
-        glm::dquat angularAcceleration() const;
-        virtual void setAngularAcceleration(const glm::dquat& acceleration);
-        virtual void addAngularAcceleration(const glm::dquat& acceleration);
-
-        // Angular friction
-        glm::dvec3 angularFrictionCoefficients() const;
-        virtual void setAngularFrictionCoefficients(const glm::dvec3& coeffs);
-        virtual void setAngularFrictionCoefficient(int order, double coeff);
-
-        // Force
-        virtual void addLinearForce(const glm::dvec3& force);
-        virtual void addAngularForce(const glm::dvec3& force);
-        virtual void addForceAt(const glm::dvec3& force, const glm::dvec3& at);
-
-        // Impulse
-        virtual void applyLinearImpulse(const glm::dvec3& impulse);
-        virtual void applyAngularImpulse(const glm::dvec3& impulse);
-        virtual void applyImpulseAt(const glm::dvec3& impulse, const glm::dvec3& at);
+        const std::vector<std::shared_ptr<Surface>>& surfaces() const;
+        virtual void addSurface(const std::shared_ptr<Surface>& surface);
 
 
-        // Constant attributes
-        static const double INFINITE_INERTIA;
-        static const glm::dmat3 INFINITE_MOMENT_OF_INERTIA;
+        // Clear
+        virtual void clear() override;
 
-    protected:
-        // Cached attributes update
-        virtual void updateTransformMatrix();
-        virtual void updateInertia();
+        // Transformations
+        virtual void transform(const glm::dmat4& mat) override;
+        virtual void translate(const glm::dvec3& dis) override;
+        virtual void rotate(double angle, const glm::dvec3& axis) override;
+        virtual void scale(double coeff) override;
 
-
-        // Attributes
-        std::vector<std::shared_ptr<Surface>> _surfaceElements;
-        std::shared_ptr<Surface> _boundingSurface;
-        EBodyType _bodyType;
-
-        double _invMass;
-        glm::dmat3 _invMomentOfInertia;
-        glm::dmat3 _invRotMomentOfInertia;
-
-        glm::dvec3 _centroid;
-        glm::dvec3 _linearVelocity;
-        glm::dvec3 _linearAcceleration;
-        glm::dvec3 _linearFirctionCoefficients;
-
-        glm::dquat _angle;
-        glm::dquat _angularVelocity;
-        glm::dquat _angularAcceleration;
-        glm::dvec3 _angularFirctionCoefficients;
-
-        glm::dmat4 _transformMatrix;
-        glm::dmat4 _transformMatrixInv;
 
     private:
-        static PropId _assigneId_();
-        static PropId _nextId_;
-
-        PropId    _id;
-        bool      _isVisible;
+        std::vector<std::shared_ptr<Surface>> _surfaces;
     };
 
 
 
     // IMPLEMENTATION //
-    inline PropId Prop::id() const
+    inline const std::vector<std::shared_ptr<Surface> >& Prop::surfaces() const
     {
-        return _id;
-    }
-
-    inline bool Prop::isVisible() const
-    {
-        return _isVisible;
-    }
-
-    inline std::shared_ptr<Surface> Prop::surface(size_t sId) const
-    {
-        if(sId < _surfaceElements.size())
-            return _surfaceElements[sId];
-        return std::shared_ptr<Surface>();
-    }
-
-    inline const std::vector<std::shared_ptr<Surface>>& Prop::surfaceElements() const
-    {
-        return _surfaceElements;
-    }
-
-    inline std::shared_ptr<Surface> Prop::boundingSurface() const
-    {
-        return _boundingSurface;
-    }
-
-    inline EBodyType Prop::bodyType() const
-    {
-        return _bodyType;
-    }
-
-    inline double Prop::mass() const
-    {
-        return _bodyType ==  EBodyType::DYNAMIC && _invMass ?
-            1.0 / _invMass :
-            INFINITE_INERTIA;
-    }
-
-    inline double Prop::inverseMass() const
-    {
-        return _bodyType ==  EBodyType::DYNAMIC ?
-            _invMass :
-            INFINITE_INERTIA;
-    }
-
-    inline glm::dmat3 Prop::momentOfInertia() const
-    {
-        return _bodyType == EBodyType::DYNAMIC &&
-                _invMomentOfInertia[0][0] != 0.0 ?
-                    glm::inverse(_invMomentOfInertia) :
-                    INFINITE_MOMENT_OF_INERTIA;
-    }
-
-    inline glm::dmat3 Prop::inverseMomentOfInertia() const
-    {
-        return _bodyType ==  EBodyType::DYNAMIC ?
-            _invMomentOfInertia :
-            INFINITE_MOMENT_OF_INERTIA;
-    }
-
-    inline glm::dvec3 Prop::centroid() const
-    {
-        return _centroid;
-    }
-
-    inline glm::dvec3 Prop::linearVelocity() const
-    {
-        return _linearVelocity;
-    }
-
-    inline glm::dvec3 Prop::linearAcceleration() const
-    {
-        return _linearAcceleration;
-    }
-
-    inline glm::dvec3 Prop::linearFrictionCoefficients() const
-    {
-        return _linearFirctionCoefficients;
-    }
-
-    inline glm::dquat Prop::angle() const
-    {
-        return _angle;
-    }
-
-    inline glm::dquat Prop::angularVelocity() const
-    {
-        return _angularVelocity;
-    }
-
-    inline glm::dquat Prop::angularAcceleration() const
-    {
-        return _angularAcceleration;
-    }
-
-    inline glm::dvec3 Prop::angularFrictionCoefficients() const
-    {
-        return _angularFirctionCoefficients;
-    }
-
-    inline PropId Prop::_assigneId_()
-    {
-        return _nextId_++;
+        return _surfaces;
     }
 }
 

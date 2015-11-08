@@ -9,7 +9,7 @@
 
 #include "CpuRaytracerEngine.h"
 #include "GlPostProdUnit.h"
-#include "StageSet/StageSet.h"
+#include "Node/StageSet.h"
 
 
 namespace prop3
@@ -46,7 +46,10 @@ namespace prop3
 
         _stageSet = stageSet;
         _localRaytracer->setup(stageSet);
+
         raytracerState()->setDraftParams(2, 4, 1, true);
+
+        //raytracerState()->setDraftParams(0, 1, 0, false);
 
         if(_postProdUnit)
         {
@@ -57,12 +60,17 @@ namespace prop3
         camera()->refresh();
     }
 
-    void ArtDirectorServer::reset()
+    void ArtDirectorServer::update(double dt)
     {
-        _localRaytracer->reset();
-        clearColorTexture();
+        if(_stageSet->stageSetChanged())
+        {
+            clearColorTexture();
+        }
 
-        // TODO wbussiere 2015-05-01 : reset clients
+        _localRaytracer->update();
+
+        // TODO wbussiere 2015-05-01 : retreive client frames
+        //_localRaytracer->pourFramesIn();
     }
 
     void ArtDirectorServer::draw(double dt)
@@ -77,17 +85,12 @@ namespace prop3
         _postProdUnit->execute();
     }
 
-    void ArtDirectorServer::update(double dt)
+    void ArtDirectorServer::reset()
     {
-        if(_stageSet->stageSetChanged())
-        {
-            clearColorTexture();
-        }
+        _localRaytracer->reset();
+        clearColorTexture();
 
-        _localRaytracer->update();
-
-        // TODO wbussiere 2015-05-01 : retreive client frames
-        //_localRaytracer->pourFramesIn();
+        // TODO wbussiere 2015-05-01 : reset clients
     }
 
     void ArtDirectorServer::notify(cellar::CameraMsg &msg)
@@ -108,21 +111,6 @@ namespace prop3
         }
 
 
-        // TODO wbussiere 2015-05-01 : notify clients
-    }
-
-    void ArtDirectorServer::manageProp(const std::shared_ptr<Prop>& prop)
-    {
-        // TODO wbussiere 2015-05-01 : notify clients
-    }
-
-    void ArtDirectorServer::unmanageProp(const std::shared_ptr<Prop>& prop)
-    {
-        // TODO wbussiere 2015-05-01 : notify clients
-    }
-
-    void ArtDirectorServer::setEnvironment(const std::shared_ptr<Environment>& env)
-    {
         // TODO wbussiere 2015-05-01 : notify clients
     }
 

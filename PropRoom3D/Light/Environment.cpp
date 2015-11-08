@@ -2,7 +2,8 @@
 
 #include "Backdrop/Backdrop.h"
 #include "Prop/Material/Material.h"
-#include "StageSet/StageSetVisitor.h"
+#include "Serial/Visitor.h"
+
 
 namespace prop3
 {
@@ -19,6 +20,16 @@ namespace prop3
 
     }
 
+    void Environment::accept(Visitor& visitor)
+    {
+        visitor.visit(*this);
+    }
+
+    std::vector<std::shared_ptr<Node>> Environment::children() const
+    {
+        return { _backdrop, _ambientMaterial };
+    }
+
     void Environment::setBackdrop(const std::shared_ptr<Backdrop>& backdrop)
     {
         _backdrop = backdrop;
@@ -31,15 +42,5 @@ namespace prop3
         _ambientMaterial = ambientMaterial;
 
         stampCurrentUpdate();
-    }
-
-    void Environment::accept(StageSetVisitor& visitor)
-    {
-        visitor.visit(*this);
-    }
-
-    std::vector<std::shared_ptr<StageSetNode>> Environment::children() const
-    {
-        return { _backdrop, _ambientMaterial };
     }
 }

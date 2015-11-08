@@ -6,10 +6,17 @@
 
 namespace prop3
 {
+    // Stage set
+    class StageSet;
+    class StageZone;
+
     // Props
     class Prop;
 
-    // Implicit Surfaces
+    // Bounds
+    class Bounds;
+
+    // Surfaces
     class Surface;
     class SurfaceShell;
     class SurfaceGhost;
@@ -40,18 +47,25 @@ namespace prop3
     class ProceduralSun;
 
 
-    class PROP3D_EXPORT StageSetVisitor
+    class PROP3D_EXPORT Visitor
     {
     protected:
-        StageSetVisitor();
+        Visitor();
 
     public:
-        virtual ~StageSetVisitor();
+        virtual ~Visitor();
+
+        // Stage
+        virtual void visit(StageSet& node);
+        virtual void visit(StageZone& node);
 
         // Props
         virtual void visit(Prop& node);
 
-        // Implicit Surfaces
+        // Surfaces
+        virtual void visit(Bounds& node);
+
+        // Surfaces
         virtual void visit(SurfaceShell& node);
         virtual void visit(SurfaceGhost& node);
         virtual void visit(SurfaceInverse& node);

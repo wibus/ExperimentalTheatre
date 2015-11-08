@@ -1,6 +1,6 @@
 #include "UniformStdMaterial.h"
 
-#include "StageSet/StageSetVisitor.h"
+#include "Serial/Visitor.h"
 
 
 namespace prop3
@@ -20,7 +20,7 @@ namespace prop3
 
     }
 
-    void UniformStdMaterial::accept(StageSetVisitor& visitor)
+    void UniformStdMaterial::accept(Visitor& visitor)
     {
         visitor.visit(*this);
     }
