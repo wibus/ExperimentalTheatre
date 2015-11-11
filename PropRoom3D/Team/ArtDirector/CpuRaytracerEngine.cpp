@@ -73,9 +73,9 @@ namespace prop3
                 new CpuRaytracerWorker());
 
             _workerObjects.push_back(worker);
-            _workerThreads.push_back(std::thread(
+            _workerThreads.push_back(std::move(std::thread(
                 CpuRaytracerWorker::launchWorker,
-                _workerObjects[i]));
+                _workerObjects[i])));
         }
 
         bufferHardReset();
@@ -168,7 +168,7 @@ namespace prop3
         return _isUpdated;
     }
 
-    bool CpuRaytracerEngine::onUpdateConsumed()
+    void CpuRaytracerEngine::onUpdateConsumed()
     {
         _isUpdated = false;
 

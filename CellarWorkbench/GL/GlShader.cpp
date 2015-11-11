@@ -114,7 +114,7 @@ namespace cellar
         for(int i=0; i < sources.size(); ++i)
             ctexts[i] = sources[i].c_str();
 
-        glShaderSource( _id, sources.size(), ctexts, NULL );
+        glShaderSource( _id, (GLsizei) sources.size(), ctexts, NULL );
         glCompileShader( _id );
 
         delete[] ctexts;
@@ -140,13 +140,13 @@ namespace cellar
             getLog().postMessage(new Message('E', false, log, "GlShader"));
             delete[] infoLog;
 
-            return compilationStatus;
+            return compilationStatus == 0;
         }
 
         getLog().postMessage(new Message('I', false,
             infoName + " successfully compiled " + shaderId, "GlShader"));
 
-        return compilationStatus;
+        return compilationStatus == 0;
     }
 
     std::string GlShader::implicitName(

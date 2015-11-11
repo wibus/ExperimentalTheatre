@@ -11,8 +11,9 @@ namespace prop2
     // Forward declarations
     class Hardware;
 
-    struct PROP2D_EXPORT HardwareUpdate
+    class PROP2D_EXPORT HardwareUpdate
     {
+	public:
         enum class EType
         {
             DENSITY,

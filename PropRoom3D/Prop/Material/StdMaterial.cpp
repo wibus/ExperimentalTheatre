@@ -78,7 +78,7 @@ namespace prop3
         {
             glm::dvec3 splitColor(scatterColor / double(outRayCountHint));
 
-            for(int i=0; i < outRayCountHint; ++i)
+            for(unsigned int i=0; i < outRayCountHint; ++i)
             {
                 glm::dvec3 direction = glm::sphericalRand(1.0);
 
@@ -109,7 +109,7 @@ namespace prop3
                                       Raycast::FULLY_SPECULAR_ENTROPY,
                                       specularity);
 
-            for(int i=0; i < outRayCountHint; ++i)
+            for(unsigned int i=0; i < outRayCountHint; ++i)
             {
                 glm::dvec3 diffuseDir = glm::sphericalRand(1.0);
                 glm::dvec3 direction = glm::mix(diffuseDir, ray.direction, specularity);

@@ -11,8 +11,9 @@ namespace prop3
     class Coating;
 
 
-    struct PROP3D_EXPORT RayHitReport
+    class PROP3D_EXPORT RayHitReport
     {
+	public:
         RayHitReport(
             double distance,
             const Raycast& incidentRay,
