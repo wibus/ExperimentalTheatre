@@ -129,7 +129,7 @@ namespace prop3
         glm::dvec3 sideward = glm::normalize(glm::cross(SKY_UP, _sunDirection));
         glm::dvec3 upward = glm::normalize(glm::cross(sideward, _sunDirection));
         std::vector<Raycast> raycasts;
-        for(int i=0; i < count; ++i)
+        for(unsigned int i=0; i < count; ++i)
         {
             glm::dvec2 recDist = glm::diskRand(RECEIVE_PLANE_RADIUS);
             glm::dvec3 recPoint = RECEIVE_PLANE_POS +
@@ -163,7 +163,7 @@ namespace prop3
         glm::dvec3 sideward = glm::normalize(glm::cross(SKY_UP, _sunDirection));
         glm::dvec3 upward = glm::normalize(glm::cross(sideward, _sunDirection));
         std::vector<Raycast> raycasts;
-        for(int i=0; i < count; ++i)
+        for(unsigned int i=0; i < count; ++i)
         {
             glm::dvec2 radDist = glm::diskRand(RADIATION_PLANE_RADIUS);
             glm::dvec3 radPoint =

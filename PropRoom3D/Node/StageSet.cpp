@@ -1,6 +1,6 @@
 #include "StageSet.h"
 
-#include <cmath>
+#include <algorithm>
 
 #include "Serial/Visitor.h"
 #include "Light/Environment.h"

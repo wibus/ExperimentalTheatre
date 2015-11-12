@@ -13,8 +13,9 @@ namespace prop3
     class Material;
 
 
-    struct PROP3D_EXPORT Raycast
+    class PROP3D_EXPORT Raycast
     {
+	public:
         Raycast(double limit,
                 double entropy,
                 const glm::dvec3& color,

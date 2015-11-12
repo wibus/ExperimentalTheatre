@@ -1,4 +1,4 @@
-if __name__ == "__main__":
+﻿if __name__ == "__main__":
     import os
     
     outfilename = 'gl3w.h.out'
@@ -8,19 +8,29 @@ if __name__ == "__main__":
     with open(outfilename, 'w') as out:
         
         for line in open(infilename, 'r'):
-            if line.find('CellarWorkbench'):
+            if 'GL3_EXPORT' in line:
                 alreadyconfigured = True
                 break
             line = line.replace(
-                '#include <GL3/gl3.h>',
-                '#include <libCellarWorkbench_global.h>\n#include <GL3/gl3.h>')
+                """#include \"glcorearb.h\"""",
+                """#include \"glcorearb.h\"
+
+                   #ifdef _WINDOWS
+                   #   if defined(GL3_LIBRARY)
+                   #       define GL3_EXPORT __declspec(dllexport)
+                   #   else
+                   #       define GL3_EXPORT __declspec(dllimport)
+                   #   endif
+                   #else
+                   #   define GL3_EXPORT
+                   #endif""")
             line = line.replace(
                 'extern PFN',
-                'extern CELLAR_EXPORT PFN')
+                'extern GL3_EXPORT PFN')
             out.write(line)
 
     if alreadyconfigured:
-        os.remove(outfilename)
+        #os.remove(outfilename)
         print('File already configured for Windows dll export')
     else:
         os.remove(infilename)

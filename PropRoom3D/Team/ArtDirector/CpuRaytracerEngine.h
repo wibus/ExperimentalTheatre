@@ -18,6 +18,10 @@ namespace prop3
 
     class PROP3D_EXPORT CpuRaytracerEngine
     {
+	private:
+		CpuRaytracerEngine(CpuRaytracerEngine&) = delete;
+		CpuRaytracerEngine& operator= (CpuRaytracerEngine&) = delete;
+
     public:
         CpuRaytracerEngine();
         CpuRaytracerEngine(unsigned int workerCount);
@@ -27,7 +31,7 @@ namespace prop3
         virtual void reset();
 
         virtual bool isUpdated();
-        virtual bool onUpdateConsumed();
+        virtual void onUpdateConsumed();
         virtual const glm::ivec2& viewportSize() const;
         virtual const std::vector<float>& colorBuffer() const;
 

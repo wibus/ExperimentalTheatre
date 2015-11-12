@@ -64,6 +64,7 @@ namespace prop3
     double Box::signedDistance(const glm::dvec3& point) const
     {
         assert(false);
+		return 0.0;
     }
 
     void Box::raycast(const Raycast& ray, RayHitList& reports) const

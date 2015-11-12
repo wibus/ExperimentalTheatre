@@ -347,11 +347,11 @@ namespace prop2
         }
 
 
-        int posSize = sizeof(positions.front()) * positions.size();
+        size_t posSize = sizeof(positions.front()) * positions.size();
         glBindBuffer(GL_ARRAY_BUFFER, _textHudVao.bufferId("position"));
         glBufferData(GL_ARRAY_BUFFER, posSize, positions.data(), GL_DYNAMIC_DRAW);
 
-        int texSize = sizeof(texCoords.front()) * texCoords.size();
+		size_t texSize = sizeof(texCoords.front()) * texCoords.size();
         glBindBuffer(GL_ARRAY_BUFFER, _textHudVao.bufferId("texCoord"));
         glBufferData(GL_ARRAY_BUFFER, texSize, texCoords.data(), GL_DYNAMIC_DRAW);
 
@@ -374,12 +374,12 @@ namespace prop2
         _imageHudVao.bind();
 
         const auto& cornerPos = image->cornersPositions();
-        int posSize = sizeof(cornerPos.front()) * cornerPos.size();
+		size_t posSize = sizeof(cornerPos.front()) * cornerPos.size();
         glBindBuffer(GL_ARRAY_BUFFER, _imageHudVao.bufferId("position"));
         glBufferData(GL_ARRAY_BUFFER, posSize, cornerPos.data(), GL_DYNAMIC_DRAW);
 
         const auto& cornerTex = image->cornersTexCoords();
-        int texSize = sizeof(cornerTex.front()) * cornerTex.size();
+		size_t texSize = sizeof(cornerTex.front()) * cornerTex.size();
         glBindBuffer(GL_ARRAY_BUFFER, _imageHudVao.bufferId("texCoord"));
         glBufferData(GL_ARRAY_BUFFER, texSize, cornerTex.data(), GL_DYNAMIC_DRAW);
 

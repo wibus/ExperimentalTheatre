@@ -8,7 +8,7 @@
 
 namespace cellar
 {
-    struct CameraMsg;
+    class CameraMsg;
 
     class CELLAR_EXPORT Camera : public cellar::SpecificSubject<CameraMsg>
     {
@@ -37,8 +37,9 @@ namespace cellar
         glm::mat4 _viewMatrix;
     };
 
-    struct CameraMsg
+    class CameraMsg
     {
+	public:
         enum class EChange {VIEWPORT, PROJECTION, VIEW};
 
         Camera& camera;

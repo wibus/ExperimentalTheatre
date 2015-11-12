@@ -92,12 +92,14 @@ namespace prop3
         {
             StageSetJsonReader reader;
             reader.deserialize(*this, stream);
+			return true;
         }
         else
         {
             getLog().postMessage(new Message('E', false,
                 "StageSet failed to load from '" + fileName + "'.",
                 "AbstractTeam"));
+			return false;
         }
     }
 

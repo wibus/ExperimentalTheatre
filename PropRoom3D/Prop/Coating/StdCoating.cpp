@@ -162,7 +162,7 @@ namespace prop3
                 const double CONST = 0.61803398876;
 
 
-                for(int r=0; r < outRayCountHint; ++r)
+                for(unsigned int r=0; r < outRayCountHint; ++r)
                 {
                     glm::dvec3 diffuseNormal = getMicrofacetNormal(
                             wallNormal,
@@ -265,6 +265,7 @@ namespace prop3
             const Material& enteredMaterial) const
     {
         assert(false);
+		return color::black;
     }
 
     glm::dvec3 StdCoating::albedo(const RayHitReport& report) const

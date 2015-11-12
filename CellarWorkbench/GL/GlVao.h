@@ -108,7 +108,7 @@ namespace cellar
 
         _bufferIds.insert( make_pair(bufferName, (GLuint) 0) );
 
-        int dataSize = sizeof(buff.dataArray.front())
+		size_t dataSize = sizeof(buff.dataArray.front())
                        * buff.dataArray.size();
 
 

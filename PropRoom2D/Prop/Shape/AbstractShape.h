@@ -34,7 +34,7 @@ namespace prop2
         // Material
         virtual const std::shared_ptr<Hardware>& hardware() const;
         virtual void setHardware(const std::shared_ptr<Hardware>& hardware);
-        virtual void notify(HardwareUpdate& msg);
+        virtual void notify(HardwareUpdate& msg) override;
 
         // Body type
         virtual EBodyType bodyType() const;
