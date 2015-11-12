@@ -59,6 +59,21 @@ namespace prop3
     };
 
 
+    namespace color
+    {
+        const extern glm::dvec3 black;
+        const extern glm::dvec3 white;
+
+        const extern glm::dvec3 red;
+        const extern glm::dvec3 green;
+        const extern glm::dvec3 blue;
+
+        const extern glm::dvec3 cyan;
+        const extern glm::dvec3 magenta;
+        const extern glm::dvec3 yellow;
+    }
+
+
     // Default materials
     namespace material
     {
@@ -98,21 +113,6 @@ namespace prop3
                 double refractiveIndex,
                 double opacity,
                 double scattering);
-    }
-
-
-    namespace color
-    {
-        const extern glm::dvec3 black;
-        const extern glm::dvec3 white;
-
-        const extern glm::dvec3 red;
-        const extern glm::dvec3 green;
-        const extern glm::dvec3 blue;
-
-        const extern glm::dvec3 cyan;
-        const extern glm::dvec3 magenta;
-        const extern glm::dvec3 yellow;
     }
 }
 

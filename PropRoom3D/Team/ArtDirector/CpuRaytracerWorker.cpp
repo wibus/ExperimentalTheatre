@@ -864,10 +864,11 @@ namespace prop3
         const RayHitReport& report)
     {
         const glm::dvec3 sunDir(0.5345, 0.2673, 0.8017);
+        glm::dvec3 albedo = report.coating->albedo(report);
         double attenuation = glm::dot(report.normal, sunDir);
         attenuation = 0.125 + (attenuation/2 + 0.5) * 0.875;
 
-        return glm::dvec3(attenuation);
+        return albedo * attenuation;
     }
 
     void CpuRaytracerWorker::resetBuffers()

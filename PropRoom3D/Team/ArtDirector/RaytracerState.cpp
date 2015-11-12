@@ -56,8 +56,8 @@ namespace prop3
     RaytracerState::RaytracerState(ProtectedState& state) :
         _protectedState(state),
         _divergenceThreshold(-1.0),
-        _draftLevelCount(2),
-        _draftLevelSizeRatio(4),
+        _draftLevelCount(0),
+        _draftLevelSizeRatio(1),
         _draftFrameCountPerLevel(1),
         _fastDraftEnabled(false)
     {

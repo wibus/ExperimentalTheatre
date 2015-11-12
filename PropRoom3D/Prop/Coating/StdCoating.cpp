@@ -267,6 +267,13 @@ namespace prop3
         assert(false);
     }
 
+    glm::dvec3 StdCoating::albedo(const RayHitReport& report) const
+    {
+        glm::dvec4 paint = paintColor(report.texCoord);
+        glm::dvec3 matCol = report.nextMaterial->color(report.position);
+        return glm::mix(matCol, glm::dvec3(paint), paint.a);
+    }
+
     inline glm::dvec3 StdCoating::getMicrofacetNormal(
             const glm::dvec3& wallNormal,
             const glm::dvec3& incidentDir,

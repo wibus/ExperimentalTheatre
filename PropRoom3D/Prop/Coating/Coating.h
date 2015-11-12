@@ -36,6 +36,9 @@ namespace prop3
             const Material& leavedMaterial,
             const Material& enteredMaterial) const = 0;
 
+        virtual glm::dvec3 albedo(
+                const RayHitReport& report) const = 0;
+
 
     protected:
         static double computeReflexionRatio(

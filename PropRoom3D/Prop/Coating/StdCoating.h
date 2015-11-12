@@ -27,6 +27,9 @@ namespace prop3
             const Material& leavedMaterial,
             const Material& enteredMaterial) const override;
 
+        virtual glm::dvec3 albedo(
+                const RayHitReport& report) const override;
+
 
         virtual double roughness(const glm::dvec3& tex) const = 0;
 

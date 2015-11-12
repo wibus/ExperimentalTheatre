@@ -40,9 +40,7 @@ namespace prop3
             int _workerCount;
             bool _interrupted;
             unsigned int _sampleCount;
-
             double _divergence;
-
             int _draftLevel;
         };
 
