@@ -64,8 +64,7 @@ namespace prop3
 
     void StdMaterial::scatterLight(
             std::vector<Raycast>& raycasts,
-            const Raycast& ray,
-            unsigned int outRayCountHint) const
+            const Raycast& ray) const
     {
         // Ray's shorthands
         const glm::dvec3& orig = ray.origin;
@@ -76,19 +75,15 @@ namespace prop3
 
         if(specularity <= 0.0)
         {
-            glm::dvec3 splitColor(scatterColor / double(outRayCountHint));
+            glm::dvec3 direction = glm::sphericalRand(1.0);
 
-            for(unsigned int i=0; i < outRayCountHint; ++i)
-            {
-                glm::dvec3 direction = glm::sphericalRand(1.0);
-
-                raycasts.push_back(Raycast(
-                        Raycast::BACKDROP_DISTANCE,
-                        Raycast::FULLY_DIFFUSIVE_ENTROPY,
-                        splitColor,
-                        scatterPoint,
-                        direction));
-            }
+            raycasts.push_back(Raycast(
+                    Raycast::BACKDROP_DISTANCE,
+                    Raycast::COMPLETE_RAY_WEIGHT,
+                    Raycast::FULLY_DIFFUSIVE_ENTROPY,
+                    scatterColor,
+                    scatterPoint,
+                    direction));
         }
         else if(specularity >= 1.0)
         {
@@ -96,6 +91,7 @@ namespace prop3
 
             raycasts.push_back(Raycast(
                     Raycast::BACKDROP_DISTANCE,
+                    Raycast::COMPLETE_RAY_WEIGHT,
                     Raycast::FULLY_SPECULAR_ENTROPY,
                     scatterColor,
                     scatterPoint,
@@ -103,25 +99,21 @@ namespace prop3
         }
         else
         {
-            glm::dvec3 splitColor(scatterColor / double(outRayCountHint));
-
             double entropy = glm::mix(Raycast::FULLY_DIFFUSIVE_ENTROPY,
                                       Raycast::FULLY_SPECULAR_ENTROPY,
                                       specularity);
 
-            for(unsigned int i=0; i < outRayCountHint; ++i)
-            {
-                glm::dvec3 diffuseDir = glm::sphericalRand(1.0);
-                glm::dvec3 direction = glm::mix(diffuseDir, ray.direction, specularity);
-                direction = glm::normalize(direction);
+            glm::dvec3 diffuseDir = glm::sphericalRand(1.0);
+            glm::dvec3 direction = glm::mix(diffuseDir, ray.direction, specularity);
+            direction = glm::normalize(direction);
 
-                raycasts.push_back(Raycast(
-                        Raycast::BACKDROP_DISTANCE,
-                        entropy,
-                        splitColor,
-                        scatterPoint,
-                        direction));
-            }
+            raycasts.push_back(Raycast(
+                    Raycast::BACKDROP_DISTANCE,
+                    Raycast::COMPLETE_RAY_WEIGHT,
+                    entropy,
+                    scatterColor,
+                    scatterPoint,
+                    direction));
         }
     }
 }

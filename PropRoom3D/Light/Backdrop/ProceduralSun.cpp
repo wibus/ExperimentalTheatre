@@ -40,6 +40,11 @@ namespace prop3
 
     }
 
+    void ProceduralSun::accept(Visitor& visitor)
+    {
+        visitor.visit(*this);
+    }
+
     void ProceduralSun::setSunColor(const glm::dvec3& color)
     {
         _sunColor = color;
@@ -143,6 +148,7 @@ namespace prop3
             glm::dvec3 direction = glm::normalize(recPoint - radPoint);
             raycasts.push_back(Raycast(
                 Raycast::BACKDROP_DISTANCE,
+                Raycast::COMPLETE_RAY_WEIGHT,
                 Raycast::FULLY_DIFFUSIVE_ENTROPY,
                 rayColor,
                 radPoint,
@@ -174,6 +180,7 @@ namespace prop3
             glm::dvec3 direction = glm::normalize(pos - radPoint);
             raycasts.push_back(Raycast(
                 Raycast::BACKDROP_DISTANCE,
+                Raycast::COMPLETE_RAY_WEIGHT,
                 Raycast::FULLY_DIFFUSIVE_ENTROPY,
                 rayColor,
                 radPoint,
@@ -181,10 +188,5 @@ namespace prop3
         }
 
         return raycasts;
-    }
-
-    void ProceduralSun::accept(Visitor& visitor)
-    {
-        visitor.visit(*this);
     }
 }

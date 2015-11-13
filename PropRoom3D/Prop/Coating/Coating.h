@@ -27,8 +27,7 @@ namespace prop3
             std::vector<Raycast>& raycasts,
             const RayHitReport& report,
             const Material& leavedMaterial,
-            const Material& enteredMaterial,
-            unsigned int outRayCountHint) const = 0;
+            const Material& enteredMaterial) const = 0;
 
         virtual glm::dvec3 directBrdf(
             const RayHitReport& report,

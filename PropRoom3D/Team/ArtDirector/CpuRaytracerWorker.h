@@ -69,28 +69,28 @@ namespace prop3
         virtual void skipAndExecute(const std::function<void()>& func);
 
         virtual void execute();
-        virtual void shootFromLights();
+        //virtual void shootFromLights();
         virtual void shootFromScreen();
 
-        virtual void fireLightRay(
-                const Raycast& fromLightRay);
+        //virtual void fireLightRay(
+        //        const Raycast& fromLightRay);
 
         virtual glm::dvec3 fireScreenRay(
                 const Raycast& fromEyeRay);
-/*
-        virtual glm::dvec3 gatherScatteredLight(
-                const Material& material,
-                const Raycast& outRay);
 
-        virtual glm::dvec3 gatherReflectedLight(
-                const Coating& coating,
-                const Material& material,
-                const RayHitReport& outReport);
+        //virtual glm::dvec3 gatherScatteredLight(
+        //        const Material& material,
+        //        const Raycast& outRay);
 
-        virtual void gatherLightHitsToward(
-                std::vector<Raycast>& outRaycasts,
-                const glm::dvec3& targetPos);
-*/
+        //virtual glm::dvec3 gatherReflectedLight(
+        //        const Coating& coating,
+        //        const Material& material,
+        //        const RayHitReport& hitReport);
+
+        //virtual void gatherLightHitsToward(
+        //        std::vector<Raycast>& outRaycasts,
+        //       const glm::dvec3& targetPos);
+
 
         virtual void compileSearchStructures();
 
@@ -123,7 +123,6 @@ namespace prop3
         double _screenRayIntensityThreshold;
         unsigned int _lightDirectRayCount;
         unsigned int _lightFireRayCount;
-        unsigned int _diffuseRayCount;
 
         glm::ivec2 _resolution;
         glm::ivec2 _viewportOrig;

@@ -15,6 +15,9 @@ namespace prop3
         ProceduralSun(bool isDirectlyVisible = true);
 
 
+        virtual void accept(Visitor& visitor) override;
+
+
         glm::dvec3 sunColor() const;
 
         void setSunColor(const glm::dvec3& color);
@@ -45,12 +48,10 @@ namespace prop3
 
         virtual std::vector<Raycast> fireRays(unsigned int count) const override;
 
-        virtual std::vector<Raycast> fireOn(
-                const glm::dvec3& pos,
-                unsigned int count) const override;
+        virtual std::vector<Raycast> fireOn(const glm::dvec3& pos, unsigned int count) const override;
 
 
-        virtual void accept(Visitor& visito) override;
+
 
     protected:
         static const double SUN_COS_DIMENSION;
@@ -64,6 +65,7 @@ namespace prop3
 
         static const double RADIATION_PLANE_DISTANCE;
         static const double RADIATION_PLANE_RADIUS;
+
 
     private:
         glm::dvec3 _sunColor;

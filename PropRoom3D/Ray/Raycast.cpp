@@ -6,14 +6,17 @@ namespace prop3
     const double Raycast::BACKDROP_DISTANCE = INFINITY;
     const double Raycast::FULLY_SPECULAR_ENTROPY = 0.0;
     const double Raycast::FULLY_DIFFUSIVE_ENTROPY = 1.0;
+    const double Raycast::COMPLETE_RAY_WEIGHT = 1.0;
 
     Raycast::Raycast(
             double limit,
+            double weight,
             double entropy,
             const glm::dvec3& color,
             const glm::dvec3& origin,
             const glm::dvec3& direction) :
         limit(limit),
+        weight(weight),
         entropy(entropy),
         color(color),
         origin(origin),

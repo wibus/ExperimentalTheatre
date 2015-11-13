@@ -49,6 +49,7 @@ namespace prop3
 
         raytracerState()->setDivergenceThreshold(-1.0);
         raytracerState()->setDraftParams(1, 4, 1, true);
+        //raytracerState()->setDraftParams(0, 1, 0, false);
 
         if(_postProdUnit)
         {

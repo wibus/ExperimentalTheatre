@@ -1,6 +1,8 @@
 #ifndef PROPROOM3D_LIGHT_H
 #define PROPROOM3D_LIGHT_H
 
+#include <vector>
+
 #include <GLM/glm.hpp>
 
 #include <PropRoom3D/libPropRoom3D_global.h>
@@ -8,45 +10,32 @@
 
 namespace prop3
 {
+    class Raycast;
 
-    struct PROP3D_EXPORT Light
-    {
-        Light();
-
-        glm::vec4 ambient;
-        glm::vec4 diffuse;
-        glm::vec4 specular;
-    };
-
-    struct PROP3D_EXPORT DirectionnalLight : public Light
-    {
-        DirectionnalLight();
-
-        glm::vec4 direction;
-    };
-
-    struct PROP3D_EXPORT PointLight : public Light
-    {
-        PointLight();
-
-        glm::vec4 position;
-        glm::vec4 attenuationCoefs;
-    };
-
-    struct PROP3D_EXPORT SpotLight : public PointLight
-    {
-        SpotLight();
-
-        glm::vec4 direction;
-        float cutoff;
-    };
-
-
+    //
     // Utilities
+    //
 
     // Kevin degree to RGB color value
     // Perfect white is 6600K
-    glm::dvec3 kelvinToRgb(int kelvin);
+    PROP3D_EXPORT glm::dvec3 kelvinToRgb(int kelvin);
+
+
+    class PROP3D_EXPORT Light
+    {
+    protected:
+        Light();
+    public:
+        virtual ~Light();
+
+        virtual glm::dvec3 raycast(const Raycast& ray, bool directView) const = 0;
+
+        virtual std::vector<Raycast> fireRays(unsigned int count) const = 0;
+
+        virtual std::vector<Raycast> fireOn(const glm::dvec3& pos, unsigned int count) const = 0;
+
+    private:
+    };
 }
 
 #endif // PROPROOM3D_LIGHT_H

@@ -54,8 +54,7 @@ namespace prop3
 
         virtual void scatterLight(
             std::vector<Raycast>& raycasts,
-            const Raycast& ray,
-            unsigned int outRayCountHint) const = 0;
+            const Raycast& ray) const = 0;
     };
 
 
