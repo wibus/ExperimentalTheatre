@@ -54,9 +54,23 @@ namespace prop3
 
         virtual void scatterLight(
             std::vector<Raycast>& raycasts,
-            const Raycast& ray,
-            unsigned int outRayCountHint) const = 0;
+            const Raycast& ray) const = 0;
     };
+
+
+    namespace color
+    {
+        PROP3D_EXPORT const extern glm::dvec3 black;
+        PROP3D_EXPORT const extern glm::dvec3 white;
+
+        PROP3D_EXPORT const extern glm::dvec3 red;
+        PROP3D_EXPORT const extern glm::dvec3 green;
+        PROP3D_EXPORT const extern glm::dvec3 blue;
+
+        PROP3D_EXPORT const extern glm::dvec3 cyan;
+        PROP3D_EXPORT const extern glm::dvec3 magenta;
+        PROP3D_EXPORT const extern glm::dvec3 yellow;
+    }
 
 
     // Default materials
@@ -98,21 +112,6 @@ namespace prop3
                 double refractiveIndex,
                 double opacity,
                 double scattering);
-    }
-
-
-    namespace color
-    {
-		PROP3D_EXPORT const extern glm::dvec3 black;
-		PROP3D_EXPORT const extern glm::dvec3 white;
-
-		PROP3D_EXPORT const extern glm::dvec3 red;
-		PROP3D_EXPORT const extern glm::dvec3 green;
-		PROP3D_EXPORT const extern glm::dvec3 blue;
-
-		PROP3D_EXPORT const extern glm::dvec3 cyan;
-		PROP3D_EXPORT const extern glm::dvec3 magenta;
-		PROP3D_EXPORT const extern glm::dvec3 yellow;
     }
 }
 

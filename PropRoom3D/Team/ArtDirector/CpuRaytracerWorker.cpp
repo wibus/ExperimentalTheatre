@@ -46,10 +46,9 @@ namespace prop3
         _usePixelJittering(true),
         _useStochasticTracing(true),
         _lightRayIntensityThreshold(1.0 / 32.0),
-        _screenRayIntensityThreshold(1.0 / 128.0),
+        _screenRayIntensityThreshold(1.0 / 32.0),
         _lightDirectRayCount(1),
         _lightFireRayCount(20),
-        _diffuseRayCount(1),
         _viewportSize(1, 1),
         _confusionRadius(0.1),
         _workingColorBuffer(nullptr),
@@ -225,12 +224,12 @@ namespace prop3
                 compileSearchStructures();
             }
 
-
+/*
             // Shoot rays
             if(_runningPredicate &&
                _lightRayIntensityThreshold != INFINITY)
                 shootFromLights();
-
+*/
             if(_runningPredicate &&
                _screenRayIntensityThreshold != INFINITY)
                 shootFromScreen();
@@ -248,7 +247,7 @@ namespace prop3
             }
         }
     }
-
+/*
     void CpuRaytracerWorker::shootFromLights()
     {
         // !!!! RETURNING !!!!
@@ -277,7 +276,7 @@ namespace prop3
                 return;
         }
     }
-
+*/
     void CpuRaytracerWorker::shootFromScreen()
     {
         double pixelWidth = 2.0 / _resolution.x;
@@ -309,6 +308,7 @@ namespace prop3
 
         Raycast raycast(
             Raycast::BACKDROP_DISTANCE,
+            Raycast::COMPLETE_RAY_WEIGHT,
             Raycast::FULLY_SPECULAR_ENTROPY,
             glm::dvec3(1.0),
             eyeWorldPos,
@@ -339,6 +339,7 @@ namespace prop3
         }
     }
 
+    /*
     void CpuRaytracerWorker::fireLightRay(
             const Raycast& fromLightRay)
     {
@@ -428,19 +429,10 @@ namespace prop3
             }
         }
     }
-
+*/
     glm::dvec3 CpuRaytracerWorker::fireScreenRay(
             const Raycast& fromEyeRay)
     {
-        // Check if step contribution is too small
-        const glm::dvec3& currAtt = fromEyeRay.color;
-        double currIntensity = glm::max(glm::max(currAtt.x, currAtt.y), currAtt.z);
-        if(currIntensity < _screenRayIntensityThreshold)
-        {
-            return glm::dvec3(0.0);
-        }
-
-
         Raycast ray = fromEyeRay;
         ray.limit = Raycast::BACKDROP_DISTANCE;
 
@@ -472,7 +464,7 @@ namespace prop3
 
         glm::dvec3 matAtt = currMat->lightAttenuation(ray);
 
-
+        glm::dvec3 toEyeColorSum(0.0);
         if(ray.limit != Raycast::BACKDROP_DISTANCE)
         {
             // If non-stochatic draft is active
@@ -481,19 +473,15 @@ namespace prop3
                 return draft(fromEyeRay, reportMin);
             }
 
-            std::vector<Raycast> outRaycasts;
-            unsigned int outRayCountHint = glm::ceil(
-                    _diffuseRayCount * currIntensity);
-
+            std::vector<Raycast> childRaycasts;
             if(matPathLen < reportMin.distance)
             {
                 ray.limit = matPathLen;
 
                 // Inderect lighting
                 currMat->scatterLight(
-                        outRaycasts,
-                        ray,
-                        outRayCountHint);
+                        childRaycasts,
+                        ray);
 
                 /*
                 // Direct lighting
@@ -508,48 +496,68 @@ namespace prop3
 
                 // Inderect lighting
                 coating->indirectBrdf(
-                        outRaycasts,
+                        childRaycasts,
                         reportMin,
                         *currMat,
-                        *nextMat,
-                        outRayCountHint);
-
-                /*
+                        *nextMat);
+/*
                 // Direct lighting
                 toEyeColorSum += gatherReflectedLight(
-                    *coating, *material, reportMin);
+                    *coating, *nextMat, reportMin);
                     * */
             }
 
-            glm::dvec3 toEyeColorSum(0.0);
-            size_t outCount = outRaycasts.size();
-            for(size_t i=0; i < outCount; ++i)
+            const glm::dvec3& currAtt = fromEyeRay.color;
+            double currWeight = fromEyeRay.weight;
+
+            double toEyeColorWeight = 0.0;
+            size_t childCount = childRaycasts.size();
+            for(size_t i=0; i < childCount; ++i)
             {
-                auto& brdf = outRaycasts[i];
-                glm::dvec3 stepAtt = brdf.color * matAtt;
+                auto& childRay = childRaycasts[i];
+                glm::dvec3 stepAtt = childRay.color * matAtt;
                 glm::dvec3 nextAtt = currAtt * stepAtt;
+
+                double setpWeight = childRay.weight;
+                double nextWeight = currWeight * childRay.weight;
+
+                const glm::dvec3& a = nextAtt;
+                double nextIntensity = glm::max(glm::max(a.r, a.g), a.b) * nextWeight;
+                if(nextIntensity < _screenRayIntensityThreshold)
+                {
+                    // Skip this child
+                    continue;
+                }
+
                 double nextEntropy =
                     Raycast::mixEntropies(
-                        brdf.entropy, fromEyeRay.entropy);
+                        childRay.entropy, fromEyeRay.entropy);
 
-                brdf.color = nextAtt;
-                brdf.entropy = nextEntropy;
-                toEyeColorSum += fireScreenRay(brdf) * stepAtt;
+                childRay.color = nextAtt;
+                childRay.weight = nextWeight;
+                childRay.entropy = nextEntropy;
+
+                glm::dvec3 childColor = fireScreenRay(childRay);
+                toEyeColorSum += childColor * stepAtt * setpWeight;
+                toEyeColorWeight += setpWeight;
             }
 
-            return toEyeColorSum;
+            if(toEyeColorWeight != 0.0)
+            {
+                toEyeColorSum /= toEyeColorWeight;
+            }
         }
         else if(_backdrop.get() != nullptr)
         {
-            bool directView = (currAtt == glm::dvec3(1.0));
+            bool directView = (fromEyeRay.color == glm::dvec3(1.0));
             if(!directView ||
                _backdrop->isDirectlyVisible())
             {
-                return _backdrop->raycast(ray, directView) * matAtt;
+                toEyeColorSum = _backdrop->raycast(ray, directView) * matAtt;
             }
         }
 
-        return glm::dvec3(0.0);
+        return toEyeColorSum;
     }
 /*
     glm::dvec3 CpuRaytracerWorker::gatherScatteredLight(
@@ -563,7 +571,7 @@ namespace prop3
 
         std::vector<Raycast> lightCasts =
             _backdrop->fireOn(scatterPoint, _lightDirectRayCount);
-        gatherLightHitsToward(lightCasts, scatterPoint);
+        //gatherLightHitsToward(lightCasts, scatterPoint);
 
         size_t lightCastCount = lightCasts.size();
         for(size_t c=0; c < lightCastCount; ++c)
@@ -604,15 +612,15 @@ namespace prop3
     glm::dvec3 CpuRaytracerWorker::gatherReflectedLight(
             const Coating& coating,
             const Material& material,
-            const RayHitReport& outReport)
+            const RayHitReport& hitReport)
     {
         glm::dvec3 colorSum;
 
-        glm::dvec3 outDirirection = -outReport.incidentRay.direction;
+        glm::dvec3 outDirirection = -hitReport.incidentRay.direction;
 
         std::vector<Raycast> lightCasts =
-            _backdrop->fireOn(outReport.position, _lightDirectRayCount);
-        gatherLightHitsToward(lightCasts, outReport.position);
+            _backdrop->fireOn(hitReport.position, _lightDirectRayCount);
+        //gatherLightHitsToward(lightCasts, hitReport.position);
 
         size_t lightCastCount = lightCasts.size();
         for(size_t c=0; c < lightCastCount; ++c)
@@ -629,7 +637,7 @@ namespace prop3
             lightRay.limit = findNearestProp(lightRay, lightReport);
             if(lightRay.limit != Raycast::BACKDROP_DISTANCE)
             {
-                if(glm::length(lightReport.position - outReport.position)
+                if(glm::length(lightReport.position - hitReport.position)
                      < RayHitReport::EPSILON_LENGTH)
                 {
                     double lightPathLen = material.lightFreePathLength(lightRay);
@@ -865,10 +873,11 @@ namespace prop3
         const RayHitReport& report)
     {
         const glm::dvec3 sunDir(0.5345, 0.2673, 0.8017);
+        glm::dvec3 albedo = report.coating->albedo(report);
         double attenuation = glm::dot(report.normal, sunDir);
         attenuation = 0.125 + (attenuation/2 + 0.5) * 0.875;
 
-        return glm::dvec3(attenuation);
+        return albedo * attenuation;
     }
 
     void CpuRaytracerWorker::resetBuffers()

@@ -40,6 +40,11 @@ namespace prop3
 
     }
 
+    void ProceduralSun::accept(Visitor& visitor)
+    {
+        visitor.visit(*this);
+    }
+
     void ProceduralSun::setSunColor(const glm::dvec3& color)
     {
         _sunColor = color;
@@ -105,14 +110,12 @@ namespace prop3
         {
             double sunMinHeight = -0.1;
             double sunHeightRatio = glm::max(0.0, (dotSunTop - sunMinHeight) / (1.0 - sunMinHeight));
-            double intMinHeight = 0.1;
-            double dirSunRatio = glm::max(0.0, (dotDirSun - intMinHeight) / (1.0 - intMinHeight));
+            double dirSunRatio = (dotDirSun + 1.0) / 2.0;
 
-            double haloTemp = glm::pow(sunHeightRatio, 16.0);
+            double haloTemp = glm::pow(sunHeightRatio, 32.0);
             glm::dvec3 haloColor = kelvinToRgb(glm::mix(1000, 6600, haloTemp));
 
             double haloIntens = glm::pow(dirSunRatio, 16.0);
-            haloIntens *= 1.0 - glm::pow(glm::abs(dotNormTop), 2.0);
 
             color += haloColor * haloIntens * 0.5;
         }
@@ -145,6 +148,7 @@ namespace prop3
             glm::dvec3 direction = glm::normalize(recPoint - radPoint);
             raycasts.push_back(Raycast(
                 Raycast::BACKDROP_DISTANCE,
+                Raycast::COMPLETE_RAY_WEIGHT,
                 Raycast::FULLY_DIFFUSIVE_ENTROPY,
                 rayColor,
                 radPoint,
@@ -176,6 +180,7 @@ namespace prop3
             glm::dvec3 direction = glm::normalize(pos - radPoint);
             raycasts.push_back(Raycast(
                 Raycast::BACKDROP_DISTANCE,
+                Raycast::COMPLETE_RAY_WEIGHT,
                 Raycast::FULLY_DIFFUSIVE_ENTROPY,
                 rayColor,
                 radPoint,
@@ -183,10 +188,5 @@ namespace prop3
         }
 
         return raycasts;
-    }
-
-    void ProceduralSun::accept(Visitor& visitor)
-    {
-        visitor.visit(*this);
     }
 }

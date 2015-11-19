@@ -18,14 +18,16 @@ namespace prop3
             std::vector<Raycast>& raycasts,
             const RayHitReport& report,
             const Material& leavedMaterial,
-            const Material& enteredMaterial,
-            unsigned int outRayCountHint) const override;
+            const Material& enteredMaterial) const override;
 
         virtual glm::dvec3 directBrdf(
             const RayHitReport& report,
             const glm::dvec3& outDirection,
             const Material& leavedMaterial,
             const Material& enteredMaterial) const override;
+
+        virtual glm::dvec3 albedo(
+                const RayHitReport& report) const override;
 
 
         virtual double roughness(const glm::dvec3& tex) const = 0;

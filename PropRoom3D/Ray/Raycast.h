@@ -17,12 +17,14 @@ namespace prop3
     {
 	public:
         Raycast(double limit,
+                double weight,
                 double entropy,
                 const glm::dvec3& color,
                 const glm::dvec3& origin,
                 const glm::dvec3& direction);
 
         double limit;
+        double weight;
         double entropy;
         glm::dvec3 color;
         glm::dvec3 origin;
@@ -31,6 +33,7 @@ namespace prop3
         static const double BACKDROP_DISTANCE;
         static const double FULLY_SPECULAR_ENTROPY;
         static const double FULLY_DIFFUSIVE_ENTROPY;
+        static const double COMPLETE_RAY_WEIGHT;
 
         static double mixEntropies(double inEntropy, double outEntropy);
         static double compatibility(double inEntropy, double outEntropy);

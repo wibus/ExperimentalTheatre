@@ -25,8 +25,7 @@ namespace prop3
 
         virtual void scatterLight(
             std::vector<Raycast>& raycasts,
-            const Raycast& ray,
-            unsigned int outRayCountHint) const override;
+            const Raycast& ray) const override;
 
 
     protected:

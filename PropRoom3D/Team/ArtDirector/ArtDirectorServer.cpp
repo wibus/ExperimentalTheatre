@@ -47,8 +47,8 @@ namespace prop3
         _stageSet = stageSet;
         _localRaytracer->setup(stageSet);
 
-        raytracerState()->setDraftParams(2, 4, 1, true);
-
+        raytracerState()->setDivergenceThreshold(-1.0);
+        raytracerState()->setDraftParams(1, 4, 1, true);
         //raytracerState()->setDraftParams(0, 1, 0, false);
 
         if(_postProdUnit)
@@ -132,7 +132,7 @@ namespace prop3
 
         // Send image to GPU
         glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
-        glTexImage2D(GL_TEXTURE_2D,         0,  GL_RGB,
+        glTexImage2D(GL_TEXTURE_2D,         0,  GL_RGB32F,
                      viewportSize.x,        viewportSize.y,
                      0, GL_RGB, GL_FLOAT,   colorBuffer.data());
 

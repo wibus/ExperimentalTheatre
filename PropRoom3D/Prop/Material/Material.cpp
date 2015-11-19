@@ -18,6 +18,19 @@ namespace prop3
 
     }
 
+    namespace color
+    {
+        const glm::dvec3 black          = glm::dvec3(0.000, 0.000, 0.000);
+        const glm::dvec3 white          = glm::dvec3(1.000, 1.000, 1.000);
+
+        const glm::dvec3 red            = glm::dvec3(1.000, 0.000, 0.000);
+        const glm::dvec3 green          = glm::dvec3(0.000, 1.000, 0.000);
+        const glm::dvec3 blue           = glm::dvec3(0.000, 0.000, 1.000);
+
+        const glm::dvec3 cyan           = glm::dvec3(0.000, 1.000, 1.000);
+        const glm::dvec3 magenta        = glm::dvec3(1.000, 0.000, 1.000);
+        const glm::dvec3 yellow         = glm::dvec3(1.000, 1.000, 0.000);
+    }
 
     namespace material
     {
@@ -65,19 +78,5 @@ namespace prop3
 
             return std::shared_ptr<Material>(mat);
         }
-    }
-
-    namespace color
-    {
-        const glm::dvec3 black          = glm::dvec3(0.000, 0.000, 0.000);
-        const glm::dvec3 white          = glm::dvec3(1.000, 1.000, 1.000);
-
-        const glm::dvec3 red            = glm::dvec3(1.000, 0.000, 0.000);
-        const glm::dvec3 green          = glm::dvec3(0.000, 1.000, 0.000);
-        const glm::dvec3 blue           = glm::dvec3(0.000, 0.000, 1.000);
-
-        const glm::dvec3 cyan           = glm::dvec3(0.000, 1.000, 1.000);
-        const glm::dvec3 magenta        = glm::dvec3(1.000, 0.000, 1.000);
-        const glm::dvec3 yellow         = glm::dvec3(1.000, 1.000, 0.000);
     }
 }

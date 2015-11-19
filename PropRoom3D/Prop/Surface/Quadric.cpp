@@ -248,8 +248,10 @@ namespace prop3
         glm::dvec4 homoDir = glm::dvec4(ray.direction, 0.0);
         glm::dvec4 homoOrg = glm::dvec4(ray.origin,    1.0);
 
+        glm::dvec4 qHomoOrgMul = _q * homoOrg;
+
         a = glm::dot(homoDir, _q * homoDir);
-        b = glm::dot(homoDir, _q * homoOrg) * 2.0;
-        c = glm::dot(homoOrg, _q * homoOrg);
+        b = glm::dot(homoDir, qHomoOrgMul) * 2.0;
+        c = glm::dot(homoOrg, qHomoOrgMul);
     }
 }

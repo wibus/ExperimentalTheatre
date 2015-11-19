@@ -9,6 +9,12 @@
 
 namespace prop3
 {
+    // The constant represents the fact that subsurface
+    // scattering only returns half of the rays while the other
+    // half is scattered further into material's depths...
+    //const double INTERNAL_SCATTER_LOSS = 0.61803398876;
+    const double INTERNAL_SCATTER_LOSS = 1.0;
+
     StdCoating::StdCoating()
     {
 
@@ -23,8 +29,7 @@ namespace prop3
         std::vector<Raycast>& raycasts,
         const RayHitReport& report,
         const Material& leavedMaterial,
-        const Material& enteredMaterial,
-        unsigned int outRayCountHint) const
+        const Material& enteredMaterial) const
     {
         // Report's shorthands
         const glm::dvec3& pos = report.position;
@@ -34,227 +39,250 @@ namespace prop3
         const glm::dvec3& reflectOrig = report.reflectionOrigin;
         const glm::dvec3& refractOrig = report.refractionOrigin;
 
+
         // StdCoating properties
         double rough = roughness(tex);
-        double paintRIdx = paintRefractiveIndex(tex);
-        glm::dvec4 paintFrag = paintColor(tex);
-        glm::dvec3 pColor = glm::dvec3(paintFrag);
-        double pOpa = paintFrag.a;
-        int rayCount = glm::round((outRayCountHint-1) * rough) + 1;
-        double normalEntropy = glm::mix(
+        double roughnessEntropy = glm::mix(
                 Raycast::FULLY_SPECULAR_ENTROPY,
                 Raycast::FULLY_DIFFUSIVE_ENTROPY,
                 rough);
 
+        glm::dvec4 paintFrag = paintColor(tex);
+        glm::dvec3 pColor = glm::dvec3(paintFrag);
+        double pOpa = paintFrag.a;
+
+
         // Entered material properties
         double lRIdx = leavedMaterial.refractiveIndex(pos);
-        double eCond = enteredMaterial.conductivity(pos);
-        glm::dvec3 eColor = enteredMaterial.color(pos);
 
 
         // Paint Reflection
         if(pOpa > 0.0)
         {
-            glm::dvec3 reflectColor = glm::dvec3(pOpa / rayCount);
-            glm::dvec3 diffuseColor = pColor / double(rayCount);
+            double paintRIdx = paintRefractiveIndex(tex);
 
-            for(int r=0; r < rayCount; ++r)
-            {
-                glm::dvec3 diffuseNormal = getMicrofacetNormal(
-                        wallNormal,
+            glm::dvec3 diffuseColor = pColor * INTERNAL_SCATTER_LOSS;
+            glm::dvec3 reflectColor = color::white;
+
+
+            glm::dvec3 diffuseNormal = getMicrofacetNormal(
+                    wallNormal,
+                    incident,
+                    1.0); // Fully diffusive
+
+            glm::dvec3 reflectNormal = getMicrofacetNormal(
+                    wallNormal,
+                    incident,
+                    rough);
+
+            glm::dvec3 diffuseDirection =
+                    glm::reflect(incident, diffuseNormal);
+
+            glm::dvec3 reflectDirection =
+                    glm::reflect(incident, reflectNormal);
+
+            double reflectionRatio =
+                    computeReflexionRatio(
+                        lRIdx,
+                        paintRIdx,
                         incident,
-                        1.0); // Fully diffusive
+                        reflectNormal);
 
-                glm::dvec3 reflectNormal = getMicrofacetNormal(
-                        wallNormal,
-                        incident,
-                        rough);
+            double diffuseWeight = (1.0 - reflectionRatio) * pOpa;
+            double reflectWeight = reflectionRatio * pOpa;
 
-                glm::dvec3 diffuseDirection =
-                        glm::reflect(incident, diffuseNormal);
+            glm::dvec3 attDiffuseColor = diffuseColor *
+                    glm::dot(diffuseDirection, wallNormal);
 
-                glm::dvec3 reflectDirection =
-                        glm::reflect(incident, reflectNormal);
+            // Diffuse
+            raycasts.push_back(Raycast(
+                    Raycast::BACKDROP_DISTANCE,
+                    diffuseWeight,
+                    Raycast::FULLY_DIFFUSIVE_ENTROPY,
+                    attDiffuseColor,
+                    reflectOrig,
+                    diffuseDirection));
 
-                double reflectionRatio =
-                        computeReflexionRatio(
-                            lRIdx,
-                            paintRIdx,
-                            incident,
-                            reflectNormal);
-
-                // The constant represents the fact that subsurface
-                // scattering only returns half of the rays while the other
-                // half is scattered further into material's depths...
-                const double CONST = 0.61803398876;
-                glm::dvec3 attenuation = diffuseColor * (1 - reflectionRatio)
-                       * (glm::dot(diffuseDirection, wallNormal)) * CONST;
-
-
-                raycasts.push_back(Raycast(
-                        Raycast::BACKDROP_DISTANCE,
-                        Raycast::FULLY_DIFFUSIVE_ENTROPY,
-                        attenuation,
-                        reflectOrig,
-                        diffuseDirection));
-
-                raycasts.push_back(Raycast(
-                        Raycast::BACKDROP_DISTANCE,
-                        normalEntropy,
-                        reflectColor * reflectionRatio,
-                        reflectOrig,
-                        reflectDirection));
-            }
+            // Specular
+            raycasts.push_back(Raycast(
+                    Raycast::BACKDROP_DISTANCE,
+                    reflectWeight,
+                    roughnessEntropy,
+                    reflectColor,
+                    reflectOrig,
+                    reflectDirection));
         }
 
+        // Totally opaque paint
         if(pOpa >= 1.0)
             return;
 
 
         // Metal reflection
+        double eMatWeight = (1 - pOpa);
+        double eCond = enteredMaterial.conductivity(pos);
+        glm::dvec3 eColor = enteredMaterial.color(pos);
         if(eCond > 0.0)
         {
-            glm::dvec3 metallicColor = eColor * ((1 - pOpa) *eCond / rayCount);
+            const glm::dvec3& metallicColor = eColor;
+            double metallicWeight = eMatWeight * eCond;
 
-            for(int r=0; r < rayCount; ++r)
-            {
-                glm::dvec3 reflectNormal = getMicrofacetNormal(
-                        wallNormal,
-                        incident,
-                        rough);
+            glm::dvec3 reflectNormal = getMicrofacetNormal(
+                    wallNormal,
+                    incident,
+                    rough);
 
-                glm::dvec3 reflectDir = glm::reflect(incident, reflectNormal);
+            glm::dvec3 reflectDir = glm::reflect(incident, reflectNormal);
 
-                raycasts.push_back(Raycast(
-                        Raycast::BACKDROP_DISTANCE,
-                        normalEntropy,
-                        metallicColor,
-                        reflectOrig,
-                        reflectDir));
-            }
+            // Metallic
+            raycasts.push_back(Raycast(
+                    Raycast::BACKDROP_DISTANCE,
+                    metallicWeight,
+                    roughnessEntropy,
+                    metallicColor,
+                    reflectOrig,
+                    reflectDir));
         }
+
+        // Totally metallic
+        if(eCond >= 1.0)
+            return;
 
 
         // Dielectric scattering
-        if(eCond < 1.0)
+        double eRIdx = enteredMaterial.refractiveIndex(pos);
+        double eOpa = enteredMaterial.opacity(pos);
+
+        double insulatorWeight = eMatWeight * (1 - eCond);
+
+
+        // Total scattering of the light at the surface
+        if(eOpa >= 1.0)
         {
-            double eRIdx = enteredMaterial.refractiveIndex(pos);
-            double eOpa = enteredMaterial.opacity(pos);
+            // This is a shortcut: Since light is almost totally absorbed
+            // near the surface, we prevent the ray from entering the
+            // material by averaging the effect through a diffuse reflexion.
+            double eScat = enteredMaterial.scattering(pos);
+            double eScatNorm = (1/(1/(1-eScat) - 1) + 1);
+            glm::dvec3 diffuseBase = glm::pow(eColor, glm::dvec3(eScatNorm));
+            diffuseBase *= INTERNAL_SCATTER_LOSS;
+            glm::dvec3 reflectColor = color::white;
 
-            glm::dvec3 insulatorColor = glm::dvec3(
-                (1 - pOpa) * (1 - eCond) / rayCount);
+
+            glm::dvec3 diffuseNormal = getMicrofacetNormal(
+                    wallNormal,
+                    incident,
+                    1.0); // Fully diffusive
+
+            glm::dvec3 reflectNormal = getMicrofacetNormal(
+                    wallNormal,
+                    incident,
+                    rough);
+
+            glm::dvec3 diffuseDirection =
+                    glm::reflect(incident, diffuseNormal);
+
+            glm::dvec3 reflectDirection =
+                    glm::reflect(incident, reflectNormal);
+
+            double reflectionRatio =
+                    computeReflexionRatio(
+                        lRIdx,
+                        eRIdx,
+                        incident,
+                        reflectNormal);
 
 
-            // Total scattering of the light at the surface
-            if(eOpa >= 1.0)
+            double diffuseWeight = (1.0 - reflectionRatio) * insulatorWeight;
+            double reflectWeight = reflectionRatio * insulatorWeight;
+
+            glm::dvec3 diffuseColor = diffuseBase *
+                   glm::dot(diffuseDirection, wallNormal);
+
+
+            // Specular
+            if(rough < 1.0)
             {
-                // This is a shortcut: Since light is almost totally absorbed
-                // near the surface, we prevent the ray from entering the
-                // material by averaging the effect by a diffuse reflexion.
-                double eScat = enteredMaterial.scattering(pos);
-                glm::dvec3 diffuseColor = glm::mix(color::black,
-                        glm::pow(eColor, glm::dvec3(1/(1/(1-eScat) - 1) + 1)), eScat)
-                    * ((1.0 - eCond) / outRayCountHint);
-
-                // The constant represents the fact that subsurface
-                // scattering only returns half of the rays while the other
-                // half is scattered further into material's depths...
-                const double CONST = 0.61803398876;
-
-
-                for(unsigned int r=0; r < outRayCountHint; ++r)
-                {
-                    glm::dvec3 diffuseNormal = getMicrofacetNormal(
-                            wallNormal,
-                            incident,
-                            1.0); // Fully diffusive
-
-                    glm::dvec3 reflectNormal = getMicrofacetNormal(
-                            wallNormal,
-                            incident,
-                            rough);
-
-                    glm::dvec3 diffuseDirection =
-                            glm::reflect(incident, diffuseNormal);
-
-                    glm::dvec3 reflectDirection =
-                            glm::reflect(incident, reflectNormal);
-
-                    double reflectionRatio =
-                            computeReflexionRatio(
-                                lRIdx,
-                                eRIdx,
-                                incident,
-                                reflectNormal);
-
-
-                    glm::dvec3 attenuation = diffuseColor * (1 - reflectionRatio)
-                           * (glm::dot(diffuseDirection, wallNormal) * CONST);
-
-
-                    raycasts.push_back(Raycast(
-                            Raycast::BACKDROP_DISTANCE,
-                            Raycast::FULLY_DIFFUSIVE_ENTROPY,
-                            attenuation,
-                            reflectOrig,
-                            diffuseDirection));
-
-                    raycasts.push_back(Raycast(
-                            Raycast::BACKDROP_DISTANCE,
-                            normalEntropy,
-                            insulatorColor * reflectionRatio,
-                            reflectOrig,
-                            reflectDirection));
-                }
+                raycasts.push_back(Raycast(
+                        Raycast::BACKDROP_DISTANCE,
+                        reflectWeight,
+                        roughnessEntropy,
+                        reflectColor,
+                        reflectOrig,
+                        reflectDirection));
             }
             else
             {
-                glm::dvec3 refractColor = insulatorColor *
-                        glm::mix(color::white, pColor, pOpa);
-
-                for(int r=0; r < rayCount; ++r)
-                {
-                    glm::dvec3 reflectNormal = getMicrofacetNormal(
-                            wallNormal,
-                            incident,
-                            rough);
-
-                    glm::dvec3 reflectDir = glm::reflect(incident, reflectNormal);
-
-                    glm::dvec3 refractDir =
-                            computeRefraction(
-                                lRIdx,
-                                eRIdx,
-                                incident,
-                                reflectNormal);
-
-                    glm::dvec3 currRefractOrig = refractOrig;
-                    if(glm::dot(refractDir, wallNormal) > 0.0)
-                        currRefractOrig = reflectOrig;
-
-                    double reflectionRatio =
-                            computeReflexionRatio(
-                                lRIdx,
-                                eRIdx,
-                                incident,
-                                reflectNormal);
-
-
-                    raycasts.push_back(Raycast(
-                            Raycast::BACKDROP_DISTANCE,
-                            normalEntropy,
-                            insulatorColor * reflectionRatio,
-                            reflectOrig,
-                            reflectDir));
-
-                    raycasts.push_back(Raycast(
-                            Raycast::BACKDROP_DISTANCE,
-                            normalEntropy,
-                            refractColor * (1 - reflectionRatio),
-                            currRefractOrig,
-                            refractDir));
-                }
+                diffuseWeight += reflectWeight;
+                diffuseColor = glm::mix(diffuseColor,
+                                    reflectColor, reflectionRatio);
             }
+
+            // Diffuse
+            raycasts.push_back(Raycast(
+                    Raycast::BACKDROP_DISTANCE,
+                    diffuseWeight,
+                    Raycast::FULLY_DIFFUSIVE_ENTROPY,
+                    diffuseColor,
+                    reflectOrig,
+                    diffuseDirection));
+        }
+        else
+        {
+            glm::dvec3 refractColor = color::white;
+            glm::dvec3 reflectColor = color::white;
+
+
+            glm::dvec3 reflectNormal = getMicrofacetNormal(
+                    wallNormal,
+                    incident,
+                    rough);
+
+            glm::dvec3 reflectDir = glm::reflect(incident, reflectNormal);
+
+            glm::dvec3 refractDir =
+                    computeRefraction(
+                        lRIdx,
+                        eRIdx,
+                        incident,
+                        reflectNormal);
+
+
+            double reflectionRatio =
+                    computeReflexionRatio(
+                        lRIdx,
+                        eRIdx,
+                        incident,
+                        reflectNormal);
+
+            double refractWeight = (1.0 - reflectionRatio) * insulatorWeight;
+            double reflectWeight = reflectionRatio * insulatorWeight;
+
+
+            // Refraction
+            if(glm::dot(refractDir, wallNormal) < 0.0)
+            {
+                raycasts.push_back(Raycast(
+                        Raycast::BACKDROP_DISTANCE,
+                        refractWeight,
+                        roughnessEntropy,
+                        refractColor,
+                        refractOrig,
+                        refractDir));
+            }
+            else
+            {
+                reflectWeight += refractWeight;
+            }
+
+            // Reflexion
+            raycasts.push_back(Raycast(
+                    Raycast::BACKDROP_DISTANCE,
+                    reflectWeight,
+                    roughnessEntropy,
+                    reflectColor,
+                    reflectOrig,
+                    reflectDir));
         }
     }
 
@@ -266,6 +294,13 @@ namespace prop3
     {
         assert(false);
 		return color::black;
+    }
+
+    glm::dvec3 StdCoating::albedo(const RayHitReport& report) const
+    {
+        glm::dvec4 paint = paintColor(report.texCoord);
+        glm::dvec3 matCol = report.nextMaterial->color(report.position);
+        return glm::mix(matCol, glm::dvec3(paint), paint.a);
     }
 
     inline glm::dvec3 StdCoating::getMicrofacetNormal(

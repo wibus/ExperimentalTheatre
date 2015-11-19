@@ -3,30 +3,6 @@
 
 namespace prop3
 {
-    Light::Light() :
-		ambient( 0.2f, 0.2f, 0.2f, 1.0f),
-		diffuse( 0.8f, 0.8f, 0.8f, 1.0f),
-		specular(0.4f, 0.4f, 0.4f, 1.0f)
-	{
-	}
-
-    DirectionnalLight::DirectionnalLight() :
-		direction(0.0f, 0.0f, -1.0f, 0.0f)
-	{
-	}
-
-    PointLight::PointLight() :
-		position(0.0f, 0.0f, 0.0f, 1.0f),
-        attenuationCoefs(1.0f, 0.0f, 0.0f, 0.0f)
-	{
-	}
-
-    SpotLight::SpotLight() :
-        direction(1, 0, 0, 0),
-		cutoff(1.0f)
-	{
-	}
-
     glm::dvec3 kelvinToRgb(int kelvin)
     {
         glm::dvec3 color;
@@ -64,5 +40,14 @@ namespace prop3
         }
 
         return color;
+    }
+
+
+    Light::Light()
+    {
+    }
+
+    Light::~Light()
+    {
     }
 }
