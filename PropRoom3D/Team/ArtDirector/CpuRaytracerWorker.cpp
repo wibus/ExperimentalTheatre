@@ -153,7 +153,7 @@ namespace prop3
         _usePixelJittering = use;
     }
 
-    unsigned int CpuRaytracerWorker::completedFrameCount()
+    size_t CpuRaytracerWorker::completedFrameCount()
     {
         std::lock_guard<std::mutex> lk(_framesMutex);
         return _completedColorBuffers.size();
@@ -794,7 +794,8 @@ namespace prop3
             _searchZones.push_back(searchZone);
         }
 
-        for(int i = _searchZones.size()-1; i >= 0; --i)
+		int last = int(_searchZones.size() - 1);
+		for(int i = last; i >= 0; --i)
         {
             const SearchZone& zone = _searchZones[i];
             if(zone.parent != -1)

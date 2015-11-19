@@ -118,7 +118,7 @@ namespace prop3
     class PROP3D_EXPORT SurfaceShell : public PhysicalSurface
     {
     protected:
-        friend std::shared_ptr<Surface> Surface::shell(
+        friend PROP3D_EXPORT std::shared_ptr<Surface> Surface::shell(
                 const std::shared_ptr<Surface> &surf);
         SurfaceShell(const std::shared_ptr<Surface>& surf);
 
@@ -153,7 +153,7 @@ namespace prop3
     // Logical surfaces
     class PROP3D_EXPORT SurfaceGhost : public Surface
     {
-        friend std::shared_ptr<Surface> operator~ (
+        friend PROP3D_EXPORT std::shared_ptr<Surface> operator~ (
                 const std::shared_ptr<Surface>&);
         SurfaceGhost(const std::shared_ptr<Surface>& surf);
 
@@ -187,7 +187,7 @@ namespace prop3
 
     class PROP3D_EXPORT SurfaceInverse : public Surface
     {
-        friend std::shared_ptr<Surface> operator! (
+        friend PROP3D_EXPORT std::shared_ptr<Surface> operator! (
                 const std::shared_ptr<Surface>&);
         SurfaceInverse(const std::shared_ptr<Surface>& surf);
 
@@ -221,7 +221,7 @@ namespace prop3
 
     class PROP3D_EXPORT SurfaceOr : public Surface
     {
-        friend std::shared_ptr<Surface> operator| (
+        friend PROP3D_EXPORT std::shared_ptr<Surface> operator| (
                 const std::shared_ptr<Surface>&,
                 const std::shared_ptr<Surface>&);
         SurfaceOr(const std::vector<std::shared_ptr<Surface>>& surfs);
@@ -260,7 +260,7 @@ namespace prop3
 
     class PROP3D_EXPORT SurfaceAnd : public Surface
     {
-        friend std::shared_ptr<Surface> operator& (
+        friend PROP3D_EXPORT std::shared_ptr<Surface> operator& (
                 const std::shared_ptr<Surface>&,
                 const std::shared_ptr<Surface>&);
         SurfaceAnd(const std::vector<std::shared_ptr<Surface>>& surfs);
@@ -299,21 +299,21 @@ namespace prop3
 
     // Logical operators overloading
     // Ghost surface
-    std::shared_ptr<Surface> operator~ (
+	PROP3D_EXPORT std::shared_ptr<Surface> operator~ (
             const std::shared_ptr<Surface>& surf);
     // Invert sides
-    std::shared_ptr<Surface> operator! (
+	PROP3D_EXPORT std::shared_ptr<Surface> operator! (
             const std::shared_ptr<Surface>& surf);
     // Surface union
-    std::shared_ptr<Surface> operator| (
+	PROP3D_EXPORT std::shared_ptr<Surface> operator| (
             const std::shared_ptr<Surface>& surf1,
             const std::shared_ptr<Surface>& surf2);
     // Surface intersection
-    std::shared_ptr<Surface> operator& (
+	PROP3D_EXPORT std::shared_ptr<Surface> operator& (
             const std::shared_ptr<Surface>& surf1,
             const std::shared_ptr<Surface>& surf2);
     // Surface junction
-    std::shared_ptr<Surface> operator^ (
+	PROP3D_EXPORT std::shared_ptr<Surface> operator^ (
             const std::shared_ptr<Surface>& surf1,
             const std::shared_ptr<Surface>& surf2);
 

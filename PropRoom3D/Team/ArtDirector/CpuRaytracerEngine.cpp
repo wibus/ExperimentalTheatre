@@ -422,8 +422,8 @@ namespace prop3
         std::list<DrafterType> drafters;
 
         int currOriginY = 0;
-        unsigned int workerIdx = 0;
-        unsigned int workerCount = _workerObjects.size();
+        int workerIdx = 0;
+        int workerCount = (int)_workerObjects.size();
         const glm::ivec2& viewport = viewportSize();
         for(auto& w : _workerObjects)
         {

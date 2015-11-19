@@ -16,8 +16,8 @@ namespace prop3
 
     void RayHitList::releaseMemoryPool()
     {
-        int count = _memoryPool.size();
-        for(int i=0; i < count; ++i)
+        size_t count = _memoryPool.size();
+        for(size_t i=0; i < count; ++i)
             delete _memoryPool[i];
 
         _memoryPool.clear();

@@ -225,6 +225,11 @@ namespace prop3
         {
             return true;
         }
+		else
+		{
+			// TODO : verify case logic
+			return false;
+		}
     }
 
     void Quadric::transform(const Transform& transform)

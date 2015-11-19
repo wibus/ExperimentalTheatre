@@ -1,5 +1,7 @@
 #include "GlToolkit.h"
 
+#include <algorithm>
+
 #include <GL3/gl3w.h>
 
 #include <CellarWorkbench/Misc/Log.h>
@@ -100,10 +102,10 @@ namespace cellar
             height = vpHeight;
 
         // Clamp to viewport borders
-        x = min(vpWidth-1, x);
-        y = min(vpHeight-1, y);
-        width  = min(vpWidth-x,  width);
-        height = min(vpHeight-y, height);
+        x = std::min(vpWidth-1, x);
+		y = std::min(vpHeight - 1, y);
+		width = std::min(vpWidth - x, width);
+		height = std::min(vpHeight - y, height);
 
         image.resize(width, height);
 

@@ -726,7 +726,8 @@ namespace prop3
             return cast2;
         }
 
-        return std::shared_ptr<Surface>(new SurfaceOr({surf1, surf2}));
+		std::vector<std::shared_ptr<Surface>> surfs{ surf1, surf2 };
+		return std::shared_ptr<Surface>(new SurfaceOr(surfs));
     }
 
     std::shared_ptr<Surface> operator& (
@@ -747,7 +748,8 @@ namespace prop3
             return cast2;
         }
 
-        return std::shared_ptr<Surface>(new SurfaceAnd({surf1, surf2}));
+		std::vector<std::shared_ptr<Surface>> surfs{ surf1, surf2 };
+		return std::shared_ptr<Surface>(new SurfaceAnd(surfs));
     }
 
     std::shared_ptr<Surface> operator^ (

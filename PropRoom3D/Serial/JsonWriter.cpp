@@ -144,17 +144,17 @@ namespace prop3
 
     bool StageSetJsonWriter::HardwareBuilder::insertSurface(Surface& node)
     {
-        return surfaceIdMap.insert(make_pair(&node, surfaceIdMap.size())).second;
+        return surfaceIdMap.insert(make_pair(&node, (int)surfaceIdMap.size())).second;
     }
 
     bool StageSetJsonWriter::HardwareBuilder::insertCoating(Coating& node)
     {
-        return coatingIdMap.insert(make_pair(&node, coatingIdMap.size())).second;
+        return coatingIdMap.insert(make_pair(&node, (int)coatingIdMap.size())).second;
     }
 
     bool StageSetJsonWriter::HardwareBuilder::insertMaterial(Material& node)
     {
-        return materialIdMap.insert(make_pair(&node, materialIdMap.size())).second;
+        return materialIdMap.insert(make_pair(&node, (int)materialIdMap.size())).second;
     }
 
     void StageSetJsonWriter::HardwareBuilder::setPhysicalProperties(PhysicalSurface& node, QJsonObject& obj)

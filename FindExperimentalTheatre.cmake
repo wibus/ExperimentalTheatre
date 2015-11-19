@@ -25,7 +25,6 @@ SET(ExTh_INCLUDE_DIRS
     
 SET(ExTh_LIBRARIES
     CellarWorkbench
-    MediaWorkbench
     PropRoom2D
     PropRoom3D
     Scaena

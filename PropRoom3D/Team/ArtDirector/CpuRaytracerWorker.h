@@ -31,7 +31,7 @@ namespace prop3
 
     class AbstractTeam;
 
-    class SearchZone;
+    struct SearchZone;
 
 
     class PROP3D_EXPORT CpuRaytracerWorker
@@ -61,7 +61,7 @@ namespace prop3
         virtual void useStochasticTracing(bool use);
         virtual void usePixelJittering(bool use);
 
-        virtual unsigned int completedFrameCount();
+        virtual size_t completedFrameCount();
         virtual const float* readNextFrame();
         virtual void popReadFrame();
 

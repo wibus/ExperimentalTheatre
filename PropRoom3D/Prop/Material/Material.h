@@ -65,9 +65,9 @@ namespace prop3
         /////////////////////////
         // Constant attributes //
         /////////////////////////
-        extern const double AIR_REFRACTIVE_INDEX;
-        extern const double GLASS_REFRACTIVE_INDEX;
-        extern const double WATER_REFRACTIVE_INDEX;
+		PROP3D_EXPORT extern const double AIR_REFRACTIVE_INDEX;
+		PROP3D_EXPORT extern const double GLASS_REFRACTIVE_INDEX;
+		PROP3D_EXPORT extern const double WATER_REFRACTIVE_INDEX;
 
 
         ///////////////////////
@@ -75,14 +75,14 @@ namespace prop3
         ///////////////////////
 
         // Clear materials
-        extern const std::shared_ptr<Material> AIR;
-        extern const std::shared_ptr<Material> GLASS;
-        extern const std::shared_ptr<Material> WATER;
+		PROP3D_EXPORT extern const std::shared_ptr<Material> AIR;
+		PROP3D_EXPORT extern const std::shared_ptr<Material> GLASS;
+		PROP3D_EXPORT extern const std::shared_ptr<Material> WATER;
 
         // Metals
-        extern const std::shared_ptr<Material> GOLD;
-        extern const std::shared_ptr<Material> SILVER;
-        extern const std::shared_ptr<Material> TITANIUM;
+		PROP3D_EXPORT extern const std::shared_ptr<Material> GOLD;
+		PROP3D_EXPORT extern const std::shared_ptr<Material> SILVER;
+		PROP3D_EXPORT extern const std::shared_ptr<Material> TITANIUM;
 
         // Minerals
 
@@ -90,10 +90,10 @@ namespace prop3
         /////////////////////
         // Factory methods //
         /////////////////////
-        std::shared_ptr<Material> createMetal(
+		PROP3D_EXPORT std::shared_ptr<Material> createMetal(
                 const glm::dvec3& color);
 
-        std::shared_ptr<Material> createInsulator(
+		PROP3D_EXPORT std::shared_ptr<Material> createInsulator(
                 const glm::dvec3& color,
                 double refractiveIndex,
                 double opacity,
@@ -103,16 +103,16 @@ namespace prop3
 
     namespace color
     {
-        const extern glm::dvec3 black;
-        const extern glm::dvec3 white;
+		PROP3D_EXPORT const extern glm::dvec3 black;
+		PROP3D_EXPORT const extern glm::dvec3 white;
 
-        const extern glm::dvec3 red;
-        const extern glm::dvec3 green;
-        const extern glm::dvec3 blue;
+		PROP3D_EXPORT const extern glm::dvec3 red;
+		PROP3D_EXPORT const extern glm::dvec3 green;
+		PROP3D_EXPORT const extern glm::dvec3 blue;
 
-        const extern glm::dvec3 cyan;
-        const extern glm::dvec3 magenta;
-        const extern glm::dvec3 yellow;
+		PROP3D_EXPORT const extern glm::dvec3 cyan;
+		PROP3D_EXPORT const extern glm::dvec3 magenta;
+		PROP3D_EXPORT const extern glm::dvec3 yellow;
     }
 }
 

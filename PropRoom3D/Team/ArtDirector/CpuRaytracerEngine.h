@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <thread>
+#include <memory>
 
 #include <GLM/glm.hpp>
 

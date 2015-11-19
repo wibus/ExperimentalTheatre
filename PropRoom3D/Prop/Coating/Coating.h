@@ -54,13 +54,13 @@ namespace prop3
 
     namespace coating
     {
-        extern const std::shared_ptr<Coating> CLEAR_POLISH;
-        extern const std::shared_ptr<Coating> CLEAR_ROUGH;
+		PROP3D_EXPORT extern const std::shared_ptr<Coating> CLEAR_POLISH;
+		PROP3D_EXPORT extern const std::shared_ptr<Coating> CLEAR_ROUGH;
 
-        std::shared_ptr<Coating> createClearCoat(
+		PROP3D_EXPORT std::shared_ptr<Coating> createClearCoat(
                 double roughness);
 
-        std::shared_ptr<Coating> createClearPaint(
+		PROP3D_EXPORT std::shared_ptr<Coating> createClearPaint(
                 const glm::dvec3& color,
                 double roughness);
     }
