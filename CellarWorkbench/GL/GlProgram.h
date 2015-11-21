@@ -18,6 +18,14 @@
 
 namespace cellar
 {
+    struct GlProgramBinary
+    {
+        GLint length;
+        GLenum format;
+        std::string binary;
+    };
+
+
     class CELLAR_EXPORT GlProgram
     {
     public:
@@ -79,6 +87,10 @@ namespace cellar
         bool setMat3f(const std::string& var, const glm::mat3& mat);
         bool setMat4f(const std::string& var, const glm::mat4& mat);
 
+        // Program Binary
+        const GlProgramBinary& getBinary();
+
+
     private:
         void applyState() const;
 
@@ -86,11 +98,11 @@ namespace cellar
 
         GLuint _id;
         int _linked;
-        int _validateStatus;
         GlInputsOutputs _inAndOutLocations;
         std::set<std::shared_ptr<GlShader>> _shaders;
         std::map<GLenum, std::pair<GLenum, GLuint>> _textures;
-        mutable std::map<std::string, int> _cachedLocations;        
+        mutable std::map<std::string, int> _cachedLocations;
+        std::shared_ptr<GlProgramBinary> _binary;
     };
 
 

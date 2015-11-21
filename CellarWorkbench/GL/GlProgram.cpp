@@ -26,7 +26,6 @@ namespace cellar
     GlProgram::GlProgram() :
         _id(0),
         _linked(false),
-        _validateStatus(false),
         _inAndOutLocations(),
         _shaders(),
         _textures(),
@@ -125,25 +124,25 @@ namespace cellar
         glGetProgramiv(_id, GL_LINK_STATUS, &_linked);
 
         int infologLength = 0;
-        glGetProgramiv( _id, GL_INFO_LOG_LENGTH, &infologLength );
+        glGetProgramiv(_id, GL_INFO_LOG_LENGTH, &infologLength );
         if( infologLength > 1 )
         {
             char* infoLog = new char[infologLength+1];
             int charsWritten  = 0;
-            glGetProgramInfoLog( _id, infologLength, &charsWritten, infoLog );
+            glGetProgramInfoLog(_id, infologLength, &charsWritten, infoLog );
 
             string log = "Errors in shader program (id): ";
             log.append( toString(_id) + "\n" + infoLog );
             getLog().postMessage(new Message('E', false, log, "GlProgram"));
             delete[] infoLog;
 
-            return _linked && _validateStatus;
+            return _linked;
         }
 
         getLog().postMessage(new Message('I', false,
             "Shader program succefully linked" + logSupInfo, "GlProgram"));
 
-        return _linked &&  _validateStatus;
+        return _linked;
     }
 
     void GlProgram::setTexture(
@@ -475,6 +474,23 @@ namespace cellar
         glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
 
         return true;
+    }
+
+    const GlProgramBinary& GlProgram::getBinary()
+    {
+        if(_binary.get() == nullptr)
+        {
+            _binary.reset(new GlProgramBinary());
+            glGetIntegerv(GL_PROGRAM_BINARY_FORMATS, (GLint*)(&_binary->format));
+            glGetProgramiv(_id, GL_PROGRAM_BINARY_LENGTH, &_binary->length);
+
+            GLchar* bin = new GLchar[_binary->length];
+            glGetProgramBinary(_id, _binary->length, nullptr, &_binary->format, bin);
+            _binary->binary = bin;
+            delete [] bin;
+        }
+
+        return *_binary;
     }
 
     void GlProgram::applyState() const
