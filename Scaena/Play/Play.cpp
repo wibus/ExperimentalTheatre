@@ -97,13 +97,16 @@ namespace scaena
 
             for(auto& view : _views)
             {
-                // Views can add art directors
-                // So it must be setup before teams
-                view->setup(*this);
+                // Install view's team members
+                view->install(*this);
             }
 
+            // Setup teams and views
             _propTeam2D->setup();
             _propTeam3D->setup();
+
+            for(auto& view : _views)
+                view->setup();
 
             (*_currentAct)->openCurtain();
 

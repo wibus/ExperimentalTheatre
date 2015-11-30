@@ -98,6 +98,12 @@ namespace prop3
         // TODO wbussiere 2015-05-01 : reset clients
     }
 
+    void ArtDirectorServer::resize(int width, int height)
+    {
+		// Image resolution is based on camera viewport size.
+		// Camera viewport is independent of OpenGL viewport.
+    }
+
     void ArtDirectorServer::notify(cellar::CameraMsg &msg)
     {
         clearColorTexture();

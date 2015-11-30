@@ -26,6 +26,8 @@ namespace prop3
         virtual void draw(double dt) override;
         virtual void reset() override;
 
+        virtual void resize(int width, int height) override;
+
         virtual void notify(cellar::CameraMsg &msg) override;
 
         std::shared_ptr<GlPostProdUnit> postProdUnit() const;

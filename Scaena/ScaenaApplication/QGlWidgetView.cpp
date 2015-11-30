@@ -112,6 +112,114 @@ namespace scaena
         resize(w, h);
     }
 
+    void QGlWidgetView::install(Play& play)
+    {
+        makeCurrent();
+        _playPtr = &play;
+        installArtDirectors(play);
+        installEventListeners(play);
+    }
+
+    void QGlWidgetView::installArtDirectors(Play& play)
+    {
+        _artDirector2D.reset(new prop2::GlArtDirector());
+        play.propTeam2D()->addArtDirector(_artDirector2D);
+
+        _artDirector3D.reset(new prop3::ArtDirectorServer());
+        play.propTeam3D()->addArtDirector(_artDirector3D);
+    }
+
+    void QGlWidgetView::installEventListeners(Play& play)
+    {
+        _keyPressAction = [&play](QKeyEvent* event)
+        {
+            if(event->isAutoRepeat())
+                return;
+            if(play.keyPressEvent(KeyboardEvent::convertQKeyEvent(event)))
+                event->accept();
+        };
+
+        _keyReleaseAction = [&play](QKeyEvent* event)
+        {
+            if(event->isAutoRepeat())
+                return;
+            if(play.keyReleaseEvent(KeyboardEvent::convertQKeyEvent(event)))
+                event->accept();
+        };
+
+        _mousePressAction = [&play](QMouseEvent* event)
+        {
+            if(play.mousePressEvent(MouseEvent::convertQMouseEvent(event)))
+                event->accept();
+        };
+
+        _mouseReleaseAction = [&play](QMouseEvent* event)
+        {
+            if(play.mouseReleaseEvent(MouseEvent::convertQMouseEvent(event)))
+                event->accept();
+        };
+
+        _mouseMoveAction = [&play](QMouseEvent* event)
+        {
+            if(play.mouseMoveEvent(MouseEvent::convertQMouseEvent(event)))
+                event->accept();
+        };
+
+        _mouseWheelAction = [&play](QWheelEvent* event)
+        {
+            if(play.mouseWheelEvent(MouseEvent::convertQWheelEvent(event)))
+                event->accept();
+        };
+    }
+
+    void QGlWidgetView::setup()
+    {
+        _artDirector2D->resize(width(), height());
+        _artDirector3D->resize(width(), height());
+    }
+
+    void QGlWidgetView::beginDraw(double dt)
+    {
+        if(dt > 0.0)
+        {
+            QWindow* window = windowHandle();
+            if(!window || !window->isExposed() || !isVisible())
+                return;
+
+            makeCurrent();
+        }
+
+        _artDirector3D->draw(glm::max(dt, 0.0));
+    }
+
+    void QGlWidgetView::endDraw(double dt)
+    {
+        if(dt > 0.0)
+        {
+            QWindow* window = windowHandle();
+            if(!window || !window->isExposed() || !isVisible())
+                return;
+        }
+
+        _artDirector2D->draw(glm::max(dt, 0.0));
+
+        if(dt > 0.0)
+        {
+            swapBuffers();
+        }
+
+        GLenum errCode = glGetError();
+        if(errCode)
+        {
+            const GLubyte* errString = gluErrorString(errCode);
+            std::string msg = (const char*) errString;
+            msg = "OpenGL error: " + msg;
+
+            getLog().postMessage(
+                new Message('E', false, msg, "QGlWidgetView"));
+        }
+    }
+
     // QGLWidget interface
     void QGlWidgetView::initializeGL()
     {
@@ -160,109 +268,5 @@ namespace scaena
         beginDraw(-1);
         _playPtr->drawCharactersFromView(*this);
         endDraw(-1);
-    }
-
-    void QGlWidgetView::beginDraw(double dt)
-    {
-        if(dt > 0.0)
-        {
-            QWindow* window = windowHandle();
-            if(!window || !window->isExposed() || !isVisible())
-                return;
-
-            makeCurrent();
-        }
-
-        _artDirector3D->draw(glm::max(dt, 0.0));
-    }
-
-    void QGlWidgetView::endDraw(double dt)
-    {
-        if(dt > 0.0)
-        {
-            QWindow* window = windowHandle();
-            if(!window || !window->isExposed() || !isVisible())
-                return;
-        }
-
-        _artDirector2D->draw(glm::max(dt, 0.0));
-
-        if(dt > 0.0)
-        {
-            swapBuffers();
-        }
-
-        GLenum errCode = glGetError();
-        if(errCode)
-        {
-            const GLubyte* errString = gluErrorString(errCode);
-            std::string msg = (const char*) errString;
-            msg = "OpenGL error: " + msg;
-
-            getLog().postMessage(
-                new Message('E', false, msg, "QGlWidgetView"));
-        }
-    }
-
-    void QGlWidgetView::setup(Play& play)
-    {
-        makeCurrent();
-        _playPtr = &play;
-        setupArtDirectors(play);
-        setupEventListeners(play);
-    }
-
-    void QGlWidgetView::setupArtDirectors(Play& play)
-    {
-        _artDirector2D.reset(new prop2::GlArtDirector());
-        play.propTeam2D()->addArtDirector(_artDirector2D);
-        _artDirector2D->resize(width(), height());
-
-        _artDirector3D.reset(new prop3::ArtDirectorServer());
-        play.propTeam3D()->addArtDirector(_artDirector3D);
-        _artDirector3D->resize(width(), height());
-    }
-
-    void QGlWidgetView::setupEventListeners(Play& play)
-    {
-        _keyPressAction = [&play](QKeyEvent* event)
-        {
-            if(event->isAutoRepeat())
-                return;
-            if(play.keyPressEvent(KeyboardEvent::convertQKeyEvent(event)))
-                event->accept();
-        };
-
-        _keyReleaseAction = [&play](QKeyEvent* event)
-        {
-            if(event->isAutoRepeat())
-                return;
-            if(play.keyReleaseEvent(KeyboardEvent::convertQKeyEvent(event)))
-                event->accept();
-        };
-
-        _mousePressAction = [&play](QMouseEvent* event)
-        {
-            if(play.mousePressEvent(MouseEvent::convertQMouseEvent(event)))
-                event->accept();
-        };
-
-        _mouseReleaseAction = [&play](QMouseEvent* event)
-        {
-            if(play.mouseReleaseEvent(MouseEvent::convertQMouseEvent(event)))
-                event->accept();
-        };
-
-        _mouseMoveAction = [&play](QMouseEvent* event)
-        {
-            if(play.mouseMoveEvent(MouseEvent::convertQMouseEvent(event)))
-                event->accept();
-        };
-
-        _mouseWheelAction = [&play](QWheelEvent* event)
-        {
-            if(play.mouseWheelEvent(MouseEvent::convertQWheelEvent(event)))
-                event->accept();
-        };
     }
 }

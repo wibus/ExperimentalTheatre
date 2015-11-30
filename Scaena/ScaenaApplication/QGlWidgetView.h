@@ -37,17 +37,19 @@ namespace scaena
         virtual void setGlWindowSpace(int w, int h);
 
     protected:
+        // View interface
+        virtual void install(Play& play)  override;
+        virtual void installArtDirectors(Play& play);
+        virtual void installEventListeners(Play& play);
+        virtual void setup() override;
+
+        virtual void beginDraw(double dt)  override;
+        virtual void endDraw(double dt)  override;
+
         // QGLWidget interface
         virtual void initializeGL() override;
         virtual void resizeGL(int w, int h) override;
         virtual void paintGL() override;
-
-        // View interface
-        virtual void beginDraw(double dt)  override;
-        virtual void endDraw(double dt)  override;
-        virtual void setup(Play& play)  override;
-        virtual void setupArtDirectors(Play& play);
-        virtual void setupEventListeners(Play& play);
 
 
     protected:

@@ -44,9 +44,12 @@ namespace scaena
 
     protected:
         friend class Play;
+
+        virtual void install(Play& play) = 0;
+        virtual void setup() = 0;
+
         virtual void beginDraw(double dt) = 0;
         virtual void endDraw(double dt) = 0;
-        virtual void setup(Play& play) = 0;
 
 
     private:
