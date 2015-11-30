@@ -61,7 +61,13 @@ SET(PROP3_SERIAL_HEADERS
     ${PROP3_SRC_DIR}/Serial/JsonWriter.h)
 
 # Art Director
+SET(PROP3_FILM_HEADERS
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Film/AbstractFilm.h
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Film/ConvergentFilm.h
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Film/StaticFilm.h)
+
 SET(PROP3_ART_DIRECTOR_HEADERS
+    ${PROP3_FILM_HEADERS}
     ${PROP3_SRC_DIR}/Team/ArtDirector/AbstractArtDirector.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorClient.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorServer.h
@@ -157,7 +163,13 @@ SET(PROP3_SERIAL_SOURCES
     ${PROP3_SRC_DIR}/Serial/JsonWriter.cpp)
 
 # Art Director
+SET(PROP3_FILM_SOURCES
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Film/AbstractFilm.cpp
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Film/ConvergentFilm.cpp
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Film/StaticFilm.cpp)
+
 SET(PROP3_ART_DIRECTOR_SOURCES
+    ${PROP3_FILM_SOURCES}
     ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorClient.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorServer.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerEngine.cpp

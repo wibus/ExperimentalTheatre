@@ -14,6 +14,7 @@ namespace prop3
 {
     class Prop;
     class StageSet;
+    class AbstractFilm;
     class CpuRaytracerWorker;
 
 
@@ -28,23 +29,18 @@ namespace prop3
         CpuRaytracerEngine(unsigned int workerCount);
         virtual ~CpuRaytracerEngine();
 
-        virtual void setup(const std::shared_ptr<StageSet>& stageSet);
+        virtual void setup(double divergenceThreshold,
+                           const RaytracerState::DraftParams& draftParams);
         virtual void reset();
 
         virtual bool isUpdated();
         virtual void onUpdateConsumed();
-        virtual const glm::ivec2& viewportSize() const;
-        virtual const std::vector<float>& colorBuffer() const;
+        virtual const AbstractFilm& film() const;
 
         std::shared_ptr<RaytracerState> raytracerState() const;
 
-        virtual void update();
-        virtual void pourFramesIn(
-            const std::vector<float>& colorBuffer,
-            unsigned int sampleCount);
-        virtual void pourFramesOut(
-            std::vector<float>& colorBuffer,
-            unsigned int& sampleCount);
+        virtual void update(const std::shared_ptr<StageSet>& stageSet);
+        virtual void pourFramesIn(const AbstractFilm& film);
 
         virtual void resize(int width, int height);
         virtual void updateView(const glm::dmat4& view);
@@ -52,31 +48,30 @@ namespace prop3
 
 
     protected:
-        virtual void dispatchStageSet();
+        virtual void dispatchStageSet(const std::shared_ptr<StageSet>& stageSet);
+        virtual void abortRendering();
         virtual void skipDrafting();
         virtual void nextDraftSize();
-        virtual void abortRendering();
         virtual void interruptWorkers();
-        virtual void bufferSoftReset();
-        virtual void bufferHardReset();
-        virtual void incorporateFrames(
-            const float* colorBuffer,
-            unsigned int sampleCount);
+        virtual void setupWorkers();
+        virtual void setupFilms();
+        virtual void hardReset();
+        virtual void incorporateFilm(
+                const AbstractFilm& film);
 
         virtual void performNonStochasticSyncronousDraf();
 
     private:
         static const unsigned int DEFAULT_WORKER_COUNT;
 
+        RaytracerState::DraftParams _draftParams;
         RaytracerState::ProtectedState _protectedState;
         std::shared_ptr<RaytracerState> _raytracerState;
 
-        glm::ivec2 _draftViewportSize;
-
         bool _isUpdated;
         glm::ivec2 _viewportSize;
-        std::vector<float> _colorBuffer;
-        std::shared_ptr<StageSet> _stageSet;
+        std::vector<std::shared_ptr<AbstractFilm>> _films;
+        std::shared_ptr<AbstractFilm> _currentFilm;
 
         friend class CpuRaytracerWorker;
         std::vector<std::thread> _workerThreads;

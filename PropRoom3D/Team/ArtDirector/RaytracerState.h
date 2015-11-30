@@ -11,6 +11,22 @@ namespace prop3
     class PROP3D_EXPORT RaytracerState
     {
     public:
+        class DraftParams
+        {
+        public:
+            DraftParams();
+            DraftParams(
+                int levelCount,
+                int sizeRatio,
+                int frameCountPerLevel,
+                bool fastDraftEnabled);
+
+            int levelCount;
+            int sizeRatio;
+            int frameCountPerLevel;
+            bool fastDraftEnabled;
+        };
+
         class ProtectedState
         {
             friend class RaytracerState;
@@ -25,11 +41,19 @@ namespace prop3
 
             void setInterrupted(bool interrupted);
 
-            void setSampleCount(unsigned int sampleCount);
+            void incSampleCount();
+
+            void addSampleCount(unsigned int count);
+
+            void resetSampleCount();
+
+            void setDivergenceThreshold(double divergenceThreshold);
 
             void setDivergence(double divergence);
 
             void setDraftLevel(int draftLevel);
+
+            void setDraftParams(const DraftParams& draftParams);
 
 
         private:
@@ -40,7 +64,11 @@ namespace prop3
             int _workerCount;
             bool _interrupted;
             unsigned int _sampleCount;
+
+            double _divergenceThreshold;
             double _divergence;
+
+            DraftParams _draftParams;
             int _draftLevel;
         };
 
@@ -59,6 +87,8 @@ namespace prop3
         double divergence() const;
 
         double divergenceThreshold() const;
+
+        bool converged() const;
 
 
         int draftLevel() const;
@@ -79,24 +109,8 @@ namespace prop3
         bool isRendering() const;
 
 
-        void setDivergenceThreshold(double divergenceThreshold);
-
-        void setDraftParams(
-                int levelCount,
-                int levelSizeRatio,
-                int frameCountPerLevel,
-                bool enableFastDraft);
-
-
     private:
         ProtectedState& _protectedState;
-
-        double _divergenceThreshold;
-
-        int _draftLevelCount;
-        int _draftLevelSizeRatio;
-        int _draftFrameCountPerLevel;
-        bool _fastDraftEnabled;
     };
 
 
@@ -132,7 +146,13 @@ namespace prop3
 
     inline double RaytracerState::divergenceThreshold() const
     {
-        return _divergenceThreshold;
+        return _protectedState._divergenceThreshold;
+    }
+
+    inline bool RaytracerState::converged() const
+    {
+        return _protectedState._divergenceThreshold >=
+               _protectedState._divergence;
     }
 
     inline int RaytracerState::draftLevel() const
@@ -142,37 +162,39 @@ namespace prop3
 
     inline int RaytracerState::draftLevelCount() const
     {
-        return _draftLevelCount;
+        return _protectedState._draftParams.levelCount;
     }
 
     inline int RaytracerState::draftLevelSizeRatio() const
     {
-        return _draftLevelSizeRatio;
+        return _protectedState._draftParams.sizeRatio;
     }
 
     inline int RaytracerState::draftFrameCountPerLevel() const
     {
-        return _draftFrameCountPerLevel;
+        return _protectedState._draftParams.frameCountPerLevel;
     }
 
     inline bool RaytracerState::fastDraftEnabled() const
     {
-        return isDrafter() && _fastDraftEnabled;
+        return isDrafter() && _protectedState._draftParams.fastDraftEnabled;
     }
 
     inline bool RaytracerState::isDrafter() const
     {
-        return _draftLevelCount != 0 && _draftFrameCountPerLevel != 0;
+        return _protectedState._draftParams.levelCount != 0 &&
+               _protectedState._draftParams.frameCountPerLevel != 0;
     }
 
     inline bool RaytracerState::isDrafting() const
     {
-        return isDrafter() && (_protectedState._draftLevel < _draftLevelCount);
+        return isDrafter() && (_protectedState._draftLevel <
+                               _protectedState._draftParams.levelCount);
     }
 
     inline bool RaytracerState::isRendering() const
     {
-        return isDrafting() || (_divergenceThreshold <= _protectedState._divergence);
+        return isDrafting() || (!converged());
     }
 }
 

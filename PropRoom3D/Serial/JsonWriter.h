@@ -29,7 +29,9 @@ namespace prop3
         StageSetJsonWriter();
         virtual ~StageSetJsonWriter();
 
-        virtual std::string serialize(StageSet& stageSet, bool prettyPrint = false);
+        virtual std::string serialize(
+                StageSet& stageSet,
+                bool prettyPrint = false);
 
 
     private:

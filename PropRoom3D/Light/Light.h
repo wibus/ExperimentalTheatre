@@ -28,7 +28,7 @@ namespace prop3
     public:
         virtual ~Light();
 
-        virtual glm::dvec3 raycast(const Raycast& ray, bool directView) const = 0;
+        virtual glm::dvec4 raycast(const Raycast& ray, bool directView) const = 0;
 
         virtual std::vector<Raycast> fireRays(unsigned int count) const = 0;
 

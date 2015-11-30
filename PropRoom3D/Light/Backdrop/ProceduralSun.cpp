@@ -87,7 +87,7 @@ namespace prop3
         stampCurrentUpdate();
     }
 
-    glm::dvec3 ProceduralSun::raycast(const Raycast& ray, bool directView) const
+    glm::dvec4 ProceduralSun::raycast(const Raycast& ray, bool directView) const
     {
         glm::dvec3 color;
 
@@ -122,7 +122,8 @@ namespace prop3
 
 
         // Final blended color
-        return color;
+        double skyColorWeight = 1.0;
+        return glm::dvec4(color, skyColorWeight);
     }
 
     std::vector<Raycast> ProceduralSun::fireRays(unsigned int count) const

@@ -21,6 +21,8 @@
 
 #include "../AbstractTeam.h"
 
+#include "Film/StaticFilm.h"
+
 
 namespace prop3
 {
@@ -43,19 +45,17 @@ namespace prop3
         _isSingleShot(false),
         _runningPredicate(false),
         _terminatePredicate(false),
-        _usePixelJittering(true),
         _useStochasticTracing(true),
+        _usePixelJittering(true),
+        _useDepthOfField(true),
         _lightRayIntensityThreshold(1.0 / 32.0),
         _screenRayIntensityThreshold(1.0 / 32.0),
         _lightDirectRayCount(1),
         _lightFireRayCount(20),
         _viewportSize(1, 1),
         _confusionRadius(0.1),
-        _workingColorBuffer(nullptr),
         _team(new WorkerTeam())
     {
-        int bufferSize = _viewportSize.x * _viewportSize.y * 3;
-        _workingColorBuffer = new float[bufferSize];
         _team->setup();
     }
 
@@ -90,7 +90,9 @@ namespace prop3
         {
             // Skip current frame
             _runningPredicate = false;
-            std::lock_guard<std::mutex> lk(_flowMutex);
+
+            // Wait till this worker terminates
+            //std::lock_guard<std::mutex> lk(_flowMutex);
         }
 
         _cv.notify_one();
@@ -99,6 +101,13 @@ namespace prop3
     bool CpuRaytracerWorker::isRunning()
     {
         return _runningPredicate;
+    }
+
+    void CpuRaytracerWorker::updateStageSet(const std::string& stream)
+    {
+        skipAndExecute([this, &stream](){
+            _stageSetStream = stream;
+        });
     }
 
     void CpuRaytracerWorker::updateView(const glm::dmat4& view)
@@ -135,13 +144,6 @@ namespace prop3
         });
     }
 
-    void CpuRaytracerWorker::setStageSetStream(const std::string& stream)
-    {
-        skipAndExecute([this, &stream](){
-            _stageSetStream = stream;
-        });
-    }
-
     void CpuRaytracerWorker::useStochasticTracing(bool use)
     {
         _useStochasticTracing = use;
@@ -152,22 +154,29 @@ namespace prop3
         _usePixelJittering = use;
     }
 
+    void CpuRaytracerWorker::useDepthOfField(bool use)
+    {
+        _useDepthOfField = use;
+    }
+
     size_t CpuRaytracerWorker::completedFrameCount()
     {
         std::lock_guard<std::mutex> lk(_framesMutex);
-        return _completedColorBuffers.size();
+        return _completedFilms.size();
     }
 
-    const float* CpuRaytracerWorker::readNextFrame()
+    std::shared_ptr<AbstractFilm> CpuRaytracerWorker::readNextFilm()
     {
         _framesMutex.lock();
-        return _completedColorBuffers.front();
+        return _completedFilms.front();
     }
 
-    void CpuRaytracerWorker::popReadFrame()
+    void CpuRaytracerWorker::popReadFilm()
     {
-        _framePool.push_back(_completedColorBuffers.front());
-        _completedColorBuffers.pop();
+        _completedFilms.front()->clear();
+        _filmPool.push_back(_completedFilms.front());
+        _completedFilms.pop();
+
         _framesMutex.unlock();
     }
 
@@ -199,10 +208,10 @@ namespace prop3
         {
             std::unique_lock<std::mutex> lk(_flowMutex);
             _cv.wait(lk, [this]{
-                return (_runningPredicate &&
+                return _terminatePredicate ||
+                       (_runningPredicate &&
                             (!_searchSurfaces.empty() ||
-                             !_stageSetStream.empty())) ||
-                        _terminatePredicate;
+                             !_stageSetStream.empty()));
             });
 
             // Verify if we are supposed to terminate
@@ -290,20 +299,23 @@ namespace prop3
             orig += (glm::dvec2(0.5) + glm::circularRand(0.5)) * pixelSize;
         }
 
-        glm::dvec4 apertureBeg = _projInvMatrix * glm::dvec4(0.0, 0.0, -1.0, 1.0);
-        apertureBeg.z /= apertureBeg.w;
-        glm::dvec4 apertureEnd = _projInvMatrix * glm::dvec4(0.0, 0.0, 1.0, 1.0);
-        apertureEnd.z /= apertureEnd.w;
-        double aperture = (apertureBeg.z - apertureEnd.z) - 1.0;
-
         glm::dvec3 eyeWorldPos = _camPos;
-        if(aperture > 0.0)
+        if(_useDepthOfField)
         {
-            glm::dvec3 camDir = glm::dvec3(_viewInvMatrix * glm::dvec4(0.0, 0.0, -1.0, 0.0));
-            glm::dvec3 confusionSide = glm::normalize(glm::cross(camDir, glm::dvec3(0.0, 0.0, 1.0)));
-            glm::dvec3 confusionUp = glm::normalize(glm::cross(confusionSide, camDir));
-            glm::dvec2 confusionPos = glm::diskRand(_confusionRadius * aperture);
-            eyeWorldPos += confusionSide * confusionPos.x + confusionUp * confusionPos.y;
+            glm::dvec4 apertureBeg = _projInvMatrix * glm::dvec4(0.0, 0.0, -1.0, 1.0);
+            apertureBeg.z /= apertureBeg.w;
+            glm::dvec4 apertureEnd = _projInvMatrix * glm::dvec4(0.0, 0.0, 1.0, 1.0);
+            apertureEnd.z /= apertureEnd.w;
+            double aperture = (apertureBeg.z - apertureEnd.z) - 1.0;
+
+            if(aperture > 0.0)
+            {
+                glm::dvec3 camDir = glm::dvec3(_viewInvMatrix * glm::dvec4(0.0, 0.0, -1.0, 0.0));
+                glm::dvec3 confusionSide = glm::normalize(glm::cross(camDir, glm::dvec3(0.0, 0.0, 1.0)));
+                glm::dvec3 confusionUp = glm::normalize(glm::cross(confusionSide, camDir));
+                glm::dvec2 confusionPos = glm::diskRand(_confusionRadius * aperture);
+                eyeWorldPos += confusionSide * confusionPos.x + confusionUp * confusionPos.y;
+            }
         }
 
         Raycast raycast(
@@ -325,12 +337,8 @@ namespace prop3
                 glm::dvec3 pixWorldPos = glm::dvec3(dirH / dirH.w);
                 raycast.direction = glm::normalize(pixWorldPos - raycast.origin);
 
-
-                glm::dvec3 color = fireScreenRay(raycast);
-
-                _workingColorBuffer[++idx] = color.r;
-                _workingColorBuffer[++idx] = color.g;
-                _workingColorBuffer[++idx] = color.b;
+                glm::dvec4 sample = fireScreenRay(raycast);
+                _workingFilm->addSample(i, j, sample);
 
                 // Verify if this frame must be skipped
                 if(!_runningPredicate)
@@ -430,7 +438,7 @@ namespace prop3
         }
     }
 */
-    glm::dvec3 CpuRaytracerWorker::fireScreenRay(
+    glm::dvec4 CpuRaytracerWorker::fireScreenRay(
             const Raycast& fromEyeRay)
     {
         Raycast ray = fromEyeRay;
@@ -464,13 +472,13 @@ namespace prop3
 
         glm::dvec3 matAtt = currMat->lightAttenuation(ray);
 
-        glm::dvec3 toEyeColorSum(0.0);
+        glm::dvec4 toEyeSampleSum(0, 0, 0, 0);
         if(ray.limit != Raycast::BACKDROP_DISTANCE)
         {
             // If non-stochatic draft is active
             if(!_useStochasticTracing)
             {
-                return draft(fromEyeRay, reportMin);
+                return glm::dvec4(draft(fromEyeRay, reportMin), 1.0);
             }
 
             std::vector<Raycast> childRaycasts;
@@ -510,7 +518,6 @@ namespace prop3
             const glm::dvec3& currAtt = fromEyeRay.color;
             double currWeight = fromEyeRay.weight;
 
-            double toEyeColorWeight = 0.0;
             size_t childCount = childRaycasts.size();
             for(size_t i=0; i < childCount; ++i)
             {
@@ -518,46 +525,39 @@ namespace prop3
                 glm::dvec3 stepAtt = childRay.color * matAtt;
                 glm::dvec3 nextAtt = currAtt * stepAtt;
 
-                double setpWeight = childRay.weight;
-                double nextWeight = currWeight * childRay.weight;
+                double stepWeight = childRay.weight;
+                double nextWeight = currWeight * stepWeight;
 
                 const glm::dvec3& a = nextAtt;
                 double nextIntensity = glm::max(glm::max(a.r, a.g), a.b) * nextWeight;
-                if(nextIntensity < _screenRayIntensityThreshold)
+                if(nextIntensity >= _screenRayIntensityThreshold)
                 {
-                    // Skip this child
-                    continue;
+                    double nextEntropy =
+                        Raycast::mixEntropies(
+                            childRay.entropy, fromEyeRay.entropy);
+
+                    childRay.color = nextAtt;
+                    childRay.weight = nextWeight;
+                    childRay.entropy = nextEntropy;
+
+                    glm::dvec4 childSample = fireScreenRay(childRay);
+                    toEyeSampleSum += childSample *
+                        glm::dvec4(stepAtt * stepWeight, stepWeight);
                 }
-
-                double nextEntropy =
-                    Raycast::mixEntropies(
-                        childRay.entropy, fromEyeRay.entropy);
-
-                childRay.color = nextAtt;
-                childRay.weight = nextWeight;
-                childRay.entropy = nextEntropy;
-
-                glm::dvec3 childColor = fireScreenRay(childRay);
-                toEyeColorSum += childColor * stepAtt * setpWeight;
-                toEyeColorWeight += setpWeight;
-            }
-
-            if(toEyeColorWeight != 0.0)
-            {
-                toEyeColorSum /= toEyeColorWeight;
+                else toEyeSampleSum += glm::dvec4(0, 0, 0, stepWeight * 0.75);
             }
         }
         else if(_backdrop.get() != nullptr)
         {
             bool directView = (fromEyeRay.color == glm::dvec3(1.0));
-            if(!directView ||
-               _backdrop->isDirectlyVisible())
+            if(!directView || _backdrop->isDirectlyVisible())
             {
-                toEyeColorSum = _backdrop->raycast(ray, directView) * matAtt;
+                toEyeSampleSum = glm::dvec4(matAtt, 1.0) *
+                    _backdrop->raycast(ray, directView);
             }
         }
 
-        return toEyeColorSum;
+        return toEyeSampleSum;
     }
 /*
     glm::dvec3 CpuRaytracerWorker::gatherScatteredLight(
@@ -882,56 +882,49 @@ namespace prop3
 
     void CpuRaytracerWorker::resetBuffers()
     {
-        while(!_completedColorBuffers.empty())
+        while(!_completedFilms.empty())
         {
-            _framePool.push_back(_completedColorBuffers.front());
-            _completedColorBuffers.pop();
+            _completedFilms.front()->clear();
+            _filmPool.push_back(_completedFilms.front());
+            _completedFilms.pop();
+        }
+
+        if(_workingFilm.get() != nullptr)
+        {
+            _workingFilm->clear();
         }
     }
 
     void CpuRaytracerWorker::destroyBuffers()
     {
-        if(_workingColorBuffer != nullptr)
-        {
-            delete[] _workingColorBuffer;
-            _workingColorBuffer = nullptr;
-        }
+        while(!_completedFilms.empty())
+            _completedFilms.pop();
 
-        while(!_completedColorBuffers.empty())
-        {
-            delete[] _completedColorBuffers.front();
-            _completedColorBuffers.pop();
-        }
-
-        for(float* frame : _framePool)
-        {
-            delete[] frame;
-        }
-        _framePool.clear();
+        _workingFilm.reset();
+        _filmPool.clear();
     }
 
     void CpuRaytracerWorker::getNewWorkingBuffers()
     {
-        if(_framePool.empty())
+        if(_filmPool.empty())
         {
-            int bufferSize = _viewportSize.x * _viewportSize.y * 3;
-            _workingColorBuffer = new float[bufferSize];
+            _workingFilm.reset(new StaticFilm());
+            _workingFilm->resize(_viewportSize);
         }
         else
         {
-            _workingColorBuffer = _framePool.back();
-            _framePool.pop_back();
+            _workingFilm = _filmPool.back();
+            _filmPool.pop_back();
         }
     }
 
     void CpuRaytracerWorker::commitWorkingBuffers()
     {
         _framesMutex.lock();
-
-        _completedColorBuffers.push(
-            _workingColorBuffer);
-        getNewWorkingBuffers();
-
+        _completedFilms.push(
+            _workingFilm);
         _framesMutex.unlock();
+
+        getNewWorkingBuffers();
     }
 }

@@ -31,6 +31,8 @@ namespace prop3
 
     class AbstractTeam;
 
+    class AbstractFilm;
+
     struct SearchZone;
 
 
@@ -43,11 +45,14 @@ namespace prop3
         CpuRaytracerWorker();
         virtual ~CpuRaytracerWorker();
 
+        // States
         virtual void start(bool singleShot = false);
         virtual void stop();
         virtual void terminate();
         virtual bool isRunning();
 
+        // Updates
+        virtual void updateStageSet(const std::string& stream);
         virtual void updateView(const glm::dmat4& view);
         virtual void updateProjection(const glm::dmat4& proj);
         virtual void updateViewport(
@@ -55,15 +60,15 @@ namespace prop3
                 const glm::ivec2& origin,
                 const glm::ivec2& size);
 
-        virtual void setStageSetStream(const std::string& stream);
 
         // TODO
         virtual void useStochasticTracing(bool use);
         virtual void usePixelJittering(bool use);
+        virtual void useDepthOfField(bool use);
 
         virtual size_t completedFrameCount();
-        virtual const float* readNextFrame();
-        virtual void popReadFrame();
+        virtual std::shared_ptr<AbstractFilm> readNextFilm();
+        virtual void popReadFilm();
 
     protected:
         virtual void skipAndExecute(const std::function<void()>& func);
@@ -75,7 +80,7 @@ namespace prop3
         //virtual void fireLightRay(
         //        const Raycast& fromLightRay);
 
-        virtual glm::dvec3 fireScreenRay(
+        virtual glm::dvec4 fireScreenRay(
                 const Raycast& fromEyeRay);
 
         //virtual glm::dvec3 gatherScatteredLight(
@@ -116,8 +121,9 @@ namespace prop3
         std::condition_variable _cv;
         std::mutex _flowMutex;
 
-        std::atomic<bool> _usePixelJittering;
         std::atomic<bool> _useStochasticTracing;
+        std::atomic<bool> _usePixelJittering;
+        std::atomic<bool> _useDepthOfField;
 
         double _lightRayIntensityThreshold;
         double _screenRayIntensityThreshold;
@@ -133,9 +139,9 @@ namespace prop3
         glm::dvec3 _camPos;
         double _confusionRadius;
 
-        std::queue<float*> _completedColorBuffers;
-        std::vector<float*> _framePool;
-        float* _workingColorBuffer;
+        std::queue<std::shared_ptr<AbstractFilm>> _completedFilms;
+        std::vector<std::shared_ptr<AbstractFilm>> _filmPool;
+        std::shared_ptr<AbstractFilm> _workingFilm;
         std::mutex _framesMutex;
 
         std::string _stageSetStream;

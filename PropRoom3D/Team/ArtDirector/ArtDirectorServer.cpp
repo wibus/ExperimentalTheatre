@@ -8,6 +8,7 @@
 #include <CellarWorkbench/Misc/Log.h>
 
 #include "CpuRaytracerEngine.h"
+#include "Film/AbstractFilm.h"
 #include "GlPostProdUnit.h"
 #include "Node/StageSet.h"
 
@@ -45,11 +46,15 @@ namespace prop3
         clearColorTexture();
 
         _stageSet = stageSet;
-        _localRaytracer->setup(stageSet);
 
-        raytracerState()->setDivergenceThreshold(-1.0);
-        raytracerState()->setDraftParams(1, 4, 1, true);
-        //raytracerState()->setDraftParams(0, 1, 0, false);
+        double divergenceThreshold = -1.0;
+        RaytracerState::DraftParams draftParams;
+        draftParams.sizeRatio = 4;
+        draftParams.levelCount = 1;
+        draftParams.frameCountPerLevel = 1;
+        draftParams.fastDraftEnabled = true;
+
+        _localRaytracer->setup(divergenceThreshold, draftParams);
 
         if(_postProdUnit)
         {
@@ -67,7 +72,7 @@ namespace prop3
             clearColorTexture();
         }
 
-        _localRaytracer->update();
+        _localRaytracer->update(_stageSet);
 
         // TODO wbussiere 2015-05-01 : retreive client frames
         //_localRaytracer->pourFramesIn();
@@ -126,9 +131,11 @@ namespace prop3
 
     void ArtDirectorServer::sendBuffersToGpu()
     {
-        const glm::ivec2& viewportSize = _localRaytracer->viewportSize();
-        const std::vector<float>& colorBuffer = _localRaytracer->colorBuffer();
+        const AbstractFilm& film = _localRaytracer->film();
+        glm::ivec2 viewportSize = film.resolution();
 
+        std::vector<glm::vec3> colorBuffer;
+        film.getColorBuffer(colorBuffer);
 
         // Send image to GPU
         glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
