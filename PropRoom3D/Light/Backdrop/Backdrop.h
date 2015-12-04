@@ -22,6 +22,8 @@ namespace prop3
 
         void setIsDirectlyVisible(bool isDirectlyVisible);
 
+        virtual glm::dvec4 raycast(const Raycast& ray) const =0;
+
 
     private:
         bool _isDirectlyVisible;

@@ -52,8 +52,7 @@ SET(PROP3_PROP_HEADERS
 SET(PROP3_RAY_HEADERS
     ${PROP3_SRC_DIR}/Ray/Raycast.h
     ${PROP3_SRC_DIR}/Ray/RayHitList.h
-    ${PROP3_SRC_DIR}/Ray/RayHitReport.h
-    ${PROP3_SRC_DIR}/Ray/RayUtils.h)
+    ${PROP3_SRC_DIR}/Ray/RayHitReport.h)
 
 # Nodes
 SET(PROP3_NODE_HEADERS
@@ -163,8 +162,7 @@ SET(PROP3_PROP_SOURCES
 SET(PROP3_RAY_SOURCES
     ${PROP3_SRC_DIR}/Ray/Raycast.cpp
     ${PROP3_SRC_DIR}/Ray/RayHitList.cpp
-    ${PROP3_SRC_DIR}/Ray/RayHitReport.cpp
-    ${PROP3_SRC_DIR}/Ray/RayUtils.cpp)
+    ${PROP3_SRC_DIR}/Ray/RayHitReport.cpp)
 
 # Nodes
 SET(PROP3_NODE_SOURCES

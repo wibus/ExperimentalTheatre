@@ -45,10 +45,6 @@ namespace prop3
 
         // StdCoating properties
         double rough = roughness(tex);
-        double roughnessEntropy = glm::mix(
-                Raycast::FULLY_SPECULAR_ENTROPY,
-                Raycast::FULLY_DIFFUSIVE_ENTROPY,
-                rough);
 
         glm::dvec4 paintFrag = paintColor(tex);
         glm::dvec3 pColor = glm::dvec3(paintFrag);
@@ -94,24 +90,21 @@ namespace prop3
             double diffuseWeight = (1.0 - reflectionRatio) * pOpa;
             double reflectWeight = reflectionRatio * pOpa;
 
-            glm::dvec3 attDiffuseColor = diffuseColor *
-                    glm::dot(diffuseDirection, wallNormal);
+            glm::dvec4 diffuseSample(diffuseColor * diffuseWeight, diffuseWeight);
+            glm::dvec4 reflectSample(reflectColor * reflectWeight, reflectWeight);
+
 
             // Diffuse
             raycasts.push_back(Raycast(
                     Raycast::BACKDROP_DISTANCE,
-                    diffuseWeight,
-                    Raycast::FULLY_DIFFUSIVE_ENTROPY,
-                    attDiffuseColor,
+                    diffuseSample,
                     reflectOrig,
                     diffuseDirection));
 
             // Specular
             raycasts.push_back(Raycast(
                     Raycast::BACKDROP_DISTANCE,
-                    reflectWeight,
-                    roughnessEntropy,
-                    reflectColor,
+                    reflectSample,
                     reflectOrig,
                     reflectDirection));
         }
@@ -122,13 +115,13 @@ namespace prop3
 
 
         // Metal reflection
-        double eMatWeight = (1 - pOpa);
+        double eMaterialWeight = (1 - pOpa);
         double eCond = enteredMaterial.conductivity(pos);
         glm::dvec3 eColor = enteredMaterial.color(pos);
         if(eCond > 0.0)
         {
-            const glm::dvec3& metallicColor = eColor;
-            double metallicWeight = eMatWeight * eCond;
+            double metallicWeight = eMaterialWeight * eCond;
+            glm::dvec4 metallicSample(eColor * metallicWeight, metallicWeight);
 
             glm::dvec3 reflectNormal = getMicrofacetNormal(
                     wallNormal,
@@ -140,9 +133,7 @@ namespace prop3
             // Metallic
             raycasts.push_back(Raycast(
                     Raycast::BACKDROP_DISTANCE,
-                    metallicWeight,
-                    roughnessEntropy,
-                    metallicColor,
+                    metallicSample,
                     reflectOrig,
                     reflectDir));
         }
@@ -156,7 +147,7 @@ namespace prop3
         double eRIdx = enteredMaterial.refractiveIndex(pos);
         double eOpa = enteredMaterial.opacity(pos);
 
-        double insulatorWeight = eMatWeight * (1 - eCond);
+        double insulatorWeight = eMaterialWeight * (1 - eCond);
 
 
         // Total scattering of the light at the surface
@@ -167,8 +158,8 @@ namespace prop3
             // material by averaging the effect through a diffuse reflexion.
             double eScat = enteredMaterial.scattering(pos);
             double eScatNorm = (1/(1/(1-eScat) - 1) + 1);
-            glm::dvec3 diffuseBase = glm::pow(eColor, glm::dvec3(eScatNorm));
-            diffuseBase *= INTERNAL_SCATTER_LOSS;
+            glm::dvec3 diffuseColor = glm::pow(eColor, glm::dvec3(eScatNorm));
+            diffuseColor *= INTERNAL_SCATTER_LOSS;
             glm::dvec3 reflectColor = color::white;
 
 
@@ -199,34 +190,27 @@ namespace prop3
             double diffuseWeight = (1.0 - reflectionRatio) * insulatorWeight;
             double reflectWeight = reflectionRatio * insulatorWeight;
 
-            glm::dvec3 diffuseColor = diffuseBase *
-                   glm::dot(diffuseDirection, wallNormal);
-
+            glm::dvec4 diffuseSample(diffuseColor * diffuseWeight, diffuseWeight);
+            glm::dvec4 reflectSample(reflectColor * reflectWeight, reflectWeight);
 
             // Specular
             if(rough < 1.0)
             {
                 raycasts.push_back(Raycast(
                         Raycast::BACKDROP_DISTANCE,
-                        reflectWeight,
-                        roughnessEntropy,
-                        reflectColor,
+                        reflectSample,
                         reflectOrig,
                         reflectDirection));
             }
             else
             {
-                diffuseWeight += reflectWeight;
-                diffuseColor = glm::mix(diffuseColor,
-                                    reflectColor, reflectionRatio);
+                diffuseSample += reflectSample;
             }
 
             // Diffuse
             raycasts.push_back(Raycast(
                     Raycast::BACKDROP_DISTANCE,
-                    diffuseWeight,
-                    Raycast::FULLY_DIFFUSIVE_ENTROPY,
-                    diffuseColor,
+                    diffuseSample,
                     reflectOrig,
                     diffuseDirection));
         }
@@ -261,29 +245,28 @@ namespace prop3
             double refractWeight = (1.0 - reflectionRatio) * insulatorWeight;
             double reflectWeight = reflectionRatio * insulatorWeight;
 
+            glm::dvec4 refractSample(refractColor * refractWeight, refractWeight);
+            glm::dvec4 reflectSample(reflectColor * reflectWeight, reflectWeight);
+
 
             // Refraction
             if(glm::dot(refractDir, wallNormal) < 0.0)
             {
                 raycasts.push_back(Raycast(
                         Raycast::BACKDROP_DISTANCE,
-                        refractWeight,
-                        roughnessEntropy,
-                        refractColor,
+                        refractSample,
                         refractOrig,
                         refractDir));
             }
             else
             {
-                reflectWeight += refractWeight;
+                reflectSample += refractSample;
             }
 
             // Reflexion
             raycasts.push_back(Raycast(
                     Raycast::BACKDROP_DISTANCE,
-                    reflectWeight,
-                    roughnessEntropy,
-                    reflectColor,
+                    reflectSample,
                     reflectOrig,
                     reflectDir));
         }
@@ -317,17 +300,15 @@ namespace prop3
         if(rough <= 0.0)
             return wallNormal;
 
-        glm::dvec3 diffuse = glm::sphericalRand(1.0);
-        if(glm::dot(diffuse, wallNormal) < 0.0)
-            diffuse = -diffuse;
+        glm::dvec3 diffuse = (glm::sphericalRand(1.0) + wallNormal) / 2.0;
 
         if(rough >= 1.0)
-            return glm::normalize((diffuse - incidentDir) / 2.0);
+            return glm::normalize(glm::normalize(diffuse) - incidentDir);
 
         glm::dvec3 specular = glm::reflect(incidentDir, wallNormal);
         glm::dvec3 glossy = glm::mix(specular, diffuse, rough);
 
-        glm::dvec3 normal = glm::normalize((glossy - incidentDir) / 2.0);
+        glm::dvec3 normal = glm::normalize(glm::normalize(glossy) - incidentDir);
         return normal;
     }
 }

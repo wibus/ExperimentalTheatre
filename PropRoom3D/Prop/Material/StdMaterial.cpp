@@ -3,7 +3,6 @@
 #include <GLM/gtc/random.hpp>
 
 #include "Ray/Raycast.h"
-#include "Ray/RayUtils.h"
 
 
 namespace prop3
@@ -69,7 +68,7 @@ namespace prop3
         // Ray's shorthands
         const glm::dvec3& orig = ray.origin;
 
-        glm::dvec3 scatterColor = color::white;
+        glm::dvec4 scatterSample(color::white, 1.0);
         double specularity = 1.0 - scattering(orig);
         glm::dvec3 scatterPoint = ray.origin + ray.direction * ray.limit;
 
@@ -79,9 +78,7 @@ namespace prop3
 
             raycasts.push_back(Raycast(
                     Raycast::BACKDROP_DISTANCE,
-                    Raycast::COMPLETE_RAY_WEIGHT,
-                    Raycast::FULLY_DIFFUSIVE_ENTROPY,
-                    scatterColor,
+                    scatterSample,
                     scatterPoint,
                     direction));
         }
@@ -91,27 +88,19 @@ namespace prop3
 
             raycasts.push_back(Raycast(
                     Raycast::BACKDROP_DISTANCE,
-                    Raycast::COMPLETE_RAY_WEIGHT,
-                    Raycast::FULLY_SPECULAR_ENTROPY,
-                    scatterColor,
+                    scatterSample,
                     scatterPoint,
                     direction));
         }
         else
         {
-            double entropy = glm::mix(Raycast::FULLY_DIFFUSIVE_ENTROPY,
-                                      Raycast::FULLY_SPECULAR_ENTROPY,
-                                      specularity);
-
             glm::dvec3 diffuseDir = glm::sphericalRand(1.0);
             glm::dvec3 direction = glm::mix(diffuseDir, ray.direction, specularity);
             direction = glm::normalize(direction);
 
             raycasts.push_back(Raycast(
                     Raycast::BACKDROP_DISTANCE,
-                    Raycast::COMPLETE_RAY_WEIGHT,
-                    entropy,
-                    scatterColor,
+                    scatterSample,
                     scatterPoint,
                     direction));
         }

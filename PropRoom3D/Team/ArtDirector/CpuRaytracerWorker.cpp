@@ -52,6 +52,7 @@ namespace prop3
         _screenRayIntensityThreshold(1.0 / 32.0),
         _lightDirectRayCount(1),
         _lightFireRayCount(20),
+        _maxScreenBounceCount(6),
         _viewportSize(1, 1),
         _confusionRadius(0.1),
         _team(new WorkerTeam())
@@ -320,9 +321,7 @@ namespace prop3
 
         Raycast raycast(
             Raycast::BACKDROP_DISTANCE,
-            Raycast::COMPLETE_RAY_WEIGHT,
-            Raycast::FULLY_SPECULAR_ENTROPY,
-            glm::dvec3(1.0),
+            glm::dvec4(1.0),
             eyeWorldPos,
             glm::dvec3(0.0));
 
@@ -441,124 +440,131 @@ namespace prop3
     glm::dvec4 CpuRaytracerWorker::fireScreenRay(
             const Raycast& fromEyeRay)
     {
-        Raycast ray = fromEyeRay;
-        ray.limit = Raycast::BACKDROP_DISTANCE;
+        int bounceCount = 1;
+        int rayBatchEnd = 1;
+        _rayBounceArray.clear();
+        _rayBounceArray.push_back(fromEyeRay);
 
-
-        // Find nearest ray-surface intersection
-        const Coating* dummyCoat = nullptr;
-        const Material* dummyMat = nullptr;
-        const glm::dvec3 dummyVec = glm::dvec3();
-        RayHitReport reportMin(Raycast::BACKDROP_DISTANCE,
-                               ray, dummyVec, dummyVec, dummyVec,
-                               dummyCoat, dummyMat, dummyMat);
-        ray.limit = findNearestProp(ray, reportMin);
-
-
-        if(reportMin.innerMat == Surface::ENVIRONMENT_MATERIAL.get() ||
-           reportMin.innerMat == nullptr)
-            reportMin.innerMat = _envMaterial.get();
-
-        if(reportMin.outerMat == Surface::ENVIRONMENT_MATERIAL.get() ||
-           reportMin.outerMat == nullptr)
-            reportMin.outerMat = _envMaterial.get();
-
-        reportMin.compile();
-
-        // Compute maximum travelled distance in current material
-        const Material* currMat = reportMin.currMaterial;
-        double matPathLen = currMat->lightFreePathLength(ray);
-        ray.limit = glm::min(matPathLen, ray.limit);
-
-        glm::dvec3 matAtt = currMat->lightAttenuation(ray);
-
-        glm::dvec4 toEyeSampleSum(0, 0, 0, 0);
-        if(ray.limit != Raycast::BACKDROP_DISTANCE)
+        size_t rayId = 0;
+        glm::dvec4 sampleAccum(0.0);
+        while(rayId < _rayBounceArray.size())
         {
-            // If non-stochatic draft is active
-            if(!_useStochasticTracing)
+            Raycast ray = _rayBounceArray[rayId];
+            ray.limit = Raycast::BACKDROP_DISTANCE;
+
+
+            // Find nearest ray-surface intersection
+            const Coating* dummyCoat = nullptr;
+            const Material* dummyMat = nullptr;
+            const glm::dvec3 dummyVec = glm::dvec3();
+            RayHitReport reportMin(Raycast::BACKDROP_DISTANCE,
+                                   ray, dummyVec, dummyVec, dummyVec,
+                                   dummyCoat, dummyMat, dummyMat);
+            ray.limit = findNearestProp(ray, reportMin);
+
+
+            if(reportMin.innerMat == Surface::ENVIRONMENT_MATERIAL.get() ||
+               reportMin.innerMat == nullptr)
+                reportMin.innerMat = _envMaterial.get();
+
+            if(reportMin.outerMat == Surface::ENVIRONMENT_MATERIAL.get() ||
+               reportMin.outerMat == nullptr)
+                reportMin.outerMat = _envMaterial.get();
+
+            reportMin.compile();
+
+            // Compute maximum travelled distance in current material
+            const Material* currMat = reportMin.currMaterial;
+            double matPathLen = currMat->lightFreePathLength(ray);
+            ray.limit = glm::min(matPathLen, ray.limit);
+
+            glm::dvec3 matAtt = currMat->lightAttenuation(ray);
+            glm::dvec4 currSamp = glm::dvec4(matAtt, 1.0) * ray.sample;
+
+            if(ray.limit != Raycast::BACKDROP_DISTANCE)
             {
-                return glm::dvec4(draft(fromEyeRay, reportMin), 1.0);
-            }
-
-            std::vector<Raycast> childRaycasts;
-            if(matPathLen < reportMin.distance)
-            {
-                ray.limit = matPathLen;
-
-                // Inderect lighting
-                currMat->scatterLight(
-                        childRaycasts,
-                        ray);
-
-                /*
-                // Direct lighting
-                toEyeColorSum += gatherScatteredLight(
-                    *material, ray);
-                    * */
-            }
-            else
-            {
-                const Coating* coating = reportMin.coating;
-                const Material* nextMat = reportMin.nextMaterial;
-
-                // Inderect lighting
-                toEyeSampleSum += glm::dvec4(matAtt, 1.0) *
-                    coating->indirectBrdf(
-                        childRaycasts,
-                        reportMin,
-                        *currMat,
-                        *nextMat);
-/*
-                // Direct lighting
-                toEyeColorSum += gatherReflectedLight(
-                    *coating, *nextMat, reportMin);
-                    * */
-            }
-
-            const glm::dvec3& currAtt = fromEyeRay.color;
-            double currWeight = fromEyeRay.weight;
-
-            size_t childCount = childRaycasts.size();
-            for(size_t i=0; i < childCount; ++i)
-            {
-                auto& childRay = childRaycasts[i];
-                glm::dvec3 stepAtt = childRay.color * matAtt;
-                glm::dvec3 nextAtt = currAtt * stepAtt;
-
-                double stepWeight = childRay.weight;
-                double nextWeight = currWeight * stepWeight;
-
-                const glm::dvec3& a = nextAtt;
-                double nextIntensity = glm::max(glm::max(a.r, a.g), a.b) * nextWeight;
-                if(nextIntensity >= _screenRayIntensityThreshold)
+                // If non-stochatic draft is active
+                if(!_useStochasticTracing)
                 {
-                    double nextEntropy =
-                        Raycast::mixEntropies(
-                            childRay.entropy, fromEyeRay.entropy);
-
-                    childRay.color = nextAtt;
-                    childRay.weight = nextWeight;
-                    childRay.entropy = nextEntropy;
-
-                    glm::dvec4 childSample = fireScreenRay(childRay);
-                    toEyeSampleSum += childSample *
-                        glm::dvec4(stepAtt * stepWeight, stepWeight);
+                    return glm::dvec4(draft(reportMin), 1.0);
                 }
-                else toEyeSampleSum += glm::dvec4(0, 0, 0, stepWeight * 0.75);
+
+                _tempChildRayArray.clear();
+                if(matPathLen < reportMin.distance)
+                {
+                    ray.limit = matPathLen;
+
+                    // Inderect lighting
+                    currMat->scatterLight(
+                            _tempChildRayArray,
+                            ray);
+
+                    /*
+                    // Direct lighting
+                    toEyeColorSum += gatherScatteredLight(
+                        *material, ray);
+                        * */
+                }
+                else
+                {
+                    const Coating* coating = reportMin.coating;
+                    const Material* nextMat = reportMin.nextMaterial;
+
+                    // Inderect lighting
+                    sampleAccum += currSamp *
+                        coating->indirectBrdf(
+                            _tempChildRayArray,
+                            reportMin,
+                            *currMat,
+                            *nextMat);
+    /*
+                    // Direct lighting
+                    toEyeColorSum += gatherReflectedLight(
+                        *coating, *nextMat, reportMin);
+                        * */
+                }
+
+
+                size_t childCount = _tempChildRayArray.size();
+                for(size_t i=0; i < childCount; ++i)
+                {
+                    Raycast& childRay = _tempChildRayArray[i];
+                    childRay.sample *= currSamp;
+
+                    double r = childRay.sample.r;
+                    double g = childRay.sample.g;
+                    double b = childRay.sample.b;
+                    double nextIntensity = glm::max(glm::max(r, g), b);
+                    if(nextIntensity >= _screenRayIntensityThreshold &&
+                       bounceCount < _maxScreenBounceCount)
+                    {
+                        _rayBounceArray.push_back(childRay);
+                    }
+                    else
+                    {
+                        sampleAccum += glm::dvec4(color::black,
+                            childRay.sample.a * (bounceCount/(bounceCount+1.0)));
+                    }
+                }
             }
-        }
-        else if(_backdrop.get() != nullptr)
-        {
-            bool directView = (fromEyeRay.color == glm::dvec3(1.0));
-            if(!directView || _backdrop->isDirectlyVisible())
+            else if(_backdrop.get() != nullptr)
             {
-                toEyeSampleSum = glm::dvec4(matAtt, 1.0) *
-                    _backdrop->raycast(ray, directView);
+                bool directView = (fromEyeRay.sample == glm::dvec4(1.0));
+                if(!directView || _backdrop->isDirectlyVisible())
+                {
+                    sampleAccum += currSamp * _backdrop->raycast(ray);
+                }
+            }
+
+            ++rayId;
+            if(rayId == rayBatchEnd)
+            {
+                ++bounceCount;
+                rayBatchEnd = _rayBounceArray.size();
             }
         }
 
-        return toEyeSampleSum;
+        return sampleAccum;
     }
 /*
     glm::dvec3 CpuRaytracerWorker::gatherScatteredLight(
@@ -870,7 +876,6 @@ namespace prop3
     }
 
     glm::dvec3 CpuRaytracerWorker::draft(
-        const Raycast& raycast,
         const RayHitReport& report)
     {
         const glm::dvec3 sunDir(0.5345, 0.2673, 0.8017);

@@ -1,7 +1,6 @@
 #include "Material.h"
 
 #include "Ray/Raycast.h"
-#include "Ray/RayUtils.h"
 
 #include "UniformStdMaterial.h"
 

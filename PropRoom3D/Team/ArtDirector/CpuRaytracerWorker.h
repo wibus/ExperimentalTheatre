@@ -103,9 +103,7 @@ namespace prop3
                 const Raycast& raycast,
                 RayHitReport& reportMin);
 
-        virtual glm::dvec3 draft(
-                const Raycast& raycast,
-                const RayHitReport& report);
+        virtual glm::dvec3 draft(const RayHitReport& report);
 
     private:
         void resetBuffers();
@@ -129,6 +127,7 @@ namespace prop3
         double _screenRayIntensityThreshold;
         unsigned int _lightDirectRayCount;
         unsigned int _lightFireRayCount;
+        unsigned int _maxScreenBounceCount;
 
         glm::ivec2 _resolution;
         glm::ivec2 _viewportOrig;
@@ -156,6 +155,8 @@ namespace prop3
 
         // Memory pools
         RayHitList _rayHitList;
+        std::vector<Raycast> _rayBounceArray;
+        std::vector<Raycast> _tempChildRayArray;
     };
 }
 

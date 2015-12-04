@@ -26,8 +26,6 @@ namespace prop3
         virtual std::vector<std::shared_ptr<Node>> children() const override;
 
 
-        virtual glm::dvec4 raycast(const Raycast& ray, bool directView) const override;
-
         virtual std::vector<Raycast> fireRays(unsigned int count) const override;
 
         virtual std::vector<Raycast> fireOn(const glm::dvec3& pos, unsigned int count) const override;

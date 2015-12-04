@@ -87,7 +87,7 @@ namespace prop3
         stampCurrentUpdate();
     }
 
-    glm::dvec4 ProceduralSun::raycast(const Raycast& ray, bool directView) const
+    glm::dvec4 ProceduralSun::raycast(const Raycast& ray) const
     {
         glm::dvec3 color;
 
@@ -131,6 +131,7 @@ namespace prop3
         // Fire only sun rays
         double sunRayProb = (1.0 - (SUN_COS_DIMENSION + 1.0)/2.0);
         glm::dvec3 rayColor = _sunColor * (sunRayProb / count) * 32.0;
+        glm::dvec4 sunSample(rayColor * sunRayProb, sunRayProb);
 
         glm::dvec3 sideward = glm::normalize(glm::cross(SKY_UP, _sunDirection));
         glm::dvec3 upward = glm::normalize(glm::cross(sideward, _sunDirection));
@@ -149,9 +150,7 @@ namespace prop3
             glm::dvec3 direction = glm::normalize(recPoint - radPoint);
             raycasts.push_back(Raycast(
                 Raycast::BACKDROP_DISTANCE,
-                Raycast::COMPLETE_RAY_WEIGHT,
-                Raycast::FULLY_DIFFUSIVE_ENTROPY,
-                rayColor,
+                sunSample,
                 radPoint,
                 direction));
         }
@@ -166,6 +165,7 @@ namespace prop3
         // Fire only sun rays
         double sunRayProb = (1.0 - (SUN_COS_DIMENSION + 1.0)/2.0);
         glm::dvec3 rayColor = _sunColor * (sunRayProb / count);
+        glm::dvec4 sunSample(rayColor * sunRayProb, sunRayProb);
 
         glm::dvec3 sideward = glm::normalize(glm::cross(SKY_UP, _sunDirection));
         glm::dvec3 upward = glm::normalize(glm::cross(sideward, _sunDirection));
@@ -181,9 +181,7 @@ namespace prop3
             glm::dvec3 direction = glm::normalize(pos - radPoint);
             raycasts.push_back(Raycast(
                 Raycast::BACKDROP_DISTANCE,
-                Raycast::COMPLETE_RAY_WEIGHT,
-                Raycast::FULLY_DIFFUSIVE_ENTROPY,
-                rayColor,
+                sunSample,
                 radPoint,
                 direction));
         }

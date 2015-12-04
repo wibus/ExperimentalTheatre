@@ -29,11 +29,6 @@ namespace prop3
         return {_sampler, _coating};
     }
 
-    glm::dvec4 LightBulb::raycast(const Raycast& ray, bool directView) const
-    {
-
-    }
-
     std::vector<Raycast> LightBulb::fireRays(unsigned int count) const
     {
 
