@@ -80,6 +80,7 @@ namespace prop3
 
     // Coatings
     const QString COATING_TYPE                      = "Type";
+    const QString COATING_TYPE_EMISSIVE             = "Emissive";
     const QString COATING_TYPE_UNIFORMSTD           = "Uniform Std";
     const QString COATING_TYPE_TEXTUREDSTD          = "Textured Std";
     const QString COATING_ROUGHNESS                 = "Roughness";
@@ -91,4 +92,6 @@ namespace prop3
     const QString COATING_PAINT_COLOR_TEX_NAME      = "Paint Color Tex Name";
     const QString COATING_TEXTURE_FILTER            = "Texture Filter";
     const QString COATING_TEXTURE_WRAPPER           = "Texture Wrapper";
+    const QString COATING_EMITTED_RADIANCE          = "Emitted Radiance";
+    const QString COATING_AREA_SAMPLER              = "Area Sampler";
 }

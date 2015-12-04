@@ -23,8 +23,14 @@
 
 #include "Prop/Material/UniformStdMaterial.h"
 
+#include "Prop/Coating/EmissiveCoating.h"
 #include "Prop/Coating/UniformStdCoating.h"
 #include "Prop/Coating/TexturedStdCoating.h"
+
+#include "Light/LightBulb.h"
+
+#include "Light/Sampler/CircularSampler.h"
+#include "Light/Sampler/SphericalSampler.h"
 
 #include "Light/Environment.h"
 #include "Light/Backdrop/ProceduralSun.h"
@@ -147,14 +153,24 @@ namespace prop3
         return surfaceIdMap.insert(make_pair(&node, (int)surfaceIdMap.size())).second;
     }
 
+    bool StageSetJsonWriter::HardwareBuilder::insertMaterial(Material& node)
+    {
+        return materialIdMap.insert(make_pair(&node, (int)materialIdMap.size())).second;
+    }
+
     bool StageSetJsonWriter::HardwareBuilder::insertCoating(Coating& node)
     {
         return coatingIdMap.insert(make_pair(&node, (int)coatingIdMap.size())).second;
     }
 
-    bool StageSetJsonWriter::HardwareBuilder::insertMaterial(Material& node)
+    bool StageSetJsonWriter::HardwareBuilder::insertSampler(Sampler& node)
     {
-        return materialIdMap.insert(make_pair(&node, (int)materialIdMap.size())).second;
+        return samplerIdMap.insert(make_pair(&node, (int)samplerIdMap.size())).second;
+    }
+
+    bool StageSetJsonWriter::HardwareBuilder::insertLight(Light& node)
+    {
+        return lightIdMap.insert(make_pair(&node, (int)lightIdMap.size())).second;
     }
 
     void StageSetJsonWriter::HardwareBuilder::setPhysicalProperties(PhysicalSurface& node, QJsonObject& obj)
@@ -267,6 +283,18 @@ namespace prop3
 
 
     // Coatings
+    void StageSetJsonWriter::HardwareBuilder::visit(EmissiveCoating& node)
+    {
+        if(insertCoating(node))
+        {
+            QJsonObject obj;
+            obj[COATING_TYPE]                   = COATING_TYPE_EMISSIVE;
+            obj[COATING_EMITTED_RADIANCE]       = toJson(node.emittedRadiance());
+            obj[COATING_AREA_SAMPLER]           = samplerIdMap[node.sampler().get()];
+            coatingsArray.append(obj);
+        }
+    }
+
     void StageSetJsonWriter::HardwareBuilder::visit(UniformStdCoating& node)
     {
         if(insertCoating(node))
@@ -294,6 +322,38 @@ namespace prop3
             obj[COATING_TEXTURE_WRAPPER]          = toJson(node.texWrapper());
             obj[COATING_PAINT_REFRACTIVE_INDEX]   = node.paintRefractiveIndex();
             coatingsArray.append(obj);
+        }
+    }
+
+    // Lights
+    void StageSetJsonWriter::HardwareBuilder::visit(LightBulb& node)
+    {
+        if(insertLight(node))
+        {
+            QJsonObject obj;
+
+            lightsArray.append(obj);
+        }
+    }
+
+    // Samplers
+    void StageSetJsonWriter::HardwareBuilder::visit(CircularSampler& node)
+    {
+        if(insertSampler(node))
+        {
+            QJsonObject obj;
+
+            samplersArray.append(obj);
+        }
+    }
+
+    void StageSetJsonWriter::HardwareBuilder::visit(SphericalSampler& node)
+    {
+        if(insertSampler(node))
+        {
+            QJsonObject obj;
+
+            samplersArray.append(obj);
         }
     }
 

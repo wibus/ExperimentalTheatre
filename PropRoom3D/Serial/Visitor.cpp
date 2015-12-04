@@ -102,12 +102,34 @@ namespace prop3
 
 
     // Coatings
+    void Visitor::visit(EmissiveCoating& node)
+    {
+
+    }
+
     void Visitor::visit(UniformStdCoating& node)
     {
 
     }
 
     void Visitor::visit(TexturedStdCoating& node)
+    {
+
+    }
+
+    // Lights
+    void Visitor::visit(LightBulb& node)
+    {
+
+    }
+
+    // Samplers
+    void Visitor::visit(CircularSampler& node)
+    {
+
+    }
+
+    void Visitor::visit(SphericalSampler& node)
     {
 
     }

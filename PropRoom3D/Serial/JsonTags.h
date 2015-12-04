@@ -83,6 +83,7 @@ namespace prop3
 
     // Coatings
     extern const QString COATING_TYPE;
+    extern const QString COATING_TYPE_EMISSIVE;
     extern const QString COATING_TYPE_UNIFORMSTD;
     extern const QString COATING_TYPE_TEXTUREDSTD;
     extern const QString COATING_ROUGHNESS;
@@ -94,6 +95,8 @@ namespace prop3
     extern const QString COATING_PAINT_COLOR_TEX_NAME;
     extern const QString COATING_TEXTURE_FILTER;
     extern const QString COATING_TEXTURE_WRAPPER;
+    extern const QString COATING_EMITTED_RADIANCE;
+    extern const QString COATING_AREA_SAMPLER;
 }
 
 #endif // PROPROOM3D_STAGESETJSONTAGS_H

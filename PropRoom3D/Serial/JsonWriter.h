@@ -54,25 +54,39 @@ namespace prop3
             virtual void visit(Sphere& node) override;
 
             // Materials
-            virtual void visit(UniformStdMaterial& node);
+            virtual void visit(UniformStdMaterial& node) override;
 
             // Coatings
-            virtual void visit(UniformStdCoating& node);
-            virtual void visit(TexturedStdCoating& node);
+            virtual void visit(EmissiveCoating& node) override;
+            virtual void visit(UniformStdCoating& node) override;
+            virtual void visit(TexturedStdCoating& node) override;
+
+            // Lights
+            virtual void visit(LightBulb& node) override;
+
+            // Samplers
+            virtual void visit(CircularSampler& node) override;
+            virtual void visit(SphericalSampler& node) override;
 
 
             QJsonArray surfacesArray;
             QJsonArray coatingsArray;
             QJsonArray materialsArray;
+            QJsonArray samplersArray;
+            QJsonArray lightsArray;
 
             std::map<Surface*,  int> surfaceIdMap;
             std::map<Coating*,  int> coatingIdMap;
             std::map<Material*, int> materialIdMap;
+            std::map<Sampler*,  int> samplerIdMap;
+            std::map<Light*,    int> lightIdMap;
 
         private:
             bool insertSurface(Surface& node);
             bool insertMaterial(Material& node);
             bool insertCoating(Coating& node);
+            bool insertSampler(Sampler& node);
+            bool insertLight(Light& node);
             void setPhysicalProperties(PhysicalSurface& node, QJsonObject& obj);
         };
 

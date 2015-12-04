@@ -503,7 +503,8 @@ namespace prop3
                 const Material* nextMat = reportMin.nextMaterial;
 
                 // Inderect lighting
-                coating->indirectBrdf(
+                toEyeSampleSum += glm::dvec4(matAtt, 1.0) *
+                    coating->indirectBrdf(
                         childRaycasts,
                         reportMin,
                         *currMat,

@@ -36,8 +36,18 @@ namespace prop3
 
     // Coatings
     class Coating;
+    class EmissiveCoating;
     class UniformStdCoating;
     class TexturedStdCoating;
+
+    // Lights
+    class Light;
+    class LightBulb;
+
+    // Samplers
+    class Sampler;
+    class CircularSampler;
+    class SphericalSampler;
 
     // Environments
     class Environment;
@@ -82,8 +92,17 @@ namespace prop3
         virtual void visit(UniformStdMaterial& node);
 
         // Coatings
+        virtual void visit(EmissiveCoating& node);
         virtual void visit(UniformStdCoating& node);
         virtual void visit(TexturedStdCoating& node);
+
+        // Lights
+        virtual void visit(LightBulb& node);
+
+        // Samplers
+        virtual void visit(CircularSampler& node);
+        virtual void visit(SphericalSampler& node);
+
 
         // Environments
         virtual void visit(Environment& node);

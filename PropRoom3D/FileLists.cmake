@@ -5,16 +5,25 @@ SET(PROP3_BACKDROP_HEADERS
     ${PROP3_SRC_DIR}/Light/Backdrop/Backdrop.h
     ${PROP3_SRC_DIR}/Light/Backdrop/ProceduralSun.h)
 
+# Samplers
+SET(PROP3_SAMPLER_HEADERS
+    ${PROP3_SRC_DIR}/Light/Sampler/Sampler.h
+    ${PROP3_SRC_DIR}/Light/Sampler/CircularSampler.h
+    ${PROP3_SRC_DIR}/Light/Sampler/SphericalSampler.h)
+
 # Light
 SET(PROP3_LIGHT_HEADERS
     ${PROP3_BACKDROP_HEADERS}
+    ${PROP3_SAMPLER_HEADERS}
     ${PROP3_SRC_DIR}/Light/Environment.h
-    ${PROP3_SRC_DIR}/Light/Light.h)
+    ${PROP3_SRC_DIR}/Light/Light.h
+    ${PROP3_SRC_DIR}/Light/LightBulb.h)
 
 # Coatings
 SET(PROP3_COATING_HEADERS
     ${PROP3_SRC_DIR}/Prop/Coating/Coating.h
     ${PROP3_SRC_DIR}/Prop/Coating/StdCoating.h
+    ${PROP3_SRC_DIR}/Prop/Coating/EmissiveCoating.h
     ${PROP3_SRC_DIR}/Prop/Coating/UniformStdCoating.h
     ${PROP3_SRC_DIR}/Prop/Coating/TexturedStdCoating.h)
 
@@ -107,16 +116,25 @@ SET(PROP3_BACKDROP_SOURCES
     ${PROP3_SRC_DIR}/Light/Backdrop/Backdrop.cpp
     ${PROP3_SRC_DIR}/Light/Backdrop/ProceduralSun.cpp)
 
+# Samplers
+SET(PROP3_SAMPLER_SOURCES
+    ${PROP3_SRC_DIR}/Light/Sampler/Sampler.cpp
+    ${PROP3_SRC_DIR}/Light/Sampler/CircularSampler.cpp
+    ${PROP3_SRC_DIR}/Light/Sampler/SphericalSampler.cpp)
+
 # Light
 SET(PROP3_LIGHT_SOURCES
     ${PROP3_BACKDROP_SOURCES}
+    ${PROP3_SAMPLER_SOURCES}
     ${PROP3_SRC_DIR}/Light/Environment.cpp
-    ${PROP3_SRC_DIR}/Light/Light.cpp)
+    ${PROP3_SRC_DIR}/Light/Light.cpp
+    ${PROP3_SRC_DIR}/Light/LightBulb.cpp)
 
 # Coatings
 SET(PROP3_COATING_SOURCES
     ${PROP3_SRC_DIR}/Prop/Coating/Coating.cpp
     ${PROP3_SRC_DIR}/Prop/Coating/StdCoating.cpp
+    ${PROP3_SRC_DIR}/Prop/Coating/EmissiveCoating.cpp
     ${PROP3_SRC_DIR}/Prop/Coating/UniformStdCoating.cpp
     ${PROP3_SRC_DIR}/Prop/Coating/TexturedStdCoating.cpp)
 

@@ -5,7 +5,7 @@
 
 #include <GLM/glm.hpp>
 
-#include <PropRoom3D/libPropRoom3D_global.h>
+#include <PropRoom3D/Node/Node.h>
 
 
 namespace prop3
@@ -21,10 +21,11 @@ namespace prop3
     PROP3D_EXPORT glm::dvec3 kelvinToRgb(int kelvin);
 
 
-    class PROP3D_EXPORT Light
+    class PROP3D_EXPORT Light : public Node
     {
     protected:
         Light();
+
     public:
         virtual ~Light();
 

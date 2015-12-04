@@ -3,14 +3,13 @@
 
 #include <GLM/glm.hpp>
 
-#include <PropRoom3D/Node/Node.h>
 #include <PropRoom3D/Light/Light.h>
 
 
 namespace prop3
 {
 
-    class PROP3D_EXPORT Backdrop : public Node, public Light
+    class PROP3D_EXPORT Backdrop : public Light
     {
     protected:
         Backdrop(bool isDirectlyVisible = true);

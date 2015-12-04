@@ -25,12 +25,15 @@ namespace prop3
 
     }
 
-    void StdCoating::indirectBrdf(
+    glm::dvec4 StdCoating::indirectBrdf(
         std::vector<Raycast>& raycasts,
         const RayHitReport& report,
         const Material& leavedMaterial,
         const Material& enteredMaterial) const
     {
+        // Emission
+        glm::dvec4 emission = glm::dvec4(0.0);
+
         // Report's shorthands
         const glm::dvec3& pos = report.position;
         const glm::dvec3& tex = report.texCoord;
@@ -115,7 +118,7 @@ namespace prop3
 
         // Totally opaque paint
         if(pOpa >= 1.0)
-            return;
+            return emission;
 
 
         // Metal reflection
@@ -146,7 +149,7 @@ namespace prop3
 
         // Totally metallic
         if(eCond >= 1.0)
-            return;
+            return emission;
 
 
         // Dielectric scattering
@@ -284,16 +287,19 @@ namespace prop3
                     reflectOrig,
                     reflectDir));
         }
+
+        // No emission
+        return emission;
     }
 
-    glm::dvec3 StdCoating::directBrdf(
+    glm::dvec4 StdCoating::directBrdf(
             const RayHitReport& report,
             const glm::dvec3& outDirection,
             const Material& leavedMaterial,
             const Material& enteredMaterial) const
     {
         assert(false);
-		return color::black;
+        return glm::dvec4(0.0);
     }
 
     glm::dvec3 StdCoating::albedo(const RayHitReport& report) const
