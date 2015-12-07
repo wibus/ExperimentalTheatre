@@ -2,16 +2,21 @@
 
 #include <GLM/gtc/constants.hpp>
 
-#include "Serial/Visitor.h"
+#include "Node/Visitor.h"
 #include "Ray/Raycast.h"
 
 
 namespace prop3
 {
-    CircularSampler::CircularSampler() :
-        _center(0.0, 0.0, 0.0),
-        _normal(0.0, 0.0, 1.0),
-        _radius(0.0)
+    CircularSampler::CircularSampler(
+            bool isTowSided,
+            const glm::dvec3& center,
+            const glm::dvec3& normal,
+            double radius) :
+        _isTwoSided(isTowSided),
+        _center(center),
+        _normal(normal),
+        _radius(radius)
     {
 
     }
@@ -40,12 +45,12 @@ namespace prop3
             return 0.0;
 
         glm::dvec3 down = glm::normalize(eye - _normal * eyeNdot) * _radius;
-        glm::dvec3 bottom = down - eye;
-        glm::dvec3 top = -down - eye;
+        glm::dvec3 bottom = glm::normalize(down - eye);
+        glm::dvec3 top = glm::normalize(-down - eye);
 
         glm::dvec3 side = glm::cross(down, _normal);
-        glm::dvec3 right = - side - eye;
-        glm::dvec3 left = side - eye;
+        glm::dvec3 right = glm::normalize(- side - eye);
+        glm::dvec3 left = glm::normalize(side - eye);
 
         double La = glm::acos(glm::dot(bottom, top)) / 2.0;
         double Ta = glm::acos(glm::dot(right, left)) / 2.0;

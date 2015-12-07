@@ -57,13 +57,13 @@ SET(PROP3_RAY_HEADERS
 # Nodes
 SET(PROP3_NODE_HEADERS
     ${PROP3_SRC_DIR}/Node/Node.h
+    ${PROP3_SRC_DIR}/Node/Visitor.h
     ${PROP3_SRC_DIR}/Node/HandleNode.h
     ${PROP3_SRC_DIR}/Node/StageZone.h
     ${PROP3_SRC_DIR}/Node/StageSet.h)
 
 # Serialization
 SET(PROP3_SERIAL_HEADERS
-    ${PROP3_SRC_DIR}/Serial/Visitor.h
     ${PROP3_SRC_DIR}/Serial/JsonTags.h
     ${PROP3_SRC_DIR}/Serial/JsonReader.h
     ${PROP3_SRC_DIR}/Serial/JsonWriter.h)
@@ -167,13 +167,13 @@ SET(PROP3_RAY_SOURCES
 # Nodes
 SET(PROP3_NODE_SOURCES
     ${PROP3_SRC_DIR}/Node/Node.cpp
+    ${PROP3_SRC_DIR}/Node/Visitor.cpp
     ${PROP3_SRC_DIR}/Node/HandleNode.cpp
     ${PROP3_SRC_DIR}/Node/StageZone.cpp
     ${PROP3_SRC_DIR}/Node/StageSet.cpp)
 
 # Serialization
 SET(PROP3_SERIAL_SOURCES
-    ${PROP3_SRC_DIR}/Serial/Visitor.cpp
     ${PROP3_SRC_DIR}/Serial/JsonTags.cpp
     ${PROP3_SRC_DIR}/Serial/JsonReader.cpp
     ${PROP3_SRC_DIR}/Serial/JsonWriter.cpp)

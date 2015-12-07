@@ -31,17 +31,17 @@ namespace prop3
         virtual std::vector<Raycast> fireOn(const glm::dvec3& pos, unsigned int count) const override;
 
 
-        void setRadiantFlux(double flux);
-        double radiantFlux() const;
+        void setRadiantFlux(const glm::dvec3& radiantFlux);
+        glm::dvec3 radiantFlux() const;
 
-        void setSampler(const std::shared_ptr<Sampler> sampler);
+        void setSampler(const std::shared_ptr<Sampler>& sampler);
         std::shared_ptr<Sampler> sampler() const;
 
         std::shared_ptr<Coating> coating() const;
 
 
     private:
-        double _radiantFlux;
+        glm::dvec3 _radiantFlux;
         std::shared_ptr<Sampler> _sampler;
         std::shared_ptr<EmissiveCoating> _coating;
     };
@@ -49,7 +49,7 @@ namespace prop3
 
 
     // IMPLEMENTATION //
-    inline double LightBulb::radiantFlux() const
+    inline glm::dvec3 LightBulb::radiantFlux() const
     {
         return _radiantFlux;
     }

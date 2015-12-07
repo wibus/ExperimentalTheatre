@@ -12,7 +12,7 @@ namespace prop3
     class PROP3D_EXPORT EmissiveCoating : public Coating
     {
     public:
-        EmissiveCoating();
+        EmissiveCoating(const glm::dvec3& emittedRadiance);
         virtual ~EmissiveCoating();
 
 
@@ -39,13 +39,9 @@ namespace prop3
         void setEmittedRadiance(const glm::dvec3& radiance);
         glm::dvec3 emittedRadiance() const;
 
-        void setSampler(const std::shared_ptr<Sampler>& sampler);
-        std::shared_ptr<Sampler> sampler() const;
-
 
     private:
         glm::dvec3 _emittedRadiance;
-        std::shared_ptr<Sampler> _sampler;
     };
 
 
@@ -54,11 +50,6 @@ namespace prop3
     inline glm::dvec3 EmissiveCoating::emittedRadiance() const
     {
         return _emittedRadiance;
-    }
-
-    inline std::shared_ptr<Sampler> EmissiveCoating::sampler() const
-    {
-        return _sampler;
     }
 }
 

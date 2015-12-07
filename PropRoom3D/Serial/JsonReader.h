@@ -28,6 +28,9 @@ namespace prop3
     class Material;
     class Coating;
 
+    class Light;
+    class Sampler;
+
     class Environment;
     class Backdrop;
 
@@ -49,6 +52,8 @@ namespace prop3
         static cellar::ESamplerWrapper wrapperFromJson(const QJsonValueRef& ref);
 
     private:
+        void deserializeSamplers(const QJsonObject& docObj);
+        void deserializeLights(const QJsonObject& docObj);
         void deserializeMaterials(const QJsonObject& docObj);
         void deserializeCoatings(const QJsonObject& docObj);
         void deserializeSurfaces(const QJsonObject& docObj);
@@ -70,9 +75,11 @@ namespace prop3
                 AbstractTeam& team);
 
 
-        std::vector<std::shared_ptr<Surface>>   _surfaces;
+        std::vector<std::shared_ptr<Sampler>>   _samplers;
+        std::vector<std::shared_ptr<Light>>     _lights;
         std::vector<std::shared_ptr<Material>>  _materials;
         std::vector<std::shared_ptr<Coating>>   _coatings;
+        std::vector<std::shared_ptr<Surface>>   _surfaces;
     };
 }
 

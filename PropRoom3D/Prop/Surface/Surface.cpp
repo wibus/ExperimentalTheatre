@@ -6,7 +6,7 @@
 #include "Ray/RayHitReport.h"
 #include "../Material/UniformStdMaterial.h"
 #include "../Coating/UniformStdCoating.h"
-#include "Serial/Visitor.h"
+#include "Node/Visitor.h"
 
 
 namespace prop3

@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "Serial/Visitor.h"
+#include "Node/Visitor.h"
 #include "Light/Environment.h"
 
 using namespace std;

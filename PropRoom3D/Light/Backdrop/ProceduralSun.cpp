@@ -6,12 +6,13 @@
 #include "Prop/Material/Material.h"
 #include "Ray/Raycast.h"
 #include "Ray/RayHitList.h"
-#include "Serial/Visitor.h"
+#include "Node/Visitor.h"
 #include "Light/Light.h"
 
 
 namespace prop3
 {
+    const double ProceduralSun::BACKDROP_DISTANCE = 20.0;
     const double ProceduralSun::SUN_COS_DIMENSION = 0.99996192306;
     const double ProceduralSun::SUN_SMOOTH_EDGE = 5.0e4;
     const glm::dvec3 ProceduralSun::SKY_UP = glm::dvec3(0, 0, 1);
@@ -22,7 +23,7 @@ namespace prop3
         glm::dvec3(0.0, 0.0, 0.0);
     const double ProceduralSun::RECEIVE_PLANE_RADIUS = 30.0;
 
-    const double ProceduralSun::RADIATION_PLANE_DISTANCE = 300.0;
+    const double ProceduralSun::RADIATION_PLANE_DISTANCE = 30.0;
     const double ProceduralSun::RADIATION_PLANE_RADIUS =
             ProceduralSun::RADIATION_PLANE_DISTANCE *
             ProceduralSun::SUN_SIN;
@@ -122,8 +123,9 @@ namespace prop3
 
 
         // Final blended color
-        double skyColorWeight = 1.0;
-        return glm::dvec4(color, skyColorWeight);
+        double distance = ray.distance + BACKDROP_DISTANCE;
+        double skyColorWeight =  1.0 / (distance *distance);
+        return glm::dvec4(color * skyColorWeight, skyColorWeight);
     }
 
     std::vector<Raycast> ProceduralSun::fireRays(unsigned int count) const
@@ -149,7 +151,8 @@ namespace prop3
 
             glm::dvec3 direction = glm::normalize(recPoint - radPoint);
             raycasts.push_back(Raycast(
-                Raycast::BACKDROP_DISTANCE,
+                Raycast::BACKDROP_LIMIT,
+                Raycast::INITIAL_DISTANCE,
                 sunSample,
                 radPoint,
                 direction));
@@ -180,7 +183,8 @@ namespace prop3
 
             glm::dvec3 direction = glm::normalize(pos - radPoint);
             raycasts.push_back(Raycast(
-                Raycast::BACKDROP_DISTANCE,
+                Raycast::BACKDROP_LIMIT,
+                Raycast::INITIAL_DISTANCE,
                 sunSample,
                 radPoint,
                 direction));

@@ -3,13 +3,17 @@
 
 namespace prop3
 {
-    const double Raycast::BACKDROP_DISTANCE = INFINITY;
+    const double Raycast::BACKDROP_LIMIT = INFINITY;
+    const double Raycast::INITIAL_DISTANCE = 0.0;
 
-    Raycast::Raycast(double limit,
+    Raycast::Raycast(
+            double limit,
+            double distance,
             const glm::dvec4& sample,
             const glm::dvec3& origin,
             const glm::dvec3& direction) :
         limit(limit),
+        distance(distance),
         sample(sample),
         origin(origin),
         direction(direction)

@@ -17,16 +17,19 @@ namespace prop3
     {
 	public:
         Raycast(double limit,
+                double distance,
                 const glm::dvec4& sample,
                 const glm::dvec3& origin,
                 const glm::dvec3& direction);
 
         double limit;
+        double distance;
         glm::dvec4 sample;
         glm::dvec3 origin;
         glm::dvec3 direction;
 
-        static const double BACKDROP_DISTANCE;
+        static const double BACKDROP_LIMIT;
+        static const double INITIAL_DISTANCE;
     };
 }
 

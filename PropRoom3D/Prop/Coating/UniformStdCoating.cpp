@@ -1,6 +1,6 @@
 #include "UniformStdCoating.h"
 
-#include "Serial/Visitor.h"
+#include "Node/Visitor.h"
 
 
 namespace prop3

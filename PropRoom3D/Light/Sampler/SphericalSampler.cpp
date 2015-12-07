@@ -2,15 +2,17 @@
 
 #include <GLM/gtc/constants.hpp>
 
-#include "Serial/Visitor.h"
+#include "Node/Visitor.h"
 #include "Ray/Raycast.h"
 
 
 namespace prop3
 {
-    SphericalSampler::SphericalSampler() :
-        _center(0.0),
-        _radius(0.0)
+    SphericalSampler::SphericalSampler(
+            const glm::dvec3& center,
+            double radius) :
+        _center(center),
+        _radius(radius)
     {
 
     }

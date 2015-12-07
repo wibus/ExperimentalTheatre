@@ -320,7 +320,8 @@ namespace prop3
         }
 
         Raycast raycast(
-            Raycast::BACKDROP_DISTANCE,
+            Raycast::BACKDROP_LIMIT,
+            Raycast::INITIAL_DISTANCE,
             glm::dvec4(1.0),
             eyeWorldPos,
             glm::dvec3(0.0));
@@ -450,14 +451,14 @@ namespace prop3
         while(rayId < _rayBounceArray.size())
         {
             Raycast ray = _rayBounceArray[rayId];
-            ray.limit = Raycast::BACKDROP_DISTANCE;
+            ray.limit = Raycast::BACKDROP_LIMIT;
 
 
             // Find nearest ray-surface intersection
             const Coating* dummyCoat = nullptr;
             const Material* dummyMat = nullptr;
             const glm::dvec3 dummyVec = glm::dvec3();
-            RayHitReport reportMin(Raycast::BACKDROP_DISTANCE,
+            RayHitReport reportMin(Raycast::BACKDROP_LIMIT,
                                    ray, dummyVec, dummyVec, dummyVec,
                                    dummyCoat, dummyMat, dummyMat);
             ray.limit = findNearestProp(ray, reportMin);
@@ -479,9 +480,12 @@ namespace prop3
             ray.limit = glm::min(matPathLen, ray.limit);
 
             glm::dvec3 matAtt = currMat->lightAttenuation(ray);
-            glm::dvec4 currSamp = glm::dvec4(matAtt, 1.0) * ray.sample;
+            glm::dvec4 currSamp = ray.sample * glm::dvec4(matAtt, 1.0);
 
-            if(ray.limit != Raycast::BACKDROP_DISTANCE)
+            double currDist = ray.distance + ray.limit;
+            double distProb = 1.0 / (currDist * currDist);
+
+            if(ray.limit != Raycast::BACKDROP_LIMIT)
             {
                 // If non-stochatic draft is active
                 if(!_useStochasticTracing)
@@ -492,8 +496,6 @@ namespace prop3
                 _tempChildRayArray.clear();
                 if(matPathLen < reportMin.distance)
                 {
-                    ray.limit = matPathLen;
-
                     // Inderect lighting
                     currMat->scatterLight(
                             _tempChildRayArray,
@@ -511,7 +513,7 @@ namespace prop3
                     const Material* nextMat = reportMin.nextMaterial;
 
                     // Inderect lighting
-                    sampleAccum += currSamp *
+                    sampleAccum += currSamp * distProb *
                         coating->indirectBrdf(
                             _tempChildRayArray,
                             reportMin,
@@ -524,26 +526,30 @@ namespace prop3
                         * */
                 }
 
-
                 size_t childCount = _tempChildRayArray.size();
                 for(size_t i=0; i < childCount; ++i)
                 {
                     Raycast& childRay = _tempChildRayArray[i];
+                    childRay.distance = currDist;
                     childRay.sample *= currSamp;
 
                     double r = childRay.sample.r;
                     double g = childRay.sample.g;
                     double b = childRay.sample.b;
-                    double nextIntensity = glm::max(glm::max(r, g), b);
-                    if(nextIntensity >= _screenRayIntensityThreshold &&
+                    double a = childRay.sample.a;
+                    double nextIntensity = glm::max(glm::max(r, g), b) / a;
+                    if(nextIntensity > _screenRayIntensityThreshold &&
                        bounceCount < _maxScreenBounceCount)
                     {
                         _rayBounceArray.push_back(childRay);
                     }
                     else
                     {
-                        sampleAccum += glm::dvec4(color::black,
-                            childRay.sample.a * (bounceCount/(bounceCount+1.0)));
+                        /*
+                        sampleAccum += glm::dvec4(r, g, b,
+                            a * (bounceCount/(bounceCount+1.0)
+                            / (currDist * currDist)));
+                        */
                     }
                 }
             }

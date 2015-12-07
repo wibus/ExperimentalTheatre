@@ -7,6 +7,8 @@ namespace prop3
     const QString DOCUMENT_MATERIAL_ARRAY        = "Materials";
     const QString DOCUMENT_COATING_ARRAY         = "Coatings";
     const QString DOCUMENT_SURFACE_ARRAY         = "Surfaces";
+    const QString DOCUMENT_SAMPLER_ARRAY         = "Area Samplers";
+    const QString DOCUMENT_LIGHTS_ARRAY          = "Lights";
     const QString DOCUMENT_STAGE_SET             = "Stage set";
 
     // Environments
@@ -24,6 +26,22 @@ namespace prop3
     const QString BACKDROP_GROUND_HEIGHT            = "Ground Height";
     const QString BACKDROP_SUN_DIR                  = "Sun Dir";
 
+    // Lights
+    const QString LIGHT_TYPE                        = "Type";
+    const QString LIGHT_TYPE_BULB                   = "Light Bulb";
+    const QString LIGHT_RADIANT_FLUX                = "Radiant Flux";
+    const QString LIGHT_AREA_SAMPLER                = "Area Sampler";
+    const QString LIGHT_COATING                     = "Coating";
+
+    // Area Samplers
+    const QString SAMPLER_TYPE                      = "Type";
+    const QString SAMPLER_TYPE_CIRCULAR             = "Circular";
+    const QString SAMPLER_TYPE_SPHERICAL            = "Spherical";
+    const QString SAMPLER_TWO_SIDED                 = "Two Sided";
+    const QString SAMPLER_CENTER                    = "Center";
+    const QString SAMPLER_NORMAL                    = "Normal";
+    const QString SAMPLER_RADIUS                    = "Radius";
+
     // Handle nodes
     const QString HANDLE_NAME                       = "Name";
     const QString HANDLE_IS_VISIBLE                 = "Is Visible";
@@ -31,6 +49,7 @@ namespace prop3
     // Zones
     const QString ZONE_BOUNDS                       = "Bounds";
     const QString ZONE_PROPS                        = "Props";
+    const QString ZONE_LIGHTS                       = "Lights";
     const QString ZONE_SUBZONES                     = "Subzones";
 
     // Stage set
@@ -93,5 +112,4 @@ namespace prop3
     const QString COATING_TEXTURE_FILTER            = "Texture Filter";
     const QString COATING_TEXTURE_WRAPPER           = "Texture Wrapper";
     const QString COATING_EMITTED_RADIANCE          = "Emitted Radiance";
-    const QString COATING_AREA_SAMPLER              = "Area Sampler";
 }

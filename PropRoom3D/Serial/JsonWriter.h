@@ -13,7 +13,7 @@
 
 #include <CellarWorkbench/Image/ImageSampler.h>
 
-#include "Serial/Visitor.h"
+#include "Node/Visitor.h"
 
 
 namespace prop3
@@ -45,13 +45,12 @@ namespace prop3
         {
         public:
 
-            // Surfaces
-            virtual void visit(Box& node) override;
-            virtual void visit(BoxTexture& node) override;
-            virtual void visit(Plane& node) override;
-            virtual void visit(PlaneTexture& node) override;
-            virtual void visit(Quadric& node) override;
-            virtual void visit(Sphere& node) override;
+            // Samplers
+            virtual void visit(CircularSampler& node) override;
+            virtual void visit(SphericalSampler& node) override;
+
+            // Lights
+            virtual void visit(LightBulb& node) override;
 
             // Materials
             virtual void visit(UniformStdMaterial& node) override;
@@ -61,41 +60,45 @@ namespace prop3
             virtual void visit(UniformStdCoating& node) override;
             virtual void visit(TexturedStdCoating& node) override;
 
-            // Lights
-            virtual void visit(LightBulb& node) override;
+            // Surfaces
+            virtual void visit(Box& node) override;
+            virtual void visit(BoxTexture& node) override;
+            virtual void visit(Plane& node) override;
+            virtual void visit(PlaneTexture& node) override;
+            virtual void visit(Quadric& node) override;
+            virtual void visit(Sphere& node) override;
 
-            // Samplers
-            virtual void visit(CircularSampler& node) override;
-            virtual void visit(SphericalSampler& node) override;
 
-
-            QJsonArray surfacesArray;
-            QJsonArray coatingsArray;
-            QJsonArray materialsArray;
             QJsonArray samplersArray;
             QJsonArray lightsArray;
+            QJsonArray materialsArray;
+            QJsonArray coatingsArray;
+            QJsonArray surfacesArray;
 
-            std::map<Surface*,  int> surfaceIdMap;
-            std::map<Coating*,  int> coatingIdMap;
-            std::map<Material*, int> materialIdMap;
             std::map<Sampler*,  int> samplerIdMap;
             std::map<Light*,    int> lightIdMap;
+            std::map<Material*, int> materialIdMap;
+            std::map<Coating*,  int> coatingIdMap;
+            std::map<Surface*,  int> surfaceIdMap;
 
         private:
-            bool insertSurface(Surface& node);
-            bool insertMaterial(Material& node);
-            bool insertCoating(Coating& node);
             bool insertSampler(Sampler& node);
             bool insertLight(Light& node);
+            bool insertMaterial(Material& node);
+            bool insertCoating(Coating& node);
+            bool insertSurface(Surface& node);
+
             void setPhysicalProperties(PhysicalSurface& node, QJsonObject& obj);
         };
 
         class StageSetBuilder : public Visitor
         {
         public:
-            StageSetBuilder(std::map<Surface*,  int>& surfaceIdMap,
-                            std::map<Coating*,  int>& coatingIdMap,
-                            std::map<Material*, int>& materialIdMap);
+            StageSetBuilder(
+                std::map<Light*,    int>& lightIdMap,
+                std::map<Material*, int>& materialIdMap,
+                std::map<Coating*,  int>& coatingIdMap,
+                std::map<Surface*,  int>& surfaceIdMap);
 
             // Stage set
             virtual void visit(StageSet& node) override;
@@ -130,6 +133,7 @@ namespace prop3
         private:
             void setHandleNodeProperties(HandleNode& node, QJsonObject& obj);
 
+            std::map<Light*,    int>& _lightIdMap;
             std::map<Surface*,  int>& _surfaceIdMap;
             std::map<Coating*,  int>& _coatingIdMap;
             std::map<Material*, int>& _materialIdMap;

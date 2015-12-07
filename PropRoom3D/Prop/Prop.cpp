@@ -1,7 +1,7 @@
 #include "Prop.h"
 
 #include "Surface/Surface.h"
-#include "Serial/Visitor.h"
+#include "Node/Visitor.h"
 
 
 namespace prop3

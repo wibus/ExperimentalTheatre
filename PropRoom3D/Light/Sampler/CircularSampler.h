@@ -11,7 +11,10 @@ namespace prop3
     class PROP3D_EXPORT CircularSampler : public Sampler
     {
     public:
-        CircularSampler();
+        CircularSampler(bool isTowSided,
+                        const glm::dvec3& center,
+                        const glm::dvec3& normal,
+                        double radius);
 
         virtual ~CircularSampler();
 

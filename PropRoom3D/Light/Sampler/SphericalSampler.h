@@ -11,7 +11,8 @@ namespace prop3
     class PROP3D_EXPORT SphericalSampler : public Sampler
     {
     public:
-        SphericalSampler();
+        SphericalSampler(const glm::dvec3& center,
+                         double radius);
 
         virtual ~SphericalSampler();
 

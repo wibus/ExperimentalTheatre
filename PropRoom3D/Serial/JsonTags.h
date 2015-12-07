@@ -10,6 +10,8 @@ namespace prop3
     extern const QString DOCUMENT_MATERIAL_ARRAY;
     extern const QString DOCUMENT_COATING_ARRAY;
     extern const QString DOCUMENT_SURFACE_ARRAY;
+    extern const QString DOCUMENT_SAMPLER_ARRAY;
+    extern const QString DOCUMENT_LIGHTS_ARRAY;
     extern const QString DOCUMENT_STAGE_SET;
 
     // Environments
@@ -27,6 +29,23 @@ namespace prop3
     extern const QString BACKDROP_GROUND_HEIGHT;
     extern const QString BACKDROP_SUN_DIR;
 
+    // Lights
+    extern const QString LIGHT_TYPE;
+    extern const QString LIGHT_TYPE_BULB;
+    extern const QString LIGHT_RADIANT_FLUX;
+    extern const QString LIGHT_AREA_SAMPLER;
+    extern const QString LIGHT_COATING;
+
+    // Area Samplers
+    extern const QString SAMPLER_TYPE;
+    extern const QString SAMPLER_TYPE_CIRCULAR;
+    extern const QString SAMPLER_TYPE_SPHERICAL;
+    extern const QString SAMPLER_TWO_SIDED;
+    extern const QString SAMPLER_CENTER;
+    extern const QString SAMPLER_NORMAL;
+    extern const QString SAMPLER_RADIUS;
+
+
     // Handle nodes
     extern const QString HANDLE_NAME;
     extern const QString HANDLE_IS_VISIBLE;
@@ -34,6 +53,7 @@ namespace prop3
     // Zones
     extern const QString ZONE_BOUNDS;
     extern const QString ZONE_PROPS;
+    extern const QString ZONE_LIGHTS;
     extern const QString ZONE_SUBZONES;
 
     // Stage set
@@ -96,7 +116,6 @@ namespace prop3
     extern const QString COATING_TEXTURE_FILTER;
     extern const QString COATING_TEXTURE_WRAPPER;
     extern const QString COATING_EMITTED_RADIANCE;
-    extern const QString COATING_AREA_SAMPLER;
 }
 
 #endif // PROPROOM3D_STAGESETJSONTAGS_H

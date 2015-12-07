@@ -59,17 +59,20 @@ namespace prop3
 
         // Build Stage set tree
         StageSetBuilder stageSetBuilder(
-                    hardwareBuilder.surfaceIdMap,
+                    hardwareBuilder.lightIdMap,
+                    hardwareBuilder.materialIdMap,
                     hardwareBuilder.coatingIdMap,
-                    hardwareBuilder.materialIdMap);
+                    hardwareBuilder.surfaceIdMap);
         stageSetBuilder.visit(stageSet);
 
         // Write document
         QJsonObject docObj;
+        docObj[DOCUMENT_SAMPLER_ARRAY]  = hardwareBuilder.samplersArray;
+        docObj[DOCUMENT_LIGHTS_ARRAY]   = hardwareBuilder.lightsArray;
         docObj[DOCUMENT_MATERIAL_ARRAY] = hardwareBuilder.materialsArray;
         docObj[DOCUMENT_COATING_ARRAY]  = hardwareBuilder.coatingsArray;
         docObj[DOCUMENT_SURFACE_ARRAY]  = hardwareBuilder.surfacesArray;
-        docObj[DOCUMENT_STAGE_SET] = stageSetBuilder.subTree;
+        docObj[DOCUMENT_STAGE_SET]      = stageSetBuilder.subTree;
 
         QJsonDocument doc;
         doc.setObject(docObj);
@@ -148,9 +151,14 @@ namespace prop3
         }
     }
 
-    bool StageSetJsonWriter::HardwareBuilder::insertSurface(Surface& node)
+    bool StageSetJsonWriter::HardwareBuilder::insertSampler(Sampler& node)
     {
-        return surfaceIdMap.insert(make_pair(&node, (int)surfaceIdMap.size())).second;
+        return samplerIdMap.insert(make_pair(&node, (int)samplerIdMap.size())).second;
+    }
+
+    bool StageSetJsonWriter::HardwareBuilder::insertLight(Light& node)
+    {
+        return lightIdMap.insert(make_pair(&node, (int)lightIdMap.size())).second;
     }
 
     bool StageSetJsonWriter::HardwareBuilder::insertMaterial(Material& node)
@@ -163,14 +171,9 @@ namespace prop3
         return coatingIdMap.insert(make_pair(&node, (int)coatingIdMap.size())).second;
     }
 
-    bool StageSetJsonWriter::HardwareBuilder::insertSampler(Sampler& node)
+    bool StageSetJsonWriter::HardwareBuilder::insertSurface(Surface& node)
     {
-        return samplerIdMap.insert(make_pair(&node, (int)samplerIdMap.size())).second;
-    }
-
-    bool StageSetJsonWriter::HardwareBuilder::insertLight(Light& node)
-    {
-        return lightIdMap.insert(make_pair(&node, (int)lightIdMap.size())).second;
+        return surfaceIdMap.insert(make_pair(&node, (int)surfaceIdMap.size())).second;
     }
 
     void StageSetJsonWriter::HardwareBuilder::setPhysicalProperties(PhysicalSurface& node, QJsonObject& obj)
@@ -178,6 +181,109 @@ namespace prop3
         obj[SURFACE_COATING]        = coatingIdMap[node.coating().get()];
         obj[SURFACE_INNER_MATERIAL] = materialIdMap[node.innerMaterial().get()];
         obj[SURFACE_OUTER_MATERIAL] = materialIdMap[node.outerMaterial().get()];
+    }
+
+
+    // Samplers
+    void StageSetJsonWriter::HardwareBuilder::visit(CircularSampler& node)
+    {
+        if(insertSampler(node))
+        {
+            QJsonObject obj;
+            obj[SAMPLER_TYPE]                 = SAMPLER_TYPE_CIRCULAR;
+            obj[SAMPLER_TWO_SIDED]            = node.isTowSided();
+            obj[SAMPLER_CENTER]               = toJson(node.center());
+            obj[SAMPLER_NORMAL]               = toJson(node.normal());
+            obj[SAMPLER_RADIUS]               = node.radius();
+            samplersArray.append(obj);
+        }
+    }
+
+    void StageSetJsonWriter::HardwareBuilder::visit(SphericalSampler& node)
+    {
+        if(insertSampler(node))
+        {
+            QJsonObject obj;
+            obj[SAMPLER_TYPE]                 = SAMPLER_TYPE_SPHERICAL;
+            obj[SAMPLER_CENTER]               = toJson(node.center());
+            obj[SAMPLER_RADIUS]               = node.radius();
+            samplersArray.append(obj);
+        }
+    }
+
+
+    // Lights
+    void StageSetJsonWriter::HardwareBuilder::visit(LightBulb& node)
+    {
+        if(insertLight(node))
+        {
+            QJsonObject obj;
+            obj[LIGHT_TYPE]                 = LIGHT_TYPE_BULB;
+            obj[LIGHT_RADIANT_FLUX]         = toJson(node.radiantFlux());
+            obj[LIGHT_AREA_SAMPLER]         = samplerIdMap[node.sampler().get()];
+            obj[LIGHT_COATING]              = coatingIdMap[node.coating().get()];
+            lightsArray.append(obj);
+        }
+    }
+
+
+    // Materials
+    void StageSetJsonWriter::HardwareBuilder::visit(UniformStdMaterial& node)
+    {
+        if(insertMaterial(node))
+        {
+            QJsonObject obj;
+            obj[MATERIAL_TYPE]              = MATERIAL_TYPE_UNIFORMSTD;
+            obj[MATERIAL_OPACITY]           = node.opacity();
+            obj[MATERIAL_CONDUCTIVITY]      = node.conductivity();
+            obj[MATERIAL_REFRACTIVE_INDEX]  = node.refractiveIndex();
+            obj[MATERIAL_SCATTERING]        = node.scattering();
+            obj[MATERIAL_COLOR]             = toJson(node.color());
+            materialsArray.append(obj);
+        }
+    }
+
+
+    // Coatings
+    void StageSetJsonWriter::HardwareBuilder::visit(EmissiveCoating& node)
+    {
+        if(insertCoating(node))
+        {
+            QJsonObject obj;
+            obj[COATING_TYPE]                   = COATING_TYPE_EMISSIVE;
+            obj[COATING_EMITTED_RADIANCE]       = toJson(node.emittedRadiance());
+            coatingsArray.append(obj);
+        }
+    }
+
+    void StageSetJsonWriter::HardwareBuilder::visit(UniformStdCoating& node)
+    {
+        if(insertCoating(node))
+        {
+            QJsonObject obj;
+            obj[COATING_TYPE]                   = COATING_TYPE_UNIFORMSTD;
+            obj[COATING_ROUGHNESS]              = node.roughness();
+            obj[COATING_PAINT_COLOR]            = toJson(node.paintColor());
+            obj[COATING_PAINT_REFRACTIVE_INDEX] = node.paintRefractiveIndex();
+            coatingsArray.append(obj);
+        }
+    }
+
+    void StageSetJsonWriter::HardwareBuilder::visit(TexturedStdCoating& node)
+    {
+        if(insertCoating(node))
+        {
+            QJsonObject obj;
+            obj[COATING_TYPE]                     = COATING_TYPE_TEXTUREDSTD;
+            obj[COATING_DEFAULT_ROUGHNESS]        = node.defaultRoughness();
+            obj[COATING_DEFAULT_PAINT_COLOR]      = toJson(node.defaultPaintColor());
+            obj[COATING_ROUGHNESS_TEX_NAME]       = QString(node.roughnessTexName().c_str());
+            obj[COATING_PAINT_COLOR_TEX_NAME]     = QString(node.paintColorTexName().c_str());
+            obj[COATING_TEXTURE_FILTER]           = toJson(node.texFilter());
+            obj[COATING_TEXTURE_WRAPPER]          = toJson(node.texWrapper());
+            obj[COATING_PAINT_REFRACTIVE_INDEX]   = node.paintRefractiveIndex();
+            coatingsArray.append(obj);
+        }
     }
 
 
@@ -265,109 +371,18 @@ namespace prop3
     }
 
 
-    // Materials
-    void StageSetJsonWriter::HardwareBuilder::visit(UniformStdMaterial& node)
-    {
-        if(insertMaterial(node))
-        {
-            QJsonObject obj;
-            obj[MATERIAL_TYPE]              = MATERIAL_TYPE_UNIFORMSTD;
-            obj[MATERIAL_OPACITY]           = node.opacity();
-            obj[MATERIAL_CONDUCTIVITY]      = node.conductivity();
-            obj[MATERIAL_REFRACTIVE_INDEX]  = node.refractiveIndex();
-            obj[MATERIAL_SCATTERING]        = node.scattering();
-            obj[MATERIAL_COLOR]             = toJson(node.color());
-            materialsArray.append(obj);
-        }
-    }
-
-
-    // Coatings
-    void StageSetJsonWriter::HardwareBuilder::visit(EmissiveCoating& node)
-    {
-        if(insertCoating(node))
-        {
-            QJsonObject obj;
-            obj[COATING_TYPE]                   = COATING_TYPE_EMISSIVE;
-            obj[COATING_EMITTED_RADIANCE]       = toJson(node.emittedRadiance());
-            obj[COATING_AREA_SAMPLER]           = samplerIdMap[node.sampler().get()];
-            coatingsArray.append(obj);
-        }
-    }
-
-    void StageSetJsonWriter::HardwareBuilder::visit(UniformStdCoating& node)
-    {
-        if(insertCoating(node))
-        {
-            QJsonObject obj;
-            obj[COATING_TYPE]                   = COATING_TYPE_UNIFORMSTD;
-            obj[COATING_ROUGHNESS]              = node.roughness();
-            obj[COATING_PAINT_COLOR]            = toJson(node.paintColor());
-            obj[COATING_PAINT_REFRACTIVE_INDEX] = node.paintRefractiveIndex();
-            coatingsArray.append(obj);
-        }
-    }
-
-    void StageSetJsonWriter::HardwareBuilder::visit(TexturedStdCoating& node)
-    {
-        if(insertCoating(node))
-        {
-            QJsonObject obj;
-            obj[COATING_TYPE]                     = COATING_TYPE_TEXTUREDSTD;
-            obj[COATING_DEFAULT_ROUGHNESS]        = node.defaultRoughness();
-            obj[COATING_DEFAULT_PAINT_COLOR]      = toJson(node.defaultPaintColor());
-            obj[COATING_ROUGHNESS_TEX_NAME]       = QString(node.roughnessTexName().c_str());
-            obj[COATING_PAINT_COLOR_TEX_NAME]     = QString(node.paintColorTexName().c_str());
-            obj[COATING_TEXTURE_FILTER]           = toJson(node.texFilter());
-            obj[COATING_TEXTURE_WRAPPER]          = toJson(node.texWrapper());
-            obj[COATING_PAINT_REFRACTIVE_INDEX]   = node.paintRefractiveIndex();
-            coatingsArray.append(obj);
-        }
-    }
-
-    // Lights
-    void StageSetJsonWriter::HardwareBuilder::visit(LightBulb& node)
-    {
-        if(insertLight(node))
-        {
-            QJsonObject obj;
-
-            lightsArray.append(obj);
-        }
-    }
-
-    // Samplers
-    void StageSetJsonWriter::HardwareBuilder::visit(CircularSampler& node)
-    {
-        if(insertSampler(node))
-        {
-            QJsonObject obj;
-
-            samplersArray.append(obj);
-        }
-    }
-
-    void StageSetJsonWriter::HardwareBuilder::visit(SphericalSampler& node)
-    {
-        if(insertSampler(node))
-        {
-            QJsonObject obj;
-
-            samplersArray.append(obj);
-        }
-    }
-
-
     //////////////////////////
     // Surface Tree Builder //
     //////////////////////////
     StageSetJsonWriter::StageSetBuilder::StageSetBuilder(
-            std::map<Surface*,  int>& surfaceIdMap,
+            std::map<Light*,    int>& lightIdMap,
+            std::map<Material*, int>& materialIdMap,
             std::map<Coating*,  int>& coatingIdMap,
-            std::map<Material*, int>& materialIdMap) :
-        _surfaceIdMap(surfaceIdMap),
+            std::map<Surface*,  int>& surfaceIdMap) :
+        _lightIdMap(lightIdMap),
+        _materialIdMap(materialIdMap),
         _coatingIdMap(coatingIdMap),
-        _materialIdMap(materialIdMap)
+        _surfaceIdMap(surfaceIdMap)
     {
 
     }
@@ -410,6 +425,16 @@ namespace prop3
                 }
             }
             obj[ZONE_PROPS] = propArray;
+        }
+
+        if(!node.lights().empty())
+        {
+            QJsonArray lightArray;
+            for(const auto& light : node.lights())
+            {
+                lightArray.append(_lightIdMap[light.get()]);
+            }
+            obj[ZONE_LIGHTS] = lightArray;
         }
 
         if(!node.subzones().empty())

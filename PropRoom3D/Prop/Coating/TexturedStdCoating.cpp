@@ -4,7 +4,7 @@
 #include <CellarWorkbench/Image/ImageBank.h>
 
 #include "Ray/RayHitReport.h"
-#include "Serial/Visitor.h"
+#include "Node/Visitor.h"
 
 
 namespace prop3

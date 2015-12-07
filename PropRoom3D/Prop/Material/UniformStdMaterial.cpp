@@ -1,6 +1,6 @@
 #include "UniformStdMaterial.h"
 
-#include "Serial/Visitor.h"
+#include "Node/Visitor.h"
 
 
 namespace prop3

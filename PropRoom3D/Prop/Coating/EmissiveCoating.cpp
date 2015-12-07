@@ -1,13 +1,15 @@
 #include "EmissiveCoating.h"
 
-#include "Serial/Visitor.h"
+#include "Node/Visitor.h"
 #include "Light/Sampler/Sampler.h"
 #include "Ray/RayHitReport.h"
 
 
 namespace prop3
 {
-    EmissiveCoating::EmissiveCoating()
+    EmissiveCoating::EmissiveCoating(
+            const glm::dvec3& emittedRadiance) :
+        _emittedRadiance()
     {
 
     }
@@ -28,15 +30,7 @@ namespace prop3
         const Material& leavedMaterial,
         const Material& enteredMaterial) const
     {
-        if(_sampler.get() != nullptr)
-        {
-            double probability = _sampler->hitProbability(report.incidentRay);
-            return glm::dvec4(_emittedRadiance * probability, probability);
-        }
-        else
-        {
-            return glm::dvec4(0.0);
-        }
+        return glm::dvec4(_emittedRadiance, 1.0);
     }
 
     glm::dvec4 EmissiveCoating::directBrdf(
@@ -58,13 +52,6 @@ namespace prop3
     void EmissiveCoating::setEmittedRadiance(const glm::dvec3& radiance)
     {
         _emittedRadiance = radiance;
-
-        stampCurrentUpdate();
-    }
-
-    void EmissiveCoating::setSampler(const std::shared_ptr<Sampler>& sampler)
-    {
-        _sampler = sampler;
 
         stampCurrentUpdate();
     }

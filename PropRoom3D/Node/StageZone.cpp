@@ -2,7 +2,8 @@
 
 #include "Prop/Prop.h"
 #include "Prop/Surface/Surface.h"
-#include "Serial/Visitor.h"
+#include "Light/Light.h"
+#include "Node/Visitor.h"
 
 
 namespace prop3
@@ -33,6 +34,7 @@ namespace prop3
 
         c.push_back(_bounds);
         c.insert(c.begin(), _props.begin(), _props.end());
+        c.insert(c.begin(), _lights.begin(), _lights.end());
         c.insert(c.begin(), _subzones.begin(), _subzones.end());
 
         return c;
@@ -52,6 +54,13 @@ namespace prop3
         stampCurrentUpdate();
     }
 
+    void StageZone::addLight(const std::shared_ptr<Light>& light)
+    {
+        _lights.push_back(light);
+
+        stampCurrentUpdate();
+    }
+
     void StageZone::addSubzone(const std::shared_ptr<StageZone>& zone)
     {
         _subzones.push_back(zone);
@@ -63,11 +72,14 @@ namespace prop3
     {
         _bounds = UNBOUNDED;
         _props.clear();
+        _lights.clear();
         _subzones.clear();
     }
 
     void StageZone::transform(const glm::dmat4& mat)
     {
+        // TODO wbussiere 2015-12-4 : Handle lights
+
         if(_bounds != UNBOUNDED)
             Surface::transform(_bounds, mat);
 
@@ -82,6 +94,8 @@ namespace prop3
 
     void StageZone::translate(const glm::dvec3& dis)
     {
+        // TODO wbussiere 2015-12-4 : Handle lights
+
         if(_bounds != UNBOUNDED)
             Surface::translate(_bounds, dis);
 
@@ -96,6 +110,8 @@ namespace prop3
 
     void StageZone::rotate(double angle, const glm::dvec3& axis)
     {
+        // TODO wbussiere 2015-12-4 : Handle lights
+
         if(_bounds != UNBOUNDED)
             Surface::rotate(_bounds, angle, axis);
 
@@ -110,6 +126,8 @@ namespace prop3
 
     void StageZone::scale(double coeff)
     {
+        // TODO wbussiere 2015-12-4 : Handle lights
+
         if(_bounds != UNBOUNDED)
             Surface::scale(_bounds, coeff);
 

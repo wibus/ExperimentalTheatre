@@ -68,26 +68,28 @@ namespace prop3
         // Ray's shorthands
         const glm::dvec3& orig = ray.origin;
 
+        double scatt = scattering(orig);
         glm::dvec4 scatterSample(color::white, 1.0);
-        double specularity = 1.0 - scattering(orig);
         glm::dvec3 scatterPoint = ray.origin + ray.direction * ray.limit;
 
-        if(specularity <= 0.0)
+        if(scatt >= 1.0)
         {
             glm::dvec3 direction = glm::sphericalRand(1.0);
 
             raycasts.push_back(Raycast(
-                    Raycast::BACKDROP_DISTANCE,
+                    Raycast::BACKDROP_LIMIT,
+                    Raycast::INITIAL_DISTANCE,
                     scatterSample,
                     scatterPoint,
                     direction));
         }
-        else if(specularity >= 1.0)
+        else if(scatt <= 0.0)
         {
             const glm::dvec3& direction = ray.direction;
 
             raycasts.push_back(Raycast(
-                    Raycast::BACKDROP_DISTANCE,
+                    Raycast::BACKDROP_LIMIT,
+                    Raycast::INITIAL_DISTANCE,
                     scatterSample,
                     scatterPoint,
                     direction));
@@ -95,11 +97,12 @@ namespace prop3
         else
         {
             glm::dvec3 diffuseDir = glm::sphericalRand(1.0);
-            glm::dvec3 direction = glm::mix(diffuseDir, ray.direction, specularity);
+            glm::dvec3 direction = glm::mix(ray.direction, diffuseDir, scatt);
             direction = glm::normalize(direction);
 
             raycasts.push_back(Raycast(
-                    Raycast::BACKDROP_DISTANCE,
+                    Raycast::BACKDROP_LIMIT,
+                    Raycast::INITIAL_DISTANCE,
                     scatterSample,
                     scatterPoint,
                     direction));

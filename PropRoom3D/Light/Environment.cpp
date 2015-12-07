@@ -2,7 +2,7 @@
 
 #include "Backdrop/Backdrop.h"
 #include "Prop/Material/Material.h"
-#include "Serial/Visitor.h"
+#include "Node/Visitor.h"
 
 
 namespace prop3

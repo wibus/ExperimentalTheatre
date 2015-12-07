@@ -21,11 +21,15 @@
 
 #include "Prop/Material/UniformStdMaterial.h"
 
+#include "Prop/Coating/EmissiveCoating.h"
 #include "Prop/Coating/UniformStdCoating.h"
 #include "Prop/Coating/TexturedStdCoating.h"
 
+#include "Light/LightBulb.h"
 #include "Light/Environment.h"
 #include "Light/Backdrop/ProceduralSun.h"
+#include "Light/Sampler/CircularSampler.h"
+#include "Light/Sampler/SphericalSampler.h"
 
 using namespace std;
 using namespace cellar;
@@ -53,6 +57,8 @@ namespace prop3
         QJsonObject docObj = jsonDoc.object();
 
         // Deserialize hardware (coatings, materials and surfaces)
+        deserializeSamplers(docObj);
+        deserializeLights(docObj);
         deserializeMaterials(docObj);
         deserializeCoatings(docObj);
         deserializeSurfaces(docObj);
@@ -62,9 +68,11 @@ namespace prop3
 
 
         //Clean-up structures
-        _surfaces.clear();
+        _samplers.clear();
+        _lights.clear();
         _materials.clear();
         _coatings.clear();
+        _surfaces.clear();
 
         return true;
     }
@@ -130,6 +138,71 @@ namespace prop3
             return cellar::ESamplerWrapper::REPEAT;
     }
 
+    void StageSetJsonReader::deserializeSamplers(const QJsonObject& docObj)
+    {
+        for(QJsonValueRef ref : docObj[DOCUMENT_SAMPLER_ARRAY].toArray())
+        {
+            std::shared_ptr<Sampler> node;
+            QJsonObject obj = ref.toObject();
+            QString type = obj[SAMPLER_TYPE].toString();
+
+            if(type == SAMPLER_TYPE_CIRCULAR)
+            {
+                CircularSampler* samp = new CircularSampler(
+                    obj[SAMPLER_TWO_SIDED].toBool(),
+                    dvec3FromJson(obj[SAMPLER_CENTER]),
+                    dvec3FromJson(obj[SAMPLER_NORMAL]),
+                    obj[SAMPLER_RADIUS].toDouble());
+                node.reset(samp);
+            }
+            else if(type == SAMPLER_TYPE_SPHERICAL)
+            {
+                SphericalSampler* samp = new SphericalSampler(
+                    dvec3FromJson(obj[SAMPLER_CENTER]),
+                    obj[SAMPLER_RADIUS].toDouble());
+                node.reset(samp);
+            }
+            else
+            {
+                getLog().postMessage(new Message('E', false,
+                    "Unknown sampler type: " + type.toStdString(), "StageSetJsonReader"));
+            }
+
+            if(node.get() != nullptr)
+            {
+                _samplers.push_back(node);
+            }
+        }
+    }
+
+    void StageSetJsonReader::deserializeLights(const QJsonObject& docObj)
+    {
+        for(QJsonValueRef ref : docObj[DOCUMENT_LIGHTS_ARRAY].toArray())
+        {
+            std::shared_ptr<Light> node;
+            QJsonObject obj = ref.toObject();
+            QString type = obj[LIGHT_TYPE].toString();
+
+            if(type == LIGHT_TYPE_BULB)
+            {
+                LightBulb* light = new LightBulb();
+                light->setRadiantFlux(dvec3FromJson(obj[LIGHT_RADIANT_FLUX]));
+                light->setSampler(_samplers[obj[LIGHT_AREA_SAMPLER].toInt()]);
+                node.reset(light);
+            }
+            else
+            {
+                getLog().postMessage(new Message('E', false,
+                    "Unknown light type: " + type.toStdString(), "StageSetJsonReader"));
+            }
+
+            if(node.get() != nullptr)
+            {
+                _lights.push_back(node);
+            }
+        }
+    }
+
     void StageSetJsonReader::deserializeMaterials(const QJsonObject& docObj)
     {
         for(QJsonValueRef ref : docObj[DOCUMENT_MATERIAL_ARRAY].toArray())
@@ -169,7 +242,13 @@ namespace prop3
             QJsonObject obj = ref.toObject();
             QString type = obj[COATING_TYPE].toString();
 
-            if(type == COATING_TYPE_UNIFORMSTD)
+            if(type == COATING_TYPE_EMISSIVE)
+            {
+                EmissiveCoating* coat = new EmissiveCoating(color::black);
+                coat->setEmittedRadiance(dvec3FromJson(obj[COATING_EMITTED_RADIANCE]) );
+                node.reset(coat);
+            }
+            else if(type == COATING_TYPE_UNIFORMSTD)
             {
                 UniformStdCoating* coat = new UniformStdCoating();
                 coat->setRoughness( obj[COATING_ROUGHNESS].toDouble() );
@@ -445,6 +524,14 @@ namespace prop3
             {
                 auto prop = deserializeProp(propRef, team);
                 node.addProp(prop);
+            }
+        }
+
+        if(obj.contains(ZONE_LIGHTS))
+        {
+            for(QJsonValueRef propRef : obj[ZONE_LIGHTS].toArray())
+            {
+                node.addLight(_lights[propRef.toInt()]);
             }
         }
 
