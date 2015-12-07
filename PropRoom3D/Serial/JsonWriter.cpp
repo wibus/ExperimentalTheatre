@@ -219,6 +219,7 @@ namespace prop3
         {
             QJsonObject obj;
             obj[LIGHT_TYPE]                 = LIGHT_TYPE_BULB;
+            obj[LIGHT_IS_ON]                = node.isOn();
             obj[LIGHT_RADIANT_FLUX]         = toJson(node.radiantFlux());
             obj[LIGHT_AREA_SAMPLER]         = samplerIdMap[node.sampler().get()];
             obj[LIGHT_COATING]              = coatingIdMap[node.coating().get()];

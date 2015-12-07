@@ -39,8 +39,7 @@ namespace prop3
         const Material& leavedMaterial,
         const Material& enteredMaterial) const
     {
-        assert(false);
-        return glm::dvec4(0);
+        return glm::dvec4(0.0, 0.0, 0.0, 1.0);
     }
 
     glm::dvec3 EmissiveCoating::albedo(

@@ -27,6 +27,7 @@ namespace prop3
     class Material;
     class Coating;
     class Surface;
+    class Light;
     class Prop;
 
     class AbstractTeam;
@@ -87,10 +88,10 @@ namespace prop3
         //        const Material& material,
         //        const Raycast& outRay);
 
-        //virtual glm::dvec3 gatherReflectedLight(
-        //        const Coating& coating,
-        //        const Material& material,
-        //        const RayHitReport& hitReport);
+        virtual glm::dvec4 gatherReflectedLight(
+                const Coating& coating,
+                const Material& material,
+                const RayHitReport& hitReport);
 
         //virtual void gatherLightHitsToward(
         //        std::vector<Raycast>& outRaycasts,
@@ -149,8 +150,9 @@ namespace prop3
         std::shared_ptr<Material> _envMaterial;
         std::shared_ptr<StageSet> _stageSet;
 
-        std::vector<RayHitReport> _lightHitReports;
+        //std::vector<RayHitReport> _lightHitReports;
         std::vector<SearchZone> _searchZones;
+        std::vector<std::shared_ptr<Light>> _lightBulbs;
         std::vector<std::shared_ptr<Surface>> _searchSurfaces;
 
         // Memory pools

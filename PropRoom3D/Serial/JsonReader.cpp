@@ -186,6 +186,7 @@ namespace prop3
             if(type == LIGHT_TYPE_BULB)
             {
                 LightBulb* light = new LightBulb();
+                light->setIsOn(obj[LIGHT_IS_ON].toBool());
                 light->setRadiantFlux(dvec3FromJson(obj[LIGHT_RADIANT_FLUX]));
                 light->setSampler(_samplers[obj[LIGHT_AREA_SAMPLER].toInt()]);
                 node.reset(light);

@@ -32,6 +32,7 @@ namespace prop3
     const QString LIGHT_RADIANT_FLUX                = "Radiant Flux";
     const QString LIGHT_AREA_SAMPLER                = "Area Sampler";
     const QString LIGHT_COATING                     = "Coating";
+    const QString LIGHT_IS_ON                       = "Is On";
 
     // Area Samplers
     const QString SAMPLER_TYPE                      = "Type";

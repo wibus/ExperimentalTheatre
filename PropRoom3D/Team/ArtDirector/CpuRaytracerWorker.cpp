@@ -13,6 +13,7 @@
 #include "Ray/RayHitList.h"
 #include "Ray/RayHitReport.h"
 
+#include "Light/Light.h"
 #include "Light/Environment.h"
 #include "Light/Backdrop/Backdrop.h"
 
@@ -479,11 +480,11 @@ namespace prop3
             double matPathLen = currMat->lightFreePathLength(ray);
             ray.limit = glm::min(matPathLen, ray.limit);
 
-            glm::dvec3 matAtt = currMat->lightAttenuation(ray);
-            glm::dvec4 currSamp = ray.sample * glm::dvec4(matAtt, 1.0);
-
             double currDist = ray.distance + ray.limit;
             double distProb = 1.0 / (currDist * currDist);
+
+            glm::dvec3 matAtt = currMat->lightAttenuation(ray);
+            glm::dvec4 currSamp = ray.sample * glm::dvec4(matAtt, 1.0);
 
             if(ray.limit != Raycast::BACKDROP_LIMIT)
             {
@@ -512,6 +513,11 @@ namespace prop3
                     const Coating* coating = reportMin.coating;
                     const Material* nextMat = reportMin.nextMaterial;
 
+                    /*
+                    double normalProb = -glm::dot(ray.direction, reportMin.normal);
+                    currSamp *= normalProb;
+                    */
+
                     // Inderect lighting
                     sampleAccum += currSamp * distProb *
                         coating->indirectBrdf(
@@ -519,37 +525,34 @@ namespace prop3
                             reportMin,
                             *currMat,
                             *nextMat);
-    /*
+
                     // Direct lighting
-                    toEyeColorSum += gatherReflectedLight(
+                    sampleAccum += gatherReflectedLight(
                         *coating, *nextMat, reportMin);
-                        * */
+
                 }
 
-                size_t childCount = _tempChildRayArray.size();
-                for(size_t i=0; i < childCount; ++i)
+                if(bounceCount < _maxScreenBounceCount)
                 {
-                    Raycast& childRay = _tempChildRayArray[i];
-                    childRay.distance = currDist;
-                    childRay.sample *= currSamp;
+                    size_t childCount = _tempChildRayArray.size();
+                    for(size_t i=0; i < childCount; ++i)
+                    {
+                        Raycast& childRay = _tempChildRayArray[i];
+                        childRay.distance = currDist;
+                        childRay.sample *= currSamp;
 
-                    double r = childRay.sample.r;
-                    double g = childRay.sample.g;
-                    double b = childRay.sample.b;
-                    double a = childRay.sample.a;
-                    double nextIntensity = glm::max(glm::max(r, g), b) / a;
-                    if(nextIntensity > _screenRayIntensityThreshold &&
-                       bounceCount < _maxScreenBounceCount)
-                    {
-                        _rayBounceArray.push_back(childRay);
-                    }
-                    else
-                    {
-                        /*
-                        sampleAccum += glm::dvec4(r, g, b,
-                            a * (bounceCount/(bounceCount+1.0)
-                            / (currDist * currDist)));
-                        */
+                        double a = childRay.sample.a;
+                        if(a <= 0.0)
+                            continue;
+
+                        double r = childRay.sample.r;
+                        double g = childRay.sample.g;
+                        double b = childRay.sample.b;
+                        double nextIntensity = glm::max(glm::max(r, g), b) / a;
+                        if(nextIntensity > _screenRayIntensityThreshold)
+                        {
+                            _rayBounceArray.push_back(childRay);
+                        }
                     }
                 }
             }
@@ -621,14 +624,15 @@ namespace prop3
 
         return colorSum;
     }
-
-    glm::dvec3 CpuRaytracerWorker::gatherReflectedLight(
+*/
+    glm::dvec4 CpuRaytracerWorker::gatherReflectedLight(
             const Coating& coating,
             const Material& material,
             const RayHitReport& hitReport)
     {
-        glm::dvec3 colorSum;
+        glm::dvec4 sampleSum;
 
+        double baseDist = hitReport.incidentRay.distance;
         glm::dvec3 outDirirection = -hitReport.incidentRay.direction;
 
         std::vector<Raycast> lightCasts =
@@ -643,12 +647,12 @@ namespace prop3
             const Coating* dummyCoat = nullptr;
             const Material* dummyMat = nullptr;
             const glm::dvec3 dummyVec = glm::dvec3();
-            RayHitReport lightReport(Raycast::BACKDROP_DISTANCE,
+            RayHitReport lightReport(Raycast::BACKDROP_LIMIT,
                                      lightRay, dummyVec, dummyVec, dummyVec,
                                      dummyCoat, dummyMat, dummyMat);
 
             lightRay.limit = findNearestProp(lightRay, lightReport);
-            if(lightRay.limit != Raycast::BACKDROP_DISTANCE)
+            if(lightRay.limit != Raycast::BACKDROP_LIMIT)
             {
                 if(glm::length(lightReport.position - hitReport.position)
                      < RayHitReport::EPSILON_LENGTH)
@@ -656,13 +660,18 @@ namespace prop3
                     double lightPathLen = material.lightFreePathLength(lightRay);
                     if(lightPathLen >= lightRay.limit)
                     {
+                        double totalDist = baseDist + lightRay.limit;
+                        double distProb = 1.0 / (totalDist * totalDist);
+                        double prob = distProb;
+
                         glm::dvec3 lightAtt = material.lightAttenuation(lightRay);
+                        glm::dvec4 currSamp = glm::dvec4(lightAtt * prob, prob);
 
                         lightReport.compile();
                         const Material* lightCurrMat = lightReport.currMaterial;
                         const Material* lightNextMat = lightReport.nextMaterial;
 
-                        colorSum += lightAtt *
+                        sampleSum += currSamp *
                             coating.directBrdf(
                                 lightReport,
                                 outDirirection,
@@ -673,9 +682,9 @@ namespace prop3
             }
         }
 
-        return colorSum;
+        return sampleSum;
     }
-
+/*
     void CpuRaytracerWorker::gatherLightHitsToward(
             std::vector<Raycast>& outRaycasts,
             const glm::dvec3& targetPos)
@@ -736,6 +745,7 @@ namespace prop3
 
     void CpuRaytracerWorker::compileSearchStructures()
     {
+        _lightBulbs.clear();
         _searchZones.clear();
         _searchSurfaces.clear();
 
@@ -770,6 +780,15 @@ namespace prop3
                             zone->addProp(subz->props()[p]);
                     }
 
+                    // Bubble up lights
+                    size_t lightCount = subz->lights().size();
+                    for(size_t l=0; l < lightCount; ++l)
+                    {
+                        auto light = subz->lights()[l];
+                        if(light->isOn())
+                            zone->addLight(light);
+                    }
+
                     // Bubble up subzones
                     size_t subzCount = subz->subzones().size();
                     for(size_t z=0; z < subzCount; ++z)
@@ -785,6 +804,12 @@ namespace prop3
                     zoneStack.push_back(std::make_pair(subz, currId));
                     ++addedSubzones;
                 }
+            }
+
+            size_t lightCount = zone->lights().size();
+            for(size_t l=0; l < lightCount; ++l)
+            {
+                _lightBulbs.push_back(zone->lights()[l]);
             }
 
             size_t addedSurfaces = 0;

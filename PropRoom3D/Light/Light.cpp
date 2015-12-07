@@ -50,4 +50,11 @@ namespace prop3
     Light::~Light()
     {
     }
+
+    void Light::setIsOn(bool isOn)
+    {
+        _isOn = isOn;
+
+        stampCurrentUpdate();
+    }
 }

@@ -35,6 +35,7 @@ namespace prop3
     extern const QString LIGHT_RADIANT_FLUX;
     extern const QString LIGHT_AREA_SAMPLER;
     extern const QString LIGHT_COATING;
+    extern const QString LIGHT_IS_ON;
 
     // Area Samplers
     extern const QString SAMPLER_TYPE;

@@ -33,8 +33,21 @@ namespace prop3
 
         virtual std::vector<Raycast> fireOn(const glm::dvec3& pos, unsigned int count) const = 0;
 
+        virtual void setIsOn(bool isOn);
+
+        bool isOn() const;
+
     private:
+        bool _isOn;
     };
+
+
+
+    // IMPLEMENTATION //
+    inline bool Light::isOn() const
+    {
+        return _isOn;
+    }
 }
 
 #endif // PROPROOM3D_LIGHT_H
