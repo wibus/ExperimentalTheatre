@@ -28,11 +28,8 @@ namespace prop3
     class Material;
     class Coating;
 
-    class Light;
-    class Sampler;
-
-    class Environment;
     class Backdrop;
+    class LightBulb;
 
 
     class PROP3D_EXPORT StageSetJsonReader
@@ -52,7 +49,6 @@ namespace prop3
         static cellar::ESamplerWrapper wrapperFromJson(const QJsonValueRef& ref);
 
     private:
-        void deserializeSamplers(const QJsonObject& docObj);
         void deserializeLights(const QJsonObject& docObj);
         void deserializeMaterials(const QJsonObject& docObj);
         void deserializeCoatings(const QJsonObject& docObj);
@@ -61,7 +57,6 @@ namespace prop3
         void deserializeStageSet(const QJsonValueRef& ref, AbstractTeam& team);
         std::shared_ptr<StageZone> deserializeZone(const QJsonValueRef& ref, AbstractTeam& team);
         std::shared_ptr<Prop> deserializeProp(const QJsonValueRef& ref, AbstractTeam& team);
-        std::shared_ptr<Environment> deserializeEnvironment(const QJsonValueRef& ref, AbstractTeam& team);
         std::shared_ptr<Backdrop> deserializeBackdrop(const QJsonValueRef& ref, AbstractTeam& team);
 
         std::shared_ptr<Surface> subSurfTree(
@@ -75,8 +70,7 @@ namespace prop3
                 AbstractTeam& team);
 
 
-        std::vector<std::shared_ptr<Sampler>>   _samplers;
-        std::vector<std::shared_ptr<Light>>     _lights;
+        std::vector<std::shared_ptr<LightBulb>> _lights;
         std::vector<std::shared_ptr<Material>>  _materials;
         std::vector<std::shared_ptr<Coating>>   _coatings;
         std::vector<std::shared_ptr<Surface>>   _surfaces;

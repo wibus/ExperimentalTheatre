@@ -9,7 +9,7 @@
 namespace prop3
 {
     class Prop;
-    class Light;
+    class LightBulb;
     class Surface;
 
 
@@ -35,8 +35,8 @@ namespace prop3
         virtual void addProp(const std::shared_ptr<Prop>& prop);
 
         // Lights
-        std::vector<std::shared_ptr<Light>> lights() const;
-        virtual void addLight(const std::shared_ptr<Light>& light);
+        std::vector<std::shared_ptr<LightBulb>> lights() const;
+        virtual void addLight(const std::shared_ptr<LightBulb>& light);
 
         // Sub-zones
         std::vector<std::shared_ptr<StageZone>> subzones() const;
@@ -59,7 +59,7 @@ namespace prop3
     private:
         std::shared_ptr<Surface> _bounds;
         std::vector<std::shared_ptr<Prop>> _props;
-        std::vector<std::shared_ptr<Light>> _lights;
+        std::vector<std::shared_ptr<LightBulb>> _lights;
         std::vector<std::shared_ptr<StageZone>> _subzones;
     };
 
@@ -76,7 +76,7 @@ namespace prop3
         return _props;
     }
 
-    inline std::vector<std::shared_ptr<Light>> StageZone::lights() const
+    inline std::vector<std::shared_ptr<LightBulb>> StageZone::lights() const
     {
         return _lights;
     }

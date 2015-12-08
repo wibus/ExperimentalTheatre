@@ -2,7 +2,7 @@
 
 #include "Prop/Prop.h"
 #include "Prop/Surface/Surface.h"
-#include "Light/Light.h"
+#include "Light/LightBulb/LightBulb.h"
 #include "Node/Visitor.h"
 
 
@@ -54,7 +54,7 @@ namespace prop3
         stampCurrentUpdate();
     }
 
-    void StageZone::addLight(const std::shared_ptr<Light>& light)
+    void StageZone::addLight(const std::shared_ptr<LightBulb>& light)
     {
         _lights.push_back(light);
 
@@ -74,17 +74,20 @@ namespace prop3
         _props.clear();
         _lights.clear();
         _subzones.clear();
+
+        stampCurrentUpdate();
     }
 
     void StageZone::transform(const glm::dmat4& mat)
     {
-        // TODO wbussiere 2015-12-4 : Handle lights
-
         if(_bounds != UNBOUNDED)
             Surface::transform(_bounds, mat);
 
         for(const auto& prop : _props)
             prop->transform(mat);
+
+        for(const auto& light : _lights)
+            light->transform(mat);
 
         for(const auto& zone : _subzones)
             zone->transform(mat);
@@ -94,13 +97,14 @@ namespace prop3
 
     void StageZone::translate(const glm::dvec3& dis)
     {
-        // TODO wbussiere 2015-12-4 : Handle lights
-
         if(_bounds != UNBOUNDED)
             Surface::translate(_bounds, dis);
 
         for(const auto& prop : _props)
             prop->translate(dis);
+
+        for(const auto& light : _lights)
+            light->translate(dis);
 
         for(const auto& zone : _subzones)
             zone->translate(dis);
@@ -110,13 +114,14 @@ namespace prop3
 
     void StageZone::rotate(double angle, const glm::dvec3& axis)
     {
-        // TODO wbussiere 2015-12-4 : Handle lights
-
         if(_bounds != UNBOUNDED)
             Surface::rotate(_bounds, angle, axis);
 
         for(const auto& prop : _props)
             prop->rotate(angle, axis);
+
+        for(const auto& light : _lights)
+            light->rotate(angle, axis);
 
         for(const auto& zone : _subzones)
             zone->rotate(angle, axis);
@@ -126,13 +131,14 @@ namespace prop3
 
     void StageZone::scale(double coeff)
     {
-        // TODO wbussiere 2015-12-4 : Handle lights
-
         if(_bounds != UNBOUNDED)
             Surface::scale(_bounds, coeff);
 
         for(const auto& prop : _props)
             prop->scale(coeff);
+
+        for(const auto& light : _lights)
+            light->scale(coeff);
 
         for(const auto& zone : _subzones)
             zone->scale(coeff);

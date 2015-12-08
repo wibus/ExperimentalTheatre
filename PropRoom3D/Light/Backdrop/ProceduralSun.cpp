@@ -3,11 +3,11 @@
 #include <GLM/gtc/random.hpp>
 #include <GLM/gtc/constants.hpp>
 
+#include "Light/LightUtils.h"
 #include "Prop/Material/Material.h"
 #include "Ray/Raycast.h"
 #include "Ray/RayHitList.h"
 #include "Node/Visitor.h"
-#include "Light/Light.h"
 
 
 namespace prop3
@@ -28,8 +28,7 @@ namespace prop3
             ProceduralSun::RADIATION_PLANE_DISTANCE *
             ProceduralSun::SUN_SIN;
 
-    ProceduralSun::ProceduralSun(bool isDirectlyVisible) :
-        Backdrop(isDirectlyVisible),
+    ProceduralSun::ProceduralSun() :
         _sunColor(glm::dvec3(1.00, 0.75, 0.62) * 1e5),
         _skyColor(glm::dvec3(0.25, 0.60, 1.00) * 2.0),
         _skylineColor(glm::dvec3(1.00, 1.00, 1.00) * 2.0),

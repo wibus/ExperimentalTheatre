@@ -24,10 +24,10 @@ namespace prop3
     class RayHitReport;
     class StageSet;
     class Backdrop;
+    class LightBulb;
     class Material;
     class Coating;
     class Surface;
-    class Light;
     class Prop;
 
     class AbstractTeam;
@@ -100,7 +100,7 @@ namespace prop3
 
         virtual void compileSearchStructures();
 
-        virtual double findNearestProp(
+        virtual double findNearestIntersection(
                 const Raycast& raycast,
                 RayHitReport& reportMin);
 
@@ -147,13 +147,13 @@ namespace prop3
         std::string _stageSetStream;
         std::shared_ptr<AbstractTeam> _team;
         std::shared_ptr<Backdrop> _backdrop;
-        std::shared_ptr<Material> _envMaterial;
+        std::shared_ptr<Material> _ambMaterial;
         std::shared_ptr<StageSet> _stageSet;
 
         //std::vector<RayHitReport> _lightHitReports;
         std::vector<SearchZone> _searchZones;
-        std::vector<std::shared_ptr<Light>> _lightBulbs;
-        std::vector<std::shared_ptr<Surface>> _searchSurfaces;
+        std::vector<std::shared_ptr<const LightBulb>> _searchLights;
+        std::vector<std::shared_ptr<const Surface>> _searchSurfaces;
 
         // Memory pools
         RayHitList _rayHitList;

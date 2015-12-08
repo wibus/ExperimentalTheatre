@@ -27,13 +27,10 @@
 #include "Prop/Coating/UniformStdCoating.h"
 #include "Prop/Coating/TexturedStdCoating.h"
 
-#include "Light/LightBulb.h"
-
-#include "Light/Sampler/CircularSampler.h"
-#include "Light/Sampler/SphericalSampler.h"
-
-#include "Light/Environment.h"
 #include "Light/Backdrop/ProceduralSun.h"
+#include "Light/LightBulb/CircularLight.h"
+#include "Light/LightBulb/SphericalLight.h"
+
 
 using namespace std;
 using namespace cellar;
@@ -67,7 +64,6 @@ namespace prop3
 
         // Write document
         QJsonObject docObj;
-        docObj[DOCUMENT_SAMPLER_ARRAY]  = hardwareBuilder.samplersArray;
         docObj[DOCUMENT_LIGHTS_ARRAY]   = hardwareBuilder.lightsArray;
         docObj[DOCUMENT_MATERIAL_ARRAY] = hardwareBuilder.materialsArray;
         docObj[DOCUMENT_COATING_ARRAY]  = hardwareBuilder.coatingsArray;
@@ -151,12 +147,7 @@ namespace prop3
         }
     }
 
-    bool StageSetJsonWriter::HardwareBuilder::insertSampler(Sampler& node)
-    {
-        return samplerIdMap.insert(make_pair(&node, (int)samplerIdMap.size())).second;
-    }
-
-    bool StageSetJsonWriter::HardwareBuilder::insertLight(Light& node)
+    bool StageSetJsonWriter::HardwareBuilder::insertLight(LightBulb& node)
     {
         return lightIdMap.insert(make_pair(&node, (int)lightIdMap.size())).second;
     }
@@ -184,45 +175,34 @@ namespace prop3
     }
 
 
-    // Samplers
-    void StageSetJsonWriter::HardwareBuilder::visit(CircularSampler& node)
-    {
-        if(insertSampler(node))
-        {
-            QJsonObject obj;
-            obj[SAMPLER_TYPE]                 = SAMPLER_TYPE_CIRCULAR;
-            obj[SAMPLER_TWO_SIDED]            = node.isTowSided();
-            obj[SAMPLER_CENTER]               = toJson(node.center());
-            obj[SAMPLER_NORMAL]               = toJson(node.normal());
-            obj[SAMPLER_RADIUS]               = node.radius();
-            samplersArray.append(obj);
-        }
-    }
-
-    void StageSetJsonWriter::HardwareBuilder::visit(SphericalSampler& node)
-    {
-        if(insertSampler(node))
-        {
-            QJsonObject obj;
-            obj[SAMPLER_TYPE]                 = SAMPLER_TYPE_SPHERICAL;
-            obj[SAMPLER_CENTER]               = toJson(node.center());
-            obj[SAMPLER_RADIUS]               = node.radius();
-            samplersArray.append(obj);
-        }
-    }
-
-
     // Lights
-    void StageSetJsonWriter::HardwareBuilder::visit(LightBulb& node)
+    void StageSetJsonWriter::HardwareBuilder::visit(CircularLight& node)
     {
         if(insertLight(node))
         {
             QJsonObject obj;
-            obj[LIGHT_TYPE]                 = LIGHT_TYPE_BULB;
+            obj[LIGHT_TYPE]                 = LIGHT_TYPE_CIRCULAR;
             obj[LIGHT_IS_ON]                = node.isOn();
             obj[LIGHT_RADIANT_FLUX]         = toJson(node.radiantFlux());
-            obj[LIGHT_AREA_SAMPLER]         = samplerIdMap[node.sampler().get()];
-            obj[LIGHT_COATING]              = coatingIdMap[node.coating().get()];
+            obj[LIGHT_TRANSFORM]            = toJson(node.transform());
+            obj[LIGHT_CENTER]               = toJson(node.center());
+            obj[LIGHT_NORMAL]               = toJson(node.normal());
+            obj[LIGHT_RADIUS]               = node.radius();
+            lightsArray.append(obj);
+        }
+    }
+
+    void StageSetJsonWriter::HardwareBuilder::visit(SphericalLight& node)
+    {
+        if(insertLight(node))
+        {
+            QJsonObject obj;
+            obj[LIGHT_TYPE]                 = LIGHT_TYPE_SPHERICAL;
+            obj[LIGHT_IS_ON]                = node.isOn();
+            obj[LIGHT_RADIANT_FLUX]         = toJson(node.radiantFlux());
+            obj[LIGHT_TRANSFORM]            = toJson(node.transform());
+            obj[LIGHT_CENTER]               = toJson(node.center());
+            obj[LIGHT_RADIUS]               = node.radius();
             lightsArray.append(obj);
         }
     }
@@ -376,7 +356,7 @@ namespace prop3
     // Surface Tree Builder //
     //////////////////////////
     StageSetJsonWriter::StageSetBuilder::StageSetBuilder(
-            std::map<Light*,    int>& lightIdMap,
+            std::map<LightBulb*,int>& lightIdMap,
             std::map<Material*, int>& materialIdMap,
             std::map<Coating*,  int>& coatingIdMap,
             std::map<Surface*,  int>& surfaceIdMap) :
@@ -394,10 +374,16 @@ namespace prop3
         visit(static_cast<StageZone&>(node));
         QJsonObject obj = subTree.toObject();
 
-        if(node.environment().get() != nullptr)
+        if(node.ambientMaterial().get() != nullptr)
         {
-            node.environment()->accept(*this);
-            obj[STAGESET_ENVIRONMENT] = subTree;
+            node.ambientMaterial()->accept(*this);
+            obj[STAGESET_AMBIENT_MATERIAL] = subTree;
+        }
+
+        if(node.backdrop().get() != nullptr)
+        {
+            node.backdrop()->accept(*this);
+            obj[STAGESET_BACKDROP] = subTree;
         }
 
         subTree = obj;
@@ -475,27 +461,11 @@ namespace prop3
         subTree = obj;
     }
 
-    // Environment
-    void StageSetJsonWriter::StageSetBuilder::visit(Environment& node)
-    {
-        QJsonObject obj;
-        obj[ENVIRONMENT_AMBIENT_MATERIAL]  = _materialIdMap[node.ambientMaterial().get()];
-
-        if(node.backdrop().get() != nullptr)
-        {
-            node.backdrop()->accept(*this);
-            obj[ENVIRONMENT_BACKDROP] = subTree;
-        }
-
-        subTree = obj;
-    }
-
     // Backdrop
     void StageSetJsonWriter::StageSetBuilder::visit(ProceduralSun& node)
     {
         QJsonObject obj;
         obj[BACKDROP_TYPE]                 = BACKDROP_TYPE_PROCEDURALSUN;
-        obj[BACKDROP_IS_DIRECTLY_VISIBLE]  = node.isDirectlyVisible();
         obj[BACKDROP_SUN_COLOR]            = toJson(node.sunColor());
         obj[BACKDROP_SKY_COLOR]            = toJson(node.skyColor());
         obj[BACKDROP_SKYLINE_COLOR]        = toJson(node.skylineColor());

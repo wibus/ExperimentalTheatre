@@ -10,7 +10,8 @@
 
 namespace prop3
 {
-    class Environment;
+    class Backdrop;
+    class Material;
     class Visitor;
 
 
@@ -27,10 +28,16 @@ namespace prop3
         virtual std::vector<std::shared_ptr<Node>> children() const;
 
 
-        // Environment
-        std::shared_ptr<Environment> environment() const;
+        // Ambient Material
+        std::shared_ptr<Material> ambientMaterial() const;
 
-        virtual void setEnvironment(const std::shared_ptr<Environment>& env);
+        virtual void setAmbientMaterial(const std::shared_ptr<Material>& ambientMaterial);
+
+
+        // Backdrop
+        std::shared_ptr<Backdrop> backdrop() const;
+
+        virtual void setBackdrop(const std::shared_ptr<Backdrop>& backdrop);
 
 
         // Tree travelling
@@ -44,7 +51,8 @@ namespace prop3
 
 
     private:
-        std::shared_ptr<Environment> _environment;
+        std::shared_ptr<Material> _ambientMaterial;
+        std::shared_ptr<Backdrop> _backdrop;
         TimeStamp _lastTimeStamp;
         bool _stageSetChanged;
     };
@@ -52,9 +60,14 @@ namespace prop3
 
 
     // IMPLEMENTATION //
-    inline std::shared_ptr<Environment> StageSet::environment() const
+    inline std::shared_ptr<Material> StageSet::ambientMaterial() const
     {
-        return _environment;
+        return _ambientMaterial;
+    }
+
+    inline std::shared_ptr<Backdrop> StageSet::backdrop() const
+    {
+        return _backdrop;
     }
 
     inline bool StageSet::stageSetChanged() const

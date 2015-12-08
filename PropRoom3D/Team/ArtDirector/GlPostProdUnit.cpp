@@ -13,7 +13,7 @@
 
 #include <CellarWorkbench/GL/GlInputsOutputs.h>
 
-#include "Light/Light.h"
+#include "Light/LightUtils.h"
 
 
 namespace prop3

@@ -1,7 +1,6 @@
 #include "EmissiveCoating.h"
 
 #include "Node/Visitor.h"
-#include "Light/Sampler/Sampler.h"
 #include "Ray/RayHitReport.h"
 
 

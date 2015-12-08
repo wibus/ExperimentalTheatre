@@ -36,6 +36,8 @@ namespace prop3
     void Prop::clear()
     {
         _surfaces.clear();
+
+        stampCurrentUpdate();
     }
 
     void Prop::transform(const glm::dmat4& mat)

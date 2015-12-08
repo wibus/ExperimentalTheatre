@@ -3,7 +3,8 @@
 #include <algorithm>
 
 #include "Node/Visitor.h"
-#include "Light/Environment.h"
+#include "Prop/Material/Material.h"
+#include "Light/Backdrop/ProceduralSun.h"
 
 using namespace std;
 
@@ -12,7 +13,8 @@ namespace prop3
 {
     StageSet::StageSet() :
         StageZone("Stage set"),
-        _environment(),
+        _ambientMaterial(material::AIR),
+        _backdrop(new ProceduralSun()),
         _stageSetChanged(false),
         _lastTimeStamp()
     {
@@ -31,12 +33,21 @@ namespace prop3
     std::vector<std::shared_ptr<Node>> StageSet::children() const
     {
         std::vector<std::shared_ptr<Node>> c = StageZone::children();
-        c.push_back(_environment);
+        c.push_back(_ambientMaterial);
+        c.push_back(_backdrop);
         return c;
     }
-    void StageSet::setEnvironment(const std::shared_ptr<Environment>& env)
+
+    void StageSet::setAmbientMaterial(const std::shared_ptr<Material>& ambientMaterial)
     {
-        _environment = env;
+        _ambientMaterial = ambientMaterial;
+
+        stampCurrentUpdate();
+    }
+
+    void StageSet::setBackdrop(const std::shared_ptr<Backdrop>& backdrop)
+    {
+        _backdrop = backdrop;
 
         stampCurrentUpdate();
     }

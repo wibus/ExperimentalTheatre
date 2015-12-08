@@ -3,8 +3,7 @@
 
 namespace prop3
 {
-    Backdrop::Backdrop(bool isDirectlyVisible) :
-        _isDirectlyVisible(isDirectlyVisible)
+    Backdrop::Backdrop()
     {
 
     }
@@ -12,12 +11,5 @@ namespace prop3
     Backdrop::~Backdrop()
     {
 
-    }
-
-    void Backdrop::setIsDirectlyVisible(bool isDirectlyVisible)
-    {
-        _isDirectlyVisible = isDirectlyVisible;
-
-        stampCurrentUpdate();
     }
 }

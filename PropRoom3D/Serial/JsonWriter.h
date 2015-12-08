@@ -45,12 +45,9 @@ namespace prop3
         {
         public:
 
-            // Samplers
-            virtual void visit(CircularSampler& node) override;
-            virtual void visit(SphericalSampler& node) override;
-
             // Lights
-            virtual void visit(LightBulb& node) override;
+            virtual void visit(CircularLight& node) override;
+            virtual void visit(SphericalLight& node) override;
 
             // Materials
             virtual void visit(UniformStdMaterial& node) override;
@@ -69,21 +66,18 @@ namespace prop3
             virtual void visit(Sphere& node) override;
 
 
-            QJsonArray samplersArray;
             QJsonArray lightsArray;
             QJsonArray materialsArray;
             QJsonArray coatingsArray;
             QJsonArray surfacesArray;
 
-            std::map<Sampler*,  int> samplerIdMap;
-            std::map<Light*,    int> lightIdMap;
+            std::map<LightBulb*,int> lightIdMap;
             std::map<Material*, int> materialIdMap;
             std::map<Coating*,  int> coatingIdMap;
             std::map<Surface*,  int> surfaceIdMap;
 
         private:
-            bool insertSampler(Sampler& node);
-            bool insertLight(Light& node);
+            bool insertLight(LightBulb& node);
             bool insertMaterial(Material& node);
             bool insertCoating(Coating& node);
             bool insertSurface(Surface& node);
@@ -95,7 +89,7 @@ namespace prop3
         {
         public:
             StageSetBuilder(
-                std::map<Light*,    int>& lightIdMap,
+                std::map<LightBulb*,int>& lightIdMap,
                 std::map<Material*, int>& materialIdMap,
                 std::map<Coating*,  int>& coatingIdMap,
                 std::map<Surface*,  int>& surfaceIdMap);
@@ -108,9 +102,6 @@ namespace prop3
 
             // Props
             virtual void visit(Prop& node) override;
-
-            // Environment
-            virtual void visit(Environment& node) override;
 
             // Backdrop
             virtual void visit(ProceduralSun& node) override;
@@ -133,7 +124,7 @@ namespace prop3
         private:
             void setHandleNodeProperties(HandleNode& node, QJsonObject& obj);
 
-            std::map<Light*,    int>& _lightIdMap;
+            std::map<LightBulb*,int>& _lightIdMap;
             std::map<Surface*,  int>& _surfaceIdMap;
             std::map<Coating*,  int>& _coatingIdMap;
             std::map<Material*, int>& _materialIdMap;

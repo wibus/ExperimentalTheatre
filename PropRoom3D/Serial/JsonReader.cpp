@@ -25,11 +25,9 @@
 #include "Prop/Coating/UniformStdCoating.h"
 #include "Prop/Coating/TexturedStdCoating.h"
 
-#include "Light/LightBulb.h"
-#include "Light/Environment.h"
 #include "Light/Backdrop/ProceduralSun.h"
-#include "Light/Sampler/CircularSampler.h"
-#include "Light/Sampler/SphericalSampler.h"
+#include "Light/LightBulb/CircularLight.h"
+#include "Light/LightBulb/SphericalLight.h"
 
 using namespace std;
 using namespace cellar;
@@ -57,7 +55,6 @@ namespace prop3
         QJsonObject docObj = jsonDoc.object();
 
         // Deserialize hardware (coatings, materials and surfaces)
-        deserializeSamplers(docObj);
         deserializeLights(docObj);
         deserializeMaterials(docObj);
         deserializeCoatings(docObj);
@@ -68,7 +65,6 @@ namespace prop3
 
 
         //Clean-up structures
-        _samplers.clear();
         _lights.clear();
         _materials.clear();
         _coatings.clear();
@@ -138,57 +134,27 @@ namespace prop3
             return cellar::ESamplerWrapper::REPEAT;
     }
 
-    void StageSetJsonReader::deserializeSamplers(const QJsonObject& docObj)
-    {
-        for(QJsonValueRef ref : docObj[DOCUMENT_SAMPLER_ARRAY].toArray())
-        {
-            std::shared_ptr<Sampler> node;
-            QJsonObject obj = ref.toObject();
-            QString type = obj[SAMPLER_TYPE].toString();
-
-            if(type == SAMPLER_TYPE_CIRCULAR)
-            {
-                CircularSampler* samp = new CircularSampler(
-                    obj[SAMPLER_TWO_SIDED].toBool(),
-                    dvec3FromJson(obj[SAMPLER_CENTER]),
-                    dvec3FromJson(obj[SAMPLER_NORMAL]),
-                    obj[SAMPLER_RADIUS].toDouble());
-                node.reset(samp);
-            }
-            else if(type == SAMPLER_TYPE_SPHERICAL)
-            {
-                SphericalSampler* samp = new SphericalSampler(
-                    dvec3FromJson(obj[SAMPLER_CENTER]),
-                    obj[SAMPLER_RADIUS].toDouble());
-                node.reset(samp);
-            }
-            else
-            {
-                getLog().postMessage(new Message('E', false,
-                    "Unknown sampler type: " + type.toStdString(), "StageSetJsonReader"));
-            }
-
-            if(node.get() != nullptr)
-            {
-                _samplers.push_back(node);
-            }
-        }
-    }
-
     void StageSetJsonReader::deserializeLights(const QJsonObject& docObj)
     {
         for(QJsonValueRef ref : docObj[DOCUMENT_LIGHTS_ARRAY].toArray())
         {
-            std::shared_ptr<Light> node;
+            std::shared_ptr<LightBulb> node;
             QJsonObject obj = ref.toObject();
             QString type = obj[LIGHT_TYPE].toString();
 
-            if(type == LIGHT_TYPE_BULB)
+            if(type == LIGHT_TYPE_CIRCULAR)
             {
-                LightBulb* light = new LightBulb();
-                light->setIsOn(obj[LIGHT_IS_ON].toBool());
-                light->setRadiantFlux(dvec3FromJson(obj[LIGHT_RADIANT_FLUX]));
-                light->setSampler(_samplers[obj[LIGHT_AREA_SAMPLER].toInt()]);
+                CircularLight* light = new CircularLight("",
+                    dvec3FromJson(obj[LIGHT_CENTER]),
+                    dvec3FromJson(obj[LIGHT_NORMAL]),
+                    obj[LIGHT_RADIUS].toDouble());
+                node.reset(light);
+            }
+            else if(type == LIGHT_TYPE_SPHERICAL)
+            {
+                SphericalLight* light = new SphericalLight("",
+                    dvec3FromJson(obj[LIGHT_CENTER]),
+                    obj[LIGHT_RADIUS].toDouble());
                 node.reset(light);
             }
             else
@@ -199,6 +165,11 @@ namespace prop3
 
             if(node.get() != nullptr)
             {
+                setHandleNodeProperties(*node, obj);
+                node->setIsOn(obj[LIGHT_IS_ON].toBool());
+                node->setRadiantFlux(dvec3FromJson(obj[LIGHT_RADIANT_FLUX]));
+                node->setTransform(dmat4FromJson(obj[LIGHT_TRANSFORM]));
+
                 _lights.push_back(node);
             }
         }
@@ -352,10 +323,11 @@ namespace prop3
         std::shared_ptr<StageSet> node = team.stageSet();
         setStageZoneProperties(*node, obj, team);
 
-        if(obj.contains(STAGESET_ENVIRONMENT))
-            node->setEnvironment(deserializeEnvironment(obj[STAGESET_ENVIRONMENT], team));
-        else
-            node->setEnvironment( make_shared<Environment>() );
+        if(obj.contains(STAGESET_AMBIENT_MATERIAL))
+            node->setAmbientMaterial(_materials[obj[STAGESET_AMBIENT_MATERIAL].toInt()]);
+
+        if(obj.contains(STAGESET_BACKDROP))
+            node->setBackdrop(deserializeBackdrop(obj[STAGESET_BACKDROP], team));
     }
 
     std::shared_ptr<StageZone> StageSetJsonReader::deserializeZone(const QJsonValueRef& ref, AbstractTeam& team)
@@ -386,22 +358,6 @@ namespace prop3
         return node;
     }
 
-    std::shared_ptr<Environment> StageSetJsonReader::deserializeEnvironment(const QJsonValueRef& ref, AbstractTeam& team)
-    {
-        QJsonObject obj = ref.toObject();
-        std::shared_ptr<Environment> node(new Environment());
-
-        if(obj.contains(ENVIRONMENT_BACKDROP))
-            node->setBackdrop(deserializeBackdrop(obj[ENVIRONMENT_BACKDROP], team));
-
-        if(obj.contains(ENVIRONMENT_AMBIENT_MATERIAL))
-            node->setAmbientMaterial(_materials[obj[ENVIRONMENT_AMBIENT_MATERIAL].toInt()]);
-        else
-            node->setAmbientMaterial(material::AIR);
-
-        return node;
-    }
-
     std::shared_ptr<Backdrop> StageSetJsonReader::deserializeBackdrop(const QJsonValueRef& ref, AbstractTeam& team)
     {
         QJsonObject obj = ref.toObject();
@@ -423,12 +379,6 @@ namespace prop3
         {
             getLog().postMessage(new Message('E', false,
                 "Unknown backdrop type: " + type.toStdString(), "StageSetJsonReader"));
-        }
-
-        // Abstract properties
-        if(node.get() != nullptr)
-        {
-            node->setIsDirectlyVisible(obj[BACKDROP_IS_DIRECTLY_VISIBLE].toBool());
         }
 
         return node;

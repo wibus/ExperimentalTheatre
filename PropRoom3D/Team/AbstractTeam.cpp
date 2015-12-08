@@ -7,7 +7,6 @@
 #include <CellarWorkbench/Misc/Log.h>
 
 #include "Node/StageSet.h"
-#include "Light/Environment.h"
 #include "Serial/JsonWriter.h"
 #include "Serial/JsonReader.h"
 #include "ArtDirector/AbstractArtDirector.h"
@@ -35,9 +34,6 @@ namespace prop3
             _choreographer->setup(_stageSet);
         for(auto& artDir : _artDirectors)
             artDir->setup(_stageSet);
-
-        std::shared_ptr<Environment> env(new Environment());
-        _stageSet->setEnvironment(env);
     }
 
     void AbstractTeam::reset()

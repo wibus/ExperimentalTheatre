@@ -41,16 +41,9 @@ namespace prop3
     class TexturedStdCoating;
 
     // Lights
-    class Light;
     class LightBulb;
-
-    // Samplers
-    class Sampler;
-    class CircularSampler;
-    class SphericalSampler;
-
-    // Environments
-    class Environment;
+    class CircularLight;
+    class SphericalLight;
 
     // Backdrops
     class Backdrop;
@@ -97,15 +90,8 @@ namespace prop3
         virtual void visit(TexturedStdCoating& node);
 
         // Lights
-        virtual void visit(LightBulb& node);
-
-        // Samplers
-        virtual void visit(CircularSampler& node);
-        virtual void visit(SphericalSampler& node);
-
-
-        // Environments
-        virtual void visit(Environment& node);
+        virtual void visit(CircularLight& node);
+        virtual void visit(SphericalLight& node);
 
         // Backdrops
         virtual void visit(ProceduralSun& node);

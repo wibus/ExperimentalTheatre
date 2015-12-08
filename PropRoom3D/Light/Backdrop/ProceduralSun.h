@@ -12,7 +12,7 @@ namespace prop3
     class PROP3D_EXPORT ProceduralSun : public Backdrop
     {
     public:
-        ProceduralSun(bool isDirectlyVisible = true);
+        ProceduralSun();
 
 
         virtual void accept(Visitor& visitor) override;

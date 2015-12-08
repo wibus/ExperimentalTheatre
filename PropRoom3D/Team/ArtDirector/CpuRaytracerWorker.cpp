@@ -13,9 +13,8 @@
 #include "Ray/RayHitList.h"
 #include "Ray/RayHitReport.h"
 
-#include "Light/Light.h"
-#include "Light/Environment.h"
 #include "Light/Backdrop/Backdrop.h"
+#include "Light/LightBulb/LightBulb.h"
 
 #include "Node/StageSet.h"
 #include "Serial/JsonReader.h"
@@ -227,8 +226,8 @@ namespace prop3
             {
                 StageSetJsonReader reader;
                 reader.deserialize(*_team, _stageSetStream);
-                _envMaterial = _team->stageSet()->environment()->ambientMaterial();
-                _backdrop = _team->stageSet()->environment()->backdrop();
+                _ambMaterial = _team->stageSet()->ambientMaterial();
+                _backdrop = _team->stageSet()->backdrop();
                 _stageSet = _team->stageSet();
                 _stageSetStream.clear();
 
@@ -462,16 +461,16 @@ namespace prop3
             RayHitReport reportMin(Raycast::BACKDROP_LIMIT,
                                    ray, dummyVec, dummyVec, dummyVec,
                                    dummyCoat, dummyMat, dummyMat);
-            ray.limit = findNearestProp(ray, reportMin);
+            ray.limit = findNearestIntersection(ray, reportMin);
 
 
             if(reportMin.innerMat == Surface::ENVIRONMENT_MATERIAL.get() ||
                reportMin.innerMat == nullptr)
-                reportMin.innerMat = _envMaterial.get();
+                reportMin.innerMat = _ambMaterial.get();
 
             if(reportMin.outerMat == Surface::ENVIRONMENT_MATERIAL.get() ||
                reportMin.outerMat == nullptr)
-                reportMin.outerMat = _envMaterial.get();
+                reportMin.outerMat = _ambMaterial.get();
 
             reportMin.compile();
 
@@ -527,8 +526,10 @@ namespace prop3
                             *nextMat);
 
                     // Direct lighting
+                    /*
                     sampleAccum += gatherReflectedLight(
                         *coating, *nextMat, reportMin);
+                    */
 
                 }
 
@@ -558,15 +559,12 @@ namespace prop3
             }
             else if(_backdrop.get() != nullptr)
             {
-                bool directView = (fromEyeRay.sample == glm::dvec4(1.0));
-                if(!directView || _backdrop->isDirectlyVisible())
-                {
-                    sampleAccum += currSamp * _backdrop->raycast(ray);
-                }
+                sampleAccum += currSamp * _backdrop->raycast(ray);
             }
 
-            ++rayId;
-            if(rayId == rayBatchEnd)
+
+            // Check bounce group end
+            if(++rayId == rayBatchEnd)
             {
                 ++bounceCount;
                 rayBatchEnd = _rayBounceArray.size();
@@ -651,7 +649,7 @@ namespace prop3
                                      lightRay, dummyVec, dummyVec, dummyVec,
                                      dummyCoat, dummyMat, dummyMat);
 
-            lightRay.limit = findNearestProp(lightRay, lightReport);
+            lightRay.limit = findNearestIntersection(lightRay, lightReport);
             if(lightRay.limit != Raycast::BACKDROP_LIMIT)
             {
                 if(glm::length(lightReport.position - hitReport.position)
@@ -660,7 +658,7 @@ namespace prop3
                     double lightPathLen = material.lightFreePathLength(lightRay);
                     if(lightPathLen >= lightRay.limit)
                     {
-                        double totalDist = baseDist + lightRay.limit;
+                        double totalDist = baseDist + lightRay.distance + lightRay.limit;
                         double distProb = 1.0 / (totalDist * totalDist);
                         double prob = distProb;
 
@@ -736,16 +734,18 @@ namespace prop3
     struct SearchZone
     {
         size_t parent;
+        size_t endZone;
+        size_t begLight;
+        size_t endLight;
         size_t begSurf;
         size_t endSurf;
-        size_t endZone;
 
         std::shared_ptr<Surface> bounds;
     };
 
     void CpuRaytracerWorker::compileSearchStructures()
     {
-        _lightBulbs.clear();
+        _searchLights.clear();
         _searchZones.clear();
         _searchSurfaces.clear();
 
@@ -806,14 +806,19 @@ namespace prop3
                 }
             }
 
+
             size_t lightCount = zone->lights().size();
+            size_t startLightCount = _searchLights.size();
             for(size_t l=0; l < lightCount; ++l)
             {
-                _lightBulbs.push_back(zone->lights()[l]);
+                _searchLights.push_back(zone->lights()[l]);
             }
+            size_t endLightCount = _searchLights.size();
+            size_t addedLights = endLightCount - startLightCount;
 
-            size_t addedSurfaces = 0;
+
             size_t propCount = zone->props().size();
+            size_t startSurfCount = _searchSurfaces.size();
             for(size_t p=0; p < propCount; ++p)
             {
                 auto prop = zone->props()[p];
@@ -823,20 +828,24 @@ namespace prop3
                     for(size_t s=0; s < surfCount; ++s)
                     {
                         _searchSurfaces.push_back(prop->surfaces()[s]);
-                        ++addedSurfaces;
                     }
                 }
             }
+            size_t endSurfCount = _searchSurfaces.size();
+            size_t addedSurfaces = endSurfCount - startSurfCount;
 
-            if(addedSubzones == 0 && addedSurfaces == 0)
+
+            if(addedSubzones == 0 && addedLights == 0 && addedSurfaces == 0)
                 continue;
 
             SearchZone searchZone;
             searchZone.parent = parentId;
-            searchZone.bounds = zone->bounds();
+            searchZone.endZone = _searchZones.size() + 1;
+            searchZone.endLight = _searchLights.size();
+            searchZone.begLight = searchZone.endLight - addedLights;
             searchZone.endSurf = _searchSurfaces.size();
             searchZone.begSurf = searchZone.endSurf - addedSurfaces;
-            searchZone.endZone = _searchZones.size() + 1;
+            searchZone.bounds = zone->bounds();
             _searchZones.push_back(searchZone);
         }
 
@@ -848,24 +857,26 @@ namespace prop3
             {
                 SearchZone& parent = _searchZones[zone.parent];
                 parent.endZone = glm::max(parent.endZone, zone.endZone);
+                parent.endLight = glm::max(parent.endLight, zone.endLight);
                 parent.endSurf = glm::max(parent.endSurf, zone.endSurf);
             }
         }
     }
 
-    double CpuRaytracerWorker::findNearestProp(
+    double CpuRaytracerWorker::findNearestIntersection(
             const Raycast& raycast,
             RayHitReport& reportMin)
     {
         Raycast ray(raycast);
 
-        size_t z = 0;
+        size_t zId = 0;
         size_t zoneCount = _searchZones.size();
-        while(z < zoneCount)
+        while(zId < zoneCount)
         {
-            const SearchZone& zone = _searchZones[z];
+            const SearchZone& zone = _searchZones[zId];
 
-            if(zone.begSurf != zone.endSurf)
+            if(zone.begSurf != zone.endSurf ||
+               zone.begLight != zone.endLight)
             {
                 if(zone.bounds == StageZone::UNBOUNDED ||
                    zone.bounds->intersects(ray, _rayHitList))
@@ -889,16 +900,35 @@ namespace prop3
                         }
                     }
 
-                    ++z;
+                    for(size_t l = zone.begLight; l < zone.endLight; ++l)
+                    {
+                        _rayHitList.clear();
+
+                        _searchLights[l]->raycast(ray, _rayHitList);
+
+                        RayHitReport* node = _rayHitList.head;
+                        while(node != nullptr)
+                        {
+                            if(0.0 < node->distance && node->distance < ray.limit)
+                            {
+                                ray.limit = node->distance;
+                                reportMin = *node;
+                            }
+
+                            node = node->_next;
+                        }
+                    }
+
+                    ++zId;
                 }
                 else
                 {
-                    z = zone.endZone;
+                    zId = zone.endZone;
                 }
             }
             else
             {
-                ++z;
+                ++zId;
             }
         }
 

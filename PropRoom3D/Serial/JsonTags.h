@@ -10,18 +10,12 @@ namespace prop3
     extern const QString DOCUMENT_MATERIAL_ARRAY;
     extern const QString DOCUMENT_COATING_ARRAY;
     extern const QString DOCUMENT_SURFACE_ARRAY;
-    extern const QString DOCUMENT_SAMPLER_ARRAY;
     extern const QString DOCUMENT_LIGHTS_ARRAY;
     extern const QString DOCUMENT_STAGE_SET;
-
-    // Environments
-    extern const QString ENVIRONMENT_BACKDROP;
-    extern const QString ENVIRONMENT_AMBIENT_MATERIAL;
 
     // Backdrops
     extern const QString BACKDROP_TYPE;
     extern const QString BACKDROP_TYPE_PROCEDURALSUN;
-    extern const QString BACKDROP_IS_DIRECTLY_VISIBLE;
     extern const QString BACKDROP_SUN_COLOR;
     extern const QString BACKDROP_SKY_COLOR;
     extern const QString BACKDROP_SKYLINE_COLOR;
@@ -31,20 +25,14 @@ namespace prop3
 
     // Lights
     extern const QString LIGHT_TYPE;
-    extern const QString LIGHT_TYPE_BULB;
-    extern const QString LIGHT_RADIANT_FLUX;
-    extern const QString LIGHT_AREA_SAMPLER;
-    extern const QString LIGHT_COATING;
+    extern const QString LIGHT_TYPE_CIRCULAR;
+    extern const QString LIGHT_TYPE_SPHERICAL;
     extern const QString LIGHT_IS_ON;
-
-    // Area Samplers
-    extern const QString SAMPLER_TYPE;
-    extern const QString SAMPLER_TYPE_CIRCULAR;
-    extern const QString SAMPLER_TYPE_SPHERICAL;
-    extern const QString SAMPLER_TWO_SIDED;
-    extern const QString SAMPLER_CENTER;
-    extern const QString SAMPLER_NORMAL;
-    extern const QString SAMPLER_RADIUS;
+    extern const QString LIGHT_RADIANT_FLUX;
+    extern const QString LIGHT_TRANSFORM;
+    extern const QString LIGHT_CENTER;
+    extern const QString LIGHT_NORMAL;
+    extern const QString LIGHT_RADIUS;
 
 
     // Handle nodes
@@ -58,7 +46,8 @@ namespace prop3
     extern const QString ZONE_SUBZONES;
 
     // Stage set
-    extern const QString STAGESET_ENVIRONMENT;
+    extern const QString STAGESET_AMBIENT_MATERIAL;
+    extern const QString STAGESET_BACKDROP;
 
 
     // Props

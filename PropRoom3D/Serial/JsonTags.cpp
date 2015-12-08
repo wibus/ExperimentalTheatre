@@ -11,14 +11,9 @@ namespace prop3
     const QString DOCUMENT_LIGHTS_ARRAY          = "Lights";
     const QString DOCUMENT_STAGE_SET             = "Stage set";
 
-    // Environments
-    const QString ENVIRONMENT_BACKDROP              = "Backdrop";
-    const QString ENVIRONMENT_AMBIENT_MATERIAL      = "Ambient Material";
-
     // Backdrops
     const QString BACKDROP_TYPE                     = "Type";
     const QString BACKDROP_TYPE_PROCEDURALSUN       = "ProceduralSun";
-    const QString BACKDROP_IS_DIRECTLY_VISIBLE      = "Is Directly Visible";
     const QString BACKDROP_SUN_COLOR                = "Sun Color";
     const QString BACKDROP_SKY_COLOR                = "Sky Color";
     const QString BACKDROP_SKYLINE_COLOR            = "Skyline Color";
@@ -28,20 +23,14 @@ namespace prop3
 
     // Lights
     const QString LIGHT_TYPE                        = "Type";
-    const QString LIGHT_TYPE_BULB                   = "Light Bulb";
-    const QString LIGHT_RADIANT_FLUX                = "Radiant Flux";
-    const QString LIGHT_AREA_SAMPLER                = "Area Sampler";
-    const QString LIGHT_COATING                     = "Coating";
+    const QString LIGHT_TYPE_CIRCULAR               = "Circular";
+    const QString LIGHT_TYPE_SPHERICAL              = "Spherical";
     const QString LIGHT_IS_ON                       = "Is On";
-
-    // Area Samplers
-    const QString SAMPLER_TYPE                      = "Type";
-    const QString SAMPLER_TYPE_CIRCULAR             = "Circular";
-    const QString SAMPLER_TYPE_SPHERICAL            = "Spherical";
-    const QString SAMPLER_TWO_SIDED                 = "Two Sided";
-    const QString SAMPLER_CENTER                    = "Center";
-    const QString SAMPLER_NORMAL                    = "Normal";
-    const QString SAMPLER_RADIUS                    = "Radius";
+    const QString LIGHT_RADIANT_FLUX                = "Radiant Flux";
+    const QString LIGHT_TRANSFORM                   = "Transform";
+    const QString LIGHT_CENTER                      = "Center";
+    const QString LIGHT_NORMAL                      = "Normal";
+    const QString LIGHT_RADIUS                      = "Radius";
 
     // Handle nodes
     const QString HANDLE_NAME                       = "Name";
@@ -54,7 +43,8 @@ namespace prop3
     const QString ZONE_SUBZONES                     = "Subzones";
 
     // Stage set
-    const QString STAGESET_ENVIRONMENT              = "Environment";
+    const QString STAGESET_BACKDROP                 = "Backdrop";
+    const QString STAGESET_AMBIENT_MATERIAL         = "Ambient Material";
 
 
     // Props

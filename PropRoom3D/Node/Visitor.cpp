@@ -117,26 +117,14 @@ namespace prop3
 
     }
 
+
     // Lights
-    void Visitor::visit(LightBulb& node)
+    void Visitor::visit(CircularLight& node)
     {
 
     }
 
-    // Samplers
-    void Visitor::visit(CircularSampler& node)
-    {
-
-    }
-
-    void Visitor::visit(SphericalSampler& node)
-    {
-
-    }
-
-
-    // Environments
-    void Visitor::visit(Environment& node)
+    void Visitor::visit(SphericalLight& node)
     {
 
     }
