@@ -54,10 +54,8 @@ namespace prop3
 
 
     protected:
-        static const double BACKDROP_DISTANCE;
-
-        static const double SUN_COS_DIMENSION;
-        static const double SUN_SMOOTH_EDGE;
+        static const double SUN_COS_RADIUS;
+        static const double SUN_SURFACE_RATIO;
         static const glm::dvec3 SKY_UP;
 
         static const double SUN_SIN;

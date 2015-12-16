@@ -90,7 +90,6 @@ namespace prop3
 
         virtual glm::dvec4 gatherReflectedLight(
                 const Coating& coating,
-                const Material& material,
                 const RayHitReport& hitReport);
 
         //virtual void gatherLightHitsToward(
@@ -103,6 +102,9 @@ namespace prop3
         virtual double findNearestIntersection(
                 const Raycast& raycast,
                 RayHitReport& reportMin);
+
+        virtual bool intersectsScene(
+                const Raycast& raycast);
 
         virtual glm::dvec3 draft(const RayHitReport& report);
 
@@ -125,7 +127,6 @@ namespace prop3
         std::atomic<bool> _useDepthOfField;
 
         double _lightRayIntensityThreshold;
-        double _screenRayIntensityThreshold;
         unsigned int _lightDirectRayCount;
         unsigned int _lightFireRayCount;
         unsigned int _maxScreenBounceCount;

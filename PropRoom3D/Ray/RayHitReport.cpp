@@ -7,7 +7,7 @@ namespace prop3
     const glm::dvec3 RayHitReport::NO_TEXCOORD = glm::dvec3(INFINITY);
 
     RayHitReport::RayHitReport(
-            double distance,
+            double length,
             const Raycast& incidentRay,
             const glm::dvec3& position,
             const glm::dvec3& normal,
@@ -15,7 +15,7 @@ namespace prop3
             const Coating* coating,
             const Material* innerMat,
             const Material* outerMat) :
-        distance(distance),
+        length(length),
         incidentRay(incidentRay),
         position(position),
         normal(normal),

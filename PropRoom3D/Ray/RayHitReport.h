@@ -15,7 +15,7 @@ namespace prop3
     {
 	public:
         RayHitReport(
-            double distance,
+            double length,
             const Raycast& incidentRay,
             const glm::dvec3& position,
             const glm::dvec3& normal,
@@ -26,7 +26,7 @@ namespace prop3
 
         void compile();
 
-        double distance;
+        double length;
         Raycast incidentRay;
         glm::dvec3 position;
         glm::dvec3 normal;

@@ -476,8 +476,11 @@ namespace prop3
 
     bool SurfaceOr::intersects(const Raycast& ray, RayHitList& reports) const
     {
-        assert(false /*Intersects not implemented for SurfaceOr*/);
-		return false;
+        RayHitReport* head = reports.head;
+
+        raycast(ray, reports);
+
+        return head != reports.head;
     }
 
     void SurfaceOr::setCoating(const std::shared_ptr<Coating>& coating)
@@ -634,8 +637,11 @@ namespace prop3
 
     bool SurfaceAnd::intersects(const Raycast& ray, RayHitList& reports) const
     {
-        assert(false /*Intersects not implemented for SurfaceAnd*/);
-		return false;
+        RayHitReport* head = reports.head;
+
+        raycast(ray, reports);
+
+        return head != reports.head;
     }
 
     void SurfaceAnd::setCoating(const std::shared_ptr<Coating>& coating)

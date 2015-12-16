@@ -25,6 +25,8 @@ namespace prop3
         // Light rays
         virtual void raycast(const Raycast& ray, RayHitList& reports) const override;
 
+        virtual bool intersects(const Raycast& ray, RayHitList& reports) const override;
+
         virtual std::vector<Raycast> fireRays(unsigned int count) const override;
 
         virtual std::vector<Raycast> fireOn(const glm::dvec3& pos, unsigned int count) const override;

@@ -139,7 +139,16 @@ namespace prop3
         double tmin = glm::max(glm::max(vtmin.x, vtmin.y), vtmin.z);
         double tmax = glm::min(glm::min(vtmax.x, vtmax.y), vtmax.z);
 
-        return tmax > glm::max(tmin, 0.0);
+        if(tmax > glm::max(tmin, 0.0))
+        {
+            if(0.0 < tmin && tmin < ray.limit)
+                return true;
+
+            if(0.0 < tmax && tmax < ray.limit)
+                return true;
+        }
+
+        return false;
     }
 
     void Box::transform(const Transform& transform)

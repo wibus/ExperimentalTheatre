@@ -8,12 +8,12 @@ namespace prop3
 
     Raycast::Raycast(
             double limit,
-            double distance,
+            double pathLength,
             const glm::dvec4& sample,
             const glm::dvec3& origin,
             const glm::dvec3& direction) :
         limit(limit),
-        distance(distance),
+        pathLength(pathLength),
         sample(sample),
         origin(origin),
         direction(direction)

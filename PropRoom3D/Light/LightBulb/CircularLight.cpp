@@ -61,6 +61,26 @@ namespace prop3
         }
     }
 
+    bool CircularLight::intersects(const Raycast& ray, RayHitList& reports) const
+    {
+        glm::dvec3 orig = glm::dvec3(_invTransform * glm::dvec4(ray.origin, 1.0));
+        glm::dvec3 dir = glm::dvec3(_invTransform * glm::dvec4(ray.direction, 0.0));
+
+
+        double dirDotNorm = glm::dot(_normal, dir);
+        if(dirDotNorm != 0.0)
+        {
+            double t = -(glm::dot(_normal, orig) + _distance) / dirDotNorm;
+            if(0.0 < t && t < ray.limit)
+            {
+                if(glm::distance(orig + dir * t, _center) < _radius)
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
     std::vector<Raycast> CircularLight::fireRays(unsigned int count) const
     {
         // TODO
