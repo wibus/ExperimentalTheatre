@@ -14,7 +14,7 @@ namespace prop3
 {
     class Prop;
     class StageSet;
-    class AbstractFilm;
+    class Film;
     class CpuRaytracerWorker;
 
 
@@ -34,13 +34,13 @@ namespace prop3
         virtual void reset();
 
         virtual bool isUpdated();
-        virtual void onUpdateConsumed();
-        virtual const AbstractFilm& film() const;
+        virtual bool newFrameCompleted();
+        virtual const Film& film() const;
 
         std::shared_ptr<RaytracerState> raytracerState() const;
 
         virtual void update(const std::shared_ptr<StageSet>& stageSet);
-        virtual void pourFramesIn(const AbstractFilm& film);
+        virtual void pourFramesIn(const Film& film);
 
         virtual void resize(int width, int height);
         virtual void updateView(const glm::dmat4& view);
@@ -57,7 +57,7 @@ namespace prop3
         virtual void setupFilms();
         virtual void hardReset();
         virtual void incorporateFilm(
-                const AbstractFilm& film);
+                const Film& film);
 
         virtual void performNonStochasticSyncronousDraf();
 
@@ -68,10 +68,9 @@ namespace prop3
         RaytracerState::ProtectedState _protectedState;
         std::shared_ptr<RaytracerState> _raytracerState;
 
-        bool _isUpdated;
         glm::ivec2 _viewportSize;
-        std::vector<std::shared_ptr<AbstractFilm>> _films;
-        std::shared_ptr<AbstractFilm> _currentFilm;
+        std::vector<std::shared_ptr<Film>> _films;
+        std::shared_ptr<Film> _currentFilm;
 
         friend class CpuRaytracerWorker;
         std::vector<std::thread> _workerThreads;

@@ -8,7 +8,7 @@
 #include <CellarWorkbench/Misc/Log.h>
 
 #include "CpuRaytracerEngine.h"
-#include "Film/AbstractFilm.h"
+#include "Film/Film.h"
 #include "GlPostProdUnit.h"
 #include "Node/StageSet.h"
 
@@ -83,8 +83,10 @@ namespace prop3
         if(_localRaytracer->isUpdated())
         {
             sendBuffersToGpu();
+
             // Let raytracer manage its drafts
-            _localRaytracer->onUpdateConsumed();
+            if(_localRaytracer->newFrameCompleted())
+                printConvergence();
         }
 
         _postProdUnit->execute();
@@ -137,21 +139,24 @@ namespace prop3
 
     void ArtDirectorServer::sendBuffersToGpu()
     {
-        const AbstractFilm& film = _localRaytracer->film();
-        glm::ivec2 viewportSize = film.resolution();
-
-        std::vector<glm::vec3> colorBuffer;
-        film.getColorBuffer(colorBuffer);
+        const Film& film = _localRaytracer->film();
+        glm::ivec2 viewportSize = film.frameResolution();
+        const std::vector<glm::vec3>& colorBuffer = film.colorBuffer();
 
         // Send image to GPU
         glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
         glTexImage2D(GL_TEXTURE_2D,         0,  GL_RGB32F,
                      viewportSize.x,        viewportSize.y,
                      0, GL_RGB, GL_FLOAT,   colorBuffer.data());
+    }
 
-
+    void ArtDirectorServer::printConvergence()
+    {
         // Output image stats
         unsigned int sampleCount = raytracerState()->sampleCount();
+
+        if(sampleCount <= 0)
+            return;
 
         std::stringstream ss;
         ss << /*"Frame " <<*/ sampleCount;
@@ -199,12 +204,6 @@ namespace prop3
 
         cellar::getLog().postMessage(new cellar::Message(
             'I', false, ss.str(), "CpuRaytracerServer"));
-
-
-        if(!raytracerState()->isDrafting() && sampleCount == 8)
-        {
-            //exit(0);
-        }
     }
 
     void ArtDirectorServer::clearColorTexture()

@@ -66,12 +66,14 @@ SET(PROP3_SERIAL_HEADERS
     ${PROP3_SRC_DIR}/Serial/JsonReader.h
     ${PROP3_SRC_DIR}/Serial/JsonWriter.h)
 
-# Art Director
+# Films
 SET(PROP3_FILM_HEADERS
-    ${PROP3_SRC_DIR}/Team/ArtDirector/Film/AbstractFilm.h
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Film/Film.h
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Film/Tile.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/Film/ConvergentFilm.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/Film/StaticFilm.h)
 
+# Art Director
 SET(PROP3_ART_DIRECTOR_HEADERS
     ${PROP3_FILM_HEADERS}
     ${PROP3_SRC_DIR}/Team/ArtDirector/AbstractArtDirector.h
@@ -174,12 +176,14 @@ SET(PROP3_SERIAL_SOURCES
     ${PROP3_SRC_DIR}/Serial/JsonReader.cpp
     ${PROP3_SRC_DIR}/Serial/JsonWriter.cpp)
 
-# Art Director
+# Films
 SET(PROP3_FILM_SOURCES
-    ${PROP3_SRC_DIR}/Team/ArtDirector/Film/AbstractFilm.cpp
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Film/Film.cpp
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Film/Tile.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/Film/ConvergentFilm.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/Film/StaticFilm.cpp)
 
+# Art Director
 SET(PROP3_ART_DIRECTOR_SOURCES
     ${PROP3_FILM_SOURCES}
     ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorClient.cpp

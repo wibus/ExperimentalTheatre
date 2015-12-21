@@ -52,7 +52,6 @@ namespace prop3
         _lightDirectRayCount(1),
         _lightFireRayCount(20),
         _maxScreenBounceCount(6),
-        _viewportSize(1, 1),
         _confusionRadius(0.1),
         _team(new WorkerTeam())
     {
@@ -61,7 +60,6 @@ namespace prop3
 
     CpuRaytracerWorker::~CpuRaytracerWorker()
     {
-        destroyBuffers();
     }
 
     void CpuRaytracerWorker::start(bool singleShot)
@@ -127,20 +125,10 @@ namespace prop3
         });
     }
 
-    void CpuRaytracerWorker::updateViewport(
-            const glm::ivec2& resolution,
-            const glm::ivec2& origin,
-            const glm::ivec2& size)
+    void CpuRaytracerWorker::updateFilm(std::shared_ptr<Film>& film)
     {
-        skipAndExecute([this, &resolution, &origin, &size](){
-            _viewportOrig = origin;
-            if(size != _viewportSize)
-            {
-                _resolution = resolution;
-                _viewportSize = size;
-                destroyBuffers();
-                getNewWorkingBuffers();
-            }
+        skipAndExecute([this, &film](){
+            _workingFilm = film;
         });
     }
 
@@ -159,39 +147,14 @@ namespace prop3
         _useDepthOfField = use;
     }
 
-    size_t CpuRaytracerWorker::completedFrameCount()
-    {
-        std::lock_guard<std::mutex> lk(_framesMutex);
-        return _completedFilms.size();
-    }
-
-    std::shared_ptr<AbstractFilm> CpuRaytracerWorker::readNextFilm()
-    {
-        _framesMutex.lock();
-        return _completedFilms.front();
-    }
-
-    void CpuRaytracerWorker::popReadFilm()
-    {
-        _completedFilms.front()->clear();
-        _filmPool.push_back(_completedFilms.front());
-        _completedFilms.pop();
-
-        _framesMutex.unlock();
-    }
-
     void CpuRaytracerWorker::skipAndExecute(const std::function<void()>& func)
     {
         // Skip current frame
         bool isRunning = _runningPredicate;
-        if(isRunning)
-        {
-            _runningPredicate = false;
-        }
+        _runningPredicate = false;
 
         // Lock and execute
         std::lock_guard<std::mutex> lk(_flowMutex);
-        resetBuffers();
         func();
 
         // Begin next frame
@@ -206,12 +169,18 @@ namespace prop3
     {
         while(true)
         {
+            std::shared_ptr<Tile> tile;
             std::unique_lock<std::mutex> lk(_flowMutex);
-            _cv.wait(lk, [this]{
-                return _terminatePredicate ||
-                       (_runningPredicate &&
-                            (!_searchSurfaces.empty() ||
-                             !_stageSetStream.empty()));
+            _cv.wait(lk, [this, &tile]{
+                if(_terminatePredicate ||
+                   (_runningPredicate &&
+                        (!_searchSurfaces.empty() ||
+                         !_stageSetStream.empty())))
+                {
+                    tile = _workingFilm->nextTile();
+                    return tile != _workingFilm->endTile();
+                }
+                else return false;
             });
 
             // Verify if we are supposed to terminate
@@ -233,25 +202,27 @@ namespace prop3
                 compileSearchStructures();
             }
 
-/*
-            // Shoot rays
+            /*// Shoot rays
             if(_runningPredicate &&
                _lightRayIntensityThreshold != INFINITY)
                 shootFromLights();
-*/
-            if(_runningPredicate)
-                shootFromScreen();
+            */
 
-
-            // Verify that stop or skip was not called
-            if(_runningPredicate)
+            while(tile != _workingFilm->endTile() &&
+                  _runningPredicate)
             {
-                commitWorkingBuffers();
+                tile->lock();
+                shootFromScreen(tile);
+                tile->unlock();
 
-                if(_isSingleShot)
-                {
-                    _runningPredicate = false;
-                }
+                tile = _workingFilm->nextTile();
+            }
+
+
+            // Stop if single shot
+            if(_isSingleShot)
+            {
+                _runningPredicate = false;
             }
         }
     }
@@ -285,17 +256,16 @@ namespace prop3
         }
     }
 */
-    void CpuRaytracerWorker::shootFromScreen()
+    void CpuRaytracerWorker::shootFromScreen(std::shared_ptr<Tile>& tile)
     {
-        double pixelWidth = 2.0 / _resolution.x;
-        double pixelHeight = 2.0 / _resolution.y;
+        double pixelWidth = 2.0 / _workingFilm->frameWidth();
+        double pixelHeight = 2.0 / _workingFilm->frameHeight();
         glm::dvec2 pixelSize(pixelWidth, pixelHeight);
-        glm::dvec2 imgOrig = -glm::dvec2(_resolution) / 2.0;
-        glm::dvec2 orig =  (imgOrig + glm::dvec2(_viewportOrig)) * pixelSize;
+        glm::dvec2 frameOrig = -glm::dvec2(_workingFilm->frameResolution()) / 2.0;
 
         if(_usePixelJittering)
         {
-            orig += (glm::dvec2(0.5) + glm::circularRand(0.5)) * pixelSize;
+            frameOrig += (glm::dvec2(0.5) + glm::circularRand(0.5)) * pixelSize;
         }
 
         glm::dvec3 eyeWorldPos = _camPos;
@@ -324,24 +294,21 @@ namespace prop3
             eyeWorldPos,
             glm::dvec3(0.0));
 
-        int idx = -1;
-        glm::dvec4 screenPos(orig, -1.0, 1);
-        for(int j=0; j<_viewportSize.y; ++j, screenPos.y += pixelHeight)
+
+        for(Tile::Iterator it = tile->begin(); it != tile->end(); ++it)
         {
-            screenPos.x = orig.x;
-            for(int i=0; i<_viewportSize.x; ++i, screenPos.x += pixelWidth)
-            {
-                glm::dvec4 dirH = _viewProjInverse * screenPos;
-                glm::dvec3 pixWorldPos = glm::dvec3(dirH / dirH.w);
-                raycast.direction = glm::normalize(pixWorldPos - raycast.origin);
+            glm::dvec2 pixPos = glm::dvec2(it.position());
+            glm::dvec4 screenPos((frameOrig + pixPos)*pixelSize, -1.0, 1.0);
+            glm::dvec4 dirH = _viewProjInverse * screenPos;
+            glm::dvec3 pixWorldPos = glm::dvec3(dirH / dirH.w);
+            raycast.direction = glm::normalize(pixWorldPos - raycast.origin);
 
-                glm::dvec4 sample = fireScreenRay(raycast);
-                _workingFilm->addSample(i, j, sample);
+            glm::dvec4 sample = fireScreenRay(raycast);
+            if(sample.w > 0.0) it.addSample(sample);
 
-                // Verify if this frame must be skipped
-                if(!_runningPredicate)
-                    return;
-            }
+            // Verify if this frame must be skipped
+            if(!_runningPredicate)
+                return;
         }
     }
 
@@ -952,53 +919,5 @@ namespace prop3
         attenuation = 0.125 + (attenuation/2 + 0.5) * 0.875;
 
         return albedo * attenuation;
-    }
-
-    void CpuRaytracerWorker::resetBuffers()
-    {
-        while(!_completedFilms.empty())
-        {
-            _completedFilms.front()->clear();
-            _filmPool.push_back(_completedFilms.front());
-            _completedFilms.pop();
-        }
-
-        if(_workingFilm.get() != nullptr)
-        {
-            _workingFilm->clear();
-        }
-    }
-
-    void CpuRaytracerWorker::destroyBuffers()
-    {
-        while(!_completedFilms.empty())
-            _completedFilms.pop();
-
-        _workingFilm.reset();
-        _filmPool.clear();
-    }
-
-    void CpuRaytracerWorker::getNewWorkingBuffers()
-    {
-        if(_filmPool.empty())
-        {
-            _workingFilm.reset(new StaticFilm());
-            _workingFilm->resize(_viewportSize);
-        }
-        else
-        {
-            _workingFilm = _filmPool.back();
-            _filmPool.pop_back();
-        }
-    }
-
-    void CpuRaytracerWorker::commitWorkingBuffers()
-    {
-        _framesMutex.lock();
-        _completedFilms.push(
-            _workingFilm);
-        _framesMutex.unlock();
-
-        getNewWorkingBuffers();
     }
 }

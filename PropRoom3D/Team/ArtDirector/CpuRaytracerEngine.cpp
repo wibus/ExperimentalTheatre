@@ -22,7 +22,6 @@ namespace prop3
     CpuRaytracerEngine::CpuRaytracerEngine() :
         _protectedState(),
         _raytracerState(new RaytracerState(_protectedState)),
-        _isUpdated(false),
         _viewportSize(1, 1)
     {
         // hardware_concurrency is only a hint on the number of cores
@@ -38,7 +37,6 @@ namespace prop3
     CpuRaytracerEngine::CpuRaytracerEngine(unsigned int  workerCount) :
         _protectedState(),
         _raytracerState(new RaytracerState(_protectedState)),
-        _isUpdated(false),
         _viewportSize(1, 1)
     {
         _protectedState.setWorkerCount( workerCount );
@@ -64,8 +62,8 @@ namespace prop3
         _protectedState.setDivergenceThreshold(divergenceThreshold);
         _protectedState.setDraftParams(draftParams);
 
-        setupWorkers();
         setupFilms();
+        setupWorkers();
     }
 
     void CpuRaytracerEngine::reset()
@@ -124,22 +122,10 @@ namespace prop3
 
             return;
         }
-
-
-        for(auto& w : _workerObjects)
-        {
-            while(w->completedFrameCount() != 0)
-            {
-                _protectedState.incSampleCount();
-                auto film = w->readNextFilm();
-                incorporateFilm(*film);
-                w->popReadFilm();
-            }
-        }
     }
 
     void CpuRaytracerEngine::pourFramesIn(
-            const AbstractFilm& film)
+            const Film& film)
     {
         skipDrafting();
 
@@ -148,32 +134,41 @@ namespace prop3
 
     bool CpuRaytracerEngine::isUpdated()
     {
-        return _isUpdated;
+        return _currentFilm->newTileCompleted();
     }
 
-    void CpuRaytracerEngine::onUpdateConsumed()
+    bool CpuRaytracerEngine::newFrameCompleted()
     {
-        _isUpdated = false;
+        if(_currentFilm->newFrameCompleted())
+        {
+            _protectedState.incSampleCount();
+            _protectedState.setDivergence(
+                _currentFilm->compileDivergence());
 
-        if(_raytracerState->isDrafting())
-        {
-            if(_raytracerState->sampleCount() >=
-               _raytracerState->draftFrameCountPerLevel()
-                    * _workerThreads.size())
+            if(_raytracerState->isDrafting())
             {
-                nextDraftSize();
+                if(_raytracerState->sampleCount() >=
+                   _raytracerState->draftFrameCountPerLevel()
+                        * _workerThreads.size())
+                {
+                    nextDraftSize();
+                }
             }
-        }
-        else
-        {
-            if(_raytracerState->converged())
+            else
             {
-                interruptWorkers();
+                if(_raytracerState->converged())
+                {
+                    interruptWorkers();
+                }
             }
+
+            return true;
         }
+
+        return false;
     }
 
-    const AbstractFilm& CpuRaytracerEngine::film() const
+    const Film& CpuRaytracerEngine::film() const
     {
         return *_currentFilm;
     }
@@ -204,28 +199,17 @@ namespace prop3
             glm::ivec2 resolution = _viewportSize / glm::ivec2(ratio);
             resolution = glm::max(resolution, glm::ivec2(1, 1));
 
-            _films[i]->resize(resolution);
+            _films[i]->resizeFrame(resolution);
         }
 
 
         // Main film: the one that contains the full res shot
         if(!_films.empty())
         {
-            _films.back()->resize(_viewportSize);
+            _films.back()->resizeFrame(_viewportSize);
         }
 
-
-        if(!_raytracerState->isDrafter())
-        {
-            for(auto& w : _workerObjects)
-            {
-                w->updateViewport(
-                    _viewportSize,
-                    glm::ivec2(0, 0),
-                    _viewportSize);
-            }
-        }
-        else
+        if(_raytracerState->isDrafter())
         {
             _protectedState.setDraftLevel(-1);
             nextDraftSize();
@@ -311,10 +295,7 @@ namespace prop3
         // Update worker buffers' size
         for(auto& w : _workerObjects)
         {
-            w->updateViewport(
-                _currentFilm->resolution(),
-                glm::ivec2(0, 0),
-                _currentFilm->resolution());
+            w->updateFilm(_currentFilm);
         }
     }
 
@@ -350,6 +331,8 @@ namespace prop3
             std::shared_ptr<CpuRaytracerWorker> worker(
                 new CpuRaytracerWorker());
 
+            worker->updateFilm(_currentFilm);
+
             _workerObjects.push_back(worker);
             _workerThreads.push_back(
                 std::move(std::thread(
@@ -373,15 +356,27 @@ namespace prop3
         {
             // Drafts: non-stocastic and intermediate resolution shots
             int draftLevelCount = _raytracerState->draftLevelCount();
+
+            // Non-Stochastic
+            if(_raytracerState->fastDraftEnabled())
+            {
+                _films.push_back(std::shared_ptr<Film>(new StaticFilm()));
+                --draftLevelCount;
+            }
+
+			// Intermediates
             for(int i=0; i < draftLevelCount; ++i)
             {
-                _films.push_back(std::shared_ptr<AbstractFilm>(new StaticFilm()));
+                _films.push_back(std::shared_ptr<Film>(new ConvergentFilm()));
             }
         }
         size_t drafCount = _films.size();
 
         // Main film: full resolution shot
-        _films.push_back(std::shared_ptr<AbstractFilm>(new ConvergentFilm()));
+        _films.push_back(std::shared_ptr<Film>(new ConvergentFilm()));
+
+        _currentFilm = _films.front();
+
 
         cellar::getLog().postMessage(new cellar::Message('I', false,
             "Scene will be raytraced with " + std::to_string(drafCount) + " drafts",
@@ -409,74 +404,37 @@ namespace prop3
         }
     }
 
-    void CpuRaytracerEngine::incorporateFilm(const AbstractFilm& film)
+    void CpuRaytracerEngine::incorporateFilm(const Film& film)
     {
         _currentFilm->mergeFilm(film);
 
         _protectedState.setDivergence(_currentFilm->compileDivergence());
-
-        _isUpdated = true;
     }
 
     void CpuRaytracerEngine::performNonStochasticSyncronousDraf()
     {
-        typedef decltype(_workerObjects.front()) WorkerPtr;
-        typedef std::pair<int, WorkerPtr> DrafterType;
-        std::list<DrafterType> drafters;
-
-        int currOriginY = 0;
-        int workerIdx = 0;
-        int workerCount = (int)_workerObjects.size();
-        glm::ivec2 viewport = _currentFilm->resolution();
         for(auto& w : _workerObjects)
         {
-            glm::ivec2 orig = glm::ivec2(0, currOriginY);
-            int nextOriginY = (viewport.y * (++workerIdx)) / workerCount;
-            int viewportHeight = nextOriginY - currOriginY;
-            glm::ivec2 size(viewport.x, viewportHeight);
-
-            w->updateViewport(viewport, orig, size);
+            w->stop();
+            w->updateFilm(_currentFilm);
             w->useStochasticTracing(false);
             w->usePixelJittering(false);
             w->useDepthOfField(false);
             w->start(true);
-
-            drafters.push_back(DrafterType(currOriginY, w));
-            currOriginY = nextOriginY;
         }
 
-        while(!drafters.empty())
+        _currentFilm->waitFrameCompletion();
+
+        for(auto& w : _workerObjects)
         {
-            auto it = drafters.begin();
-            while(it != drafters.end())
-            {
-                WorkerPtr& worker = it->second;
-                if(worker->completedFrameCount() != 0)
-                {
-                    int originY = it->first;
-                    glm::ivec2 filmOrigin(0, originY);
-
-                    std::shared_ptr<AbstractFilm> film = worker->readNextFilm();
-                    _currentFilm->blitFilm(filmOrigin, *film);
-
-                    worker->popReadFilm();
-                    worker->useStochasticTracing(true);
-                    worker->usePixelJittering(true);
-                    worker->useDepthOfField(true);
-                    it = drafters.erase(it);
-                }
-                else
-                {
-                    ++it;
-                }
-            }
+            w->useStochasticTracing(true);
+            w->usePixelJittering(true);
+            w->useDepthOfField(true);
         }
 
         // Set this draft level as complete
         _protectedState.addSampleCount(
-            _raytracerState->draftFrameCountPerLevel() * workerCount );
-
-        // Notify user that a new frame is ready
-        _isUpdated = true;
+            _raytracerState->draftFrameCountPerLevel() *
+            _raytracerState->workerCount());
     }
 }

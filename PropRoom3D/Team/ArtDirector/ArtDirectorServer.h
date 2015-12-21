@@ -37,6 +37,7 @@ namespace prop3
 
     protected:
         virtual void sendBuffersToGpu();
+        virtual void printConvergence();
         virtual void clearColorTexture();
 
     private:

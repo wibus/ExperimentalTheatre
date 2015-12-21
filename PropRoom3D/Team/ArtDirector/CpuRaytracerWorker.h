@@ -32,7 +32,8 @@ namespace prop3
 
     class AbstractTeam;
 
-    class AbstractFilm;
+    class Film;
+    class Tile;
 
     struct SearchZone;
 
@@ -56,10 +57,7 @@ namespace prop3
         virtual void updateStageSet(const std::string& stream);
         virtual void updateView(const glm::dmat4& view);
         virtual void updateProjection(const glm::dmat4& proj);
-        virtual void updateViewport(
-                const glm::ivec2& resolution,
-                const glm::ivec2& origin,
-                const glm::ivec2& size);
+        virtual void updateFilm(std::shared_ptr<Film>& film);
 
 
         // TODO
@@ -67,16 +65,12 @@ namespace prop3
         virtual void usePixelJittering(bool use);
         virtual void useDepthOfField(bool use);
 
-        virtual size_t completedFrameCount();
-        virtual std::shared_ptr<AbstractFilm> readNextFilm();
-        virtual void popReadFilm();
-
     protected:
         virtual void skipAndExecute(const std::function<void()>& func);
 
         virtual void execute();
         //virtual void shootFromLights();
-        virtual void shootFromScreen();
+        virtual void shootFromScreen(std::shared_ptr<Tile>& tile);
 
         //virtual void fireLightRay(
         //        const Raycast& fromLightRay);
@@ -108,12 +102,6 @@ namespace prop3
 
         virtual glm::dvec3 draft(const RayHitReport& report);
 
-    private:
-        void resetBuffers();
-        void destroyBuffers();
-        void getNewWorkingBuffers();
-        void commitWorkingBuffers();
-
 
     private:
         std::atomic<bool> _isSingleShot;
@@ -132,18 +120,13 @@ namespace prop3
         unsigned int _maxScreenBounceCount;
 
         glm::ivec2 _resolution;
-        glm::ivec2 _viewportOrig;
-        glm::ivec2 _viewportSize;
         glm::dmat4 _viewInvMatrix;
         glm::dmat4 _projInvMatrix;
         glm::dmat4 _viewProjInverse;
         glm::dvec3 _camPos;
         double _confusionRadius;
 
-        std::queue<std::shared_ptr<AbstractFilm>> _completedFilms;
-        std::vector<std::shared_ptr<AbstractFilm>> _filmPool;
-        std::shared_ptr<AbstractFilm> _workingFilm;
-        std::mutex _framesMutex;
+        std::shared_ptr<Film> _workingFilm;
 
         std::string _stageSetStream;
         std::shared_ptr<AbstractTeam> _team;

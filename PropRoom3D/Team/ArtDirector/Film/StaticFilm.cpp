@@ -1,8 +1,10 @@
 #include "StaticFilm.h"
 
+
 namespace prop3
 {
-    StaticFilm::StaticFilm()
+    StaticFilm::StaticFilm() :
+        _tileCompletedCount(0)
     {
 
     }
@@ -12,18 +14,67 @@ namespace prop3
 
     }
 
+    void StaticFilm::clear(const glm::dvec3& color, bool hardReset)
+    {
+        _newTileCompleted = false;
+        _newFrameCompleted = false;
+        _tileCompletedCount = 0;
+
+        _nextTileId = 0;
+        _varianceThreshold = 0.0;
+
+        if(hardReset)
+        {
+            size_t pixelCount = _frameResolution.x * _frameResolution.y;
+
+            _colorBuffer.clear();
+            _colorBuffer.resize(pixelCount, color);
+        }
+    }
+
     double StaticFilm::compileDivergence() const
     {
         return 1.0;
     }
 
-    void StaticFilm::setSample(int index, const glm::dvec4& sample)
+    void StaticFilm::tileCompleted(Tile& tile)
     {
-        _weightedColorBuffer[index] = sample;
+        std::lock_guard<std::mutex> lk(_tilesMutex);
+
+        _newTileCompleted = true;
+        ++_tileCompletedCount;
+
+        if(_tileCompletedCount >= _tiles.size())
+        {
+            _cvMutex.lock();
+            _newFrameCompleted = true;
+            _cvMutex.unlock();
+            _cv.notify_all();
+        }
+    }
+
+    void StaticFilm::endTileReached()
+    {
+        // Do nothing
+    }
+
+    glm::dvec4 StaticFilm::sample(int index) const
+    {
+        return glm::dvec4(_colorBuffer[index], 1.0);
+    }
+
+    double StaticFilm::pixelVariance(int index) const
+    {
+        return 1.0;
+    }
+
+    void StaticFilm::setColor(int index, const glm::dvec3& color)
+    {
+        _colorBuffer[index] = color;
     }
 
     void StaticFilm::addSample(int index, const glm::dvec4& sample)
     {
-        _weightedColorBuffer[index] += sample;
+        _colorBuffer[index] = glm::dvec3(sample);
     }
 }
