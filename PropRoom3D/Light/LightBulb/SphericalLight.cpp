@@ -52,7 +52,7 @@ namespace prop3
             {
                 glm::dvec3 pt = ray.origin + ray.direction*t1;
                 glm::dvec3 n = glm::normalize(pt - _transformC);
-                reports.add(t1, ray, pt, n,
+                reports.add(t1, pt, n,
                             RayHitReport::NO_TEXCOORD,
                             _coating.get(),
                             nullptr,
@@ -64,7 +64,7 @@ namespace prop3
             {
                 glm::dvec3 pt = ray.origin + ray.direction*t2;
                 glm::dvec3 n = glm::normalize(pt - _transformC);
-                reports.add(t2, ray, pt, n,
+                reports.add(t2, pt, n,
                             RayHitReport::NO_TEXCOORD,
                             _coating.get(),
                             nullptr,
@@ -78,7 +78,7 @@ namespace prop3
             {
                 glm::dvec3 pt = ray.origin + ray.direction*t;
                 glm::dvec3 n = glm::normalize(pt - _transformC);
-                reports.add(t, ray, pt, n,
+                reports.add(t, pt, n,
                             RayHitReport::NO_TEXCOORD,
                             _coating.get(),
                             nullptr,

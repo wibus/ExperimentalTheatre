@@ -96,7 +96,7 @@ namespace prop3
                     else
                         n = glm::dvec3(0, 0, glm::sign(n.z));
 
-                reports.add(tmin, ray, pt, n,
+                reports.add(tmin, pt, n,
                             RayHitReport::NO_TEXCOORD,
                             _coating.get(),
                             _innerMat.get(),
@@ -119,7 +119,7 @@ namespace prop3
                     else
                         n = glm::dvec3(0, 0, glm::sign(n.z));
 
-                reports.add(tmax, ray, pt, n,
+                reports.add(tmax, pt, n,
                             RayHitReport::NO_TEXCOORD,
                             _coating.get(),
                             _innerMat.get(),

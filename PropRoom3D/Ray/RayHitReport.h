@@ -16,7 +16,6 @@ namespace prop3
 	public:
         RayHitReport(
             double length,
-            const Raycast& incidentRay,
             const glm::dvec3& position,
             const glm::dvec3& normal,
             const glm::dvec3& texCoord,
@@ -24,10 +23,9 @@ namespace prop3
             const Material* innerMat,
             const Material* outerMat);
 
-        void compile();
+        void compile(const glm::dvec3& incident);
 
         double length;
-        Raycast incidentRay;
         glm::dvec3 position;
         glm::dvec3 normal;
         glm::dvec3 texCoord;

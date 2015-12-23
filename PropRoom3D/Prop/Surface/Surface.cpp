@@ -180,7 +180,6 @@ namespace prop3
             r.position = glm::dvec3(_transform * glm::dvec4(r.position, 1.0));
             r.normal = glm::dvec3(_transform * glm::dvec4(r.normal, 0.0));
             r.normal  = glm::normalize(r.normal);
-            r.incidentRay = ray;
 
             if(_coating.get() != nullptr)
                 r.coating = _coating.get();

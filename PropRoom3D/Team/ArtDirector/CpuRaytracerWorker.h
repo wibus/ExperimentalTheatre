@@ -84,7 +84,8 @@ namespace prop3
 
         virtual glm::dvec4 gatherReflectedLight(
                 const Coating& coating,
-                const RayHitReport& hitReport);
+                const RayHitReport& hitReport,
+                const Raycast& outRay);
 
         //virtual void gatherLightHitsToward(
         //        std::vector<Raycast>& outRaycasts,

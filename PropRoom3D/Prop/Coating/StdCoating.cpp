@@ -27,7 +27,8 @@ namespace prop3
 
     glm::dvec4 StdCoating::indirectBrdf(
         std::vector<Raycast>& raycasts,
-        const RayHitReport& report) const
+        const RayHitReport& report,
+        const Raycast& incidentRay) const
     {
         // Emission
         glm::dvec4 emission = glm::dvec4(0.0);
@@ -37,11 +38,11 @@ namespace prop3
         const glm::dvec3& pos = report.position;
         const glm::dvec3& tex = report.texCoord;
         const glm::dvec3& wallNormal = report.normal;
-        const glm::dvec3& incident = report.incidentRay.direction;
         const glm::dvec3& reflectOrig = report.reflectionOrigin;
         const glm::dvec3& refractOrig = report.refractionOrigin;
         const Material& currMaterial = *report.currMaterial;
         const Material& nextMaterial = *report.nextMaterial;
+        const glm::dvec3& incident = incidentRay.direction;
 
 
         // StdCoating properties
@@ -285,6 +286,7 @@ namespace prop3
 
     glm::dvec4 StdCoating::directBrdf(
             const RayHitReport& report,
+            const Raycast& incidentRay,
             const glm::dvec3& outDirection) const
     {
         glm::dvec4 sampleSum = glm::dvec4(0.0);
@@ -293,11 +295,12 @@ namespace prop3
         const glm::dvec3& pos = report.position;
         const glm::dvec3& tex = report.texCoord;
         const glm::dvec3& wallNormal = report.normal;
-        const glm::dvec3& incident = report.incidentRay.direction;
+        const glm::dvec3& incident = incidentRay.direction;
 
         glm::dvec3 reflection = glm::reflect(incident, wallNormal);
+        double outDotNorm = glm::dot(outDirection, wallNormal);
         double inDotNorm = -glm::dot(incident, wallNormal);
-        bool isTransmission = inDotNorm < 0.0;
+        bool isTransmission = outDotNorm < 0.0;
 
         // StdCoating properties
         double rough = roughness(tex);

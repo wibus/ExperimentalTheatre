@@ -422,20 +422,20 @@ namespace prop3
             const Material* dummyMat = nullptr;
             const glm::dvec3 dummyVec = glm::dvec3();
             RayHitReport reportMin(Raycast::BACKDROP_LIMIT,
-                                   ray, dummyVec, dummyVec, dummyVec,
+                                   dummyVec, dummyVec, dummyVec,
                                    dummyCoat, dummyMat, dummyMat);
             double hitDistance = findNearestIntersection(ray, reportMin);
             ray.limit = hitDistance;
 
             if(reportMin.innerMat == Surface::ENVIRONMENT_MATERIAL.get() ||
                reportMin.innerMat == nullptr)
-                reportMin.innerMat = _ambMaterial.get();
+                    reportMin.innerMat = _ambMaterial.get();
 
             if(reportMin.outerMat == Surface::ENVIRONMENT_MATERIAL.get() ||
                reportMin.outerMat == nullptr)
-                reportMin.outerMat = _ambMaterial.get();
+                    reportMin.outerMat = _ambMaterial.get();
 
-            reportMin.compile();
+            reportMin.compile(ray.direction);
 
             // Compute maximum travelled distance in current material
             const Material* currMat = reportMin.currMaterial;
@@ -476,11 +476,12 @@ namespace prop3
                     sampleAccum += currSamp *
                         coating->indirectBrdf(
                             _tempChildRayArray,
-                            reportMin);
+                            reportMin,
+                            ray);
 
                     // Direct lighting
                     sampleAccum += gatherReflectedLight(
-                        *coating, reportMin);
+                        *coating, reportMin, ray);
                 }
 
                 if(bounceCount < _maxScreenBounceCount)
@@ -567,12 +568,12 @@ namespace prop3
 */
     glm::dvec4 CpuRaytracerWorker::gatherReflectedLight(
             const Coating& coating,
-            const RayHitReport& hitReport)
+            const RayHitReport& hitReport,
+            const Raycast& outRay)
     {
         glm::dvec4 sampleSum;
 
-        double baseDist = hitReport.incidentRay.pathLength;
-        glm::dvec3 outDirirection = -hitReport.incidentRay.direction;
+        glm::dvec3 outDirirection = -outRay.direction;
 
         std::vector<Raycast> lightCasts =
             _backdrop->fireOn(hitReport.position, _lightDirectRayCount);
@@ -601,12 +602,12 @@ namespace prop3
                     glm::dvec4 currSamp = glm::dvec4(lightAtt, 1.0);
 
                     RayHitReport shadowReport = hitReport;
-                    shadowReport.incidentRay = lightRay;
-                    shadowReport.compile();
+                    shadowReport.compile(lightRay.direction);
 
                     sampleSum += currSamp * lightRay.sample *
                         coating.directBrdf(
                             shadowReport,
+                            lightRay,
                             outDirirection);
                 }
             }

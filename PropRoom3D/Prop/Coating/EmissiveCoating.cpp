@@ -25,13 +25,15 @@ namespace prop3
 
     glm::dvec4 EmissiveCoating::indirectBrdf(
             std::vector<Raycast>& raycasts,
-            const RayHitReport& report) const
+            const RayHitReport& report,
+            const Raycast& incidentRay) const
     {
         return glm::dvec4(_emittedRadiance, 1.0);
     }
 
     glm::dvec4 EmissiveCoating::directBrdf(
             const RayHitReport& report,
+            const Raycast& incidentRay,
             const glm::dvec3& outDirection) const
     {
         return glm::dvec4(0.0, 0.0, 0.0, 1.0);

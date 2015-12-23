@@ -16,7 +16,6 @@ namespace prop3
 
         void add(
             double length,
-            const Raycast& incidentRay,
             const glm::dvec3& position,
             const glm::dvec3& normal,
             const glm::dvec3& texCoord,
@@ -41,7 +40,6 @@ namespace prop3
     // IMPLEMENTATION //
     inline void RayHitList::add(
             double length,
-            const Raycast& incidentRay,
             const glm::dvec3& position,
             const glm::dvec3& normal,
             const glm::dvec3& texCoord,
@@ -54,7 +52,6 @@ namespace prop3
         {
             report = new RayHitReport(
                         length,
-                        incidentRay,
                         position,
                         normal,
                         texCoord,
@@ -67,7 +64,6 @@ namespace prop3
             report = _memoryPool.back();
 
             report->length = length;
-            report->incidentRay = incidentRay;
             report->position = position;
             report->normal = normal;
             report->texCoord = texCoord;

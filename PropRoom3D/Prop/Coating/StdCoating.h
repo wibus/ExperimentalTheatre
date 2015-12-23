@@ -15,12 +15,14 @@ namespace prop3
         virtual ~StdCoating();
 
         virtual glm::dvec4 indirectBrdf(
-            std::vector<Raycast>& raycasts,
-            const RayHitReport& report) const override;
+                std::vector<Raycast>& raycasts,
+                const RayHitReport& report,
+                const Raycast& incidentRay) const override;
 
         virtual glm::dvec4 directBrdf(
-            const RayHitReport& report,
-            const glm::dvec3& outDirection) const override;
+                const RayHitReport& report,
+                const Raycast& incidentRay,
+                const glm::dvec3& outDirection) const override;
 
         virtual glm::dvec3 albedo(
                 const RayHitReport& report) const override;

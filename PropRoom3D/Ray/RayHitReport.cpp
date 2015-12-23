@@ -8,7 +8,6 @@ namespace prop3
 
     RayHitReport::RayHitReport(
             double length,
-            const Raycast& incidentRay,
             const glm::dvec3& position,
             const glm::dvec3& normal,
             const glm::dvec3& texCoord,
@@ -16,7 +15,6 @@ namespace prop3
             const Material* innerMat,
             const Material* outerMat) :
         length(length),
-        incidentRay(incidentRay),
         position(position),
         normal(normal),
         texCoord(texCoord),
@@ -29,11 +27,11 @@ namespace prop3
     {
     }
 
-    void RayHitReport::compile()
+    void RayHitReport::compile(const glm::dvec3& incident)
     {
         isTextured = (texCoord != NO_TEXCOORD);
 
-        if(glm::dot(incidentRay.direction, normal) > 0.0)
+        if(glm::dot(incident, normal) > 0.0)
         {
             normal = -normal;
             nextMaterial = outerMat;

@@ -51,7 +51,7 @@ namespace prop3
                 if(glm::distance(orig + dir * t, _center) < _radius)
                 {
                     glm::dvec3 pt = ray.origin + ray.direction * t;
-                    reports.add(t, ray, pt, _transformN,
+                    reports.add(t, pt, _transformN,
                                 RayHitReport::NO_TEXCOORD,
                                 _coating.get(),
                                 nullptr,
