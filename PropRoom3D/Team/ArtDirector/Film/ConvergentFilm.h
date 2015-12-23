@@ -42,6 +42,7 @@ namespace prop3
         std::vector<glm::dvec4> _weightedColorBuffer;
 
         int _minThresholdFrameCount;
+        double _maxConsideredVariance;
     };
 }
 

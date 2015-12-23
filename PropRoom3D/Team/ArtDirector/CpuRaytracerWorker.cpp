@@ -265,7 +265,7 @@ namespace prop3
 
         if(_usePixelJittering)
         {
-            frameOrig += (glm::dvec2(0.5) + glm::circularRand(0.5)) * pixelSize;
+            frameOrig += glm::diskRand(0.5);
         }
 
         glm::dvec3 eyeWorldPos = _camPos;
@@ -586,7 +586,10 @@ namespace prop3
         {
             Raycast& lightRay = lightCasts[c];
 
-            lightRay.limit = glm::distance(lightRay.origin, hitReport.reflectionOrigin);
+            if(glm::dot(lightRay.direction, hitReport.normal) < 0.0)
+                lightRay.limit = glm::distance(lightRay.origin, hitReport.reflectionOrigin);
+            else
+                lightRay.limit = glm::distance(lightRay.origin, hitReport.refractionOrigin);
 
             if(!intersectsScene(lightRay))
             {
@@ -601,7 +604,7 @@ namespace prop3
                     shadowReport.incidentRay = lightRay;
                     shadowReport.compile();
 
-                    sampleSum += currSamp *
+                    sampleSum += currSamp * lightRay.sample *
                         coating.directBrdf(
                             shadowReport,
                             outDirirection);

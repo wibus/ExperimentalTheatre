@@ -21,6 +21,7 @@ namespace prop3
         _tileCompletedCount = 0;
 
         _nextTileId = 0;
+        _framePassCount = 0;
         _varianceThreshold = 0.0;
 
         if(hardReset)
