@@ -136,7 +136,7 @@ namespace prop3
 
     void ConvergentFilm::addSample(int index, const glm::dvec4& sample)
     {
-        //
+        // Power heuristic weight optimization
         glm::dvec4 trueSample = sample * sample.w;
 
         glm::dvec4 oldSample = _weightedColorBuffer[index];

@@ -123,12 +123,12 @@ namespace prop3
             haloMix);
 
         glm::dvec4 sunSample;
-        /*
+
         double ringWidth = (1.0 - SUN_COS_RADIUS);
         if(dotDirSun > SUN_COS_RADIUS - ringWidth)
         {
             glm::dvec3 sunColor = haloColor * _sunColor;
-            double sunProb = glm::mix(1.0, SUN_SURFACE_RATIO, ray.entropy);
+            double sunProb = glm::pow(SUN_SURFACE_RATIO, ray.entropy);
             if(dotDirSun > SUN_COS_RADIUS)
             {
                 sunSample = glm::dvec4(sunColor * sunProb, sunProb);
@@ -141,7 +141,6 @@ namespace prop3
             }
 
         }
-        */
 
         return glm::dvec4(skyColor, 1.0) + sunSample;
     }

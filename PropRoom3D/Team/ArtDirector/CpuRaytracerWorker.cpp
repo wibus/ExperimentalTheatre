@@ -208,14 +208,16 @@ namespace prop3
                 shootFromLights();
             */
 
-            while(tile != _workingFilm->endTile() &&
-                  _runningPredicate)
+            while(tile != _workingFilm->endTile())
             {
                 tile->lock();
                 shootFromScreen(tile);
                 tile->unlock();
 
-                tile = _workingFilm->nextTile();
+                if(_runningPredicate)
+                    tile = _workingFilm->nextTile();
+                else
+                    break;
             }
 
 
@@ -294,8 +296,11 @@ namespace prop3
             glm::dvec3(0.0));
 
 
-        for(Tile::Iterator it = tile->begin(); it != tile->end(); ++it)
+        for(Tile::Iterator it = tile->begin();
+            _runningPredicate && it != tile->end();
+            ++it)
         {
+
             glm::dvec2 pixPos = glm::dvec2(it.position());
             glm::dvec4 screenPos((frameOrig + pixPos)*pixelSize, -1.0, 1.0);
             glm::dvec4 dirH = _viewProjInverse * screenPos;
@@ -304,10 +309,6 @@ namespace prop3
 
             glm::dvec4 sample = fireScreenRay(raycast);
             if(sample.w > 0.0) it.addSample(sample);
-
-            // Verify if this frame must be skipped
-            if(!_runningPredicate)
-                return;
         }
     }
 
@@ -602,7 +603,7 @@ namespace prop3
                 if(lightPathLen >= lightRay.limit)
                 {
                     glm::dvec3 lightAtt = currMaterial.lightAttenuation(lightRay);
-                    glm::dvec4 currSamp = glm::dvec4(lightAtt, 1.0);
+                    glm::dvec4 currSamp = outRay.sample * glm::dvec4(lightAtt, 1.0);
 
                     RayHitReport shadowReport = hitReport;
                     shadowReport.compile(lightRay.direction);
