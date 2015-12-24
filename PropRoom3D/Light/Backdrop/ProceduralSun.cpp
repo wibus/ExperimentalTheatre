@@ -116,12 +116,34 @@ namespace prop3
         double haloMix = glm::pow(haloRatio, HALO_POWER);
         double halowIntensity = glm::mix(0.25, 1.0, 1.0 - glm::pow(1.0 - dayRatio, 4.0));
 
+
         glm::dvec3 skyColor = glm::mix(
-            diffuseColor *diffuseIntens,
+            diffuseColor * diffuseIntens,
             haloColor * halowIntensity,
             haloMix);
 
-        return glm::dvec4(skyColor, 1.0);
+        glm::dvec4 sunSample;
+        /*
+        double ringWidth = (1.0 - SUN_COS_RADIUS);
+        if(dotDirSun > SUN_COS_RADIUS - ringWidth)
+        {
+            glm::dvec3 sunColor = haloColor * _sunColor;
+            double sunProb = glm::mix(1.0, SUN_SURFACE_RATIO, ray.entropy);
+            if(dotDirSun > SUN_COS_RADIUS)
+            {
+                sunSample = glm::dvec4(sunColor * sunProb, sunProb);
+            }
+            else
+            {
+                double alpha = (dotDirSun - (SUN_COS_RADIUS - ringWidth)) / ringWidth;
+                double attenuation = glm::pow(0.3, 1.0/(1.0/(1.0-alpha) - 1.0)*3.0);
+                sunSample = glm::dvec4((skyColor + sunColor * attenuation) * sunProb, sunProb);
+            }
+
+        }
+        */
+
+        return glm::dvec4(skyColor, 1.0) + sunSample;
     }
 
     std::vector<Raycast> ProceduralSun::fireRays(unsigned int count) const
@@ -146,8 +168,7 @@ namespace prop3
 
             glm::dvec3 direction = glm::normalize(recPoint - radPoint);
             raycasts.push_back(Raycast(
-                Raycast::BACKDROP_LIMIT,
-                Raycast::INITIAL_DISTANCE,
+                Raycast::FULLY_SPECULAR,
                 sunSample,
                 radPoint,
                 direction));
@@ -183,8 +204,7 @@ namespace prop3
 
             glm::dvec3 direction = glm::normalize(pos - radPoint);
             raycasts.push_back(Raycast(
-                Raycast::BACKDROP_LIMIT,
-                Raycast::INITIAL_DISTANCE,
+                Raycast::FULLY_SPECULAR,
                 sunSample,
                 radPoint,
                 direction));

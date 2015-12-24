@@ -77,8 +77,7 @@ namespace prop3
             glm::dvec3 direction = glm::sphericalRand(1.0);
 
             raycasts.push_back(Raycast(
-                    Raycast::BACKDROP_LIMIT,
-                    Raycast::INITIAL_DISTANCE,
+                    Raycast::FULLY_DIFFUSE,
                     scatterSample,
                     scatterPoint,
                     direction));
@@ -88,21 +87,20 @@ namespace prop3
             const glm::dvec3& direction = ray.direction;
 
             raycasts.push_back(Raycast(
-                    Raycast::BACKDROP_LIMIT,
-                    Raycast::INITIAL_DISTANCE,
+                    Raycast::FULLY_SPECULAR,
                     scatterSample,
                     scatterPoint,
                     direction));
         }
         else
         {
+            double entropy = Raycast::getEntropy(scatt);
             glm::dvec3 diffuseDir = glm::sphericalRand(1.0);
             glm::dvec3 direction = glm::mix(ray.direction, diffuseDir, scatt);
             direction = glm::normalize(direction);
 
             raycasts.push_back(Raycast(
-                    Raycast::BACKDROP_LIMIT,
-                    Raycast::INITIAL_DISTANCE,
+                    entropy,
                     scatterSample,
                     scatterPoint,
                     direction));

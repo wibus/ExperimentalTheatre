@@ -47,6 +47,7 @@ namespace prop3
 
         // StdCoating properties
         double rough = roughness(tex);
+        double entropy = Raycast::getEntropy(rough);
 
         glm::dvec4 paintFrag = paintColor(tex);
         glm::dvec3 pColor = glm::dvec3(paintFrag);
@@ -98,16 +99,14 @@ namespace prop3
 
             // Diffuse
             raycasts.push_back(Raycast(
-                    Raycast::BACKDROP_LIMIT,
-                    Raycast::INITIAL_DISTANCE,
+                    Raycast::FULLY_DIFFUSE,
                     diffuseSample,
                     reflectOrig,
                     diffuseDirection));
 
             // Specular
             raycasts.push_back(Raycast(
-                    Raycast::BACKDROP_LIMIT,
-                    Raycast::INITIAL_DISTANCE,
+                    entropy,
                     reflectSample,
                     reflectOrig,
                     reflectDirection));
@@ -136,8 +135,7 @@ namespace prop3
 
             // Metallic
             raycasts.push_back(Raycast(
-                    Raycast::BACKDROP_LIMIT,
-                    Raycast::INITIAL_DISTANCE,
+                    entropy,
                     metallicSample,
                     reflectOrig,
                     reflectDir));
@@ -198,12 +196,11 @@ namespace prop3
             glm::dvec4 diffuseSample(diffuseColor * diffuseWeight, diffuseWeight);
             glm::dvec4 reflectSample(reflectColor * reflectWeight, reflectWeight);
 
-            // Specular
+            // Reflection
             if(rough < 1.0)
             {
                 raycasts.push_back(Raycast(
-                        Raycast::BACKDROP_LIMIT,
-                        Raycast::INITIAL_DISTANCE,
+                        entropy,
                         reflectSample,
                         reflectOrig,
                         reflectDirection));
@@ -215,8 +212,7 @@ namespace prop3
 
             // Diffuse
             raycasts.push_back(Raycast(
-                    Raycast::BACKDROP_LIMIT,
-                    Raycast::INITIAL_DISTANCE,
+                    Raycast::FULLY_DIFFUSE,
                     diffuseSample,
                     reflectOrig,
                     diffuseDirection));
@@ -260,8 +256,7 @@ namespace prop3
             if(glm::dot(refractDir, wallNormal) < 0.0)
             {
                 raycasts.push_back(Raycast(
-                        Raycast::BACKDROP_LIMIT,
-                        Raycast::INITIAL_DISTANCE,
+                        entropy,
                         refractSample,
                         refractOrig,
                         refractDir));
@@ -273,8 +268,7 @@ namespace prop3
 
             // Reflexion
             raycasts.push_back(Raycast(
-                    Raycast::BACKDROP_LIMIT,
-                    Raycast::INITIAL_DISTANCE,
+                    entropy,
                     reflectSample,
                     reflectOrig,
                     reflectDir));

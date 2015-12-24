@@ -16,18 +16,24 @@ namespace prop3
     class PROP3D_EXPORT Raycast
     {
 	public:
-        Raycast(double limit,
-                double pathLength,
+        Raycast(double entropy,
                 const glm::dvec4& sample,
                 const glm::dvec3& origin,
                 const glm::dvec3& direction);
 
+        static double getEntropy(double roughness);
+        static double mixEntropies(double entropy1, double entropy2);
+
         double limit;
+        double entropy;
+        double virtDist;
         double pathLength;
         glm::dvec4 sample;
         glm::dvec3 origin;
         glm::dvec3 direction;
 
+        static const double FULLY_DIFFUSE;
+        static const double FULLY_SPECULAR;
         static const double BACKDROP_LIMIT;
         static const double INITIAL_DISTANCE;
     };

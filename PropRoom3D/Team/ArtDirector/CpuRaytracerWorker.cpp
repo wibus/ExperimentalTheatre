@@ -288,8 +288,7 @@ namespace prop3
         }
 
         Raycast raycast(
-            Raycast::BACKDROP_LIMIT,
-            Raycast::INITIAL_DISTANCE,
+            Raycast::FULLY_SPECULAR,
             glm::dvec4(1.0),
             eyeWorldPos,
             glm::dvec3(0.0));
@@ -444,7 +443,8 @@ namespace prop3
 
             glm::dvec3 matAtt = currMat->lightAttenuation(ray);
             glm::dvec4 currSamp = ray.sample * glm::dvec4(matAtt, 1.0);
-            double currDist = ray.pathLength + ray.limit;
+            double currVirtDist = ray.virtDist + ray.limit * ray.entropy;
+            double currPathLength = ray.pathLength + ray.limit;
 
             if(ray.limit != Raycast::BACKDROP_LIMIT)
             {
@@ -490,11 +490,14 @@ namespace prop3
                     for(size_t i=0; i < childCount; ++i)
                     {
                         Raycast& childRay = _tempChildRayArray[i];
-                        childRay.pathLength = currDist;
                         childRay.sample *= currSamp;
 
                         if(childRay.sample.a > 0.0)
                         {
+                            childRay.entropy = Raycast::mixEntropies(ray.entropy, childRay.entropy);
+                            childRay.pathLength = currPathLength;
+                            childRay.virtDist = currVirtDist;
+
                             _rayBounceArray.push_back(childRay);
                         }
                     }
