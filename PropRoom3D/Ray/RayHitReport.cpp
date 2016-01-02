@@ -29,22 +29,36 @@ namespace prop3
 
     void RayHitReport::compile(const glm::dvec3& incident)
     {
-        isTextured = (texCoord != NO_TEXCOORD);
-
-        if(glm::dot(incident, normal) > 0.0)
+        if(nextMaterial == nullptr)
         {
-            normal = -normal;
-            nextMaterial = outerMat;
-            currMaterial = innerMat;
+            isTextured = (texCoord != NO_TEXCOORD);
+
+            if(glm::dot(incident, normal) > 0.0)
+            {
+                normal = -normal;
+                nextMaterial = outerMat;
+                currMaterial = innerMat;
+            }
+            else
+            {
+                nextMaterial = innerMat;
+                currMaterial = outerMat;
+            }
+
+            glm::dvec3 espilonDist = normal * EPSILON_LENGTH;
+            reflectionOrigin = position +  espilonDist;
+            refractionOrigin = position -  espilonDist;
         }
         else
         {
-            nextMaterial = innerMat;
-            currMaterial = outerMat;
-        }
+            if(glm::dot(incident, normal) > 0.0)
+            {
+                normal = -normal;
 
-        glm::dvec3 espilonDist = normal * EPSILON_LENGTH;
-        reflectionOrigin = position +  espilonDist;
-        refractionOrigin = position -  espilonDist;
+                const Material* tmp = currMaterial;
+                currMaterial = nextMaterial;
+                nextMaterial = tmp;
+            }
+        }
     }
 }

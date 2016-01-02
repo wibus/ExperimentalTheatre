@@ -46,14 +46,12 @@ namespace prop3
 
         virtual glm::dvec4 raycast(const Raycast& ray) const override;
 
-        virtual std::vector<Raycast> fireRays(unsigned int count) const override;
+        virtual void fireOn(
+                std::vector<LightCast>& lightCasts,
+                const glm::dvec3& pos,
+                unsigned int count) const override;
 
-        virtual std::vector<Raycast> fireOn(const glm::dvec3& pos, unsigned int count) const override;
 
-
-
-
-    protected:
         static const double SUN_COS_RADIUS;
         static const double SUN_SURFACE_RATIO;
         static const glm::dvec3 SKY_UP;

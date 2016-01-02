@@ -13,6 +13,7 @@
 #include "Ray/RayHitList.h"
 #include "Ray/RayHitReport.h"
 
+#include "Light/LightCast.h"
 #include "Light/Backdrop/Backdrop.h"
 #include "Light/LightBulb/LightBulb.h"
 
@@ -300,15 +301,17 @@ namespace prop3
             _runningPredicate && it != tile->end();
             ++it)
         {
-
             glm::dvec2 pixPos = glm::dvec2(it.position());
             glm::dvec4 screenPos((frameOrig + pixPos)*pixelSize, -1.0, 1.0);
             glm::dvec4 dirH = _viewProjInverse * screenPos;
             glm::dvec3 pixWorldPos = glm::dvec3(dirH / dirH.w);
             raycast.direction = glm::normalize(pixWorldPos - raycast.origin);
 
-            glm::dvec4 sample = fireScreenRay(raycast);
-            if(sample.w > 0.0) it.addSample(sample);
+            _workingSample = glm::dvec4();
+
+            fireScreenRay(raycast);
+            if(_workingSample.w > 0.0)
+                it.addSample(_workingSample);
         }
     }
 
@@ -403,7 +406,7 @@ namespace prop3
         }
     }
 */
-    glm::dvec4 CpuRaytracerWorker::fireScreenRay(
+    void CpuRaytracerWorker::fireScreenRay(
             const Raycast& fromEyeRay)
     {
         int bounceCount = 1;
@@ -412,7 +415,6 @@ namespace prop3
         _rayBounceArray.push_back(fromEyeRay);
 
         size_t rayId = 0;
-        glm::dvec4 sampleAccum(0.0);
         while(rayId < _rayBounceArray.size())
         {
             Raycast ray = _rayBounceArray[rayId];
@@ -444,15 +446,15 @@ namespace prop3
 
             glm::dvec3 matAtt = currMat->lightAttenuation(ray);
             glm::dvec4 currSamp = ray.sample * glm::dvec4(matAtt, 1.0);
-            double currVirtDist = ray.virtDist + ray.limit * ray.entropy;
-            double currPathLength = ray.pathLength + ray.limit;
+            ray.virtDist += ray.limit * ray.entropy;
+            ray.pathLength += ray.limit;
 
             if(ray.limit != Raycast::BACKDROP_LIMIT)
             {
                 // If non-stochatic draft is active
                 if(!_useStochasticTracing)
                 {
-                    return glm::dvec4(draft(reportMin), 1.0);
+                    return commitSample(glm::dvec4(draft(reportMin), 1.0));
                 }
 
                 _tempChildRayArray.clear();
@@ -460,13 +462,15 @@ namespace prop3
                 {
                     // Inderect lighting
                     currMat->scatterLight(
-                            _tempChildRayArray,
-                            ray);
+                        _tempChildRayArray,
+                        ray);
 
                     /*
                     // Direct lighting
-                    toEyeColorSum += gatherScatteredLight(
-                        *currMat, ray);
+                    commitSample(currSamp *
+                        gatherScatteredLight(
+                            *currMat,
+                            ray);
                     */
                 }
                 else
@@ -474,15 +478,17 @@ namespace prop3
                     const Coating* coating = reportMin.coating;
 
                     // Inderect lighting
-                    sampleAccum += currSamp *
+                    commitSample(currSamp *
                         coating->indirectBrdf(
                             _tempChildRayArray,
                             reportMin,
-                            ray);
+                            ray));
 
                     // Direct lighting
-                    sampleAccum += gatherReflectedLight(
-                        *coating, reportMin, ray);
+                    gatherReflectedLight(
+                        *coating,
+                        reportMin,
+                        ray);
                 }
 
                 if(bounceCount < _maxScreenBounceCount)
@@ -496,8 +502,8 @@ namespace prop3
                         if(childRay.sample.a > 0.0)
                         {
                             childRay.entropy = Raycast::mixEntropies(ray.entropy, childRay.entropy);
-                            childRay.pathLength = currPathLength;
-                            childRay.virtDist = currVirtDist;
+                            childRay.pathLength = ray.pathLength;
+                            childRay.virtDist = ray.virtDist;
 
                             _rayBounceArray.push_back(childRay);
                         }
@@ -506,7 +512,7 @@ namespace prop3
             }
             else if(_backdrop.get() != nullptr)
             {
-                sampleAccum += currSamp * _backdrop->raycast(ray);
+                commitSample(currSamp * _backdrop->raycast(ray));
             }
 
 
@@ -517,8 +523,6 @@ namespace prop3
                 rayBatchEnd = _rayBounceArray.size();
             }
         }
-
-        return sampleAccum;
     }
 /*
     glm::dvec3 CpuRaytracerWorker::gatherScatteredLight(
@@ -570,54 +574,51 @@ namespace prop3
         return colorSum;
     }
 */
-    glm::dvec4 CpuRaytracerWorker::gatherReflectedLight(
+    void CpuRaytracerWorker::gatherReflectedLight(
             const Coating& coating,
             const RayHitReport& hitReport,
             const Raycast& outRay)
     {
-        glm::dvec4 sampleSum;
+        std::vector<LightCast> lightRays;
+        _backdrop->fireOn(lightRays, hitReport.position, _lightDirectRayCount);
 
-        glm::dvec3 outDirirection = -outRay.direction;
-
-        std::vector<Raycast> lightCasts =
-            _backdrop->fireOn(hitReport.position, _lightDirectRayCount);
+        for(const auto& light : _searchLights)
+            light->fireOn(lightRays, hitReport.position, _lightDirectRayCount);
 
         //gatherLightHitsToward(lightCasts, hitReport.position);
 
-        const Material& currMaterial = *hitReport.currMaterial;
-
-        size_t lightCastCount = lightCasts.size();
+        size_t lightCastCount = lightRays.size();
         for(size_t c=0; c < lightCastCount; ++c)
         {
-            Raycast& lightRay = lightCasts[c];
+            LightCast& lightRay = lightRays[c];
+            Raycast& lightCast = lightRay.raycast;
 
-            if(glm::dot(lightRay.direction, hitReport.normal) < 0.0)
-                lightRay.limit = glm::distance(lightRay.origin, hitReport.reflectionOrigin);
+            if(glm::dot(lightCast.direction, hitReport.normal) < 0.0)
+                lightCast.limit = glm::distance(lightCast.origin, hitReport.reflectionOrigin);
             else
-                lightRay.limit = glm::distance(lightRay.origin, hitReport.refractionOrigin);
+                lightCast.limit = glm::distance(lightCast.origin, hitReport.refractionOrigin);
 
-            if(!intersectsScene(lightRay))
+            if(!intersectsScene(lightCast))
             {
-                double lightPathLen = currMaterial.lightFreePathLength(lightRay);
+                RayHitReport shadowReport = hitReport;
+                shadowReport.compile(lightCast.direction);
+                const Material& currMaterial = *shadowReport.currMaterial;
 
-                if(lightPathLen >= lightRay.limit)
+                double lightPathLen = currMaterial.lightFreePathLength(lightCast);
+
+                if(lightPathLen >= lightCast.limit)
                 {
-                    glm::dvec3 lightAtt = currMaterial.lightAttenuation(lightRay);
-                    glm::dvec4 currSamp = outRay.sample * glm::dvec4(lightAtt, 1.0);
+                    glm::dvec3 lightAtt = currMaterial.lightAttenuation(lightCast);
+                    glm::dvec4 currSamp = glm::dvec4(lightAtt, 1.0) * lightCast.sample;
 
-                    RayHitReport shadowReport = hitReport;
-                    shadowReport.compile(lightRay.direction);
-
-                    sampleSum += currSamp * lightRay.sample *
+                    commitSample(currSamp *
                         coating.directBrdf(
-                            shadowReport,
                             lightRay,
-                            outDirirection);
+                            shadowReport,
+                            outRay));
                 }
             }
         }
-
-        return sampleSum;
     }
 /*
     void CpuRaytracerWorker::gatherLightHitsToward(
@@ -682,9 +683,9 @@ namespace prop3
 
     void CpuRaytracerWorker::compileSearchStructures()
     {
-        _searchLights.clear();
         _searchZones.clear();
         _searchSurfaces.clear();
+        _searchLights.clear();
 
         if(!_stageSet->isVisible())
             return;
@@ -927,5 +928,11 @@ namespace prop3
         attenuation = 0.125 + (attenuation/2 + 0.5) * 0.875;
 
         return albedo * attenuation;
+    }
+
+    inline void CpuRaytracerWorker::commitSample(const glm::dvec4& sample)
+    {
+        // Using the power heuristic (B=2)
+        _workingSample += sample;
     }
 }

@@ -3,6 +3,7 @@
 #include <GLM/gtc/matrix_transform.hpp>
 
 #include "Ray/Raycast.h"
+#include "Light/LightCast.h"
 #include "Prop/Surface/Surface.h"
 #include "Prop/Coating/EmissiveCoating.h"
 
@@ -13,7 +14,7 @@ namespace prop3
         HandleNode(name),
         _isOn(true),
         _radiantFlux(0.0),
-        _coating(new EmissiveCoating(glm::dvec3(0.0)))
+        _coating(new EmissiveCoating(*this))
     {
     }
 
@@ -56,29 +57,12 @@ namespace prop3
     {
         _isOn = isOn;
 
-        if(_isOn)
-        {
-            _coating->setEmittedRadiance(
-                _radiantFlux / area());
-        }
-        else
-        {
-            _coating->setEmittedRadiance(
-                glm::dvec3(0.0));
-        }
-
         stampCurrentUpdate();
     }
 
     void LightBulb::setRadiantFlux(const glm::dvec3& radiantFlux)
     {
         _radiantFlux = radiantFlux;
-
-        if(_isOn)
-        {
-            _coating->setEmittedRadiance(
-                _radiantFlux / area());
-        }
 
         stampCurrentUpdate();
     }
@@ -98,5 +82,16 @@ namespace prop3
         onTransform();
 
         stampCurrentUpdate();
+    }
+
+    double LightBulb::diffuseSize(
+            const LightCast& lightCast,
+            const Raycast& eyeRay,
+            double roughness) const
+    {
+        double entropy = Raycast::totalEntropy(eyeRay, lightCast.raycast, roughness);
+        double diffDist = Raycast::totalDiffuseDist(eyeRay, lightCast.raycast, roughness);
+        glm::dvec3 origin = lightCast.emittingPosition + lightCast.emittingDirection * diffDist;
+        return visibility(Raycast(entropy, glm::dvec4(), origin, -lightCast.emittingDirection));
     }
 }

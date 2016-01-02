@@ -214,13 +214,7 @@ namespace prop3
             QJsonObject obj = ref.toObject();
             QString type = obj[COATING_TYPE].toString();
 
-            if(type == COATING_TYPE_EMISSIVE)
-            {
-                EmissiveCoating* coat = new EmissiveCoating(color::black);
-                coat->setEmittedRadiance(dvec3FromJson(obj[COATING_EMITTED_RADIANCE]) );
-                node.reset(coat);
-            }
-            else if(type == COATING_TYPE_UNIFORMSTD)
+            if(type == COATING_TYPE_UNIFORMSTD)
             {
                 UniformStdCoating* coat = new UniformStdCoating();
                 coat->setRoughness( obj[COATING_ROUGHNESS].toDouble() );

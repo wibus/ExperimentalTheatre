@@ -10,6 +10,7 @@ namespace prop3
 {
     class Raycast;
     class RayHitList;
+    class LightCast;
     class EmissiveCoating;
     class Material;
     class Surface;
@@ -43,9 +44,15 @@ namespace prop3
 
         virtual bool intersects(const Raycast& ray, RayHitList& reports) const = 0;
 
-        virtual std::vector<Raycast> fireRays(unsigned int count) const = 0;
+        virtual void fireOn(
+                std::vector<LightCast>& lightCasts,
+                const glm::dvec3& pos,
+                unsigned int count) const = 0;
 
-        virtual std::vector<Raycast> fireOn(const glm::dvec3& pos, unsigned int count) const = 0;
+        // Properties
+        virtual double area() const = 0;
+
+        virtual double visibility(const Raycast& ray) const = 0;
 
 
         virtual void setIsOn(bool isOn);
@@ -62,9 +69,10 @@ namespace prop3
 
 
     protected:
-        virtual double area() const = 0;
-        virtual double visibility(const Raycast& ray) const = 0;
-        virtual glm::dvec3 genPoint() const  = 0;
+        virtual double diffuseSize(
+                const LightCast& lightCast,
+                const Raycast& eyeRay,
+                double roughness) const;
 
         virtual void onTransform() = 0;
 

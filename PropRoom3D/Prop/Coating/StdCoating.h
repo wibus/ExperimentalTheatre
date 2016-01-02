@@ -20,9 +20,9 @@ namespace prop3
                 const Raycast& incidentRay) const override;
 
         virtual glm::dvec4 directBrdf(
+                const LightCast& lightCast,
                 const RayHitReport& report,
-                const Raycast& incidentRay,
-                const glm::dvec3& outDirection) const override;
+                const Raycast& eyeRay) const override;
 
         virtual glm::dvec3 albedo(
                 const RayHitReport& report) const override;

@@ -11,6 +11,7 @@
 namespace prop3
 {
     class Raycast;
+    class LightCast;
     class RayHitReport;
     class Material;
 
@@ -29,9 +30,9 @@ namespace prop3
                 const Raycast& incidentRay) const = 0;
 
         virtual glm::dvec4 directBrdf(
+                const LightCast& lightCast,
                 const RayHitReport& report,
-                const Raycast& incidentRay,
-                const glm::dvec3& outDirection) const = 0;
+                const Raycast& eyeRay) const = 0;
 
         virtual glm::dvec3 albedo(
                 const RayHitReport& report) const = 0;

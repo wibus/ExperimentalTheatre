@@ -27,9 +27,16 @@ namespace prop3
 
         virtual bool intersects(const Raycast& ray, RayHitList& reports) const override;
 
-        virtual std::vector<Raycast> fireRays(unsigned int count) const override;
+        virtual void fireOn(
+                std::vector<LightCast>& lightCasts,
+                const glm::dvec3& pos,
+                unsigned int count) const override;
 
-        virtual std::vector<Raycast> fireOn(const glm::dvec3& pos, unsigned int count) const override;
+
+        // Properties
+        virtual double area() const override;
+
+        virtual double visibility(const Raycast& ray) const override;
 
 
         glm::dvec3 center() const;
@@ -40,10 +47,6 @@ namespace prop3
 
 
     protected:
-        virtual double area() const override;
-        virtual double visibility(const Raycast& ray) const override;
-        virtual glm::dvec3 genPoint() const override;
-
         virtual void onTransform() override;
 
 

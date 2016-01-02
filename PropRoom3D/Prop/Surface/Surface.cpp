@@ -717,6 +717,11 @@ namespace prop3
             const std::shared_ptr<Surface>& surf1,
             const std::shared_ptr<Surface>& surf2)
     {
+        if(surf1.get() == nullptr)
+            return surf2;
+        if(surf2.get() == nullptr)
+            return surf1;
+
         std::shared_ptr<SurfaceOr> cast1;
         if(cast1 = std::dynamic_pointer_cast<SurfaceOr>(surf1))
         {
@@ -739,6 +744,9 @@ namespace prop3
             const std::shared_ptr<Surface>& surf1,
             const std::shared_ptr<Surface>& surf2)
     {
+        if(surf1.get() == nullptr || surf2.get() == nullptr)
+            return std::shared_ptr<Surface>();
+
         std::shared_ptr<SurfaceAnd> cast1;
         if(cast1 = std::dynamic_pointer_cast<SurfaceAnd>(surf1))
         {

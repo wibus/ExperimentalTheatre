@@ -9,6 +9,7 @@
 namespace prop3
 {
     class Coating;
+    class Material;
 
 
     class PROP3D_EXPORT RayHitReport

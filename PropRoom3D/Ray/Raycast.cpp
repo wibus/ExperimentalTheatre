@@ -27,8 +27,29 @@ namespace prop3
         return roughness;
     }
 
-    double Raycast::mixEntropies(double entropy1, double entropy2)
+    double Raycast::mixEntropies(double e1, double e2)
     {
-        return 1.0 - (1.0 - entropy1) * (1.0 - entropy2);
+        return 1.0 - (1.0 - e1) * (1.0 - e2);
+    }
+
+    double Raycast::totalEntropy(
+            const Raycast& eyeRay,
+            const Raycast& lightRay,
+            double roughness)
+    {
+        return 1.0 - (1.0 - eyeRay.entropy) *
+                (1.0 - getEntropy(roughness)) *
+                (1.0 - lightRay.entropy);
+    }
+
+    double Raycast::totalDiffuseDist(
+            const Raycast& eyeRay,
+            const Raycast& lightRay,
+            double roughness)
+    {
+        double specularity = (1.0 - eyeRay.entropy) * (1.0 - getEntropy(roughness));
+        double endDist = (lightRay.pathLength - lightRay.virtDist * specularity);
+        double bindingDist = lightRay.limit * (1.0 - specularity);
+        return eyeRay.virtDist + bindingDist + endDist;
     }
 }

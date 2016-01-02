@@ -2,13 +2,13 @@
 
 #include "Node/Visitor.h"
 #include "Ray/RayHitReport.h"
+#include "Light/LightBulb/LightBulb.h"
 
 
 namespace prop3
 {
-    EmissiveCoating::EmissiveCoating(
-            const glm::dvec3& emittedRadiance) :
-        _emittedRadiance()
+    EmissiveCoating::EmissiveCoating(const LightBulb& lightBulb) :
+        _lightBulb(lightBulb)
     {
 
     }
@@ -28,28 +28,22 @@ namespace prop3
             const RayHitReport& report,
             const Raycast& incidentRay) const
     {
-        return glm::dvec4(_emittedRadiance, 1.0);
+        glm::dvec3 virtOrig = report.position - incidentRay.direction * incidentRay.virtDist;
+        double visibility = _lightBulb.visibility(Raycast(incidentRay.entropy, incidentRay.sample, virtOrig, incidentRay.direction));
+        return glm::dvec4(_lightBulb.radiantFlux() / _lightBulb.area() * visibility, visibility);
     }
 
     glm::dvec4 EmissiveCoating::directBrdf(
+            const LightCast& lightCast,
             const RayHitReport& report,
-            const Raycast& incidentRay,
-            const glm::dvec3& outDirection) const
+            const Raycast& eyeRay) const
     {
-        return glm::dvec4(0.0, 0.0, 0.0, 1.0);
+        return glm::dvec4(0.0, 0.0, 0.0, 0.0);
     }
 
     glm::dvec3 EmissiveCoating::albedo(
             const RayHitReport& report) const
     {
-        return _emittedRadiance;
-    }
-
-    void EmissiveCoating::setEmittedRadiance(
-            const glm::dvec3& radiance)
-    {
-        _emittedRadiance = radiance;
-
-        stampCurrentUpdate();
+        return _lightBulb.radiantFlux() / _lightBulb.area();
     }
 }

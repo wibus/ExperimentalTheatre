@@ -3,6 +3,7 @@
 #include <GLM/gtc/random.hpp>
 #include <GLM/gtc/constants.hpp>
 
+#include "Light/LightCast.h"
 #include "Light/LightUtils.h"
 #include "Prop/Material/Material.h"
 #include "Ray/Raycast.h"
@@ -32,8 +33,17 @@ namespace prop3
     const double HALO_POWER = 32.0;
     const double DAY_POWER = 1.0;
 
+    double sunDiffuseSize(
+            const LightCast& lightCast,
+            const Raycast& eyeRay,
+            double roughness)
+    {
+        double entropy = Raycast::totalEntropy(eyeRay, lightCast.raycast, roughness);
+        return glm::pow(ProceduralSun::SUN_SURFACE_RATIO, entropy);
+    }
+
     ProceduralSun::ProceduralSun() :
-        _sunColor(glm::dvec3(1.0/*1.00, 0.75, 0.62*/) * 6e4),
+        _sunColor(glm::dvec3(1.0/*1.00, 0.75, 0.62*/) * 2e4),
         _skyColor(glm::dvec3(0.25, 0.60, 1.00) * 2.0),
         _skylineColor(glm::dvec3(1.00, 1.00, 1.00) * 2.0),
         _groundColor(glm::dvec3(0.05, 0.05, 0.3)),
@@ -145,40 +155,10 @@ namespace prop3
         return glm::dvec4(skyColor, 1.0) + sunSample;
     }
 
-    std::vector<Raycast> ProceduralSun::fireRays(unsigned int count) const
-    {
-        // Fire only sun rays
-        glm::dvec3 rayColor = _sunColor / double(count);
-        glm::dvec4 sunSample(rayColor * SUN_SURFACE_RATIO, SUN_SURFACE_RATIO);
-
-        glm::dvec3 sideward = glm::normalize(glm::cross(SKY_UP, _sunDirection));
-        glm::dvec3 upward = glm::normalize(glm::cross(sideward, _sunDirection));
-        std::vector<Raycast> raycasts;
-        for(unsigned int i=0; i < count; ++i)
-        {
-            glm::dvec2 recDist = glm::diskRand(RECEIVE_PLANE_RADIUS);
-            glm::dvec3 recPoint = RECEIVE_PLANE_POS +
-                sideward * recDist.x + upward * recDist.y;
-
-            glm::dvec2 radDist = glm::diskRand(RADIATION_PLANE_RADIUS);
-            glm::dvec3 radPoint = recPoint +
-                _sunDirection * RADIATION_PLANE_DISTANCE +
-                sideward * radDist.x + upward * radDist.y;
-
-            glm::dvec3 direction = glm::normalize(recPoint - radPoint);
-            raycasts.push_back(Raycast(
-                Raycast::FULLY_SPECULAR,
-                sunSample,
-                radPoint,
-                direction));
-        }
-
-        return raycasts;
-    }
-
-    std::vector<Raycast> ProceduralSun::fireOn(
-                    const glm::dvec3& pos,
-                    unsigned int count) const
+    void ProceduralSun::fireOn(
+            std::vector<LightCast>& lightCasts,
+            const glm::dvec3& pos,
+            unsigned int count) const
     {
         // Fire only sun rays
         double dotSunTop = _sunDirection.z;
@@ -187,12 +167,10 @@ namespace prop3
         double dayMix = 1.0 - glm::pow(1.0 - dayRatio, DAY_POWER);
         glm::dvec3 haloFilter = kelvinToRgb(glm::mix(2000, 6600, dayMix));
 
-        glm::dvec3 rayColor = haloFilter * _sunColor / double(count);
-        glm::dvec4 sunSample(rayColor * SUN_SURFACE_RATIO, SUN_SURFACE_RATIO);
+        glm::dvec4 sunSample(haloFilter * _sunColor, 1.0);
 
         glm::dvec3 sideward = glm::normalize(glm::cross(SKY_UP, _sunDirection));
         glm::dvec3 upward = glm::normalize(glm::cross(sideward, _sunDirection));
-        std::vector<Raycast> raycasts;
         for(unsigned int i=0; i < count; ++i)
         {
             glm::dvec2 radDist = glm::diskRand(RADIATION_PLANE_RADIUS);
@@ -202,13 +180,13 @@ namespace prop3
                 upward * radDist.y;
 
             glm::dvec3 direction = glm::normalize(pos - radPoint);
-            raycasts.push_back(Raycast(
+            Raycast raycasts(
                 Raycast::FULLY_SPECULAR,
                 sunSample,
                 radPoint,
-                direction));
-        }
+                direction);
 
-        return raycasts;
+            lightCasts.push_back(LightCast(raycasts, radPoint, direction, sunDiffuseSize));
+        }
     }
 }

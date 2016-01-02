@@ -1,11 +1,13 @@
 #include "SphericalLight.h"
 
+#include <GLM/gtc/random.hpp>
 #include <GLM/gtc/constants.hpp>
 
 #include "Node/Visitor.h"
 #include "Ray/Raycast.h"
 #include "Ray/RayHitList.h"
 #include "Ray/RayHitReport.h"
+#include "Light/LightCast.h"
 #include "Prop/Coating/EmissiveCoating.h"
 
 
@@ -127,14 +129,34 @@ namespace prop3
         return false;
     }
 
-    std::vector<Raycast> SphericalLight::fireRays(unsigned int count) const
+    void SphericalLight::fireOn(
+            std::vector<LightCast>& lightCasts,
+            const glm::dvec3& pos,
+            unsigned int count) const
     {
-        // TODO
-    }
+        glm::dvec4 sample(radiantFlux() / area(), 1.0);
 
-    std::vector<Raycast> SphericalLight::fireOn(const glm::dvec3& pos, unsigned int count) const
-    {
-        // TODO
+        for(int i=0; i < count; ++i)
+        {
+            glm::dvec3 randRad = glm::sphericalRand(_radius);
+            glm::dvec3 randPos = _transformC + randRad;
+
+            glm::dvec3 dir = pos - randPos;
+            double dotDir = glm::dot(dir, randRad);
+            if(dotDir < 0.0)
+            {
+                randPos = _transformC - randRad;
+                dir = pos - randPos;
+            }
+
+            dir = glm::normalize(dir);
+
+            Raycast ray = Raycast(0.0, sample, randPos, dir);
+
+            using namespace std::placeholders;
+            lightCasts.push_back(LightCast(ray, randPos, dir,
+                std::bind(&SphericalLight::diffuseSize, this, _1, _2, _3)));
+        }
     }
 
     double SphericalLight::area() const
@@ -150,11 +172,6 @@ namespace prop3
         double span = 1.0 - glm::cos(glm::asin(_radius / length));
 
         return span;
-    }
-
-    glm::dvec3 SphericalLight::genPoint() const
-    {
-
     }
 
     void SphericalLight::onTransform()

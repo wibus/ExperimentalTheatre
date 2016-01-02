@@ -81,12 +81,10 @@ namespace prop3
         return false;
     }
 
-    std::vector<Raycast> CircularLight::fireRays(unsigned int count) const
-    {
-        // TODO
-    }
-
-    std::vector<Raycast> CircularLight::fireOn(const glm::dvec3& pos, unsigned int count) const
+    void CircularLight::fireOn(
+            std::vector<LightCast>& lightCasts,
+            const glm::dvec3& pos,
+            unsigned int count) const
     {
         // TODO
     }
@@ -119,11 +117,6 @@ namespace prop3
         double span = 1 - glm::cos(theta);
 
         return span;
-    }
-
-    glm::dvec3 CircularLight::genPoint() const
-    {
-
     }
 
     void CircularLight::onTransform()

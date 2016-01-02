@@ -228,13 +228,7 @@ namespace prop3
     // Coatings
     void StageSetJsonWriter::HardwareBuilder::visit(EmissiveCoating& node)
     {
-        if(insertCoating(node))
-        {
-            QJsonObject obj;
-            obj[COATING_TYPE]                   = COATING_TYPE_EMISSIVE;
-            obj[COATING_EMITTED_RADIANCE]       = toJson(node.emittedRadiance());
-            coatingsArray.append(obj);
-        }
+        // Never add
     }
 
     void StageSetJsonWriter::HardwareBuilder::visit(UniformStdCoating& node)

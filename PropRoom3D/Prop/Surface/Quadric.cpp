@@ -96,8 +96,8 @@ namespace prop3
         Quadric::paraboloid(double rx, double ry)
     {
         return std::shared_ptr<Surface>(new Quadric(
-                1.0 / (rx*rx), // A
-                1.0 / (ry*ry), // B
+                1.0 / (rx*rx) * glm::sign(rx), // A
+                1.0 / (ry*ry) * glm::sign(ry), // B
                 0,             // C
                 0, 0, 0,      // B, C, D
                 0, 0,-1,      // F, H, I
@@ -219,17 +219,35 @@ namespace prop3
 
         if(a != 0.0)
         {
-            return (b*b - 4*a*c) >= 0.0;
+            double dscr = b*b - 4*a*c;
+            if(dscr > 0.0)
+            {
+                double dsrcSqrt = glm::sqrt(dscr);
+
+                double t1 = (-b - dsrcSqrt) / (2 * a);
+                if(0.0 < t1 && t1 <= ray.limit)
+                    return true;
+
+                double t2 = (-b + dsrcSqrt) / (2 * a);
+                if(0.0 < t2 && t2 <= ray.limit)
+                    return true;
+            }
+            else if(dscr == 0.0)
+            {
+                double t = -b / (2 * a);
+                if(0.0 < t && t < ray.limit)
+                    return true;
+            }
         }
         else if(b != 0.0)
         {
-            return true;
+            double t = -c / b;
+            if(0.0 < t && t < ray.limit)
+                return true;
         }
-		else
-		{
-			// TODO : verify case logic
-			return false;
-		}
+
+        // TODO : verify case logic
+        return false;
     }
 
     void Quadric::transform(const Transform& transform)

@@ -10,9 +10,6 @@
 
 namespace prop3
 {
-    class Material;
-
-
     class PROP3D_EXPORT Raycast
     {
 	public:
@@ -22,7 +19,16 @@ namespace prop3
                 const glm::dvec3& direction);
 
         static double getEntropy(double roughness);
-        static double mixEntropies(double entropy1, double entropy2);
+        static double mixEntropies(double e1, double e2);
+
+        static double totalEntropy(
+                const Raycast& eyeRay,
+                const Raycast& lightRay,
+                double roughness);
+        static double totalDiffuseDist(
+                const Raycast& eyeRay,
+                const Raycast& lightRay,
+                double roughness);
 
         double limit;
         double entropy;

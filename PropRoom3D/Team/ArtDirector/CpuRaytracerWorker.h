@@ -75,14 +75,14 @@ namespace prop3
         //virtual void fireLightRay(
         //        const Raycast& fromLightRay);
 
-        virtual glm::dvec4 fireScreenRay(
+        virtual void fireScreenRay(
                 const Raycast& fromEyeRay);
 
         //virtual glm::dvec3 gatherScatteredLight(
         //        const Material& material,
         //        const Raycast& outRay);
 
-        virtual glm::dvec4 gatherReflectedLight(
+        virtual void gatherReflectedLight(
                 const Coating& coating,
                 const RayHitReport& hitReport,
                 const Raycast& outRay);
@@ -102,6 +102,8 @@ namespace prop3
                 const Raycast& raycast);
 
         virtual glm::dvec3 draft(const RayHitReport& report);
+
+        void commitSample(const glm::dvec4& sample);
 
 
     private:
@@ -127,6 +129,7 @@ namespace prop3
         glm::dvec3 _camPos;
         double _confusionRadius;
 
+        glm::dvec4 _workingSample;
         std::shared_ptr<Film> _workingFilm;
 
         std::string _stageSetStream;
@@ -137,8 +140,8 @@ namespace prop3
 
         //std::vector<RayHitReport> _lightHitReports;
         std::vector<SearchZone> _searchZones;
-        std::vector<std::shared_ptr<const LightBulb>> _searchLights;
         std::vector<std::shared_ptr<const Surface>> _searchSurfaces;
+        std::vector<std::shared_ptr<const LightBulb>> _searchLights;
 
         // Memory pools
         RayHitList _rayHitList;
