@@ -22,7 +22,7 @@ namespace prop3
 
         _nextTileId = 0;
         _framePassCount = 0;
-        _varianceThreshold = 0.0;
+        _priorityThreshold = 0.0;
 
         if(hardReset)
         {
@@ -64,7 +64,7 @@ namespace prop3
         return glm::dvec4(_colorBuffer[index], 1.0);
     }
 
-    double StaticFilm::pixelVariance(int index) const
+    double StaticFilm::pixelPriority(int index) const
     {
         return 1.0;
     }

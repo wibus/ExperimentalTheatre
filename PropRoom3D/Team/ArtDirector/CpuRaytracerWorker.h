@@ -121,6 +121,7 @@ namespace prop3
         unsigned int _lightDirectRayCount;
         unsigned int _lightFireRayCount;
         unsigned int _maxScreenBounceCount;
+        double _minScreenRayWeight;
 
         glm::ivec2 _resolution;
         glm::dmat4 _viewInvMatrix;

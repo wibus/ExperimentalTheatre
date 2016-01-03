@@ -56,6 +56,7 @@ namespace prop3
         double _radius;
 
         double _distance;
+        glm::dvec3 _transformC;
         glm::dvec3 _transformN;
     };
 

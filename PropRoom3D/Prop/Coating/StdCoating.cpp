@@ -80,22 +80,29 @@ namespace prop3
             glm::dvec3 diffuseColor = glm::mix(pColor, eColor, blend);
             const glm::dvec3& reflectColor = color::white;
 
-            glm::dvec3 diffuseNormal = getMicrofacetNormal(
-                    wallNormal, incident, 1.0); // Fully diffusive
-
-            glm::dvec3 diffuseDir = glm::reflect(
-                    incident, diffuseNormal);
-
             glm::dvec4 diffuseSample(diffuseColor * diffuseWeight, diffuseWeight);
             glm::dvec4 reflectSample(reflectColor * reflectWeight, reflectWeight);
 
 
             // Diffuse
-            raycasts.push_back(Raycast(
-                    Raycast::FULLY_DIFFUSE,
-                    diffuseSample,
-                    reflectOrig,
-                    diffuseDir));
+            if(rough < 1.0)
+            {
+                glm::dvec3 diffuseNormal = getMicrofacetNormal(
+                        wallNormal, incident, 1.0); // Fully diffusive
+
+                glm::dvec3 diffuseDir = glm::reflect(
+                        incident, diffuseNormal);
+
+                raycasts.push_back(Raycast(
+                        Raycast::FULLY_DIFFUSE,
+                        diffuseSample,
+                        reflectOrig,
+                        diffuseDir));
+            }
+            else
+            {
+                reflectSample += diffuseSample;
+            }
 
             // Specular
             raycasts.push_back(Raycast(

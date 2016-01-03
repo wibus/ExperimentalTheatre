@@ -134,27 +134,29 @@ namespace prop3
             const glm::dvec3& pos,
             unsigned int count) const
     {
+        if(!_isOn) return;
+
         glm::dvec4 sample(radiantFlux() / area(), 1.0);
 
         for(int i=0; i < count; ++i)
         {
             glm::dvec3 randRad = glm::sphericalRand(_radius);
-            glm::dvec3 randPos = _transformC + randRad;
+            glm::dvec3 source = _transformC + randRad;
 
-            glm::dvec3 dir = pos - randPos;
+            glm::dvec3 dir = pos - source;
             double dotDir = glm::dot(dir, randRad);
             if(dotDir < 0.0)
             {
-                randPos = _transformC - randRad;
-                dir = pos - randPos;
+                source = _transformC - randRad;
+                dir = pos - source;
             }
 
             dir = glm::normalize(dir);
 
-            Raycast ray = Raycast(0.0, sample, randPos, dir);
+            Raycast ray = Raycast(0.0, sample, source, dir);
 
             using namespace std::placeholders;
-            lightCasts.push_back(LightCast(ray, randPos, dir,
+            lightCasts.push_back(LightCast(ray, source, dir,
                 std::bind(&SphericalLight::diffuseSize, this, _1, _2, _3)));
         }
     }
@@ -166,7 +168,7 @@ namespace prop3
 
     double SphericalLight::visibility(const Raycast& ray) const
     {
-        glm::dvec3 dist = ray.origin - _center;
+        glm::dvec3 dist = ray.origin - _transformC;
 
         double length = glm::max(glm::length(dist), _radius);
         double span = 1.0 - glm::cos(glm::asin(_radius / length));

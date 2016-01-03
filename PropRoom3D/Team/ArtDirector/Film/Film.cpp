@@ -13,7 +13,7 @@ namespace prop3
         _newFrameCompleted(false),
         _nextTileId(0),
         _tilesResolution(36, 36),
-        _varianceThreshold(0.0),
+        _priorityThreshold(0.0),
         _endTile(nullptr)
     {
 
@@ -98,9 +98,9 @@ namespace prop3
                 endTileReached();
             }
 
-            if(tile->tileVariance() >= _varianceThreshold)
+            if(tile->tilePriority() >= _priorityThreshold)
             {
-                tile->setThreshold(_varianceThreshold);
+                tile->setPriorityThreshold(_priorityThreshold);
                 return tile;
             }
         }
@@ -137,7 +137,7 @@ namespace prop3
                     glm::min((j+1)*tilesHeight(), frameHeight()));
 
                 _tiles.push_back(std::make_shared<Tile>(
-                    *this, _varianceThreshold, minCorner, maxCorner));
+                    *this, _priorityThreshold, minCorner, maxCorner));
             }
         }
     }

@@ -1,11 +1,13 @@
 #include "CircularLight.h"
 
+#include <GLM/gtc/random.hpp>
 #include <GLM/gtc/constants.hpp>
 
 #include "Node/Visitor.h"
 #include "Ray/Raycast.h"
 #include "Ray/RayHitList.h"
 #include "Ray/RayHitReport.h"
+#include "Light/LightCast.h"
 #include "Prop/Coating/EmissiveCoating.h"
 
 
@@ -86,7 +88,30 @@ namespace prop3
             const glm::dvec3& pos,
             unsigned int count) const
     {
-        // TODO
+        if(!_isOn) return;
+
+        if(glm::dot(pos - _transformC, _transformN) < 0.0)
+            return;
+
+        for(int i=0; i < count; ++i)
+        {
+            glm::dvec2 disk = glm::diskRand(_radius);
+
+            glm::dvec3 nonco = glm::abs(_transformN.x) < glm::abs(_transformN.z) ?
+                glm::dvec3(1, 0, 0) : glm::dvec3(0, 0, 1);
+            glm::dvec3 tangent = glm::normalize(glm::cross(_transformN, nonco));
+            glm::dvec3 binorm = glm::normalize(glm::cross(_transformN, tangent));
+
+            glm::dvec3 source = _transformC + tangent*disk.x + binorm*disk.y;
+            glm::dvec3 dir = glm::normalize(pos - source);
+
+            glm::dvec4 sample(radiantFlux() / area(), 1.0);
+            Raycast ray = Raycast(0.0, sample, source, dir);
+
+            using namespace std::placeholders;
+            lightCasts.push_back(LightCast(ray, source, dir,
+                std::bind(&CircularLight::diffuseSize, this, _1, _2, _3)));
+        }
     }
 
     double CircularLight::area() const
@@ -121,6 +146,7 @@ namespace prop3
 
     void CircularLight::onTransform()
     {
+        _transformC = glm::dvec3(_transform * glm::dvec4(_center, 1.0));
         _transformN = glm::transpose(glm::inverse(glm::dmat3(_transform))) * _normal;
     }
 }

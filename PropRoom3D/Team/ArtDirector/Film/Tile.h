@@ -50,9 +50,6 @@ namespace prop3
         const glm::ivec2& minCorner() const;
         const glm::ivec2& maxCorner() const;
 
-        double tileVariance() const;
-        double pixelVariance(const glm::ivec2& position) const;
-
         Iterator begin();
         Iterator end();
 
@@ -64,8 +61,11 @@ namespace prop3
         void addSample(const glm::ivec2& position,
                        const glm::dvec4& sample);
 
-        void setThreshold(double threshold);
-        void setTileVariance(double threshold);
+        void setTilePriority(double priority);
+        void setPriorityThreshold(double threshold);
+
+        double tilePriority() const;
+        double pixelPriority(const glm::ivec2& position) const;
 
     protected:
         static const glm::ivec2 END_PIXEL;
@@ -73,8 +73,8 @@ namespace prop3
         Film& _film;
         std::mutex _mutex;
         Iterator _endIterator;
-        double _tileVariance;
-        double _threshold;
+        double _tilePriority;
+        double _priorityThreshold;
         const glm::ivec2 _minCorner;
         const glm::ivec2 _maxCorner;
         const glm::ivec2 _startPix;
@@ -113,9 +113,9 @@ namespace prop3
         return _maxCorner;
     }
 
-    inline double Tile::tileVariance() const
+    inline double Tile::tilePriority() const
     {
-        return _tileVariance;
+        return _tilePriority;
     }
 }
 

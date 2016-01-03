@@ -35,7 +35,7 @@ namespace prop3
                     }
                 }
             }
-            while(_threshold > _tile.pixelVariance(_position));
+            while(_threshold >= _tile.pixelPriority(_position));
         }
 
         return *this;
@@ -47,8 +47,8 @@ namespace prop3
                        const glm::ivec2& maxCorner) :
         _film(film),
         _endIterator(*this, 0.0, END_PIXEL),
-        _tileVariance(1.0),
-        _threshold(threshold),
+        _tilePriority(1.0),
+        _priorityThreshold(threshold),
         _minCorner(minCorner),
         _maxCorner(maxCorner),
         _startPix(_minCorner + glm::ivec2(-1, 0))
@@ -62,7 +62,7 @@ namespace prop3
 
     Tile::Iterator Tile::begin()
     {
-        Iterator it(*this, _threshold, _startPix);
+        Iterator it(*this, _priorityThreshold, _startPix);
         return ++it;
     }
 
@@ -82,19 +82,14 @@ namespace prop3
         _mutex.unlock();
     }
 
-    void Tile::setThreshold(double threshold)
+    void Tile::setTilePriority(double priority)
     {
-        _threshold = threshold;
+        _tilePriority = priority;
     }
 
-    void Tile::setTileVariance(double threshold)
+    void Tile::setPriorityThreshold(double threshold)
     {
-        _tileVariance = threshold;
-    }
-
-    double Tile::pixelVariance(const glm::ivec2& position) const
-    {
-        return _film.pixelVariance(position);
+        _priorityThreshold = threshold;
     }
 
     void Tile::setColor(
@@ -109,5 +104,10 @@ namespace prop3
             const glm::dvec4& sample)
     {
         _film.addSample(position, sample);
+    }
+
+    double Tile::pixelPriority(const glm::ivec2& position) const
+    {
+        return _film.pixelPriority(position);
     }
 }

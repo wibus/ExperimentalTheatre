@@ -14,7 +14,7 @@ namespace prop3
 
         using Film::sample;
         using Film::addSample;
-        using Film::pixelVariance;
+        using Film::pixelPriority;
 
 
         virtual void clear(const glm::dvec3& color = glm::dvec3(0),
@@ -28,7 +28,7 @@ namespace prop3
     protected:
         virtual void endTileReached() override;
         virtual glm::dvec4 sample(int index) const override;
-        virtual double pixelVariance(int index) const override;
+        virtual double pixelPriority(int index) const override;
         virtual void setColor(int index, const glm::dvec3& color) override;
         virtual void addSample(int index, const glm::dvec4& sample) override;
 

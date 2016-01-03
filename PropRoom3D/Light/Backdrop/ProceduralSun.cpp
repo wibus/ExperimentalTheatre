@@ -43,7 +43,7 @@ namespace prop3
     }
 
     ProceduralSun::ProceduralSun() :
-        _sunColor(glm::dvec3(1.0/*1.00, 0.75, 0.62*/) * 2e4),
+        _sunColor(glm::dvec3(1.0/*1.00, 0.75, 0.62*/) * 5e4),
         _skyColor(glm::dvec3(0.25, 0.60, 1.00) * 2.0),
         _skylineColor(glm::dvec3(1.00, 1.00, 1.00) * 2.0),
         _groundColor(glm::dvec3(0.05, 0.05, 0.3)),

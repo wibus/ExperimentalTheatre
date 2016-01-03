@@ -50,8 +50,8 @@ namespace prop3
         void setColor(int i, int j, const glm::dvec3& color);
         void setColor(const glm::ivec2& position, const glm::dvec3& color);
 
-        double pixelVariance(int i, int j) const;
-        double pixelVariance(const glm::ivec2& position) const;
+        double pixelPriority(int i, int j) const;
+        double pixelPriority(const glm::ivec2& position) const;
 
         virtual void mergeFilm(const Film& film);
 
@@ -65,7 +65,7 @@ namespace prop3
     protected:
         virtual void endTileReached() = 0;
         virtual glm::dvec4 sample(int index) const = 0;
-        virtual double pixelVariance(int index) const = 0;
+        virtual double pixelPriority(int index) const = 0;
         virtual void setColor(int index, const glm::dvec3& color) = 0;
         virtual void addSample(int index, const glm::dvec4& sample) = 0;
 
@@ -82,7 +82,7 @@ namespace prop3
         int _nextTileId;
         std::mutex _tilesMutex;
         glm::ivec2 _tilesResolution;
-        double _varianceThreshold;
+        double _priorityThreshold;
         std::shared_ptr<Tile> _endTile;
         std::vector<std::shared_ptr<Tile>> _tiles;
 
@@ -177,15 +177,15 @@ namespace prop3
         setColor(position.x, position.y, color);
     }
 
-    inline double Film::pixelVariance(int i, int j) const
+    inline double Film::pixelPriority(int i, int j) const
     {
         int index = i + j * _frameResolution.x;
-        return pixelVariance(index);
+        return pixelPriority(index);
     }
 
-    inline double Film::pixelVariance(const glm::ivec2& position) const
+    inline double Film::pixelPriority(const glm::ivec2& position) const
     {
-        return pixelVariance(position.x, position.y);
+        return pixelPriority(position.x, position.y);
     }
 }
 

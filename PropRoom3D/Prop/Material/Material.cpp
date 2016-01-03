@@ -29,6 +29,11 @@ namespace prop3
         const glm::dvec3 cyan           = glm::dvec3(0.000, 1.000, 1.000);
         const glm::dvec3 magenta        = glm::dvec3(1.000, 0.000, 1.000);
         const glm::dvec3 yellow         = glm::dvec3(1.000, 1.000, 0.000);
+
+        const glm::dvec3 candleFlame    = glm::dvec3(1.00, 0.58, 0.16);
+        const glm::dvec3 sodiumVapor    = glm::dvec3(1.00, 0.82, 0.70);
+        const glm::dvec3 tungsten40W    = glm::dvec3(1.00, 0.77, 0.68);
+        const glm::dvec3 tungsten100W   = glm::dvec3(1.00, 0.84, 0.67);
     }
 
     namespace material

@@ -52,7 +52,8 @@ namespace prop3
         _lightRayIntensityThreshold(1.0 / 32.0),
         _lightDirectRayCount(1),
         _lightFireRayCount(20),
-        _maxScreenBounceCount(6),
+        _maxScreenBounceCount(200),
+        _minScreenRayWeight(0.05),
         _confusionRadius(0.1),
         _team(new WorkerTeam())
     {
@@ -499,7 +500,7 @@ namespace prop3
                         Raycast& childRay = _tempChildRayArray[i];
                         childRay.sample *= currSamp;
 
-                        if(childRay.sample.a > 0.0)
+                        if(childRay.sample.a > _minScreenRayWeight)
                         {
                             childRay.entropy = Raycast::mixEntropies(ray.entropy, childRay.entropy);
                             childRay.pathLength = ray.pathLength;
@@ -723,7 +724,7 @@ namespace prop3
                     for(size_t l=0; l < lightCount; ++l)
                     {
                         auto light = subz->lights()[l];
-                        if(light->isOn())
+                        if(light->isVisible())
                             zone->addLight(light);
                     }
 
@@ -749,7 +750,9 @@ namespace prop3
             size_t startLightCount = _searchLights.size();
             for(size_t l=0; l < lightCount; ++l)
             {
-                _searchLights.push_back(zone->lights()[l]);
+                auto light = zone->lights()[l];
+                if(light->isVisible())
+                    _searchLights.push_back(light);
             }
             size_t endLightCount = _searchLights.size();
             size_t addedLights = endLightCount - startLightCount;

@@ -44,6 +44,9 @@ namespace prop3
     glm::dvec3 EmissiveCoating::albedo(
             const RayHitReport& report) const
     {
-        return _lightBulb.radiantFlux() / _lightBulb.area();
+        if(_lightBulb.isOn())
+            return _lightBulb.radiantFlux() / _lightBulb.area();
+        else
+            glm::dvec3(0.0, 0.0, 0.0);
     }
 }

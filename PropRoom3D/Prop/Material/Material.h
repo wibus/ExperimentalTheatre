@@ -70,6 +70,11 @@ namespace prop3
         PROP3D_EXPORT const extern glm::dvec3 cyan;
         PROP3D_EXPORT const extern glm::dvec3 magenta;
         PROP3D_EXPORT const extern glm::dvec3 yellow;
+
+        PROP3D_EXPORT const extern glm::dvec3 candleFlame;
+        PROP3D_EXPORT const extern glm::dvec3 sodiumVapor;
+        PROP3D_EXPORT const extern glm::dvec3 tungsten40W;
+        PROP3D_EXPORT const extern glm::dvec3 tungsten100W;
     }
 
 
