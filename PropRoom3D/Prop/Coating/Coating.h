@@ -63,7 +63,8 @@ namespace prop3
 
 		PROP3D_EXPORT std::shared_ptr<Coating> createClearPaint(
                 const glm::dvec3& color,
-                double roughness);
+                double roughness,
+                double opacity = 1.0);
     }
 }
 

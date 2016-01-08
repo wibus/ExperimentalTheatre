@@ -95,7 +95,20 @@ namespace prop3
     {
         double a, b, c;
         params(ray, a, b, c);
-        return b*b - 4*a*c >= 0.0;
+        double discr = b*b - 4*a*c;
+        if(discr >= 0.0)
+        {
+            double disrcSqrt = glm::sqrt(disrcSqrt);
+            double t1 = (-b - disrcSqrt) / (2 * a);
+            double t2 = (-b + disrcSqrt) / (2 * a);
+            if((0.0 > t1 && t1 > ray.limit) ||
+               (0.0 > t2 && t2 > ray.limit))
+            {
+                return true;
+            }
+        }
+
+        return  false;
     }
 
     void Sphere::transform(const Transform& transform)

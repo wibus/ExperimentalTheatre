@@ -156,7 +156,8 @@ namespace prop3
             }
             else
             {
-                if(_raytracerState->converged())
+                if(_raytracerState->sampleCount() > 2 &&
+                   _raytracerState->converged())
                 {
                     interruptWorkers();
                 }

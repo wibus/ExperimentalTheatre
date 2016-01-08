@@ -12,7 +12,7 @@ namespace prop3
         _newTileCompleted(false),
         _newFrameCompleted(false),
         _nextTileId(0),
-        _tilesResolution(36, 36),
+        _tilesResolution(16, 16),
         _priorityThreshold(0.0),
         _endTile(nullptr)
     {

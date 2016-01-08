@@ -47,7 +47,7 @@ namespace prop3
 
         _stageSet = stageSet;
 
-        double divergenceThreshold = -1.0;
+        double divergenceThreshold = 1.0e-3;
         RaytracerState::DraftParams draftParams;
         draftParams.sizeRatio = 4;
         draftParams.levelCount = 1;

@@ -43,7 +43,6 @@ namespace prop3
 
         int _minThresholdFrameCount;
         int _forceFullFrameCycleCount;
-        double _maxConsideredPriority;
         glm::dvec3 _maxPixelIntensity;
     };
 }

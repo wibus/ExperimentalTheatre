@@ -71,11 +71,12 @@ namespace prop3
 
         std::shared_ptr<Coating> createClearPaint(
                 const glm::dvec3& color,
-                double roughness)
+                double roughness,
+                double opacity)
         {
             UniformStdCoating* coat = new UniformStdCoating();
             coat->setRoughness(roughness);
-            coat->setPaintColor(glm::dvec4(color, 1.0));
+            coat->setPaintColor(glm::dvec4(color, opacity));
             coat->setPaintRefractiveIndex(1.55);
             return std::shared_ptr<Coating>(coat);
         }

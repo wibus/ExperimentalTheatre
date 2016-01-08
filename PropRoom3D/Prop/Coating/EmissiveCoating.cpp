@@ -28,9 +28,13 @@ namespace prop3
             const RayHitReport& report,
             const Raycast& incidentRay) const
     {
-        glm::dvec3 virtOrig = report.position - incidentRay.direction * incidentRay.virtDist;
-        double visibility = _lightBulb.visibility(Raycast(incidentRay.entropy, incidentRay.sample, virtOrig, incidentRay.direction));
-        return glm::dvec4(_lightBulb.radiantFlux() / _lightBulb.area() * visibility, visibility);
+        if(_lightBulb.isOn())
+        {
+            glm::dvec3 virtOrig = report.position - incidentRay.direction * incidentRay.virtDist;
+            double visibility = _lightBulb.visibility(Raycast(incidentRay.entropy, incidentRay.sample, virtOrig, incidentRay.direction));
+            return glm::dvec4(_lightBulb.radiantFlux() / _lightBulb.area() * visibility, visibility);
+        }
+        else return glm::dvec4(0.0, 0.0, 0.0, 0.0);
     }
 
     glm::dvec4 EmissiveCoating::directBrdf(
