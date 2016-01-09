@@ -40,8 +40,10 @@ namespace prop3
 
         // StdCoating properties
         double rough = roughness(tex);
+        double pRIdx = paintRefractiveIndex(tex);
         double entropy = Raycast::getEntropy(rough);
         glm::dvec4 paintFrag = paintColor(tex);
+        glm::dvec3 pColor = glm::dvec3(paintFrag);
         double pOpa = paintFrag.a;
 
         // Leaved material properties
@@ -56,35 +58,86 @@ namespace prop3
         // Reflection
         glm::dvec3 reflectNormal = getMicrofacetNormal(
                 wallNormal, incident, rough);
-        glm::dvec3 reflectDir = glm::reflect(
-                incident, reflectNormal);
+
+        // Fresnel reflection
+        double paintReflectRatio = computeReflexionRatio(
+            lRIdx, pRIdx, incident, reflectNormal);
 
 
-        // Surface reflection (paint and insulator)
-        if(pOpa > 0.0 || (eOpa >= 1.0 && eCond < 1.0))
+        glm::dvec4 reflectSample(0.0);
+        glm::dvec4 diffuseSample(0.0);
+        glm::dvec4 refractSample(0.0);
+
+
+        // Paint
+        if(pOpa > 0.0)
         {
-            double totalDiffScatt = (eOpa >= 1.0 ? 1.0 : 0.0);
-            double blend = (1.0 - pOpa) * totalDiffScatt;
+            double paintReflectWeight = pOpa * paintReflectRatio;
+            reflectSample += glm::dvec4(paintReflectWeight);
 
-            double pRIdx = paintRefractiveIndex(tex);
-            double sRIdx = glm::mix(pRIdx, eRIdx, blend);
+            double paintDiffWeight = pOpa * (1 - paintReflectRatio);
+            diffuseSample += glm::dvec4(pColor * paintDiffWeight, paintDiffWeight);
+        }
 
-            double reflectRatio = computeReflexionRatio(
-                lRIdx, sRIdx, incident, reflectNormal);
+        if(pOpa < 1.0)
+        {
+            // Metal reflection
+            double metalWeight = (1 - pOpa) * eCond;
+            if(metalWeight > 0.0)
+            {
+                reflectSample += glm::dvec4(eColor * metalWeight, metalWeight);
+            }
 
-            double surfaceWeight = pOpa + (1 - pOpa) * (1 - eCond) * totalDiffScatt;
-            double diffuseWeight = (1.0 - reflectRatio) * surfaceWeight;
-            double reflectWeight = reflectRatio * surfaceWeight;
+            if(eCond < 1.0)
+            {
+                // Insulator reflection
+                double insulProb = (1 - pOpa) * (1 - eCond);
+                double matReflectRatio = computeReflexionRatio(
+                    lRIdx, eRIdx, incident, reflectNormal);
 
-            glm::dvec3 pColor = glm::dvec3(paintFrag);
-            glm::dvec3 diffuseColor = glm::mix(pColor, eColor, blend);
-            const glm::dvec3& reflectColor = color::white;
+                double insulReflectWeight = insulProb * matReflectRatio;
+                reflectSample += glm::dvec4(insulReflectWeight);
 
-            glm::dvec4 diffuseSample(diffuseColor * diffuseWeight, diffuseWeight);
-            glm::dvec4 reflectSample(reflectColor * reflectWeight, reflectWeight);
+                // Fully opaque insulator
+                if(eOpa >= 1.0)
+                {
+                    double matDiffWeight = insulProb * (1 - matReflectRatio);
+                    diffuseSample += glm::dvec4(eColor * matDiffWeight, matDiffWeight);
+                }
+                // Refraction
+                else
+                {
+                    double paintRefract = pOpa * (1 - paintReflectRatio);
+                    double insulRefract = insulProb * (1 - matReflectRatio);
+                    double refractWeight = paintRefract + insulRefract;
+                    glm::dvec3 refractColor = glm::mix(color::white, pColor, pOpa);
+                    refractSample += glm::dvec4(refractColor * refractWeight, refractWeight);
+                }
+            }
+        }
 
 
-            // Diffuse
+        // Refraction
+        if(refractSample.w > 0.0)
+        {
+            glm::dvec3 refractDir = computeRefraction(lRIdx, eRIdx, incident, reflectNormal);
+            if(glm::dot(refractDir, wallNormal) < 0.0)
+            {
+                raycasts.push_back(Raycast(
+                        entropy,
+                        refractSample,
+                        refractOrig,
+                        refractDir));
+            }
+            else
+            {
+                reflectSample += refractSample;
+            }
+        }
+
+        // Diffuse
+        if(diffuseSample.w > 0.0)
+        {
             if(rough < 1.0)
             {
                 glm::dvec3 diffuseNormal = getMicrofacetNormal(
@@ -103,84 +156,14 @@ namespace prop3
             {
                 reflectSample += diffuseSample;
             }
-
-            // Specular
-            raycasts.push_back(Raycast(
-                    entropy,
-                    reflectSample,
-                    reflectOrig,
-                    reflectDir));
         }
 
-        // Totally opaque diffuse surface
-        if(pOpa >= 1.0 || (eOpa >= 1.0 && eCond <= 0.0))
-            return emission;
-
-
-        // Metal reflection
-        double eMaterialWeight = (1 - pOpa);
-        if(eCond > 0.0)
+        // Specular
+        if(reflectSample.w > 0.0)
         {
-            double metallicWeight = eMaterialWeight * eCond;
-            glm::dvec4 metallicSample(eColor * metallicWeight, metallicWeight);
+            glm::dvec3 reflectDir = glm::reflect(
+                    incident, reflectNormal);
 
-            // Metallic
-            raycasts.push_back(Raycast(
-                    entropy,
-                    metallicSample,
-                    reflectOrig,
-                    reflectDir));
-        }
-
-        // Totally metallic
-        if(eCond >= 1.0)
-            return emission;
-
-
-        // Dielectric scattering
-        double insulatorWeight = eMaterialWeight * (1 - eCond);
-        if(eOpa < 1.0)
-        {
-            const glm::dvec3& refractColor = color::white;
-            const glm::dvec3& reflectColor = color::white;
-
-            glm::dvec3 refractDir =
-                    computeRefraction(
-                        lRIdx,
-                        eRIdx,
-                        incident,
-                        reflectNormal);
-
-
-            double reflectionRatio =
-                    computeReflexionRatio(
-                        lRIdx,
-                        eRIdx,
-                        incident,
-                        reflectNormal);
-
-            double refractWeight = (1.0 - reflectionRatio) * insulatorWeight;
-            double reflectWeight = reflectionRatio * insulatorWeight;
-
-            glm::dvec4 refractSample(refractColor * refractWeight, refractWeight);
-            glm::dvec4 reflectSample(reflectColor * reflectWeight, reflectWeight);
-
-
-            // Refraction
-            if(glm::dot(refractDir, wallNormal) < 0.0)
-            {
-                raycasts.push_back(Raycast(
-                        entropy,
-                        refractSample,
-                        refractOrig,
-                        refractDir));
-            }
-            else
-            {
-                reflectSample += refractSample;
-            }
-
-            // Reflexion
             raycasts.push_back(Raycast(
                     entropy,
                     reflectSample,
