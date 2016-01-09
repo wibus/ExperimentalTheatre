@@ -53,7 +53,7 @@ namespace prop3
         _lightDirectRayCount(1),
         _lightFireRayCount(20),
         _maxScreenBounceCount(200),
-        _minScreenRayWeight(0.05),
+        _minScreenRayWeight(0.04),
         _confusionRadius(0.1),
         _team(new WorkerTeam())
     {
@@ -489,6 +489,7 @@ namespace prop3
                     gatherReflectedLight(
                         *coating,
                         reportMin,
+                        currSamp,
                         ray);
                 }
 
@@ -578,6 +579,7 @@ namespace prop3
     void CpuRaytracerWorker::gatherReflectedLight(
             const Coating& coating,
             const RayHitReport& hitReport,
+            const glm::dvec4& outSample,
             const Raycast& outRay)
     {
         std::vector<LightCast> lightRays;
@@ -612,7 +614,7 @@ namespace prop3
                     glm::dvec3 lightAtt = currMaterial.lightAttenuation(lightCast);
                     glm::dvec4 currSamp = glm::dvec4(lightAtt, 1.0) * lightCast.sample;
 
-                    commitSample(currSamp *
+                    commitSample(currSamp * outSample *
                         coating.directBrdf(
                             lightRay,
                             shadowReport,

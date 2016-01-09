@@ -38,6 +38,9 @@ namespace prop3
         // Divergence decreases over time
         std::vector<double> _divergenceBuffer;
 
+        // Priority stabilizes over time
+        std::vector<double> _priorityBuffer;
+
         // rgb accumulation and its total weight
         std::vector<glm::dvec4> _weightedColorBuffer;
 

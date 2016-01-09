@@ -7,7 +7,8 @@ namespace prop3
 {
     ConvergentFilm::ConvergentFilm() :
         _varianceBuffer(1, 0.0),
-        _divergenceBuffer(1, 0.0),
+        _divergenceBuffer(1, 1.0),
+        _priorityBuffer(1, 1.0),
         _weightedColorBuffer(1, glm::dvec4(0)),
         _minThresholdFrameCount(7),
         _forceFullFrameCycleCount(1000),
@@ -23,6 +24,8 @@ namespace prop3
 
     void ConvergentFilm::clear(const glm::dvec3& color, bool hardReset)
     {
+        size_t pixelCount = _frameResolution.x * _frameResolution.y;
+
         _newTileCompleted = false;
         _newFrameCompleted = false;
 
@@ -31,8 +34,6 @@ namespace prop3
         _priorityThreshold = 0.0;
 
 
-        size_t pixelCount = _frameResolution.x * _frameResolution.y;
-
         _colorBuffer.clear();
         _colorBuffer.resize(pixelCount, color);
 
@@ -40,7 +41,10 @@ namespace prop3
         _varianceBuffer.resize(pixelCount, 0.0);
 
         _divergenceBuffer.clear();
-        _divergenceBuffer.resize(pixelCount, 0.0);
+        _divergenceBuffer.resize(pixelCount, 1.0);
+
+        _priorityBuffer.clear();
+        _priorityBuffer.resize(pixelCount, 1.0);
 
         glm::dvec4 sample(color, 0.0);
         _weightedColorBuffer.clear();
@@ -54,17 +58,12 @@ namespace prop3
 
     double ConvergentFilm::compileDivergence() const
     {
-        double meanDivergenceSqr = 0.0;
-        size_t buffSize = _divergenceBuffer.size();
-        for(size_t i=0; i < buffSize; ++i)
-        {
-            meanDivergenceSqr += _divergenceBuffer[i];
-        }
+        double divSum = 0.0;
+        double divCount = _divergenceBuffer.size();
+        for(size_t i=0; i < divCount; ++i)
+            divSum += _divergenceBuffer[i];
 
-        meanDivergenceSqr /= double(buffSize);
-        double stdDev = glm::sqrt(meanDivergenceSqr);
-
-        return stdDev;
+        return glm::sqrt(divSum / divCount);
     }
 
     void ConvergentFilm::tileCompleted(Tile& tile)
@@ -97,16 +96,14 @@ namespace prop3
         if(_framePassCount >= _minThresholdFrameCount &&
            _framePassCount % _forceFullFrameCycleCount != 0)
         {
-            int index = 0;
-            double meanPriority = 0.0;
-            for(int j=0; j < frameHeight(); ++j)
-                for(int i=0; i < frameWidth(); ++i, ++index)
-                    meanPriority += pixelPriority(index);
+            double prioritySum = 0.0;
+            double priorityCount = _priorityBuffer.size();
+            for(size_t i=0; i < priorityCount; ++i)
+                prioritySum += _priorityBuffer[i] * _priorityBuffer[i];
 
-            meanPriority /= _varianceBuffer.size();
             double baseRand = glm::linearRand(0.0, 1.0);
-
-            _priorityThreshold = glm::sqrt(baseRand) * meanPriority;
+            double meanPriority = prioritySum / _priorityBuffer.size();
+            _priorityThreshold = 0.75 * glm::sqrt(baseRand * meanPriority);
         }
         else
         {
@@ -121,14 +118,7 @@ namespace prop3
 
     double ConvergentFilm::pixelPriority(int index) const
     {
-        double weight =_weightedColorBuffer[index].w;
-        if(_framePassCount >= _minThresholdFrameCount && weight > 0.0)
-        {
-            glm::dvec3 color = glm::dvec3(_weightedColorBuffer[index]);
-            return (_varianceBuffer[index] / glm::length(color) + 1.0) / (weight);
-        }
-
-        return 1.0;
+        return _priorityBuffer[index];
     }
 
     void ConvergentFilm::setColor(int index, const glm::dvec3& color)
@@ -145,7 +135,8 @@ namespace prop3
         glm::dvec4 newSample = oldSample + trueSample;
         _weightedColorBuffer[index] = newSample;
 
-        glm::dvec3 newColor = glm::dvec3(newSample) / newSample.w;
+        double newWeight = newSample.w;
+        glm::dvec3 newColor = glm::dvec3(newSample) / newWeight;
 
         if(oldSample.w != 0.0)
         {
@@ -164,21 +155,13 @@ namespace prop3
             double dBase = glm::max(trueSample.w, oldSample.w);
 
             double oldVar = _varianceBuffer[index];
-            _varianceBuffer[index] = glm::mix(oldVar, dMean, dWeight / dBase);
+            double newVar = glm::mix(oldVar, dMean, dWeight / dBase);
+            _varianceBuffer[index] = newVar;
+
+            _priorityBuffer[index] = (newVar / glm::length(newColor) + 0.1/newWeight) / newWeight;
         }
 
-/*
-        double priority = 1.0;
-        double weight = _weightedColorBuffer[index].w;
-        if(weight > 0.0)
-        {
-            glm::dvec3 color = glm::dvec3(_weightedColorBuffer[index]);
-            priority = (_varianceBuffer[index] / glm::length(color) + 1.0) / weight;
-        }
-
-        _colorBuffer[index] = glm::dvec3(priority);
-/*///*
+        //_colorBuffer[index] = glm::dvec3(_priorityBuffer[index] * 50.0);
         _colorBuffer[index] = newColor;
-//*/
     }
 }
