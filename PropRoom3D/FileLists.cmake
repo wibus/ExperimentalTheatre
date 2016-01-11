@@ -78,6 +78,7 @@ SET(PROP3_FILM_HEADERS
 SET(PROP3_ART_DIRECTOR_HEADERS
     ${PROP3_FILM_HEADERS}
     ${PROP3_SRC_DIR}/Team/ArtDirector/AbstractArtDirector.h
+    ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorDummy.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorClient.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorServer.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerEngine.h
@@ -188,6 +189,7 @@ SET(PROP3_FILM_SOURCES
 # Art Director
 SET(PROP3_ART_DIRECTOR_SOURCES
     ${PROP3_FILM_SOURCES}
+    ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorDummy.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorClient.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorServer.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerEngine.cpp

@@ -16,7 +16,7 @@
 #include <PropRoom2D/Team/ArtDirector/GlArtDirector.h>
 
 #include <PropRoom3D/Team/AbstractTeam.h>
-#include <PropRoom3D/Team/ArtDirector/ArtDirectorServer.h>
+#include <PropRoom3D/Team/ArtDirector/ArtDirectorDummy.h>
 
 #include "../Play/Play.h"
 #include "../StageManagement/Event/MouseEvent.h"
@@ -125,7 +125,7 @@ namespace scaena
         _artDirector2D.reset(new prop2::GlArtDirector());
         play.propTeam2D()->addArtDirector(_artDirector2D);
 
-        _artDirector3D.reset(new prop3::ArtDirectorServer());
+        _artDirector3D.reset(new prop3::ArtDirectorDummy());
         play.propTeam3D()->addArtDirector(_artDirector3D);
     }
 

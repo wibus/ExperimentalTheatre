@@ -90,9 +90,6 @@ namespace prop3
         {
             // Skip current frame
             _runningPredicate = false;
-
-            // Wait till this worker terminates
-            //std::lock_guard<std::mutex> lk(_flowMutex);
         }
 
         _cv.notify_one();
@@ -174,15 +171,18 @@ namespace prop3
             std::shared_ptr<Tile> tile;
             std::unique_lock<std::mutex> lk(_flowMutex);
             _cv.wait(lk, [this, &tile]{
-                if(_terminatePredicate ||
-                   (_runningPredicate &&
-                        (!_searchSurfaces.empty() ||
-                         !_stageSetStream.empty())))
+                if(_terminatePredicate)
+                    return true;
+
+                if(_runningPredicate &&
+                    (!_searchSurfaces.empty() ||
+                     !_stageSetStream.empty()))
                 {
                     tile = _workingFilm->nextTile();
                     return tile != _workingFilm->endTile();
                 }
-                else return false;
+                else
+                    return false;
             });
 
             // Verify if we are supposed to terminate
