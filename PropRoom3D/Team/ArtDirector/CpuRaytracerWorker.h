@@ -129,7 +129,10 @@ namespace prop3
         glm::dmat4 _projInvMatrix;
         glm::dmat4 _viewProjInverse;
         glm::dvec3 _camPos;
+        double _aperture;
         double _confusionRadius;
+        glm::dvec3 _confusionSide;
+        glm::dvec3 _confusionUp;
 
         glm::dvec4 _workingSample;
         std::shared_ptr<Film> _workingFilm;

@@ -54,6 +54,7 @@ namespace prop3
         _lightFireRayCount(20),
         _maxScreenBounceCount(200),
         _minScreenRayWeight(0.04),
+        _aperture(0.0),
         _confusionRadius(0.1),
         _team(new WorkerTeam())
     {
@@ -113,6 +114,10 @@ namespace prop3
             _viewInvMatrix = glm::inverse(view);
             _viewProjInverse = _viewInvMatrix * _projInvMatrix;
             _camPos = glm::dvec3(_viewInvMatrix * glm::dvec4(0, 0, 0, 1));
+
+            glm::dvec3 camDir = glm::dvec3(_viewInvMatrix * glm::dvec4(0.0, 0.0, -1.0, 0.0));
+            _confusionSide = glm::normalize(glm::cross(camDir, glm::dvec3(0.0, 0.0, 1.0)));
+            _confusionUp = glm::normalize(glm::cross(_confusionSide, camDir));
         });
     }
 
@@ -121,6 +126,12 @@ namespace prop3
         skipAndExecute([this, &proj](){
             _projInvMatrix = glm::inverse(proj);
             _viewProjInverse = _viewInvMatrix * _projInvMatrix;
+
+            glm::dvec4 apertureBeg = _projInvMatrix * glm::dvec4(0.0, 0.0, -1.0, 1.0);
+            apertureBeg.z /= apertureBeg.w;
+            glm::dvec4 apertureEnd = _projInvMatrix * glm::dvec4(0.0, 0.0, 1.0, 1.0);
+            apertureEnd.z /= apertureEnd.w;
+            _aperture = _confusionRadius * ((apertureBeg.z - apertureEnd.z) - 1.0);
         });
     }
 
@@ -272,36 +283,25 @@ namespace prop3
             frameOrig += glm::diskRand(0.5);
         }
 
-        glm::dvec3 eyeWorldPos = _camPos;
-        if(_useDepthOfField)
-        {
-            glm::dvec4 apertureBeg = _projInvMatrix * glm::dvec4(0.0, 0.0, -1.0, 1.0);
-            apertureBeg.z /= apertureBeg.w;
-            glm::dvec4 apertureEnd = _projInvMatrix * glm::dvec4(0.0, 0.0, 1.0, 1.0);
-            apertureEnd.z /= apertureEnd.w;
-            double aperture = (apertureBeg.z - apertureEnd.z) - 1.0;
-
-            if(aperture > 0.0)
-            {
-                glm::dvec3 camDir = glm::dvec3(_viewInvMatrix * glm::dvec4(0.0, 0.0, -1.0, 0.0));
-                glm::dvec3 confusionSide = glm::normalize(glm::cross(camDir, glm::dvec3(0.0, 0.0, 1.0)));
-                glm::dvec3 confusionUp = glm::normalize(glm::cross(confusionSide, camDir));
-                glm::dvec2 confusionPos = glm::diskRand(_confusionRadius * aperture);
-                eyeWorldPos += confusionSide * confusionPos.x + confusionUp * confusionPos.y;
-            }
-        }
-
         Raycast raycast(
             Raycast::FULLY_SPECULAR,
             glm::dvec4(1.0),
-            eyeWorldPos,
+            _camPos,
             glm::dvec3(0.0));
 
-
+        int pixId = 0;
         for(Tile::Iterator it = tile->begin();
             _runningPredicate && it != tile->end();
-            ++it)
+            ++it, ++pixId)
         {
+            if(_useDepthOfField && _aperture > 0.0 && pixId % 7 == 0)
+            {
+                glm::dvec2 rVar = glm::linearRand(glm::dvec2(0.0), glm::dvec2(1.0, 2.0*glm::pi<double>()));
+                glm::dvec2 confusionPos = _aperture * glm::sqrt(rVar.x) * glm::dvec2(glm::cos(rVar.y), glm::sin(rVar.y));
+                raycast.origin = _camPos + _confusionSide * confusionPos.x + _confusionUp * confusionPos.y;
+            }
+
+
             glm::dvec2 pixPos = glm::dvec2(it.position());
             glm::dvec4 screenPos((frameOrig + pixPos)*pixelSize, -1.0, 1.0);
             glm::dvec4 dirH = _viewProjInverse * screenPos;
