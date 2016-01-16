@@ -67,17 +67,25 @@ namespace prop3
         double tilePriority() const;
         double pixelPriority(const glm::ivec2& position) const;
 
+        void setDivergenceSum(double sum);
+        double divergenceSum() const;
+
+        void setPrioritySum(double sum);
+        double prioritySum() const;
+
     protected:
         static const glm::ivec2 END_PIXEL;
 
         Film& _film;
         std::mutex _mutex;
         Iterator _endIterator;
-        double _tilePriority;
-        double _priorityThreshold;
         const glm::ivec2 _minCorner;
         const glm::ivec2 _maxCorner;
         const glm::ivec2 _startPix;
+        double _tilePriority;
+        double _priorityThreshold;
+        double _divergenceSum;
+        double _prioritySum;
     };
 
 
@@ -116,6 +124,16 @@ namespace prop3
     inline double Tile::tilePriority() const
     {
         return _tilePriority;
+    }
+
+    inline double Tile::divergenceSum() const
+    {
+        return _divergenceSum;
+    }
+
+    inline double Tile::prioritySum() const
+    {
+        return _prioritySum;
     }
 }
 

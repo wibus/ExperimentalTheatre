@@ -73,7 +73,7 @@ namespace prop3
                 for(int i=minCorner.x; i < maxCorner.x; ++i)
                 {
                     int index = j*frameWidth() + i;
-                    addSample(index, film.sample(index));
+                    addSample(index, film.pixelSample(index));
                 }
             }
 

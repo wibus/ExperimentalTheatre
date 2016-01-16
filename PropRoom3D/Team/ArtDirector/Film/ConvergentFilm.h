@@ -12,7 +12,7 @@ namespace prop3
         ConvergentFilm();
         virtual ~ConvergentFilm();
 
-        using Film::sample;
+        using Film::pixelSample;
         using Film::addSample;
         using Film::pixelPriority;
 
@@ -26,8 +26,9 @@ namespace prop3
 
     protected:
         virtual void endTileReached() override;
-        virtual glm::dvec4 sample(int index) const override;
+        virtual double pixelDivergence(int index) const override;
         virtual double pixelPriority(int index) const override;
+        virtual glm::dvec4 pixelSample(int index) const override;
         virtual void setColor(int index, const glm::dvec3& color) override;
         virtual void addSample(int index, const glm::dvec4& sample) override;
 
@@ -45,7 +46,6 @@ namespace prop3
         std::vector<glm::dvec4> _weightedColorBuffer;
 
         int _minThresholdFrameCount;
-        int _forceFullFrameCycleCount;
         glm::dvec3 _maxPixelIntensity;
     };
 }

@@ -41,17 +41,20 @@ namespace prop3
 
         virtual double compileDivergence() const = 0;
 
-        glm::dvec4 sample(int i, int j) const;
-        glm::dvec4 sample(const glm::ivec2& position) const;
+        double pixelDivergence(int i, int j) const;
+        double pixelDivergence(const glm::ivec2& position) const;
+
+        double pixelPriority(int i, int j) const;
+        double pixelPriority(const glm::ivec2& position) const;
+
+        glm::dvec4 pixelSample(int i, int j) const;
+        glm::dvec4 pixelSample(const glm::ivec2& position) const;
 
         void addSample(int i, int j, const glm::dvec4& sample);
         void addSample(const glm::ivec2& position, const glm::dvec4& sample);
 
         void setColor(int i, int j, const glm::dvec3& color);
         void setColor(const glm::ivec2& position, const glm::dvec3& color);
-
-        double pixelPriority(int i, int j) const;
-        double pixelPriority(const glm::ivec2& position) const;
 
         virtual void mergeFilm(const Film& film);
 
@@ -64,8 +67,9 @@ namespace prop3
 
     protected:
         virtual void endTileReached() = 0;
-        virtual glm::dvec4 sample(int index) const = 0;
+        virtual double pixelDivergence(int index) const = 0;
         virtual double pixelPriority(int index) const = 0;
+        virtual glm::dvec4 pixelSample(int index) const = 0;
         virtual void setColor(int index, const glm::dvec3& color) = 0;
         virtual void addSample(int index, const glm::dvec4& sample) = 0;
 
@@ -138,15 +142,37 @@ namespace prop3
         return _colorBuffer;
     }
 
-    inline glm::dvec4 Film::sample(int i, int j) const
+    inline double Film::pixelDivergence(int i, int j) const
     {
         int index = i + j * _frameResolution.x;
-        return sample(index);
+        return pixelDivergence(index);
     }
 
-    inline glm::dvec4 Film::sample(const glm::ivec2& position) const
+    inline double Film::pixelDivergence(const glm::ivec2& position) const
     {
-        return sample(position.x, position.y);
+        return pixelDivergence(position.x, position.y);
+    }
+
+    inline double Film::pixelPriority(int i, int j) const
+    {
+        int index = i + j * _frameResolution.x;
+        return pixelPriority(index);
+    }
+
+    inline double Film::pixelPriority(const glm::ivec2& position) const
+    {
+        return pixelPriority(position.x, position.y);
+    }
+
+    inline glm::dvec4 Film::pixelSample(int i, int j) const
+    {
+        int index = i + j * _frameResolution.x;
+        return pixelSample(index);
+    }
+
+    inline glm::dvec4 Film::pixelSample(const glm::ivec2& position) const
+    {
+        return pixelSample(position.x, position.y);
     }
 
     inline void Film::addSample(
@@ -175,17 +201,6 @@ namespace prop3
             const glm::dvec3& color)
     {
         setColor(position.x, position.y, color);
-    }
-
-    inline double Film::pixelPriority(int i, int j) const
-    {
-        int index = i + j * _frameResolution.x;
-        return pixelPriority(index);
-    }
-
-    inline double Film::pixelPriority(const glm::ivec2& position) const
-    {
-        return pixelPriority(position.x, position.y);
     }
 }
 

@@ -10,8 +10,7 @@ namespace prop3
         _divergenceBuffer(1, 1.0),
         _priorityBuffer(1, 1.0),
         _weightedColorBuffer(1, glm::dvec4(0)),
-        _minThresholdFrameCount(7),
-        _forceFullFrameCycleCount(1000),
+        _minThresholdFrameCount(8),
         _maxPixelIntensity(2.0)
     {
 
@@ -52,17 +51,23 @@ namespace prop3
 
         for(const auto& tile : _tiles)
         {
+            glm::ivec2 tileResolution = tile->maxCorner() - tile->minCorner();
+            int tilePixCount = tileResolution.x * tileResolution.y;
+
             tile->setTilePriority(1.0);
+            tile->setPrioritySum(tilePixCount);
+            tile->setDivergenceSum(tilePixCount);
         }
     }
 
     double ConvergentFilm::compileDivergence() const
     {
         double divSum = 0.0;
-        double divCount = _divergenceBuffer.size();
-        for(size_t i=0; i < divCount; ++i)
-            divSum += _divergenceBuffer[i];
+        double tileCount = _tiles.size();
+        for(size_t i=0; i < tileCount; ++i)
+            divSum += _tiles[i]->divergenceSum();
 
+        double divCount = _divergenceBuffer.size();
         return glm::sqrt(divSum / divCount);
     }
 
@@ -72,15 +77,23 @@ namespace prop3
 
         _newTileCompleted = true;
 
-        if(_framePassCount >= _minThresholdFrameCount)
+        double prioritySum = 0.0;
+        double maxPriority = 0.0;
+        double divergenceSum = 0.0;
+        for(int j=tile.minCorner().y; j < tile.maxCorner().y; ++j)
         {
-            double maxPriority = 0.0;
-            for(int j=tile.minCorner().y; j < tile.maxCorner().y; ++j)
-                for(int i=tile.minCorner().x; i < tile.maxCorner().x; ++i)
-                    maxPriority = glm::max(maxPriority, pixelPriority(i, j));
-
-            tile.setTilePriority(maxPriority);
+            int index = j * _frameResolution.x + tile.minCorner().x;
+            for(int i=tile.minCorner().x; i < tile.maxCorner().x; ++i, ++index)
+            {
+                prioritySum += _priorityBuffer[index] * _priorityBuffer[index];
+                maxPriority = glm::max(maxPriority, _priorityBuffer[index]);
+                divergenceSum += _divergenceBuffer[index];
+            }
         }
+
+        tile.setPrioritySum(prioritySum);
+        tile.setTilePriority(maxPriority);
+        tile.setDivergenceSum(divergenceSum);
     }
 
     void ConvergentFilm::endTileReached()
@@ -93,13 +106,12 @@ namespace prop3
         _cvMutex.unlock();
         _cv.notify_all();
 
-        if(_framePassCount >= _minThresholdFrameCount &&
-           _framePassCount % _forceFullFrameCycleCount != 0)
+        if(_framePassCount >= _minThresholdFrameCount)
         {
             double prioritySum = 0.0;
-            double priorityCount = _priorityBuffer.size();
-            for(size_t i=0; i < priorityCount; ++i)
-                prioritySum += _priorityBuffer[i] * _priorityBuffer[i];
+            double tileCount = _tiles.size();
+            for(size_t i=0; i < tileCount; ++i)
+                prioritySum += _tiles[i]->prioritySum();
 
             double baseRand = glm::linearRand(0.0, 1.0);
             double meanPriority = prioritySum / _priorityBuffer.size();
@@ -111,9 +123,14 @@ namespace prop3
         }
     }
 
-    glm::dvec4 ConvergentFilm::sample(int index) const
+    glm::dvec4 ConvergentFilm::pixelSample(int index) const
     {
         return _weightedColorBuffer[index];
+    }
+
+    double ConvergentFilm::pixelDivergence(int index) const
+    {
+        return _divergenceBuffer[index];
     }
 
     double ConvergentFilm::pixelPriority(int index) const

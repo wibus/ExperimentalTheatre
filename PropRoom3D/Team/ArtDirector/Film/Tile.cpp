@@ -35,23 +35,25 @@ namespace prop3
                     }
                 }
             }
-            while(_threshold >= _tile.pixelPriority(_position));
+            while(_threshold > _tile.pixelPriority(_position));
         }
 
         return *this;
     }
 
     Tile::Tile(Film& film,
-                       double threshold,
-                       const glm::ivec2& minCorner,
-                       const glm::ivec2& maxCorner) :
+               double threshold,
+               const glm::ivec2& minCorner,
+               const glm::ivec2& maxCorner) :
         _film(film),
         _endIterator(*this, 0.0, END_PIXEL),
-        _tilePriority(1.0),
-        _priorityThreshold(threshold),
         _minCorner(minCorner),
         _maxCorner(maxCorner),
-        _startPix(_minCorner + glm::ivec2(-1, 0))
+        _startPix(_minCorner + glm::ivec2(-1, 0)),
+        _tilePriority(1.0),
+        _priorityThreshold(threshold),
+        _divergenceSum(0.0),
+        _prioritySum(1.0)
     {
     }
 
@@ -62,8 +64,7 @@ namespace prop3
 
     Tile::Iterator Tile::begin()
     {
-        Iterator it(*this, _priorityThreshold, _startPix);
-        return ++it;
+        return ++Iterator(*this, _priorityThreshold, _startPix);
     }
 
     Tile::Iterator Tile::end()
@@ -109,5 +110,15 @@ namespace prop3
     double Tile::pixelPriority(const glm::ivec2& position) const
     {
         return _film.pixelPriority(position);
+    }
+
+    void Tile::setDivergenceSum(double sum)
+    {
+        _divergenceSum = sum;
+    }
+
+    void Tile::setPrioritySum(double sum)
+    {
+        _prioritySum = sum;
     }
 }

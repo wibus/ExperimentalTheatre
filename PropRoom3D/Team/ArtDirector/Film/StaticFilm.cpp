@@ -59,14 +59,19 @@ namespace prop3
         // Do nothing
     }
 
-    glm::dvec4 StaticFilm::sample(int index) const
+    double StaticFilm::pixelDivergence(int index) const
     {
-        return glm::dvec4(_colorBuffer[index], 1.0);
+        return 0.0;
     }
 
     double StaticFilm::pixelPriority(int index) const
     {
         return 1.0;
+    }
+
+    glm::dvec4 StaticFilm::pixelSample(int index) const
+    {
+        return glm::dvec4(_colorBuffer[index], 1.0);
     }
 
     void StaticFilm::setColor(int index, const glm::dvec3& color)
