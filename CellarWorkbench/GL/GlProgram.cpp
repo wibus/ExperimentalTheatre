@@ -89,6 +89,7 @@ namespace cellar
     {
         if(_id != 0)
         {
+            _binary.reset();
             glDeleteProgram(_id);
             _id = 0;
         }
@@ -484,10 +485,9 @@ namespace cellar
             glGetIntegerv(GL_PROGRAM_BINARY_FORMATS, (GLint*)(&_binary->format));
             glGetProgramiv(_id, GL_PROGRAM_BINARY_LENGTH, &_binary->length);
 
-            GLchar* bin = new GLchar[_binary->length];
-            glGetProgramBinary(_id, _binary->length, nullptr, &_binary->format, bin);
-            _binary->binary = bin;
-            delete [] bin;
+            _binary->binary = new GLchar[_binary->length];
+            glGetProgramBinary(_id, _binary->length, nullptr,
+                               &_binary->format, _binary->binary);
         }
 
         return *_binary;

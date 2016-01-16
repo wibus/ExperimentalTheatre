@@ -4,6 +4,7 @@
 #include <QDesktopWidget>
 #include <QWidget>
 #include <QComboBox>
+#include <QDir>
 
 #include <CellarWorkbench/Misc/StringUtils.h>
 #include <CellarWorkbench/Misc/Log.h>
@@ -39,6 +40,11 @@ namespace scaena
 
         // Init QApplication
         connect(&(*_qApp), SIGNAL(aboutToQuit()), this, SLOT(aboutToQuitSlot()));
+
+        QString cwd = QDir::currentPath();
+        getLog().postMessage(
+          new Message('I', false,"Current working directory is " + cwd.toStdString(),
+            "Application"));
     }
 
     void Application::setPlay(const std::shared_ptr<Play>& play)

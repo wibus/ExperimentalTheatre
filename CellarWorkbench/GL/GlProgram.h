@@ -20,9 +20,12 @@ namespace cellar
 {
     struct GlProgramBinary
     {
+        GlProgramBinary() : length(0), binary(nullptr) {}
+        ~GlProgramBinary() {delete [] binary;}
+
         GLint length;
         GLenum format;
-        std::string binary;
+        char* binary;
     };
 
 
