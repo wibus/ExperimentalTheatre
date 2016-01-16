@@ -52,11 +52,18 @@ namespace prop3
         _lightRayIntensityThreshold(1.0 / 32.0),
         _lightDirectRayCount(1),
         _lightFireRayCount(20),
-        _maxScreenBounceCount(200),
+        _screenRayIntensityThreshold(1.0/64.0),
+        _maxScreenBounceCount(24),
+        _sufficientScreenRayBounce(5),
+        _sufficientScreenRayWeight(0.75),
         _minScreenRayWeight(0.04),
         _aperture(0.0),
         _confusionRadius(0.1),
-        _team(new WorkerTeam())
+        _team(new WorkerTeam()),
+        _dofJitterSampleCount(37),
+        _dofJitteredTilePerArray(45),
+        _dofCurrentJitteredTileCount(0),
+        _dofJitterIterator(0)
     {
         _team->setup();
     }
@@ -118,6 +125,7 @@ namespace prop3
             glm::dvec3 camDir = glm::dvec3(_viewInvMatrix * glm::dvec4(0.0, 0.0, -1.0, 0.0));
             _confusionSide = glm::normalize(glm::cross(camDir, glm::dvec3(0.0, 0.0, 1.0)));
             _confusionUp = glm::normalize(glm::cross(_confusionSide, camDir));
+            _dofJitterArray.clear();
         });
     }
 
@@ -132,6 +140,7 @@ namespace prop3
             glm::dvec4 apertureEnd = _projInvMatrix * glm::dvec4(0.0, 0.0, 1.0, 1.0);
             apertureEnd.z /= apertureEnd.w;
             _aperture = _confusionRadius * ((apertureBeg.z - apertureEnd.z) - 1.0);
+            _dofJitterArray.clear();
         });
     }
 
@@ -223,9 +232,35 @@ namespace prop3
 
             while(tile != _workingFilm->endTile())
             {
+                // Build jitter buffer if it was destroyed
+                if(_useDepthOfField && _aperture > 0.0 && _dofJitterArray.empty())
+                {
+                    int jittCount = glm::linearRand(_dofJitterSampleCount/2, _dofJitterSampleCount);
+                    _dofJitterArray.resize(jittCount);
+                    for(int i=0; i < jittCount; ++i)
+                    {
+                        glm::dvec2 rVar = glm::linearRand(glm::dvec2(0.0), glm::dvec2(1.0, 2.0*glm::pi<double>()));
+                        glm::dvec2 confusionPos = _aperture * glm::sqrt(rVar.x) * glm::dvec2(glm::cos(rVar.y), glm::sin(rVar.y));
+                        _dofJitterArray[i] = _camPos + _confusionSide * confusionPos.x + _confusionUp * confusionPos.y;
+                        _dofCurrentJitteredTileCount = 0;
+                    }
+                }
+
                 tile->lock();
                 shootFromScreen(tile);
                 tile->unlock();
+
+
+                // Destroy jitter buffer if too many tiles used it
+                if(_useDepthOfField && _aperture > 0.0)
+                {
+                    ++_dofCurrentJitteredTileCount;
+                    if(_dofCurrentJitteredTileCount >=
+                       _dofJitteredTilePerArray)
+                    {
+                        _dofJitterArray.clear();
+                    }
+                }
 
                 if(_runningPredicate)
                     tile = _workingFilm->nextTile();
@@ -291,14 +326,14 @@ namespace prop3
 
         int pixId = 0;
         for(Tile::Iterator it = tile->begin();
-            _runningPredicate && it != tile->end();
-            ++it, ++pixId)
+            it != tile->end(); ++it, ++pixId)
         {
-            if(_useDepthOfField && _aperture > 0.0 && pixId % 7 == 0)
+            if(_useDepthOfField && _aperture > 0.0)
             {
-                glm::dvec2 rVar = glm::linearRand(glm::dvec2(0.0), glm::dvec2(1.0, 2.0*glm::pi<double>()));
-                glm::dvec2 confusionPos = _aperture * glm::sqrt(rVar.x) * glm::dvec2(glm::cos(rVar.y), glm::sin(rVar.y));
-                raycast.origin = _camPos + _confusionSide * confusionPos.x + _confusionUp * confusionPos.y;
+                if(++_dofJitterIterator >= _dofJitterArray.size())
+                    _dofJitterIterator = 0;
+
+                raycast.origin = _dofJitterArray[_dofJitterIterator];
             }
 
 
@@ -309,10 +344,16 @@ namespace prop3
             raycast.direction = glm::normalize(pixWorldPos - raycast.origin);
 
             _workingSample = glm::dvec4();
+            while(_workingSample.w == 0.0
+                   && _runningPredicate)
+            {
+                fireScreenRay(raycast);
+            }
 
-            fireScreenRay(raycast);
-            if(_workingSample.w > 0.0)
+            if(_runningPredicate)
+            {
                 it.addSample(_workingSample);
+            }
         }
     }
 
@@ -503,11 +544,21 @@ namespace prop3
 
                         if(childRay.sample.a > _minScreenRayWeight)
                         {
-                            childRay.entropy = Raycast::mixEntropies(ray.entropy, childRay.entropy);
-                            childRay.pathLength = ray.pathLength;
-                            childRay.virtDist = ray.virtDist;
+                            glm::dvec3 color = glm::dvec3(childRay.sample) / childRay.sample.a;
+                            if(color.r > _screenRayIntensityThreshold ||
+                               color.g > _screenRayIntensityThreshold ||
+                               color.b > _screenRayIntensityThreshold)
+                            {
+                                childRay.entropy = Raycast::mixEntropies(ray.entropy, childRay.entropy);
+                                childRay.pathLength = ray.pathLength;
+                                childRay.virtDist = ray.virtDist;
 
-                            _rayBounceArray.push_back(childRay);
+                                _rayBounceArray.push_back(childRay);
+                            }
+                            else
+                            {
+                               commitSample(glm::dvec4(0, 0, 0, childRay.sample.a / 2.0));
+                            }
                         }
                     }
                 }
@@ -521,6 +572,11 @@ namespace prop3
             // Check bounce group end
             if(++rayId == rayBatchEnd)
             {
+                // Check if we are satisfied with accumulated samples
+                if(bounceCount >= _sufficientScreenRayBounce &&
+                   _workingSample.w >= _sufficientScreenRayWeight)
+                    break;
+
                 ++bounceCount;
                 rayBatchEnd = _rayBounceArray.size();
             }
@@ -601,24 +657,27 @@ namespace prop3
             else
                 lightCast.limit = glm::distance(lightCast.origin, hitReport.refractionOrigin);
 
-            if(!intersectsScene(lightCast))
+            RayHitReport shadowReport = hitReport;
+            shadowReport.compile(lightCast.direction);
+            const Material& currMaterial = *shadowReport.currMaterial;
+            double lightPathLen = currMaterial.lightFreePathLength(lightCast);
+
+            if(lightPathLen >= lightCast.limit)
             {
-                RayHitReport shadowReport = hitReport;
-                shadowReport.compile(lightCast.direction);
-                const Material& currMaterial = *shadowReport.currMaterial;
+                glm::dvec3 lightAtt = currMaterial.lightAttenuation(lightCast);
+                glm::dvec4 lighSamp = glm::dvec4(lightAtt, 1.0) * lightCast.sample;
 
-                double lightPathLen = currMaterial.lightFreePathLength(lightCast);
-
-                if(lightPathLen >= lightCast.limit)
+                glm::dvec4 pathSamp = lighSamp * outSample;
+                if(pathSamp.w > _minScreenRayWeight)
                 {
-                    glm::dvec3 lightAtt = currMaterial.lightAttenuation(lightCast);
-                    glm::dvec4 currSamp = glm::dvec4(lightAtt, 1.0) * lightCast.sample;
-
-                    commitSample(currSamp * outSample *
-                        coating.directBrdf(
-                            lightRay,
-                            shadowReport,
-                            outRay));
+                    if(!intersectsScene(lightCast))
+                    {
+                        commitSample(pathSamp *
+                             coating.directBrdf(
+                                 lightRay,
+                                 shadowReport,
+                                 outRay));
+                    }
                 }
             }
         }

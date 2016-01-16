@@ -122,6 +122,9 @@ namespace prop3
         unsigned int _lightDirectRayCount;
         unsigned int _lightFireRayCount;
         unsigned int _maxScreenBounceCount;
+        double _screenRayIntensityThreshold;
+        unsigned int _sufficientScreenRayBounce;
+        double _sufficientScreenRayWeight;
         double _minScreenRayWeight;
 
         glm::ivec2 _resolution;
@@ -152,6 +155,13 @@ namespace prop3
         RayHitList _rayHitList;
         std::vector<Raycast> _rayBounceArray;
         std::vector<Raycast> _tempChildRayArray;
+
+        // Jittering cache
+        size_t _dofJitterSampleCount;
+        int _dofJitteredTilePerArray;
+        int _dofCurrentJitteredTileCount;
+        std::vector<glm::dvec3> _dofJitterArray;
+        size_t _dofJitterIterator;
     };
 }
 

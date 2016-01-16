@@ -175,7 +175,8 @@ namespace prop3
             double newVar = glm::mix(oldVar, dMean, dWeight / dBase);
             _varianceBuffer[index] = newVar;
 
-            _priorityBuffer[index] = (newVar / glm::length(newColor) + 0.1/newWeight) / newWeight;
+            double scale = glm::length(newColor) + 1e-3;
+            _priorityBuffer[index] = (newVar / scale  + 0.1/newWeight) / newWeight;
         }
 
         //_colorBuffer[index] = glm::dvec3(_priorityBuffer[index] * 50.0);

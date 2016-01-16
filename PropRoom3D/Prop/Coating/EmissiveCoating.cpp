@@ -34,7 +34,7 @@ namespace prop3
             double visibility = _lightBulb.visibility(Raycast(incidentRay.entropy, incidentRay.sample, virtOrig, incidentRay.direction));
             return glm::dvec4(_lightBulb.radiantFlux() / _lightBulb.area() * visibility, visibility);
         }
-        else return glm::dvec4(0.0, 0.0, 0.0, 0.0);
+        else return glm::dvec4(0.0, 0.0, 0.0, 1.0);
     }
 
     glm::dvec4 EmissiveCoating::directBrdf(
@@ -42,7 +42,7 @@ namespace prop3
             const RayHitReport& report,
             const Raycast& eyeRay) const
     {
-        return glm::dvec4(0.0, 0.0, 0.0, 0.0);
+        return glm::dvec4(0.0, 0.0, 0.0, 1.0);
     }
 
     glm::dvec3 EmissiveCoating::albedo(
