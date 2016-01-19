@@ -9,7 +9,7 @@ ELSEIF(MSVC)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4251") # dll interface
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4244") # int to float
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4351") # array init new behavior
-	ADD_DEFINITIONS(-DNOMINMAX)						  # for abusive min max defines
+    ADD_DEFINITIONS(-DNOMINMAX)                       # for abusive min max defines
 ENDIF()
 
 ADD_DEFINITIONS(-DGLM_FORCE_RADIANS)

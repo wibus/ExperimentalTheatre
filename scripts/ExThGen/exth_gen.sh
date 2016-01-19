@@ -2,6 +2,7 @@
 # Execute in script folder
 
 # Arg 1 = Project name
+# Arg 2 = Output directory
 proj="$1"
 out="$2"
 tmp="tmp"
