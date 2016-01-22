@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 /// OpenGL Mathematics (glm.g-truc.net)
 ///
-/// Copyright (c) 2005 - 2014 G-Truc Creation (www.g-truc.net)
+/// Copyright (c) 2005 - 2015 G-Truc Creation (www.g-truc.net)
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
 /// in the Software without restriction, including without limitation the rights
@@ -202,8 +202,12 @@ namespace detail
 		GLM_STATIC_ASSERT(
 			std::numeric_limits<genFIType>::is_iec559 || (std::numeric_limits<genFIType>::is_signed && std::numeric_limits<genFIType>::is_integer),
 			"'sign' only accept signed inputs");
-		
-		return detail::compute_sign<genFIType, defaultp, tvec1, std::numeric_limits<genFIType>::is_iec559>::call(tvec1<genFIType>(x)).x;
+#ifdef __CUDACC__
+                auto tmp = detail::compute_sign<genFIType, defaultp, tvec1, std::numeric_limits<genFIType>::is_iec559>::call(tvec1<genFIType>(x));
+                return tmp.x;
+#else
+                return detail::compute_sign<genFIType, defaultp, tvec1, std::numeric_limits<genFIType>::is_iec559>::call(tvec1<genFIType>(x)).x;
+#endif
 	}
 
 	template <typename T, precision P, template <typename, precision> class vecType>
@@ -546,16 +550,18 @@ namespace detail
 		{
 			GLM_STATIC_ASSERT(std::numeric_limits<genType>::is_iec559, "'isnan' only accept floating-point inputs");
 
-#			if GLM_LANG & GLM_LANG_CXX11_FLAG
+#			if GLM_HAS_CXX11_STL
 				return std::isnan(x);
-#			elif GLM_COMPILER & (GLM_COMPILER_VC | GLM_COMPILER_INTEL)
+#			elif GLM_COMPILER & GLM_COMPILER_VC
 				return _isnan(x) != 0;
-#			elif GLM_COMPILER & (GLM_COMPILER_GCC | (GLM_COMPILER_APPLE_CLANG | GLM_COMPILER_LLVM))
-#				if GLM_PLATFORM & GLM_PLATFORM_ANDROID && __cplusplus < 201103L
+#			elif GLM_COMPILER & GLM_COMPILER_INTEL
+#				if GLM_PLATFORM & GLM_PLATFORM_WINDOWS
 					return _isnan(x) != 0;
 #				else
-					return std::isnan(x);
+					return ::isnan(x) != 0;
 #				endif
+#			elif (GLM_COMPILER & (GLM_COMPILER_GCC | (GLM_COMPILER_APPLE_CLANG | GLM_COMPILER_LLVM))) && (GLM_PLATFORM & GLM_PLATFORM_ANDROID) && __cplusplus < 201103L
+				return _isnan(x) != 0;
 #			elif GLM_COMPILER & GLM_COMPILER_CUDA
 				return isnan(x) != 0;
 #			else
@@ -580,17 +586,21 @@ namespace detail
 		{
 			GLM_STATIC_ASSERT(std::numeric_limits<genType>::is_iec559, "'isinf' only accept floating-point inputs");
 
-#			if(GLM_LANG & GLM_LANG_CXX11_FLAG)
+#			if GLM_HAS_CXX11_STL
 				return std::isinf(x);
-#			elif(GLM_COMPILER & (GLM_COMPILER_INTEL | GLM_COMPILER_VC))
-				return _fpclass(x) == _FPCLASS_NINF || _fpclass(x) == _FPCLASS_PINF;
-#			elif(GLM_COMPILER & (GLM_COMPILER_GCC | (GLM_COMPILER_APPLE_CLANG | GLM_COMPILER_LLVM)))
+#			elif GLM_COMPILER & (GLM_COMPILER_INTEL | GLM_COMPILER_VC)
+#				if(GLM_PLATFORM & GLM_PLATFORM_WINDOWS)
+					return _fpclass(x) == _FPCLASS_NINF || _fpclass(x) == _FPCLASS_PINF;
+#				else
+					return ::isinf(x);
+#				endif
+#			elif GLM_COMPILER & (GLM_COMPILER_GCC | (GLM_COMPILER_APPLE_CLANG | GLM_COMPILER_LLVM))
 #				if(GLM_PLATFORM & GLM_PLATFORM_ANDROID && __cplusplus < 201103L)
 					return _isinf(x) != 0;
 #				else
 					return std::isinf(x);
 #				endif
-#			elif(GLM_COMPILER & GLM_COMPILER_CUDA)
+#			elif GLM_COMPILER & GLM_COMPILER_CUDA
 				// http://developer.download.nvidia.com/compute/cuda/4_2/rel/toolkit/docs/online/group__CUDA__MATH__DOUBLE_g13431dd2b40b51f9139cbb7f50c18fab.html#g13431dd2b40b51f9139cbb7f50c18fab
 				return isinf(double(x)) != 0;
 #			else
@@ -662,7 +672,7 @@ namespace detail
 	{
 		GLM_STATIC_ASSERT(std::numeric_limits<genType>::is_iec559, "'frexp' only accept floating-point inputs");
 
-		return std::frexp(x, exp);
+		return std::frexp(x, &exp);
 	}
 
 	template <typename T, precision P>
@@ -670,7 +680,7 @@ namespace detail
 	{
 		GLM_STATIC_ASSERT(std::numeric_limits<T>::is_iec559, "'frexp' only accept floating-point inputs");
 
-		return tvec1<T, P>(std::frexp(x.x, exp.x));
+		return tvec1<T, P>(std::frexp(x.x, &exp.x));
 	}
 
 	template <typename T, precision P>
@@ -706,7 +716,7 @@ namespace detail
 			frexp(x.w, exp.w));
 	}
 
-	template <typename genType, precision P>
+	template <typename genType>
 	GLM_FUNC_QUALIFIER genType ldexp(genType const & x, int const & exp)
 	{
 		GLM_STATIC_ASSERT(std::numeric_limits<genType>::is_iec559, "'ldexp' only accept floating-point inputs");

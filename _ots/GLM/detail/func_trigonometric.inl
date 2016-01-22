@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 /// OpenGL Mathematics (glm.g-truc.net)
 ///
-/// Copyright (c) 2005 - 2014 G-Truc Creation (www.g-truc.net)
+/// Copyright (c) 2005 - 2015 G-Truc Creation (www.g-truc.net)
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
 /// in the Software without restriction, including without limitation the rights
@@ -38,7 +38,7 @@ namespace glm
 {
 	// radians
 	template <typename genType>
-	GLM_FUNC_QUALIFIER genType radians(genType degrees)
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR genType radians(genType degrees)
 	{
 		GLM_STATIC_ASSERT(std::numeric_limits<genType>::is_iec559, "'radians' only accept floating-point input");
 
@@ -46,14 +46,14 @@ namespace glm
 	}
 
 	template <typename T, precision P, template <typename, precision> class vecType>
-	GLM_FUNC_QUALIFIER vecType<T, P> radians(vecType<T, P> const & v)
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vecType<T, P> radians(vecType<T, P> const & v)
 	{
 		return detail::functor1<T, T, P, vecType>::call(radians, v);
 	}
 	
 	// degrees
 	template <typename genType>
-	GLM_FUNC_QUALIFIER genType degrees(genType radians)
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR genType degrees(genType radians)
 	{
 		GLM_STATIC_ASSERT(std::numeric_limits<genType>::is_iec559, "'degrees' only accept floating-point input");
 
@@ -61,7 +61,7 @@ namespace glm
 	}
 
 	template <typename T, precision P, template <typename, precision> class vecType>
-	GLM_FUNC_QUALIFIER vecType<T, P> degrees(vecType<T, P> const & v)
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR vecType<T, P> degrees(vecType<T, P> const & v)
 	{
 		return detail::functor1<T, T, P, vecType>::call(degrees, v);
 	}
@@ -123,7 +123,7 @@ namespace glm
 	template <typename T, precision P, template <typename, precision> class vecType>
 	GLM_FUNC_QUALIFIER vecType<T, P> atan(vecType<T, P> const & a, vecType<T, P> const & b)
 	{
-		return detail::functor2<T, P, vecType>::call(atan2, a, b);
+		return detail::functor2<T, P, vecType>::call(::std::atan2, a, b);
 	}
 
 	using std::atan;
@@ -162,7 +162,7 @@ namespace glm
 	}
 
 	// asinh
-#	if GLM_LANG & GLM_LANG_CXX11_FLAG
+#	if GLM_HAS_CXX11_STL
 		using std::asinh;
 #	else
 		template <typename genType> 
@@ -181,7 +181,7 @@ namespace glm
 	}
 
 	// acosh
-#	if GLM_LANG & GLM_LANG_CXX11_FLAG
+#	if GLM_HAS_CXX11_STL
 		using std::acosh;
 #	else
 		template <typename genType> 
@@ -202,7 +202,7 @@ namespace glm
 	}
 
 	// atanh
-#	if GLM_LANG & GLM_LANG_CXX11_FLAG
+#	if GLM_HAS_CXX11_STL
 		using std::atanh;
 #	else
 		template <typename genType>

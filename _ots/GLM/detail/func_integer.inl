@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 /// OpenGL Mathematics (glm.g-truc.net)
 ///
-/// Copyright (c) 2005 - 2014 G-Truc Creation (www.g-truc.net)
+/// Copyright (c) 2005 - 2015 G-Truc Creation (www.g-truc.net)
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
 /// in the Software without restriction, including without limitation the rights
@@ -116,6 +116,7 @@ namespace detail
 			}
 		};
 
+#		if !((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_MODEL == GLM_MODEL_32))
 		template <typename genIUType>
 		struct compute_findLSB<genIUType, 64>
 		{
@@ -126,6 +127,7 @@ namespace detail
 				return IsNotNull ? int(Result) : -1;
 			}
 		};
+#		endif
 #	endif//GLM_HAS_BITSCAN_WINDOWS
 
 	template <typename T, glm::precision P, template <class, glm::precision> class vecType, bool EXEC = true>
@@ -171,14 +173,6 @@ namespace detail
 			return IsNotNull ? int(Result) : -1;
 		}
 
-		template <typename genIUType>
-		GLM_FUNC_QUALIFIER int compute_findMSB_64(genIUType Value)
-		{
-			unsigned long Result(0);
-			unsigned char IsNotNull = _BitScanReverse64(&Result, *reinterpret_cast<unsigned __int64*>(&Value));
-			return IsNotNull ? int(Result) : -1;
-		}
-
 		template <typename T, glm::precision P, template <class, glm::precision> class vecType>
 		struct compute_findMSB_vec<T, P, vecType, 32>
 		{
@@ -188,6 +182,15 @@ namespace detail
 			}
 		};
 
+#		if !((GLM_COMPILER & GLM_COMPILER_VC) && (GLM_MODEL == GLM_MODEL_32))
+		template <typename genIUType>
+		GLM_FUNC_QUALIFIER int compute_findMSB_64(genIUType Value)
+		{
+			unsigned long Result(0);
+			unsigned char IsNotNull = _BitScanReverse64(&Result, *reinterpret_cast<unsigned __int64*>(&Value));
+			return IsNotNull ? int(Result) : -1;
+		}
+
 		template <typename T, glm::precision P, template <class, glm::precision> class vecType>
 		struct compute_findMSB_vec<T, P, vecType, 64>
 		{
@@ -196,6 +199,7 @@ namespace detail
 				return detail::functor1<int, T, P, vecType>::call(compute_findMSB_64, x);
 			}
 		};
+#		endif
 #	endif//GLM_HAS_BITSCAN_WINDOWS
 }//namespace detail
 
@@ -203,7 +207,7 @@ namespace detail
 	GLM_FUNC_QUALIFIER uint uaddCarry(uint const & x, uint const & y, uint & Carry)
 	{
 		uint64 const Value64(static_cast<uint64>(x) + static_cast<uint64>(y));
-		uint64 const Max32(static_cast<uint64>(std::numeric_limits<uint>::max()));
+		uint64 const Max32((static_cast<uint64>(1) << static_cast<uint64>(32)) - static_cast<uint64>(1));
 		Carry = Value64 > Max32 ? 1 : 0;
 		return static_cast<uint32>(Value64 % (Max32 + static_cast<uint64>(1)));
 	}
@@ -244,10 +248,8 @@ namespace detail
 		GLM_STATIC_ASSERT(sizeof(uint) == sizeof(uint32), "uint and uint32 size mismatch");
 
 		uint64 Value64 = static_cast<uint64>(x) * static_cast<uint64>(y);
-		uint32* PointerMSB = (reinterpret_cast<uint32*>(&Value64) + 1);
-		msb = *PointerMSB;
-		uint32* PointerLSB = (reinterpret_cast<uint32*>(&Value64) + 0);
-		lsb = *PointerLSB;
+		msb = static_cast<uint>(Value64 >> static_cast<uint64>(32));
+		lsb = static_cast<uint>(Value64);
 	}
 
 	template <precision P, template <typename, precision> class vecType>
@@ -266,10 +268,8 @@ namespace detail
 		GLM_STATIC_ASSERT(sizeof(int) == sizeof(int32), "int and int32 size mismatch");
 
 		int64 Value64 = static_cast<int64>(x) * static_cast<int64>(y);
-		int32* PointerMSB = (reinterpret_cast<int32*>(&Value64) + 1);
-		msb = *PointerMSB;
-		int32* PointerLSB = (reinterpret_cast<int32*>(&Value64));
-		lsb = *PointerLSB;
+		msb = static_cast<int>(Value64 >> static_cast<int64>(32));
+		lsb = static_cast<int>(Value64);
 	}
 
 	template <precision P, template <typename, precision> class vecType>

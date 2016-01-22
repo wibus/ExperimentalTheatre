@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 /// OpenGL Mathematics (glm.g-truc.net)
 ///
-/// Copyright (c) 2005 - 2014 G-Truc Creation (www.g-truc.net)
+/// Copyright (c) 2005 - 2015 G-Truc Creation (www.g-truc.net)
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
 /// in the Software without restriction, including without limitation the rights
@@ -34,7 +34,8 @@
 ///////////////////////////////////////////////////////////////////////////////////
 
 #define GLM_MESSAGES
-#include "../glm.hpp"
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
 #include <limits>
 
 struct material
@@ -66,8 +67,8 @@ struct light
 
 
 // Sample 1
-#include <GLM/vec3.hpp>// glm::vec3
-#include <GLM/geometric.hpp>// glm::cross, glm::normalize
+#include <glm/vec3.hpp>// glm::vec3
+#include <glm/geometric.hpp>// glm::cross, glm::normalize
 
 glm::vec3 computeNormal
 (
@@ -84,11 +85,11 @@ typedef unsigned int GLuint;
 void glUniformMatrix4fv(GLuint, int, int, float*){}
 
 // Sample 2
-#include <GLM/vec3.hpp> // glm::vec3
-#include <GLM/vec4.hpp> // glm::vec4, glm::ivec4
-#include <GLM/mat4x4.hpp> // glm::mat4
-#include <GLM/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
-#include <GLM/gtc/type_ptr.hpp> // glm::value_ptr
+#include <glm/vec3.hpp> // glm::vec3
+#include <glm/vec4.hpp> // glm::vec4, glm::ivec4
+#include <glm/mat4x4.hpp> // glm::mat4
+#include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
+#include <glm/gtc/type_ptr.hpp> // glm::value_ptr
 void func(GLuint LocationMVP, float Translate, glm::vec2 const & Rotate)
 {
 	glm::mat4 Projection = glm::perspective(45.0f, 4.0f / 3.0f, 0.1f, 100.f);
@@ -101,10 +102,10 @@ void func(GLuint LocationMVP, float Translate, glm::vec2 const & Rotate)
 }
 
 // Sample 3
-#include <GLM/vec2.hpp>// glm::vec2
-#include <GLM/packing.hpp>// glm::packUnorm2x16
-#include <GLM/integer.hpp>// glm::uint
-#include <GLM/gtc/type_precision.hpp>// glm::i8vec2, glm::i32vec2
+#include <glm/vec2.hpp>// glm::vec2
+#include <glm/packing.hpp>// glm::packUnorm2x16
+#include <glm/integer.hpp>// glm::uint
+#include <glm/gtc/type_precision.hpp>// glm::i8vec2, glm::i32vec2
 std::size_t const VertexCount = 4;
 // Float quad geometry
 std::size_t const PositionSizeF32 = VertexCount * sizeof(glm::vec2);
@@ -151,10 +152,10 @@ struct intersection
 
 /*
 // Sample 4
-#include <GLM/vec3.hpp>// glm::vec3
-#include <GLM/geometric.hpp>// glm::normalize, glm::dot, glm::reflect
-#include <GLM/exponential.hpp>// glm::pow
-#include <GLM/gtc/random.hpp>// glm::vecRand3
+#include <glm/vec3.hpp>// glm::vec3
+#include <glm/geometric.hpp>// glm::normalize, glm::dot, glm::reflect
+#include <glm/exponential.hpp>// glm::pow
+#include <glm/gtc/random.hpp>// glm::vecRand3
 glm::vec3 lighting
 (
 	intersection const & Intersection,
@@ -213,10 +214,19 @@ typename vecType::value_type normalizeDotC(vecType const & a, vecType const & b)
 
 int main()
 {
-	glm::vec4 v(1);
-	float a = normalizeDotA(v, v);
-	float b = normalizeDotB(v, v);
-	float c = normalizeDotC(v, v);
+	glm::vec1 o(1);
+	glm::vec2 a(1);
+	glm::vec3 b(1);
+	glm::vec4 c(1);
+
+	glm::quat q;
+	glm::dualquat p;
+
+	glm::mat4 m(1);
+
+	float a0 = normalizeDotA(a, a);
+	float b0 = normalizeDotB(b, b);
+	float c0 = normalizeDotC(c, c);
 
 	return 0;
 }
