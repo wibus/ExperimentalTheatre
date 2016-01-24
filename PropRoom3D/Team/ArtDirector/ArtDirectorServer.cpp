@@ -22,7 +22,7 @@ namespace prop3
 #ifdef NDEBUG
         _localRaytracer.reset(new CpuRaytracerEngine(8));
 #else
-        _localRaytracer.reset(new CpuRaytracerEngine(1));
+        _localRaytracer.reset(new CpuRaytracerEngine(8));
 #endif
     }
 
@@ -47,14 +47,23 @@ namespace prop3
 
         _stageSet = stageSet;
 
-        double divergenceThreshold = 1.0e-3;
+
+        unsigned int sampleCountThreshold = 256;
+        //unsigned int sampleCountThreshold = 2;
+        double divergenceThreshold = 1.333e-3;
+        double timeThreshold = 900.0;
+
         RaytracerState::DraftParams draftParams;
         draftParams.sizeRatio = 4;
         draftParams.levelCount = 1;
         draftParams.frameCountPerLevel = 1;
         draftParams.fastDraftEnabled = true;
 
-        _localRaytracer->setup(divergenceThreshold, draftParams);
+        _localRaytracer->setup(
+            divergenceThreshold,
+            sampleCountThreshold,
+            timeThreshold,
+            draftParams);
 
         if(_postProdUnit)
         {
@@ -92,12 +101,12 @@ namespace prop3
         _postProdUnit->execute();
     }
 
-    void ArtDirectorServer::reset()
+    void ArtDirectorServer::terminate()
     {
-        _localRaytracer->reset();
+        _localRaytracer->terminate();
         clearColorTexture();
 
-        // TODO wbussiere 2015-05-01 : reset clients
+        // TODO wbussiere 2015-05-01 : terminate clients
     }
 
     void ArtDirectorServer::resize(int width, int height)

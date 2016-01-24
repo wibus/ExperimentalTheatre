@@ -49,6 +49,10 @@ namespace prop3
 
             void setDivergenceThreshold(double divergenceThreshold);
 
+            void setSampleCountThreshold(unsigned int sampleCountThreshold);
+
+            void setRenderTimeThreshold(double renderTimeThreshold);
+
             void setDivergence(double divergence);
 
             void setDraftLevel(int draftLevel);
@@ -59,14 +63,18 @@ namespace prop3
         private:
             double renderTime() const;
 
-            std::chrono::steady_clock::time_point _startTime;
 
             int _workerCount;
             bool _interrupted;
-            unsigned int _sampleCount;
 
-            double _divergenceThreshold;
+            std::chrono::steady_clock::time_point _startTime;
+            double _renderTimeThreshold;
+
+            unsigned int _sampleCount;
+            unsigned int _sampleCountThreshold;
+
             double _divergence;
+            double _divergenceThreshold;
 
             DraftParams _draftParams;
             int _draftLevel;
@@ -79,9 +87,15 @@ namespace prop3
 
         bool interrupted() const;
 
+
         unsigned int sampleCount() const;
 
+        bool runningOutOfSamples() const;
+
+
         double renderTime() const;
+
+        bool runningOutOfTime() const;
 
 
         double divergence() const;
@@ -131,12 +145,22 @@ namespace prop3
         return _protectedState._sampleCount;
     }
 
+    inline bool RaytracerState::runningOutOfSamples() const
+    {
+        return sampleCount() >= _protectedState._sampleCountThreshold;
+    }
+
     inline double RaytracerState::renderTime() const
     {
         if(isDrafting() || sampleCount() == 0)
             return 0.0;
 
         return _protectedState.renderTime();
+    }
+
+    inline bool RaytracerState::runningOutOfTime() const
+    {
+        return renderTime() >= _protectedState._renderTimeThreshold;
     }
 
     inline double RaytracerState::divergence() const
@@ -194,7 +218,7 @@ namespace prop3
 
     inline bool RaytracerState::isRendering() const
     {
-        return isDrafting() || (!converged());
+        return isDrafting() || (!converged() && !runningOutOfTime() && !runningOutOfSamples());
     }
 }
 

@@ -1,5 +1,7 @@
 #include "RaytracerState.h"
 
+#include <numeric>
+
 
 namespace prop3
 {
@@ -29,9 +31,11 @@ namespace prop3
         _workerCount(0),
         _interrupted(true),
         _startTime(std::chrono::steady_clock::now()),
+        _renderTimeThreshold(std::numeric_limits<double>::infinity()),
         _sampleCount(0),
-        _divergenceThreshold(-1.0),
+        _sampleCountThreshold(std::numeric_limits<unsigned int>::max()),
         _divergence(1.0),
+        _divergenceThreshold(-1.0),
         _draftLevel(0),
         _draftParams()
     {
@@ -79,6 +83,16 @@ namespace prop3
     void RaytracerState::ProtectedState::setDivergenceThreshold(double divergenceThreshold)
     {
         _divergenceThreshold = divergenceThreshold;
+    }
+
+    void RaytracerState::ProtectedState::setSampleCountThreshold(unsigned int sampleCountThreshold)
+    {
+        _sampleCountThreshold = sampleCountThreshold;
+    }
+
+    void RaytracerState::ProtectedState::setRenderTimeThreshold(double renderTimeThreshold)
+    {
+        _renderTimeThreshold = renderTimeThreshold;
     }
 
     void RaytracerState::ProtectedState::setDivergence(double divergence)

@@ -17,7 +17,7 @@ using namespace cellar;
 
 namespace prop3
 {
-    AbstractTeam::AbstractTeam(AbstractChoreographer* choreographer) :
+    AbstractTeam::AbstractTeam(const std::shared_ptr<AbstractChoreographer> &choreographer) :
         _stageSet(new StageSet()),
         _choreographer(choreographer),
         _artDirectors()
@@ -36,14 +36,14 @@ namespace prop3
             artDir->setup(_stageSet);
     }
 
-    void AbstractTeam::reset()
+    void AbstractTeam::terminate()
     {
         _stageSet->clear();
 
         if(_choreographer.get() != nullptr)
-            _choreographer->reset();
+            _choreographer->terminate();
         for(auto& artDir : _artDirectors)
-            artDir->reset();
+            artDir->terminate();
     }
 
     void AbstractTeam::update(double dt)
@@ -103,6 +103,12 @@ namespace prop3
         const shared_ptr<AbstractArtDirector>& artDirector)
     {
         _artDirectors.push_back(artDirector);
+    }
+
+    void AbstractTeam::switchChoreographer(
+        const std::shared_ptr<AbstractChoreographer>& choreographer)
+    {
+        _choreographer = choreographer;
     }
 }
 

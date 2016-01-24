@@ -57,16 +57,20 @@ namespace prop3
 
     void CpuRaytracerEngine::setup(
             double divergenceThreshold,
+            unsigned int sampleCountThreshold,
+            double timeThreshold,
             const RaytracerState::DraftParams& draftParams)
     {
         _protectedState.setDivergenceThreshold(divergenceThreshold);
+        _protectedState.setSampleCountThreshold(sampleCountThreshold);
+        _protectedState.setRenderTimeThreshold(timeThreshold);
         _protectedState.setDraftParams(draftParams);
 
         setupFilms();
         setupWorkers();
     }
 
-    void CpuRaytracerEngine::reset()
+    void CpuRaytracerEngine::terminate()
     {
         for(auto& w : _workerObjects)
         {
@@ -156,8 +160,10 @@ namespace prop3
             }
             else
             {
-                if(_raytracerState->sampleCount() > 2 &&
-                   _raytracerState->converged())
+                if(_raytracerState->sampleCount() > 2 && (
+                   _raytracerState->converged()) ||
+                   _raytracerState->runningOutOfTime() ||
+                   _raytracerState->runningOutOfSamples())
                 {
                     interruptWorkers();
                 }
@@ -317,7 +323,7 @@ namespace prop3
                 "Terminating current CPU raytracer workers",
                 "CpuRaytracerEngine"));
 
-            reset();
+            terminate();
         }
 
 

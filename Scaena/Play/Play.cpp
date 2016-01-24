@@ -126,7 +126,7 @@ namespace scaena
 
             // Reset teams
             _propTeam2D->reset();
-            _propTeam3D->reset();
+            _propTeam3D->terminate();
 
             // Reset play
             (*_currentAct)->closeCurtain();

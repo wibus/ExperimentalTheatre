@@ -32,14 +32,14 @@ namespace prop3
 
 
     protected:
-        AbstractTeam(AbstractChoreographer* choreographer);
+        AbstractTeam(const std::shared_ptr<AbstractChoreographer>& choreographer);
 
 
     public:
         virtual ~AbstractTeam();
 
         virtual void setup();
-        virtual void reset();
+        virtual void terminate();
         virtual void update(double dt);
 
         // StageSet
@@ -50,12 +50,14 @@ namespace prop3
         // Team accessors/modifiers
         virtual void addArtDirector(
             const std::shared_ptr<AbstractArtDirector>& artDirector);
+        virtual void switchChoreographer(
+            const std::shared_ptr<AbstractChoreographer>& choreographer);
 
 
     private:
         // Team members
         std::shared_ptr<StageSet> _stageSet;
-        std::unique_ptr<AbstractChoreographer> _choreographer;
+        std::shared_ptr<AbstractChoreographer> _choreographer;
         std::vector<std::shared_ptr<AbstractArtDirector>> _artDirectors;
     };
 

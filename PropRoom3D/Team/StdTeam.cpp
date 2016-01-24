@@ -6,7 +6,7 @@
 namespace prop3
 {
     StdTeam::StdTeam() :
-        AbstractTeam(new StdChoreographer())
+        AbstractTeam(std::make_shared<StdChoreographer>())
     {
 
     }

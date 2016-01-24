@@ -53,6 +53,14 @@ SET(CELLAR_MISC_HEADERS
     ${CELLAR_SRC_DIR}/Misc/StringUtils.h)
 
 
+# Path
+SET(CELLAR_PATH_HEADERS
+    ${CELLAR_SRC_DIR}/Path/AbstractPath.h
+    ${CELLAR_SRC_DIR}/Path/LinearPath.h
+    ${CELLAR_SRC_DIR}/Path/CubicSplinePath.h
+    ${CELLAR_SRC_DIR}/Path/CompositePath.h)
+
+
 # All the header files #
 SET(CELLAR_HEADERS
     ${CELLAR_CAMERA_HEADERS}
@@ -62,6 +70,7 @@ SET(CELLAR_HEADERS
     ${CELLAR_GL_HEADERS}
     ${CELLAR_IMAGE_HEADERS}
     ${CELLAR_MISC_HEADERS}
+    ${CELLAR_PATH_HEADERS}
     ${CELLAR_SRC_DIR}/libCellarWorkbench_global.h)
 
 
@@ -114,6 +123,10 @@ SET(CELLAR_MISC_SOURCES
     ${CELLAR_SRC_DIR}/Misc/StringUtils.cpp)
 
 
+# Path
+SET(CELLAR_PATH_SOURCES)
+
+
 # All the source files #
 SET(CELLAR_SOURCES
     ${CELLAR_CAMERA_SOURCES}
@@ -122,7 +135,8 @@ SET(CELLAR_SOURCES
     ${CELLAR_DESIGN_PATTERN_SOURCES}
     ${CELLAR_GL_SOURCES}
     ${CELLAR_IMAGE_SOURCES}
-    ${CELLAR_MISC_SOURCES})
+    ${CELLAR_MISC_SOURCES}
+    ${CELLAR_PATH_SOURCES})
     
     
 
