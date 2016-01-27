@@ -203,11 +203,6 @@ namespace scaena
 
         _artDirector2D->draw(glm::max(dt, 0.0));
 
-        if(dt > 0.0)
-        {
-            swapBuffers();
-        }
-
         GLenum errCode = glGetError();
         if(errCode)
         {
@@ -217,6 +212,11 @@ namespace scaena
 
             getLog().postMessage(
                 new Message('E', false, msg, "QGlWidgetView"));
+        }
+
+        if(dt > 0.0)
+        {
+            swapBuffers();
         }
     }
 
