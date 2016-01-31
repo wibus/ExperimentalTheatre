@@ -1,6 +1,8 @@
 #ifndef PROPROOM3D_STDCOATING_H
 #define PROPROOM3D_STDCOATING_H
 
+#include <CellarWorkbench/Misc/Distribution.h>
+
 #include "Coating.h"
 
 
@@ -36,10 +38,12 @@ namespace prop3
 
 
     protected:
-        static glm::dvec3 getMicrofacetNormal(
+        glm::dvec3 getMicrofacetNormal(
                 const glm::dvec3& wallNormal,
                 const glm::dvec3& incidentDir,
-                double rough);
+                double rough) const;
+
+        cellar::LinearRand _linearRand;
     };
 }
 

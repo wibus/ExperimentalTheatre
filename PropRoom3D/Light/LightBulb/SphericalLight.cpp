@@ -1,8 +1,5 @@
 #include "SphericalLight.h"
 
-#include <GLM/gtc/random.hpp>
-#include <GLM/gtc/constants.hpp>
-
 #include "Node/Visitor.h"
 #include "Ray/Raycast.h"
 #include "Ray/RayHitList.h"
@@ -140,7 +137,7 @@ namespace prop3
 
         for(int i=0; i < count; ++i)
         {
-            glm::dvec3 randRad = glm::sphericalRand(_radius);
+            glm::dvec3 randRad = _sphereRand.gen(_radius);
             glm::dvec3 source = _transformC + randRad;
 
             glm::dvec3 dir = pos - source;

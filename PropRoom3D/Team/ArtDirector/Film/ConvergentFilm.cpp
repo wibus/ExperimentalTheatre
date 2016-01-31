@@ -1,7 +1,5 @@
 #include "ConvergentFilm.h"
 
-#include <GLM/gtc/random.hpp>
-
 
 namespace prop3
 {
@@ -73,8 +71,6 @@ namespace prop3
 
     void ConvergentFilm::tileCompleted(Tile& tile)
     {
-        std::lock_guard<std::mutex> lk(_tilesMutex);
-
         _newTileCompleted = true;
 
         double prioritySum = 0.0;
@@ -98,10 +94,8 @@ namespace prop3
 
     void ConvergentFilm::endTileReached()
     {
-        _nextTileId = 0;
-        _newFrameCompleted = true;
-
         _cvMutex.lock();
+        _nextTileId = 0;
         _newFrameCompleted = true;
         _cvMutex.unlock();
         _cv.notify_all();
@@ -113,7 +107,7 @@ namespace prop3
             for(size_t i=0; i < tileCount; ++i)
                 prioritySum += _tiles[i]->prioritySum();
 
-            double baseRand = glm::linearRand(0.0, 1.0);
+            double baseRand = _linearRand.gen1(0.0, 1.0);
             double meanPriority = prioritySum / _priorityBuffer.size();
             _priorityThreshold = 0.75 * glm::sqrt(baseRand * meanPriority);
         }

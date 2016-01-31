@@ -1,6 +1,8 @@
 #ifndef PROPROOM3D_PROCEDURALSUN_H
 #define PROPROOM3D_PROCEDURALSUN_H
 
+#include <CellarWorkbench/Misc/Distribution.h>
+
 #include "Backdrop.h"
 
 
@@ -74,6 +76,8 @@ namespace prop3
         double _groundHeight;
 
         std::shared_ptr<Material> _spaceMaterial;
+
+        cellar::DiskRand _diskRand;
     };
 
 

@@ -1,7 +1,5 @@
 #include "Film.h"
 
-#include <GLM/gtc/random.hpp>
-
 
 namespace prop3
 {
@@ -11,9 +9,9 @@ namespace prop3
         _colorBuffer(1, glm::dvec3(0.0)),
         _newTileCompleted(false),
         _newFrameCompleted(false),
-        _nextTileId(0),
-        _tilesResolution(16, 16),
         _priorityThreshold(0.0),
+        _tilesResolution(16, 16),
+        _nextTileId(0),
         _endTile(nullptr)
     {
 
@@ -29,8 +27,9 @@ namespace prop3
         if(_frameResolution != resolution)
         {
             _frameResolution = resolution;
-            clear(glm::dvec3(0.0), true);
+
             buildTiles();
+            clear(glm::dvec3(0.0), true);
         }
     }
 
@@ -39,7 +38,9 @@ namespace prop3
         if(_tilesResolution != resolution)
         {
             _tilesResolution = resolution;
+
             buildTiles();
+            clear(glm::dvec3(0.0), false);
         }
     }
 
@@ -121,6 +122,8 @@ namespace prop3
 
     void Film::buildTiles()
     {
+        std::lock_guard<std::mutex> lk(_tilesMutex);
+
         size_t columnCount = glm::ceil(frameWidth() / double(tilesWidth()));
         size_t rowCount = glm::ceil(frameHeight() / double(tilesHeight()));
         size_t tileCount = columnCount * rowCount;
@@ -140,5 +143,7 @@ namespace prop3
                     *this, _priorityThreshold, minCorner, maxCorner));
             }
         }
+
+        _nextTileId = 0;
     }
 }

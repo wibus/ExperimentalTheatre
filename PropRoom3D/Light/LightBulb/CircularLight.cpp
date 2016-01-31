@@ -1,8 +1,5 @@
 #include "CircularLight.h"
 
-#include <GLM/gtc/random.hpp>
-#include <GLM/gtc/constants.hpp>
-
 #include "Node/Visitor.h"
 #include "Ray/Raycast.h"
 #include "Ray/RayHitList.h"
@@ -95,7 +92,7 @@ namespace prop3
 
         for(int i=0; i < count; ++i)
         {
-            glm::dvec2 disk = glm::diskRand(_radius);
+            glm::dvec2 disk = _diskRand.gen(_radius);
 
             glm::dvec3 nonco = glm::abs(_transformN.x) < glm::abs(_transformN.z) ?
                 glm::dvec3(1, 0, 0) : glm::dvec3(0, 0, 1);

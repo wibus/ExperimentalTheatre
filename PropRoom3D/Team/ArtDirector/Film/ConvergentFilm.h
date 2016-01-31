@@ -1,6 +1,8 @@
 #ifndef PROPROOM3D_CONVERGENTFILM_H
 #define PROPROOM3D_CONVERGENTFILM_H
 
+#include <CellarWorkbench/Misc/Distribution.h>
+
 #include "Film.h"
 
 
@@ -47,6 +49,9 @@ namespace prop3
 
         int _minThresholdFrameCount;
         glm::dvec3 _maxPixelIntensity;
+
+        // Random distribution
+        cellar::LinearRand _linearRand;
     };
 }
 

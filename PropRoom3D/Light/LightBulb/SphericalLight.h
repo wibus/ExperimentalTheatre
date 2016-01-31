@@ -3,6 +3,8 @@
 
 #include <GLM/glm.hpp>
 
+#include <CellarWorkbench/Misc/Distribution.h>
+
 #include "LightBulb.h"
 
 
@@ -51,6 +53,8 @@ namespace prop3
         double _radius;
 
         glm::dvec3 _transformC;
+
+        cellar::SphereRand _sphereRand;
     };
 
 

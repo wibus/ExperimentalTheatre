@@ -13,6 +13,8 @@
 
 #include <GLM/glm.hpp>
 
+#include <CellarWorkbench/Misc/Distribution.h>
+
 #include "../../libPropRoom3D_global.h"
 
 #include "Ray/RayHitList.h"
@@ -156,12 +158,9 @@ namespace prop3
         std::vector<Raycast> _rayBounceArray;
         std::vector<Raycast> _tempChildRayArray;
 
-        // Jittering cache
-        size_t _dofJitterSampleCount;
-        int _dofJitteredTilePerArray;
-        int _dofCurrentJitteredTileCount;
-        std::vector<glm::dvec3> _dofJitterArray;
-        size_t _dofJitterIterator;
+        // Random distribution
+        cellar::LinearRand _linearRand;
+        cellar::DiskRand _diskRand;
     };
 }
 

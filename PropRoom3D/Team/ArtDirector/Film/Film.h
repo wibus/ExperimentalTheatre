@@ -83,10 +83,11 @@ namespace prop3
         std::mutex _cvMutex;
         std::condition_variable _cv;
 
-        int _nextTileId;
+        double _priorityThreshold;
         std::mutex _tilesMutex;
         glm::ivec2 _tilesResolution;
-        double _priorityThreshold;
+
+        int _nextTileId;
         std::shared_ptr<Tile> _endTile;
         std::vector<std::shared_ptr<Tile>> _tiles;
 

@@ -32,6 +32,8 @@ namespace prop3
         {
             _protectedState.setWorkerCount( DEFAULT_WORKER_COUNT );
         }
+
+        cellar::g_masterRandomArray.allocate();
     }
 
     CpuRaytracerEngine::CpuRaytracerEngine(unsigned int  workerCount) :
@@ -40,6 +42,8 @@ namespace prop3
         _viewportSize(1, 1)
     {
         _protectedState.setWorkerCount( workerCount );
+
+        cellar::g_masterRandomArray.allocate();
     }
 
     CpuRaytracerEngine::~CpuRaytracerEngine()
@@ -53,6 +57,8 @@ namespace prop3
         {
             t.join();
         }
+
+        cellar::g_masterRandomArray.deallocate();
     }
 
     void CpuRaytracerEngine::setup(

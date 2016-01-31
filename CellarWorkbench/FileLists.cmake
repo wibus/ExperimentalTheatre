@@ -49,6 +49,7 @@ SET(CELLAR_IMAGE_HEADERS
 # Misc
 SET(CELLAR_MISC_HEADERS
     ${CELLAR_SRC_DIR}/Misc/Log.h
+    ${CELLAR_SRC_DIR}/Misc/Distribution.h
     ${CELLAR_SRC_DIR}/Misc/SimplexNoise.h
     ${CELLAR_SRC_DIR}/Misc/StringUtils.h)
 
@@ -119,6 +120,7 @@ SET(CELLAR_IMAGE_SOURCES
 # Misc
 SET(CELLAR_MISC_SOURCES
     ${CELLAR_SRC_DIR}/Misc/Log.cpp
+    ${CELLAR_SRC_DIR}/Misc/Distribution.cpp
     ${CELLAR_SRC_DIR}/Misc/SimplexNoise.cpp
     ${CELLAR_SRC_DIR}/Misc/StringUtils.cpp)
 

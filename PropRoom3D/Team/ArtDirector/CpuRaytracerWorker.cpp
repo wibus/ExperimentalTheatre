@@ -1,8 +1,7 @@
 #include "CpuRaytracerWorker.h"
 
 #include <list>
-
-#include <GLM/gtc/random.hpp>
+#include <iostream>
 
 #include "Prop/Prop.h"
 #include "Prop/Surface/Surface.h"
@@ -59,11 +58,7 @@ namespace prop3
         _minScreenRayWeight(0.04),
         _aperture(0.0),
         _confusionRadius(0.1),
-        _team(new WorkerTeam()),
-        _dofJitterSampleCount(37),
-        _dofJitteredTilePerArray(45),
-        _dofCurrentJitteredTileCount(0),
-        _dofJitterIterator(0)
+        _team(new WorkerTeam())
     {
         _team->setup();
     }
@@ -125,7 +120,6 @@ namespace prop3
             glm::dvec3 camDir = glm::dvec3(_viewInvMatrix * glm::dvec4(0.0, 0.0, -1.0, 0.0));
             _confusionSide = glm::normalize(glm::cross(camDir, glm::dvec3(0.0, 0.0, 1.0)));
             _confusionUp = glm::normalize(glm::cross(_confusionSide, camDir));
-            _dofJitterArray.clear();
         });
     }
 
@@ -140,7 +134,6 @@ namespace prop3
             glm::dvec4 apertureEnd = _projInvMatrix * glm::dvec4(0.0, 0.0, 1.0, 1.0);
             apertureEnd.z /= apertureEnd.w;
             _aperture = _confusionRadius * ((apertureBeg.z - apertureEnd.z) - 1.0);
-            _dofJitterArray.clear();
         });
     }
 
@@ -232,35 +225,9 @@ namespace prop3
 
             while(tile != _workingFilm->endTile())
             {
-                // Build jitter buffer if it was destroyed
-                if(_useDepthOfField && _aperture > 0.0 && _dofJitterArray.empty())
-                {
-                    int jittCount = glm::linearRand(_dofJitterSampleCount/2, _dofJitterSampleCount);
-                    _dofJitterArray.resize(jittCount);
-                    for(int i=0; i < jittCount; ++i)
-                    {
-                        glm::dvec2 rVar = glm::linearRand(glm::dvec2(0.0), glm::dvec2(1.0, 2.0*glm::pi<double>()));
-                        glm::dvec2 confusionPos = _aperture * glm::sqrt(rVar.x) * glm::dvec2(glm::cos(rVar.y), glm::sin(rVar.y));
-                        _dofJitterArray[i] = _camPos + _confusionSide * confusionPos.x + _confusionUp * confusionPos.y;
-                        _dofCurrentJitteredTileCount = 0;
-                    }
-                }
-
                 tile->lock();
                 shootFromScreen(tile);
                 tile->unlock();
-
-
-                // Destroy jitter buffer if too many tiles used it
-                if(_useDepthOfField && _aperture > 0.0)
-                {
-                    ++_dofCurrentJitteredTileCount;
-                    if(_dofCurrentJitteredTileCount >=
-                       _dofJitteredTilePerArray)
-                    {
-                        _dofJitterArray.clear();
-                    }
-                }
 
                 if(_runningPredicate)
                     tile = _workingFilm->nextTile();
@@ -315,7 +282,7 @@ namespace prop3
 
         if(_usePixelJittering)
         {
-            frameOrig += glm::linearRand(glm::dvec2(-0.5), glm::dvec2(0.5));
+            frameOrig += _linearRand.gen2(glm::dvec2(-0.5), glm::dvec2(0.5));
         }
 
         Raycast raycast(
@@ -330,10 +297,10 @@ namespace prop3
         {
             if(_useDepthOfField && _aperture > 0.0)
             {
-                if(++_dofJitterIterator >= _dofJitterArray.size())
-                    _dofJitterIterator = 0;
-
-                raycast.origin = _dofJitterArray[_dofJitterIterator];
+                glm::dvec2 confusionPos = _diskRand.gen(_aperture);
+                raycast.origin = _camPos +
+                    _confusionSide * confusionPos.x +
+                    _confusionUp * confusionPos.y;
             }
 
 
@@ -739,8 +706,7 @@ namespace prop3
         size_t endLight;
         size_t begSurf;
         size_t endSurf;
-
-        std::shared_ptr<Surface> bounds;
+        Surface* bounds;
     };
 
     void CpuRaytracerWorker::compileSearchStructures()
@@ -769,7 +735,7 @@ namespace prop3
                     continue;
 
                 // Bubble up unbounded subzones
-                if(subz->bounds() == StageZone::UNBOUNDED)
+                if(subz->bounds().get() == StageZone::UNBOUNDED.get())
                 {
                     // Bubble up props
                     size_t propCount = subz->props().size();
@@ -847,7 +813,7 @@ namespace prop3
             searchZone.begLight = searchZone.endLight - addedLights;
             searchZone.endSurf = _searchSurfaces.size();
             searchZone.begSurf = searchZone.endSurf - addedSurfaces;
-            searchZone.bounds = zone->bounds();
+            searchZone.bounds = zone->bounds().get();
             _searchZones.push_back(searchZone);
         }
 
@@ -859,8 +825,6 @@ namespace prop3
             {
                 SearchZone& parent = _searchZones[zone.parent];
                 parent.endZone = glm::max(parent.endZone, zone.endZone);
-                parent.endLight = glm::max(parent.endLight, zone.endLight);
-                parent.endSurf = glm::max(parent.endSurf, zone.endSurf);
             }
         }
     }
@@ -877,63 +841,54 @@ namespace prop3
         {
             const SearchZone& zone = _searchZones[zId];
 
-            if(zone.begSurf != zone.endSurf ||
-               zone.begLight != zone.endLight)
+            if(zone.bounds == StageZone::UNBOUNDED.get() ||
+               zone.bounds->intersects(ray, _rayHitList))
             {
-                if(zone.bounds == StageZone::UNBOUNDED ||
-                   zone.bounds->intersects(ray, _rayHitList))
+                for(size_t s = zone.begSurf; s < zone.endSurf; ++s)
                 {
-                    for(size_t s = zone.begSurf; s < zone.endSurf; ++s)
+                    _rayHitList.clear();
+
+                    _searchSurfaces[s]->raycast(ray, _rayHitList);
+
+                    RayHitReport* node = _rayHitList.head;
+                    while(node != nullptr)
                     {
-                        _rayHitList.clear();
-
-                        _searchSurfaces[s]->raycast(ray, _rayHitList);
-
-                        RayHitReport* node = _rayHitList.head;
-                        while(node != nullptr)
+                        if(0.0 < node->length && node->length < ray.limit)
                         {
-                            if(0.0 < node->length && node->length < ray.limit)
-                            {
-                                ray.limit = node->length;
-                                reportMin = *node;
-                            }
-
-                            node = node->_next;
+                            ray.limit = node->length;
+                            reportMin = *node;
                         }
+
+                        node = node->_next;
                     }
-
-                    for(size_t l = zone.begLight; l < zone.endLight; ++l)
-                    {
-                        _rayHitList.clear();
-
-                        _searchLights[l]->raycast(ray, _rayHitList);
-
-                        RayHitReport* node = _rayHitList.head;
-                        while(node != nullptr)
-                        {
-                            if(0.0 < node->length && node->length < ray.limit)
-                            {
-                                ray.limit = node->length;
-                                reportMin = *node;
-                            }
-
-                            node = node->_next;
-                        }
-                    }
-
-                    ++zId;
                 }
-                else
+
+                for(size_t l = zone.begLight; l < zone.endLight; ++l)
                 {
-                    zId = zone.endZone;
+                    _rayHitList.clear();
+
+                    _searchLights[l]->raycast(ray, _rayHitList);
+
+                    RayHitReport* node = _rayHitList.head;
+                    while(node != nullptr)
+                    {
+                        if(0.0 < node->length && node->length < ray.limit)
+                        {
+                            ray.limit = node->length;
+                            reportMin = *node;
+                        }
+
+                        node = node->_next;
+                    }
                 }
+
+                ++zId;
             }
             else
             {
-                ++zId;
+                zId = zone.endZone;
             }
         }
-
 
         return reportMin.length;
     }
@@ -949,34 +904,26 @@ namespace prop3
         {
             const SearchZone& zone = _searchZones[zId];
 
-            if(zone.begSurf != zone.endSurf ||
-               zone.begLight != zone.endLight)
+            if(zone.bounds == StageZone::UNBOUNDED.get() ||
+               zone.bounds->intersects(raycast, _rayHitList))
             {
-                if(zone.bounds == StageZone::UNBOUNDED ||
-                   zone.bounds->intersects(raycast, _rayHitList))
+                for(size_t s = zone.begSurf; s < zone.endSurf; ++s)
                 {
-                    for(size_t s = zone.begSurf; s < zone.endSurf; ++s)
-                    {
-                        if(_searchSurfaces[s]->intersects(raycast, _rayHitList))
-                            return true;
-                    }
-
-                    for(size_t l = zone.begLight; l < zone.endLight; ++l)
-                    {
-                        if(_searchLights[l]->intersects(raycast, _rayHitList))
-                            return true;
-                    }
-
-                    ++zId;
+                    if(_searchSurfaces[s]->intersects(raycast, _rayHitList))
+                        return true;
                 }
-                else
+
+                for(size_t l = zone.begLight; l < zone.endLight; ++l)
                 {
-                    zId = zone.endZone;
+                    if(_searchLights[l]->intersects(raycast, _rayHitList))
+                        return true;
                 }
+
+                ++zId;
             }
             else
             {
-                ++zId;
+                zId = zone.endZone;
             }
         }
 

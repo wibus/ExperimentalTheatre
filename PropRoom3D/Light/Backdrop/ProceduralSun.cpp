@@ -1,8 +1,5 @@
 #include "ProceduralSun.h"
 
-#include <GLM/gtc/random.hpp>
-#include <GLM/gtc/constants.hpp>
-
 #include "Light/LightCast.h"
 #include "Light/LightUtils.h"
 #include "Prop/Material/Material.h"
@@ -173,7 +170,7 @@ namespace prop3
         glm::dvec3 upward = glm::normalize(glm::cross(sideward, _sunDirection));
         for(unsigned int i=0; i < count; ++i)
         {
-            glm::dvec2 radDist = glm::diskRand(RADIATION_PLANE_RADIUS);
+            glm::dvec2 radDist = _diskRand.gen(RADIATION_PLANE_RADIUS);
             glm::dvec3 radPoint =
                 pos + _sunDirection * RADIATION_PLANE_DISTANCE +
                 sideward * radDist.x +

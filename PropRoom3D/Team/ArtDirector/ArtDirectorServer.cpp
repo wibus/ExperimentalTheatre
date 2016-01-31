@@ -48,9 +48,9 @@ namespace prop3
         _stageSet = stageSet;
 
 
-        unsigned int sampleCountThreshold = 256;
+        unsigned int sampleCountThreshold = 400;
         //unsigned int sampleCountThreshold = 2;
-        double divergenceThreshold = 1.333e-3;
+        double divergenceThreshold = 1.000e-3;
         double timeThreshold = 900.0;
 
         RaytracerState::DraftParams draftParams;

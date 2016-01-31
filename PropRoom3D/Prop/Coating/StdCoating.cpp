@@ -1,6 +1,5 @@
 #include "StdCoating.h"
 
-#include <GLM/gtc/random.hpp>
 #include <GLM/gtc/matrix_transform.hpp>
 
 #include "Light/LightCast.h"
@@ -293,15 +292,13 @@ namespace prop3
     inline glm::dvec3 StdCoating::getMicrofacetNormal(
             const glm::dvec3& wallNormal,
             const glm::dvec3& incidentDir,
-            double rough)
+            double rough) const
     {
         if(rough <= 0.0)
             return wallNormal;
 
-        glm::dvec2 randV = glm::linearRand(glm::dvec2(0), glm::dvec2(1.0));
-
-        double phi = 2 * glm::pi<double>() * randV.x;
-        double zee = glm::pow(randV.y, 1.0 / (1.0/rough + 1.0));
+        double phi = _linearRand.gen1(2.0 * glm::pi<double>());
+        double zee = glm::pow(_linearRand.gen1(), 1.0 / (1.0/rough + 1.0));
         double rad = glm::sqrt(1.0 - zee*zee);
         double csp = glm::cos(phi) * rad;
         double snp = glm::sin(phi) * rad;

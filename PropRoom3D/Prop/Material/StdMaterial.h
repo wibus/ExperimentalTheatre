@@ -3,6 +3,8 @@
 
 #include <random>
 
+#include <CellarWorkbench/Misc/Distribution.h>
+
 #include "Material.h"
 
 
@@ -31,6 +33,7 @@ namespace prop3
     protected:
         // For exponential distribution
         mutable std::mt19937 _randomEngine;
+        cellar::SphereRand _sphereRand;
     };
 }
 

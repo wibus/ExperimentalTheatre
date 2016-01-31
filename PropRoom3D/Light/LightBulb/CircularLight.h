@@ -3,6 +3,8 @@
 
 #include <GLM/glm.hpp>
 
+#include <CellarWorkbench/Misc/Distribution.h>
+
 #include "LightBulb.h"
 
 
@@ -58,6 +60,8 @@ namespace prop3
         double _distance;
         glm::dvec3 _transformC;
         glm::dvec3 _transformN;
+
+        cellar::DiskRand _diskRand;
     };
 
 

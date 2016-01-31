@@ -1,7 +1,5 @@
 #include "StdMaterial.h"
 
-#include <GLM/gtc/random.hpp>
-
 #include "Ray/Raycast.h"
 
 
@@ -74,7 +72,7 @@ namespace prop3
 
         if(scatt >= 1.0)
         {
-            glm::dvec3 direction = glm::sphericalRand(1.0);
+            glm::dvec3 direction = _sphereRand.gen(1.0);
 
             raycasts.push_back(Raycast(
                     Raycast::FULLY_DIFFUSE,
@@ -95,7 +93,7 @@ namespace prop3
         else
         {
             double entropy = Raycast::getEntropy(scatt);
-            glm::dvec3 diffuseDir = glm::sphericalRand(1.0);
+            glm::dvec3 diffuseDir = _sphereRand.gen(1.0);
             glm::dvec3 direction = glm::mix(ray.direction, diffuseDir, scatt);
             direction = glm::normalize(direction);
 
