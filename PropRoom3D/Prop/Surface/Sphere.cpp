@@ -46,12 +46,12 @@ namespace prop3
     {
         double a, b, c;
         params(ray, a, b, c);
-        double discr = b*b - 4*a*c;
+        double discr = b*b - 4.0*a*c;
         if(discr > 0.0)
         {
             double disrcSqrt = glm::sqrt(discr);
 
-            double t1 = (-b - disrcSqrt) / (2 * a);
+            double t1 = (-b - disrcSqrt) / (2.0 * a);
             if(0.0 < t1 && t1 < ray.limit)
             {
                 glm::dvec3 pt = ray.origin + ray.direction*t1;
@@ -63,7 +63,7 @@ namespace prop3
                             _outerMat.get());
             }
 
-            double t2 = (-b + disrcSqrt) / (2 * a);
+            double t2 = (-b + disrcSqrt) / (2.0 * a);
             if(0.0 < t2 && t2 < ray.limit)
             {
                 glm::dvec3 pt = ray.origin + ray.direction*t2;
@@ -77,7 +77,7 @@ namespace prop3
         }
         else if(discr == 0.0)
         {
-            double t = -b / (2 * a);
+            double t = -b / (2.0 * a);
             if(0.0 < t && t < ray.limit)
             {
                 glm::dvec3 pt = ray.origin + ray.direction*t;
@@ -93,16 +93,20 @@ namespace prop3
 
     bool Sphere::intersects(const Raycast& ray, RayHitList& reports) const
     {
-        double a, b, c;
-        params(ray, a, b, c);
-        double discr = b*b - 4*a*c;
+        glm::dvec3 dist = ray.origin - _center;
+        double c = glm::dot(dist, dist) - _radius2;
+        if(c < 0.0) return true;
+
+        double a = glm::dot(ray.direction, ray.direction);
+        double b = 2.0 * glm::dot(ray.direction, dist);
+        double discr = b*b - 4.0*a*c;
         if(discr >= 0.0)
         {
-            double disrcSqrt = glm::sqrt(disrcSqrt);
-            double t1 = (-b - disrcSqrt) / (2 * a);
-            double t2 = (-b + disrcSqrt) / (2 * a);
-            if((0.0 > t1 && t1 > ray.limit) ||
-               (0.0 > t2 && t2 > ray.limit))
+            double disrcSqrt = glm::sqrt(discr);
+            double t1 = (-b - disrcSqrt) / (2.0 * a);
+            double t2 = (-b + disrcSqrt) / (2.0 * a);
+            if((0.0 < t1 && t1 < ray.limit) ||
+               (0.0 < t2 && t2 < ray.limit))
             {
                 return true;
             }
@@ -127,7 +131,7 @@ namespace prop3
         glm::dvec3 dist = ray.origin - _center;
 
         a = glm::dot(ray.direction, ray.direction);
-        b = 2 * glm::dot(ray.direction, dist);
+        b = 2.0 * glm::dot(ray.direction, dist);
         c = glm::dot(dist, dist) - _radius2;
     }
 }

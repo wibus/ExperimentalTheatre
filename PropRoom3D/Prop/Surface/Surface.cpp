@@ -82,7 +82,7 @@ namespace prop3
 
     std::shared_ptr<Surface> Surface::scale(std::shared_ptr<Surface>& surf, double coeff)
     {
-        if(!surf->isRotatable())
+        if(!surf->isScalable())
             surf = shell(surf);
         surf->transform(glm::scale(glm::dmat4(), glm::dvec3(coeff)));
         return surf;

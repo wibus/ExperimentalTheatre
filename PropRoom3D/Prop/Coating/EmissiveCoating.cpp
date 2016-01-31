@@ -51,6 +51,6 @@ namespace prop3
         if(_lightBulb.isOn())
             return _lightBulb.radiantFlux() / _lightBulb.area();
         else
-            glm::dvec3(0.0, 0.0, 0.0);
+            return glm::dvec3(0.0, 0.0, 0.0);
     }
 }

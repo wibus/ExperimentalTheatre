@@ -225,11 +225,11 @@ namespace prop3
                 double dsrcSqrt = glm::sqrt(dscr);
 
                 double t1 = (-b - dsrcSqrt) / (2 * a);
-                if(0.0 < t1 && t1 <= ray.limit)
+                if(0.0 < t1 && t1 < ray.limit)
                     return true;
 
                 double t2 = (-b + dsrcSqrt) / (2 * a);
-                if(0.0 < t2 && t2 <= ray.limit)
+                if(0.0 < t2 && t2 < ray.limit)
                     return true;
             }
             else if(dscr == 0.0)

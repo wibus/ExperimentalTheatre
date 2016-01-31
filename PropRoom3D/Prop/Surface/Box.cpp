@@ -130,8 +130,14 @@ namespace prop3
 
     bool Box::intersects(const Raycast& ray, RayHitList& reports) const
     {
-        glm::dvec3 t1 = (_minCorner - ray.origin) / ray.direction;
-        glm::dvec3 t2 = (_maxCorner - ray.origin) / ray.direction;
+        glm::dvec3 minDiff = _minCorner - ray.origin;
+        glm::dvec3 maxDiff = _maxCorner - ray.origin;
+        if(minDiff.x <= 0.0 && minDiff.y <= 0.0 && minDiff.z <= 0.0 &&
+           maxDiff.x >= 0.0 && maxDiff.y >= 0.0 && maxDiff.z >= 0.0)
+            return true;
+
+        glm::dvec3 t1 = minDiff / ray.direction;
+        glm::dvec3 t2 = maxDiff / ray.direction;
 
         glm::dvec3 vtmin = glm::min(t1, t2);
         glm::dvec3 vtmax = glm::max(t1, t2);

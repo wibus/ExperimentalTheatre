@@ -22,7 +22,7 @@ namespace prop3
 #ifdef NDEBUG
         _localRaytracer.reset(new CpuRaytracerEngine(8));
 #else
-        _localRaytracer.reset(new CpuRaytracerEngine(8));
+        _localRaytracer.reset(new CpuRaytracerEngine(1));
 #endif
     }
 
