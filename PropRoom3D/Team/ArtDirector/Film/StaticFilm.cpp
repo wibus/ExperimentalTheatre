@@ -14,6 +14,11 @@ namespace prop3
 
     }
 
+    const std::vector<glm::vec3>& StaticFilm::colorBuffer(ColorOutput colorOutput)
+    {
+        return _colorBuffer;
+    }
+
     void StaticFilm::clear(const glm::dvec3& color, bool hardReset)
     {
         _newTileCompleted = false;

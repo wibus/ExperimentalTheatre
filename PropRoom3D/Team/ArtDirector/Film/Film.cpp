@@ -7,6 +7,7 @@ namespace prop3
         _framePassCount(0),
         _frameResolution(1, 1),
         _colorBuffer(1, glm::dvec3(0.0)),
+        _colorOutput(ColorOutput::ALBEDO),
         _newTileCompleted(false),
         _newFrameCompleted(false),
         _priorityThreshold(0.0),
@@ -114,7 +115,7 @@ namespace prop3
         return _endTile;
     }
 
-    void Film::waitFrameCompletion()
+    void Film::waitForFrameCompletion()
     {
         std::unique_lock<std::mutex> lk(_cvMutex);
         _cv.wait(lk, [&](){ return _newFrameCompleted; });

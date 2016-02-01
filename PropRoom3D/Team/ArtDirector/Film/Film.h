@@ -15,6 +15,8 @@ namespace prop3
     class PROP3D_EXPORT Film
     {
     public:
+        enum class ColorOutput {ALBEDO, DIVERGENCE, VARIANCE, PRIORITY};
+
         Film();
         virtual ~Film();
 
@@ -34,7 +36,8 @@ namespace prop3
         bool newFrameCompleted();
 
 
-        const std::vector<glm::vec3>& colorBuffer() const;
+        virtual const std::vector<glm::vec3>& colorBuffer(ColorOutput colorOutput) = 0;
+
 
         virtual void clear(const glm::dvec3& color = glm::dvec3(0),
                            bool hardReset = false) = 0;
@@ -61,7 +64,7 @@ namespace prop3
         virtual std::shared_ptr<Tile> nextTile();
         virtual std::shared_ptr<Tile> endTile();
 
-        void waitFrameCompletion();
+        void waitForFrameCompletion();
         virtual void tileCompleted(Tile& tile) = 0;
 
 
@@ -79,6 +82,7 @@ namespace prop3
         size_t _framePassCount;
         glm::ivec2 _frameResolution;
         std::vector<glm::vec3> _colorBuffer;
+        ColorOutput _colorOutput;
 
         std::mutex _cvMutex;
         std::condition_variable _cv;
@@ -136,11 +140,6 @@ namespace prop3
     inline void Film::resizeTiles(int width, int height)
     {
         resizeTiles(glm::ivec2(width, height));
-    }
-
-    inline const std::vector<glm::vec3>& Film::colorBuffer() const
-    {
-        return _colorBuffer;
     }
 
     inline double Film::pixelDivergence(int i, int j) const

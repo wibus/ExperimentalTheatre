@@ -89,13 +89,20 @@ namespace prop3
 
     void ArtDirectorServer::draw(double dt)
     {
-        if(_localRaytracer->isUpdated())
+        if(_localRaytracer->newTileCompleted())
         {
-            sendBuffersToGpu();
+            if(raytracerState()->isUpdateEachTileEnabled())
+                sendBuffersToGpu();
 
-            // Let raytracer manage its drafts
             if(_localRaytracer->newFrameCompleted())
+            {
+                if(!raytracerState()->isUpdateEachTileEnabled())
+                    sendBuffersToGpu();
+
+                // Let raytracer manage its drafts
+                _localRaytracer->manageNextFrame();
                 printConvergence();
+            }
         }
 
         _postProdUnit->execute();
@@ -148,9 +155,19 @@ namespace prop3
 
     void ArtDirectorServer::sendBuffersToGpu()
     {
-        const Film& film = _localRaytracer->film();
-        glm::ivec2 viewportSize = film.frameResolution();
-        const std::vector<glm::vec3>& colorBuffer = film.colorBuffer();
+        std::string colorOuputType = raytracerState()->colorOutputType();
+        Film::ColorOutput colorOutput = Film::ColorOutput::ALBEDO;
+        if(colorOuputType == RaytracerState::COLOROUTPUT_DIVERGENCE)
+            colorOutput = Film::ColorOutput::DIVERGENCE;
+        else if(colorOuputType == RaytracerState::COLOROUTPUT_VARIANCE)
+            colorOutput = Film::ColorOutput::VARIANCE;
+        else if(colorOuputType == RaytracerState::COLOROUTPUT_PRIORITY)
+            colorOutput = Film::ColorOutput::PRIORITY;
+
+
+        auto film = _localRaytracer->film();
+        glm::ivec2 viewportSize = film->frameResolution();
+        const std::vector<glm::vec3>& colorBuffer = film->colorBuffer(colorOutput);
 
         // Send image to GPU
         glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);

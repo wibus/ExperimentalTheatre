@@ -16,6 +16,7 @@ namespace prop3
         using Film::addSample;
         using Film::pixelPriority;
 
+        virtual const std::vector<glm::vec3>& colorBuffer(ColorOutput colorOutput) override;
 
         virtual void clear(const glm::dvec3& color = glm::dvec3(0),
                            bool hardReset = false) override;

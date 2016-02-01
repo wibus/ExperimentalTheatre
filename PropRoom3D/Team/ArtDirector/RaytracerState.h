@@ -2,6 +2,7 @@
 #define PROPROOM3D_RAYTRACERSTATE_H
 
 #include <chrono>
+#include <string>
 
 #include "../../libPropRoom3D_global.h"
 
@@ -123,8 +124,21 @@ namespace prop3
         bool isRendering() const;
 
 
+        void setUpdateEachTile(bool enabled);
+        bool isUpdateEachTileEnabled() const;
+
+        void setColorOutputType(const std::string& colorOutput);
+        std::string colorOutputType() const;
+
+        static const std::string COLOROUTPUT_ALBEDO;
+        static const std::string COLOROUTPUT_DIVERGENCE;
+        static const std::string COLOROUTPUT_VARIANCE;
+        static const std::string COLOROUTPUT_PRIORITY;
+
     private:
         ProtectedState& _protectedState;
+        bool _isUpdateEachTileEnabled;
+        std::string _colorOutputType;
     };
 
 
@@ -219,6 +233,16 @@ namespace prop3
     inline bool RaytracerState::isRendering() const
     {
         return isDrafting() || (!converged() && !runningOutOfTime() && !runningOutOfSamples());
+    }
+
+    inline bool RaytracerState::isUpdateEachTileEnabled() const
+    {
+        return _isUpdateEachTileEnabled;
+    }
+
+    inline std::string RaytracerState::colorOutputType() const
+    {
+        return _colorOutputType;
     }
 }
 

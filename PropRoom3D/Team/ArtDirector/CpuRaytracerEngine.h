@@ -37,9 +37,10 @@ namespace prop3
 
         virtual void terminate();
 
-        virtual bool isUpdated();
+        virtual bool newTileCompleted();
         virtual bool newFrameCompleted();
-        virtual const Film& film() const;
+        virtual void manageNextFrame();
+        virtual std::shared_ptr<Film> film() const;
 
         std::shared_ptr<RaytracerState> raytracerState() const;
 

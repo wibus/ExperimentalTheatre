@@ -18,6 +18,8 @@ namespace prop3
         using Film::addSample;
         using Film::pixelPriority;
 
+        virtual const std::vector<glm::vec3>& colorBuffer(ColorOutput colorOutput) override;
+
         virtual void clear(const glm::dvec3& color = glm::dvec3(0),
                            bool hardReset = false) override;
 
@@ -33,6 +35,11 @@ namespace prop3
         virtual glm::dvec4 pixelSample(int index) const override;
         virtual void setColor(int index, const glm::dvec3& color) override;
         virtual void addSample(int index, const glm::dvec4& sample) override;
+
+        glm::vec3 sampleToColor(const glm::dvec4& sample) const;
+        glm::vec3 divergenceToColor(double divergence) const;
+        glm::vec3 varianceToColor(double variance) const;
+        glm::vec3 priorityToColor(double priority) const;
 
 
         // Variance stabilzes over time

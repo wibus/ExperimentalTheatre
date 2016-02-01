@@ -142,48 +142,46 @@ namespace prop3
         incorporateFilm(film);
     }
 
-    bool CpuRaytracerEngine::isUpdated()
+    bool CpuRaytracerEngine::newTileCompleted()
     {
         return _currentFilm->newTileCompleted();
     }
 
     bool CpuRaytracerEngine::newFrameCompleted()
     {
-        if(_currentFilm->newFrameCompleted())
-        {
-            _protectedState.incSampleCount();
-            _protectedState.setDivergence(
-                _currentFilm->compileDivergence());
-
-            if(_raytracerState->isDrafting())
-            {
-                if(_raytracerState->sampleCount() >=
-                   _raytracerState->draftFrameCountPerLevel()
-                        * _workerThreads.size())
-                {
-                    nextDraftSize();
-                }
-            }
-            else
-            {
-                if(_raytracerState->sampleCount() > 2 && (
-                   _raytracerState->converged()) ||
-                   _raytracerState->runningOutOfTime() ||
-                   _raytracerState->runningOutOfSamples())
-                {
-                    interruptWorkers();
-                }
-            }
-
-            return true;
-        }
-
-        return false;
+        return _currentFilm->newFrameCompleted();
     }
 
-    const Film& CpuRaytracerEngine::film() const
+    void CpuRaytracerEngine::manageNextFrame()
     {
-        return *_currentFilm;
+        _protectedState.incSampleCount();
+        _protectedState.setDivergence(
+            _currentFilm->compileDivergence());
+
+        if(_raytracerState->isDrafting())
+        {
+            if(_raytracerState->sampleCount() >=
+               _raytracerState->draftFrameCountPerLevel()
+                    * _workerThreads.size())
+            {
+                nextDraftSize();
+            }
+        }
+        else
+        {
+            if(_raytracerState->sampleCount() > 2 && (
+               _raytracerState->converged()) ||
+               _raytracerState->runningOutOfTime() ||
+               _raytracerState->runningOutOfSamples())
+            {
+                interruptWorkers();
+            }
+        }
+    }
+
+    std::shared_ptr<Film> CpuRaytracerEngine::film() const
+    {
+        return _currentFilm;
     }
 
     std::shared_ptr<RaytracerState> CpuRaytracerEngine::raytracerState() const
@@ -436,7 +434,7 @@ namespace prop3
             w->start(true);
         }
 
-        _currentFilm->waitFrameCompletion();
+        _currentFilm->waitForFrameCompletion();
 
         for(auto& w : _workerObjects)
         {

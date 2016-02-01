@@ -19,6 +19,41 @@ namespace prop3
 
     }
 
+    const std::vector<glm::vec3>& ConvergentFilm::colorBuffer(ColorOutput colorOutput)
+    {
+        if(colorOutput != _colorOutput)
+        {
+            _colorOutput = colorOutput;
+
+            int pixelCount = _frameResolution.x * _frameResolution.y;
+
+            switch(colorOutput)
+            {
+            case ColorOutput::ALBEDO :
+                for(int i=0; i < pixelCount; ++i)
+                    _colorBuffer[i] = sampleToColor(_weightedColorBuffer[i]);
+                break;
+
+            case ColorOutput::DIVERGENCE :
+                for(int i=0; i < pixelCount; ++i)
+                    _colorBuffer[i] = divergenceToColor(_divergenceBuffer[i]);
+                break;
+
+            case ColorOutput::VARIANCE :
+                for(int i=0; i < pixelCount; ++i)
+                    _colorBuffer[i] = varianceToColor(_varianceBuffer[i]);
+                break;
+
+            case ColorOutput::PRIORITY :
+                for(int i=0; i < pixelCount; ++i)
+                    _colorBuffer[i] = priorityToColor(_priorityBuffer[i]);
+                break;
+            }
+        }
+
+        return _colorBuffer;
+    }
+
     void ConvergentFilm::clear(const glm::dvec3& color, bool hardReset)
     {
         size_t pixelCount = _frameResolution.x * _frameResolution.y;
@@ -149,6 +184,9 @@ namespace prop3
         double newWeight = newSample.w;
         glm::dvec3 newColor = glm::dvec3(newSample) / newWeight;
 
+        if(_colorOutput == ColorOutput::ALBEDO)
+            _colorBuffer[index] = newColor;
+
         if(oldSample.w != 0.0)
         {
             glm::dvec3 oldColor = glm::min(_maxPixelIntensity,
@@ -158,6 +196,9 @@ namespace prop3
 
             glm::dvec3 delta = oldColor - glm::min(_maxPixelIntensity, newColor);
             _divergenceBuffer[index] = glm::dot(delta, delta);
+
+            if(_colorOutput == ColorOutput::DIVERGENCE)
+                _colorBuffer[index] = divergenceToColor(_divergenceBuffer[index]);
 
 
             glm::dvec3 dColor = sampColor - oldColor;
@@ -169,11 +210,39 @@ namespace prop3
             double newVar = glm::mix(oldVar, dMean, dWeight / dBase);
             _varianceBuffer[index] = newVar;
 
+            if(_colorOutput == ColorOutput::VARIANCE)
+                _colorBuffer[index] = varianceToColor(_varianceBuffer[index]);
+
+
             double scale = glm::length(newColor) + 1e-3;
             _priorityBuffer[index] = (newVar / scale  + 0.1/newWeight) / newWeight;
-        }
 
-        //_colorBuffer[index] = glm::dvec3(_priorityBuffer[index] * 50.0);
-        _colorBuffer[index] = newColor;
+            if(_colorOutput == ColorOutput::PRIORITY)
+                _colorBuffer[index] = priorityToColor(_priorityBuffer[index]);
+        }
+    }
+
+
+    glm::vec3 ConvergentFilm::sampleToColor(const glm::dvec4& sample) const
+    {
+        if(sample.w > 0.0)
+            return glm::vec3(sample) / float(sample.w);
+        else
+            return glm::vec3(0.0);
+    }
+
+    glm::vec3 ConvergentFilm::divergenceToColor(double divergence) const
+    {
+        return glm::vec3(divergence * 200.0);
+    }
+
+    glm::vec3 ConvergentFilm::varianceToColor(double variance) const
+    {
+        return glm::vec3(variance * 10.0);
+    }
+
+    glm::vec3 ConvergentFilm::priorityToColor(double priority) const
+    {
+        return glm::vec3(priority * 50.0);
     }
 }

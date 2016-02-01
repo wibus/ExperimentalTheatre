@@ -5,6 +5,12 @@
 
 namespace prop3
 {
+
+    const std::string RaytracerState::COLOROUTPUT_ALBEDO = "Albedo";
+    const std::string RaytracerState::COLOROUTPUT_DIVERGENCE = "Divergence";
+    const std::string RaytracerState::COLOROUTPUT_VARIANCE = "Variance";
+    const std::string RaytracerState::COLOROUTPUT_PRIORITY = "Priority";
+
     RaytracerState::DraftParams::DraftParams() :
         levelCount(0),
         sizeRatio(1),
@@ -112,8 +118,20 @@ namespace prop3
 
 
     RaytracerState::RaytracerState(ProtectedState& state) :
-        _protectedState(state)
+        _protectedState(state),
+        _isUpdateEachTileEnabled(true),
+        _colorOutputType(COLOROUTPUT_ALBEDO)
     {
 
+    }
+
+    void RaytracerState::setUpdateEachTile(bool enabled)
+    {
+        _isUpdateEachTileEnabled = enabled;
+    }
+
+    void RaytracerState::setColorOutputType(const std::string& colorOutput)
+    {
+        _colorOutputType = colorOutput;
     }
 }
