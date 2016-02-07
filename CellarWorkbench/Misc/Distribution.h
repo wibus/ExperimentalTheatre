@@ -154,7 +154,7 @@ namespace cellar
     {
         return gen(radius,
                    _linearRand.gen1(2.0 * glm::pi<double>()),
-                   _linearRand.gen1(-glm::pi<double>(), glm::pi<double>()));
+                   _linearRand.gen1(-1.0, 1.0));
     }
 
     inline glm::dvec3 SphereRand::gen(double radius,

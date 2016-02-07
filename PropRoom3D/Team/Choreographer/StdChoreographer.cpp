@@ -27,4 +27,9 @@ namespace prop3
     {
         // TODO wbussiere 2014-12-13
     }
+
+    void StdChoreographer::restart()
+    {
+        // TODO wbussiere 2014-12-13
+    }
 }

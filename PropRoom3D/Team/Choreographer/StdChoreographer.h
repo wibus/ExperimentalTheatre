@@ -15,6 +15,7 @@ namespace prop3
         virtual void setup(const std::shared_ptr<StageSet>& stageSet) override;
         virtual void update(double dt) override;
         virtual void terminate() override;
+        virtual void restart() override;
 
     private:
 

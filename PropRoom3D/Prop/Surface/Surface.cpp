@@ -177,9 +177,8 @@ namespace prop3
         while(node != last)
         {
             RayHitReport& r = *node;
-            r.position = glm::dvec3(_transform * glm::dvec4(r.position, 1.0));
-            r.normal = glm::dvec3(_transform * glm::dvec4(r.normal, 0.0));
-            r.normal  = glm::normalize(r.normal);
+            r.position = glm::dvec3(_mvTransform * glm::dvec4(r.position, 1.0));
+            r.normal = glm::normalize(_normalTransform * r.normal);
 
             if(_coating.get() != nullptr)
                 r.coating = _coating.get();
@@ -202,8 +201,9 @@ namespace prop3
 
     void SurfaceShell::transform(const Transform& transform)
     {
-        _transform = transform.mat() * _transform;
         _invTransform = _invTransform * transform.inv();
+        _mvTransform = transform.mat() * _mvTransform;
+        _normalTransform = glm::transpose(glm::inverse(glm::dmat3(_mvTransform)));
 
         stampCurrentUpdate();
     }

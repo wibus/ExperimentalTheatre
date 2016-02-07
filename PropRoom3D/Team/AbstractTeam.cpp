@@ -55,6 +55,12 @@ namespace prop3
             artDir->update(dt);
     }
 
+    void AbstractTeam::restart()
+    {
+        if(_choreographer.get() != nullptr)
+            _choreographer->restart();
+    }
+
     bool AbstractTeam::saveScene(const string& fileName, bool prettyPrint)
     {
         StageSetJsonWriter writer;

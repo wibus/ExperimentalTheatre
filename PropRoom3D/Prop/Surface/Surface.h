@@ -146,7 +146,8 @@ namespace prop3
     private:
         std::shared_ptr<Surface> _surf;
         glm::dmat4 _invTransform;
-        glm::dmat4 _transform;
+        glm::dmat4 _mvTransform;
+        glm::dmat3 _normalTransform;
     };
 
 
@@ -348,7 +349,7 @@ namespace prop3
 
     inline glm::dmat4 SurfaceShell::transform() const
     {
-        return _transform;
+        return _mvTransform;
     }
 
     inline std::shared_ptr<Surface> SurfaceOr::apply(

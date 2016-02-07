@@ -1,5 +1,5 @@
-#ifndef CELLAR_CUBICSPLINEPATH_H
-#define CELLAR_CUBICSPLINEPATH_H
+#ifndef CELLAR_BASISSPLINEPATH_H
+#define CELLAR_BASISSPLINEPATH_H
 
 #include <vector>
 
@@ -162,4 +162,4 @@ namespace cellar
     }
 }
 
-#endif // CELLAR_CUBICSPLINEPATH_H
+#endif // CELLAR_BASISSPLINEPATH_H

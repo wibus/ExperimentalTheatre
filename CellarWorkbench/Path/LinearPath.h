@@ -23,9 +23,9 @@ namespace cellar
         void setEnd(const Data& begin);
 
 
-        virtual Data value(double t) override;
-        virtual Data tangent(double t) override;
-        virtual Data curvature(double t) override;
+        virtual Data value(double t) const override;
+        virtual Data tangent(double t) const override;
+        virtual Data curvature(double t) const override;
 
 
     private:
@@ -75,19 +75,19 @@ namespace cellar
     }
 
     template<typename Data>
-    Data LinearPath<Data>::value(double t)
+    Data LinearPath<Data>::value(double t) const
     {
         return (1.0-t) * _begin + t * _end;
     }
 
     template<typename Data>
-    Data LinearPath<Data>::tangent(double t)
+    Data LinearPath<Data>::tangent(double t) const
     {
         return _end - _begin;
     }
 
     template<typename Data>
-    Data LinearPath<Data>::curvature(double t)
+    Data LinearPath<Data>::curvature(double t) const
     {
         return Data(0);
     }

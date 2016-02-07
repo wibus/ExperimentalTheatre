@@ -17,9 +17,9 @@ namespace cellar
     public:
         virtual ~AbstractPath();
 
-        virtual Data value(double t) = 0;
-        virtual Data tangent(double t) = 0;
-        virtual Data curvature(double t) = 0;
+        virtual Data value(double t) const = 0;
+        virtual Data tangent(double t) const = 0;
+        virtual Data curvature(double t) const = 0;
 
     private:
     };

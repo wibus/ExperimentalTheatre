@@ -58,6 +58,7 @@ SET(CELLAR_MISC_HEADERS
 SET(CELLAR_PATH_HEADERS
     ${CELLAR_SRC_DIR}/Path/AbstractPath.h
     ${CELLAR_SRC_DIR}/Path/LinearPath.h
+    ${CELLAR_SRC_DIR}/Path/BasisSplinePath.h
     ${CELLAR_SRC_DIR}/Path/CubicSplinePath.h
     ${CELLAR_SRC_DIR}/Path/CompositePath.h)
 
