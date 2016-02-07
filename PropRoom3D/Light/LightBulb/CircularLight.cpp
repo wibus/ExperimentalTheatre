@@ -132,8 +132,8 @@ namespace prop3
         glm::dvec3 right = glm::normalize(- side - eye);
         glm::dvec3 left = glm::normalize(side - eye);
 
-        double La = glm::acos(glm::dot(bottom, top)) / 2.0;
-        double Ta = glm::acos(glm::dot(right, left)) / 2.0;
+        double La = glm::acos(glm::clamp(glm::dot(bottom, top), -1.0, 1.0)) / 2.0;
+        double Ta = glm::acos(glm::clamp(glm::dot(right, left), -1.0, 1.0)) / 2.0;
 
         double theta = glm::sqrt(La * Ta);
         double span = 1 - glm::cos(theta);

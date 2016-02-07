@@ -41,7 +41,6 @@ namespace prop3
         virtual void setup();
         virtual void terminate();
         virtual void update(double dt);
-        virtual void restart();
 
         // StageSet
         virtual std::shared_ptr<StageSet> stageSet() const;
