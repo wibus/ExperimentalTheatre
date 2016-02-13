@@ -34,7 +34,7 @@ namespace prop2
 
         signed char pointLateralPosition(const glm::dvec2& point) const;
         signed char pointTransversalPosition(const glm::dvec2& point) const;
-        double           pointMinimalDistance(const glm::dvec2& point) const;
+        double      pointMinimalDistance(const glm::dvec2& point) const;
         glm::dvec2 pointMinimalDirection(const glm::dvec2& point) const;
         bool        intersects(const Segment2D& line) const;
         glm::dvec2 intersectionPoint(const Segment2D &line) const; // Vec(0, 0) if not intersecting

@@ -79,24 +79,38 @@ namespace prop2
             _imageHudShader.popProgram();
         }
 
+        glm::mat4 shapeViewProjMatrix =
+                camera()->projectionMatrix() *
+                camera()->viewMatrix();
+
         if(msg.change == CameraMsg::EChange::PROJECTION ||
            msg.change == CameraMsg::EChange::VIEW)
         {
-            glm::vec2 zoom = glm::dvec2(1, 1);
-            glm::mat4 shapeViewProjMatrix =
-                    camera()->projectionMatrix() *
-                    camera()->viewMatrix();
 
             _circleShader.pushProgram();
             _circleShader.setMat4f("Projection", shapeViewProjMatrix);
-            _circleShader.setVec2f("Zoom", zoom);
             _circleShader.popProgram();
 
             _polygonShader.pushProgram();
             _polygonShader.setMat4f("Projection", shapeViewProjMatrix);
-            _polygonShader.setVec2f("Zoom", zoom);
             _polygonShader.popProgram();
         }
+
+        glm::vec4 botLeft = shapeViewProjMatrix * glm::vec4(0, 0, 0, 1);
+        glm::vec4 upRight = shapeViewProjMatrix * glm::vec4(1, 1, 0, 1);
+        glm::vec2 diag = (glm::vec2(upRight / upRight.w) -
+                          glm::vec2(botLeft / botLeft.w)) / 2.0f;
+        glm::vec2 zoom = diag * glm::vec2(camera()->viewport());
+
+        _circleShader.pushProgram();
+        _circleShader.setMat4f("Projection", shapeViewProjMatrix);
+        _circleShader.setVec2f("Zoom", zoom);
+        _circleShader.popProgram();
+
+        _polygonShader.pushProgram();
+        _polygonShader.setMat4f("Projection", shapeViewProjMatrix);
+        _polygonShader.setVec2f("Zoom", zoom);
+        _polygonShader.popProgram();
     }
 
     void GlArtDirector::setup()
