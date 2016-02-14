@@ -19,7 +19,8 @@ namespace prop3
         pathLength(INITIAL_DISTANCE),
         sample(sample),
         origin(origin),
-        direction(direction)
+        direction(direction),
+        invDir(1.0 / direction)
     {}
 
     double Raycast::getEntropy(double roughness)

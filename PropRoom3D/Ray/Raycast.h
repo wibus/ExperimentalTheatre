@@ -37,6 +37,7 @@ namespace prop3
         glm::dvec4 sample;
         glm::dvec3 origin;
         glm::dvec3 direction;
+        glm::dvec3 invDir;
 
         static const double FULLY_DIFFUSE;
         static const double FULLY_SPECULAR;

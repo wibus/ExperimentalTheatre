@@ -12,9 +12,10 @@ namespace prop3
 {
     Box::Box(const glm::dvec3& minCorner, const glm::dvec3& maxCorner) :
         _center((minCorner + maxCorner) / 2.0),
-        _dimensions(maxCorner - minCorner),
         _minCorner(minCorner),
-        _maxCorner(maxCorner)
+        _maxCorner(maxCorner),
+        _dimensions(maxCorner - minCorner),
+        _invDim(1.0 / _dimensions)
     {
 
     }
@@ -69,8 +70,8 @@ namespace prop3
 
     void Box::raycast(const Raycast& ray, RayHitList& reports) const
     {
-        glm::dvec3 t1 = (_minCorner - ray.origin) / ray.direction;
-        glm::dvec3 t2 = (_maxCorner - ray.origin) / ray.direction;
+        glm::dvec3 t1 = (_minCorner - ray.origin) * ray.invDir;
+        glm::dvec3 t2 = (_maxCorner - ray.origin) * ray.invDir;
 
         glm::dvec3 vtmin = glm::min(t1, t2);
         glm::dvec3 vtmax = glm::max(t1, t2);
@@ -83,7 +84,7 @@ namespace prop3
             if(0.0 < tmin && tmin < ray.limit)
             {
                 glm::dvec3 pt = ray.origin + ray.direction * tmin;
-                glm::dvec3 n = (pt - _center) / _dimensions;
+                glm::dvec3 n = (pt - _center) * _invDim;
                 glm::dvec3 absN = glm::abs(n);
                 if(absN.x > absN.y)
                     if(absN.x > absN.z)
@@ -106,7 +107,7 @@ namespace prop3
             if(0.0 < tmax && tmax < ray.limit)
             {
                 glm::dvec3 pt = ray.origin + ray.direction * tmax;
-                glm::dvec3 n = (pt - _center) / _dimensions;
+                glm::dvec3 n = (pt - _center) * _invDim;
                 glm::dvec3 absN = glm::abs(n);
                 if(absN.x > absN.y)
                     if(absN.x > absN.z)
@@ -136,8 +137,8 @@ namespace prop3
            maxDiff.x >= 0.0 && maxDiff.y >= 0.0 && maxDiff.z >= 0.0)
             return true;
 
-        glm::dvec3 t1 = minDiff / ray.direction;
-        glm::dvec3 t2 = maxDiff / ray.direction;
+        glm::dvec3 t1 = minDiff * ray.invDir;
+        glm::dvec3 t2 = maxDiff * ray.invDir;
 
         glm::dvec3 vtmin = glm::min(t1, t2);
         glm::dvec3 vtmax = glm::max(t1, t2);
@@ -163,6 +164,7 @@ namespace prop3
         _maxCorner = glm::dvec3(transform.mat() * glm::dvec4(_maxCorner, 1.0));
         _center = (_minCorner + _maxCorner) / 2.0;
         _dimensions = _maxCorner - _minCorner;
+        _invDim = 1.0 / _dimensions;
 
         stampCurrentUpdate();
     }

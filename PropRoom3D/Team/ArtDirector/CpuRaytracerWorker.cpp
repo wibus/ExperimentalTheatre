@@ -309,6 +309,7 @@ namespace prop3
             glm::dvec4 dirH = _viewProjInverse * screenPos;
             glm::dvec3 pixWorldPos = glm::dvec3(dirH / dirH.w);
             raycast.direction = glm::normalize(pixWorldPos - raycast.origin);
+            raycast.invDir = 1.0 / raycast.direction;
 
             _workingSample = glm::dvec4();
             while(_workingSample.w == 0.0

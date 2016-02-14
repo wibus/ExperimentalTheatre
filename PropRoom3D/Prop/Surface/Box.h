@@ -39,9 +39,10 @@ namespace prop3
 
     private:
         glm::dvec3 _center;
-        glm::dvec3 _dimensions;
         glm::dvec3 _minCorner;
         glm::dvec3 _maxCorner;
+        glm::dvec3 _dimensions;
+        glm::dvec3 _invDim;
     };
 
 

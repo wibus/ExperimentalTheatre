@@ -169,6 +169,7 @@ namespace prop3
         Raycast tRay = ray;
         tRay.origin = glm::dvec3(_invTransform * glm::dvec4(ray.origin, 1.0));
         tRay.direction = glm::dvec3(_invTransform * glm::dvec4(ray.direction, 0.0));
+        tRay.invDir = 1.0 / tRay.direction;
 
         RayHitReport* last = reports.head;
         _surf->raycast(tRay, reports);
@@ -196,6 +197,8 @@ namespace prop3
         Raycast tRay = ray;
         tRay.origin = glm::dvec3(_invTransform * glm::dvec4(ray.origin, 1.0));
         tRay.direction = glm::dvec3(_invTransform * glm::dvec4(ray.direction, 0.0));
+        tRay.invDir = 1.0 / tRay.direction;
+
         return _surf->intersects(tRay, reports);
     }
 
