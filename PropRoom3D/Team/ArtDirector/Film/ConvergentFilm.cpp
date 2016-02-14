@@ -4,14 +4,23 @@
 namespace prop3
 {
     ConvergentFilm::ConvergentFilm() :
-        _varianceBuffer(1, 0.0),
+        _weightedVarianceBuffer(1, glm::dvec2(0)),
         _divergenceBuffer(1, 1.0),
         _priorityBuffer(1, 1.0),
         _weightedColorBuffer(1, glm::dvec4(0)),
-        _minThresholdFrameCount(8),
+        _varianceWeightThreshold(4.0),
+        _priorityWeightThreshold(7.0),
         _maxPixelIntensity(2.0)
     {
+        _priorityWeightBias =
+            _priorityWeightThreshold *
+            _priorityWeightThreshold;
 
+        _priorityScale =
+            (_priorityWeightThreshold *
+             _priorityWeightThreshold *
+             _priorityWeightThreshold ) /
+                _priorityWeightBias ;
     }
 
     ConvergentFilm::~ConvergentFilm()
@@ -34,6 +43,11 @@ namespace prop3
                     _colorBuffer[i] = sampleToColor(_weightedColorBuffer[i]);
                 break;
 
+            case ColorOutput::WEIGHT :
+                for(int i=0; i < pixelCount; ++i)
+                    _colorBuffer[i] = weightToColor(_weightedColorBuffer[i]);
+                break;
+
             case ColorOutput::DIVERGENCE :
                 for(int i=0; i < pixelCount; ++i)
                     _colorBuffer[i] = divergenceToColor(_divergenceBuffer[i]);
@@ -41,7 +55,7 @@ namespace prop3
 
             case ColorOutput::VARIANCE :
                 for(int i=0; i < pixelCount; ++i)
-                    _colorBuffer[i] = varianceToColor(_varianceBuffer[i]);
+                    _colorBuffer[i] = varianceToColor(_weightedVarianceBuffer[i]);
                 break;
 
             case ColorOutput::PRIORITY :
@@ -64,13 +78,14 @@ namespace prop3
         _nextTileId = 0;
         _framePassCount = 0;
         _priorityThreshold = 0.0;
+        _maxPixelWeight = 1.0;
 
 
         _colorBuffer.clear();
         _colorBuffer.resize(pixelCount, color);
 
-        _varianceBuffer.clear();
-        _varianceBuffer.resize(pixelCount, 0.0);
+        _weightedVarianceBuffer.clear();
+        _weightedVarianceBuffer.resize(pixelCount, glm::dvec2(0));
 
         _divergenceBuffer.clear();
         _divergenceBuffer.resize(pixelCount, 1.0);
@@ -88,7 +103,6 @@ namespace prop3
             int tilePixCount = tileResolution.x * tileResolution.y;
 
             tile->setTilePriority(1.0);
-            tile->setPrioritySum(tilePixCount);
             tile->setDivergenceSum(tilePixCount);
         }
     }
@@ -108,23 +122,30 @@ namespace prop3
     {
         _newTileCompleted = true;
 
-        double prioritySum = 0.0;
-        double maxPriority = 0.0;
-        double divergenceSum = 0.0;
-        for(int j=tile.minCorner().y; j < tile.maxCorner().y; ++j)
+        if(_framePassCount >= _priorityWeightThreshold)
         {
-            int index = j * _frameResolution.x + tile.minCorner().x;
-            for(int i=tile.minCorner().x; i < tile.maxCorner().x; ++i, ++index)
+            double maxPriority = 0.0;
+            double divergenceSum = 0.0;
+            for(int j=tile.minCorner().y; j < tile.maxCorner().y; ++j)
             {
-                prioritySum += _priorityBuffer[index] * _priorityBuffer[index];
-                maxPriority = glm::max(maxPriority, _priorityBuffer[index]);
-                divergenceSum += _divergenceBuffer[index];
-            }
-        }
+                int index = j * _frameResolution.x + tile.minCorner().x;
+                for(int i=tile.minCorner().x; i < tile.maxCorner().x; ++i, ++index)
+                {
+                    double div = _divergenceBuffer[index];
+                    divergenceSum += div * div;
 
-        tile.setPrioritySum(prioritySum);
-        tile.setTilePriority(maxPriority);
-        tile.setDivergenceSum(divergenceSum);
+                    if(maxPriority < _priorityBuffer[index])
+                        maxPriority = _priorityBuffer[index];
+
+                    double currWeight = _weightedColorBuffer[index].w;
+                    if(_maxPixelWeight < currWeight)
+                        _maxPixelWeight = currWeight;
+                }
+            }
+
+            tile.setTilePriority(maxPriority);
+            tile.setDivergenceSum(divergenceSum);
+        }
     }
 
     void ConvergentFilm::endTileReached()
@@ -135,16 +156,20 @@ namespace prop3
         _cvMutex.unlock();
         _cv.notify_all();
 
-        if(_framePassCount >= _minThresholdFrameCount)
+        if(_framePassCount > _priorityWeightThreshold)
         {
-            double prioritySum = 0.0;
+            double topPriority = 0.0;
             double tileCount = _tiles.size();
             for(size_t i=0; i < tileCount; ++i)
-                prioritySum += _tiles[i]->prioritySum();
+            {
+                double tilePriority = _tiles[i]->tilePriority();
+                if(topPriority < tilePriority)
+                    topPriority = tilePriority;
+            }
 
+            topPriority = glm::min(topPriority, 1.0);
             double baseRand = _linearRand.gen1(0.0, 1.0);
-            double meanPriority = prioritySum / _priorityBuffer.size();
-            _priorityThreshold = 0.75 * glm::sqrt(baseRand * meanPriority);
+            _priorityThreshold = baseRand * topPriority * 0.85;
         }
         else
         {
@@ -181,44 +206,51 @@ namespace prop3
         glm::dvec4 newSample = oldSample + trueSample;
         _weightedColorBuffer[index] = newSample;
 
-        double newWeight = newSample.w;
-        glm::dvec3 newColor = glm::dvec3(newSample) / newWeight;
-
+        glm::dvec3 newColor = sampleToColor(newSample);
         if(_colorOutput == ColorOutput::ALBEDO)
             _colorBuffer[index] = newColor;
 
-        if(oldSample.w != 0.0)
+        if(_colorOutput == ColorOutput::WEIGHT)
+            _colorBuffer[index] = weightToColor(newSample);
+
+        double newWeight = newSample.w;
+        if(newWeight > _varianceWeightThreshold)
         {
             glm::dvec3 oldColor = glm::min(_maxPixelIntensity,
                 glm::dvec3(oldSample) / oldSample.w);
             glm::dvec3 sampColor = glm::min(_maxPixelIntensity,
                 glm::dvec3(trueSample) / trueSample.w);
 
-            glm::dvec3 delta = oldColor - glm::min(_maxPixelIntensity, newColor);
-            _divergenceBuffer[index] = glm::dot(delta, delta);
-
-            if(_colorOutput == ColorOutput::DIVERGENCE)
-                _colorBuffer[index] = divergenceToColor(_divergenceBuffer[index]);
-
-
             glm::dvec3 dColor = sampColor - oldColor;
             double dMean = glm::dot(dColor, dColor);
-            double dWeight = glm::min(trueSample.w, oldSample.w);
-            double dBase = glm::max(trueSample.w, oldSample.w);
+            double trueWeight = trueSample.w;
 
-            double oldVar = _varianceBuffer[index];
-            double newVar = glm::mix(oldVar, dMean, dWeight / dBase);
-            _varianceBuffer[index] = newVar;
+            _weightedVarianceBuffer[index] += glm::dvec2(dMean, trueWeight);
+            glm::dvec2 newWeightedVar = _weightedVarianceBuffer[index];
 
             if(_colorOutput == ColorOutput::VARIANCE)
-                _colorBuffer[index] = varianceToColor(_varianceBuffer[index]);
+                _colorBuffer[index] = varianceToColor(newWeightedVar);
 
 
-            double scale = glm::length(newColor) + 1e-3;
-            _priorityBuffer[index] = (newVar / scale  + 0.1/newWeight) / newWeight;
+            if(newWeight > _priorityWeightThreshold)
+            {
+                double scale = glm::length(newColor) + 1e-3;
+                double newVar = newWeightedVar.x / newWeightedVar.y;
+                double newDiv = glm::sqrt(newVar) / (scale * newWeight);
+                _divergenceBuffer[index] = newDiv;
 
-            if(_colorOutput == ColorOutput::PRIORITY)
-                _colorBuffer[index] = priorityToColor(_priorityBuffer[index]);
+                if(_colorOutput == ColorOutput::DIVERGENCE)
+                    _colorBuffer[index] = divergenceToColor(newDiv);
+
+
+                double weightPrio = newWeight*newWeight*newWeight;
+                double newPrio = _priorityScale *
+                    (newDiv + _priorityWeightBias / weightPrio);
+                _priorityBuffer[index] = newPrio;
+
+                if(_colorOutput == ColorOutput::PRIORITY)
+                    _colorBuffer[index] = priorityToColor(newPrio);
+            }
         }
     }
 
@@ -231,18 +263,33 @@ namespace prop3
             return glm::vec3(0.0);
     }
 
-    glm::vec3 ConvergentFilm::divergenceToColor(double divergence) const
+    glm::vec3 ConvergentFilm::weightToColor(const glm::dvec4& sample) const
     {
-        return glm::vec3(divergence * 200.0);
+        if(sample.w > _priorityWeightThreshold)
+        {
+            double maxPrio =_maxPixelWeight - _priorityWeightThreshold;
+            double currWeight = sample.w - _priorityWeightThreshold;
+            return glm::vec3(currWeight / maxPrio);
+        }
+        else
+            return glm::vec3(0.0);
     }
 
-    glm::vec3 ConvergentFilm::varianceToColor(double variance) const
+    glm::vec3 ConvergentFilm::divergenceToColor(double divergence) const
     {
-        return glm::vec3(variance * 10.0);
+        return glm::vec3(divergence * 10.0);
+    }
+
+    glm::vec3 ConvergentFilm::varianceToColor(const glm::dvec2& variance) const
+    {
+        if(variance.y > 0.0)
+            return glm::vec3((variance.x / variance.y) * 10.0);
+        else
+            return glm::dvec3(1.0);
     }
 
     glm::vec3 ConvergentFilm::priorityToColor(double priority) const
     {
-        return glm::vec3(priority * 50.0);
+        return glm::vec3(priority);
     }
 }

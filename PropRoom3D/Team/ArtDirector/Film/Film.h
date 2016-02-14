@@ -15,7 +15,7 @@ namespace prop3
     class PROP3D_EXPORT Film
     {
     public:
-        enum class ColorOutput {ALBEDO, DIVERGENCE, VARIANCE, PRIORITY};
+        enum class ColorOutput {ALBEDO, WEIGHT, DIVERGENCE, VARIANCE, PRIORITY};
 
         Film();
         virtual ~Film();

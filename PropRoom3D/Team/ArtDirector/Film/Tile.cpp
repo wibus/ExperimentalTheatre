@@ -52,8 +52,7 @@ namespace prop3
         _startPix(_minCorner + glm::ivec2(-1, 0)),
         _tilePriority(1.0),
         _priorityThreshold(threshold),
-        _divergenceSum(0.0),
-        _prioritySum(1.0)
+        _divergenceSum(0.0)
     {
     }
 
@@ -115,10 +114,5 @@ namespace prop3
     void Tile::setDivergenceSum(double sum)
     {
         _divergenceSum = sum;
-    }
-
-    void Tile::setPrioritySum(double sum)
-    {
-        _prioritySum = sum;
     }
 }

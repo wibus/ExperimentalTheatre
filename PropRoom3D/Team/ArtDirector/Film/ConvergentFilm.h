@@ -37,13 +37,14 @@ namespace prop3
         virtual void addSample(int index, const glm::dvec4& sample) override;
 
         glm::vec3 sampleToColor(const glm::dvec4& sample) const;
+        glm::vec3 weightToColor(const glm::dvec4& sample) const;
         glm::vec3 divergenceToColor(double divergence) const;
-        glm::vec3 varianceToColor(double variance) const;
+        glm::vec3 varianceToColor(const glm::dvec2& variance) const;
         glm::vec3 priorityToColor(double priority) const;
 
 
         // Variance stabilzes over time
-        std::vector<double> _varianceBuffer;
+        std::vector<glm::dvec2> _weightedVarianceBuffer;
 
         // Divergence decreases over time
         std::vector<double> _divergenceBuffer;
@@ -54,8 +55,13 @@ namespace prop3
         // rgb accumulation and its total weight
         std::vector<glm::dvec4> _weightedColorBuffer;
 
-        int _minThresholdFrameCount;
+        double _varianceWeightThreshold;
+        double _priorityWeightThreshold;
+        double _priorityWeightBias;
+        double _priorityScale;
+
         glm::dvec3 _maxPixelIntensity;
+        double _maxPixelWeight;
 
         // Random distribution
         cellar::LinearRand _linearRand;

@@ -7,6 +7,7 @@ namespace prop3
 {
 
     const std::string RaytracerState::COLOROUTPUT_ALBEDO = "Albedo";
+    const std::string RaytracerState::COLOROUTPUT_WEIGHT = "Weight";
     const std::string RaytracerState::COLOROUTPUT_DIVERGENCE = "Divergence";
     const std::string RaytracerState::COLOROUTPUT_VARIANCE = "Variance";
     const std::string RaytracerState::COLOROUTPUT_PRIORITY = "Priority";

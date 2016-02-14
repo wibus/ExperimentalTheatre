@@ -35,6 +35,8 @@ namespace prop3
         std::shared_ptr<RaytracerState> raytracerState() const;
 
 
+        static const double FORCE_REFRESH_DT;
+
     protected:
         virtual void sendBuffersToGpu();
         virtual void printConvergence();

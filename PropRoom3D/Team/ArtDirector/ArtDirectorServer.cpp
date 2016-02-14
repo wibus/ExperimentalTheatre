@@ -15,6 +15,8 @@
 
 namespace prop3
 {
+    const double ArtDirectorServer::FORCE_REFRESH_DT = 0.0;
+
     ArtDirectorServer::ArtDirectorServer() :
         _colorBufferTexId(0),
         _postProdUnit(new GlPostProdUnit())
@@ -48,9 +50,9 @@ namespace prop3
         _stageSet = stageSet;
 
 
-        unsigned int sampleCountThreshold = 400;
+        unsigned int sampleCountThreshold = 4096;
         //unsigned int sampleCountThreshold = 2;
-        double divergenceThreshold = 1.000e-3;
+        double divergenceThreshold = 3.500e-3;
         double timeThreshold = 900.0;
 
         RaytracerState::DraftParams draftParams;
@@ -89,9 +91,11 @@ namespace prop3
 
     void ArtDirectorServer::draw(double dt)
     {
-        if(_localRaytracer->newTileCompleted())
+        if(dt == FORCE_REFRESH_DT ||
+           _localRaytracer->newTileCompleted())
         {
-            if(raytracerState()->isUpdateEachTileEnabled())
+            if(dt == FORCE_REFRESH_DT ||
+               raytracerState()->isUpdateEachTileEnabled())
                 sendBuffersToGpu();
 
             if(_localRaytracer->newFrameCompleted())
@@ -157,6 +161,8 @@ namespace prop3
     {
         std::string colorOuputType = raytracerState()->colorOutputType();
         Film::ColorOutput colorOutput = Film::ColorOutput::ALBEDO;
+        if(colorOuputType == RaytracerState::COLOROUTPUT_WEIGHT)
+            colorOutput = Film::ColorOutput::WEIGHT;
         if(colorOuputType == RaytracerState::COLOROUTPUT_DIVERGENCE)
             colorOutput = Film::ColorOutput::DIVERGENCE;
         else if(colorOuputType == RaytracerState::COLOROUTPUT_VARIANCE)

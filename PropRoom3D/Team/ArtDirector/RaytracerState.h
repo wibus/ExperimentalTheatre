@@ -131,6 +131,7 @@ namespace prop3
         std::string colorOutputType() const;
 
         static const std::string COLOROUTPUT_ALBEDO;
+        static const std::string COLOROUTPUT_WEIGHT;
         static const std::string COLOROUTPUT_DIVERGENCE;
         static const std::string COLOROUTPUT_VARIANCE;
         static const std::string COLOROUTPUT_PRIORITY;
