@@ -2,15 +2,16 @@
 #define CELLAR_LINEARPATH_H
 
 #include "AbstractPath.h"
+#include "PathVisitor.h"
 
 
 namespace cellar
 {
     template<typename Data>
-    class CELLAR_EXPORT LinearPath : public AbstractPath<Data>
+    class CELLAR_EXPORT LinearPath : public LeafPath<Data>
     {
     public:
-        LinearPath(const Data& begin, const Data& end);
+        LinearPath(double duration, const Data& begin, const Data& end);
         virtual ~LinearPath();
 
 
@@ -27,6 +28,8 @@ namespace cellar
         virtual Data tangent(double t) const override;
         virtual Data curvature(double t) const override;
 
+        virtual void accept(PathVisitor<Data>& visitor) override;
+
 
     private:
         Data _begin;
@@ -37,7 +40,11 @@ namespace cellar
 
     // IMPLEMENTATION
     template<typename Data>
-    LinearPath<Data>::LinearPath(const Data& begin, const Data& end) :
+    LinearPath<Data>::LinearPath(
+            double duration,
+            const Data& begin,
+            const Data& end) :
+        LeafPath<Data>(duration),
         _begin(begin),
         _end(end)
     {
@@ -90,6 +97,12 @@ namespace cellar
     Data LinearPath<Data>::curvature(double t) const
     {
         return Data(0);
+    }
+
+    template<typename Data>
+    void LinearPath<Data>::accept(PathVisitor<Data>& visitor)
+    {
+        visitor.visit(*this);
     }
 }
 

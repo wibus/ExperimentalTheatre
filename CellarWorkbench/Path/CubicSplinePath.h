@@ -4,21 +4,25 @@
 #include <vector>
 
 #include "AbstractPath.h"
+#include "PathVisitor.h"
 
 
 namespace cellar
 {
     template<typename Data>
-    class CELLAR_EXPORT CubicSplinePath : public AbstractPath<Data>
+    class CELLAR_EXPORT CubicSplinePath : public LeafPath<Data>
     {
     public:
-        CubicSplinePath(const std::vector<Data>& ctrlPts);
+        CubicSplinePath(double duration, const std::vector<Data>& ctrlPts);
         virtual ~CubicSplinePath();
 
+        const std::vector<Data>& ctrlPts() const;
 
         virtual Data value(double t) const override;
         virtual Data tangent(double t) const override;
         virtual Data curvature(double t) const override;
+
+        virtual void accept(PathVisitor<Data>& visitor) override;
 
 
     protected:
@@ -27,6 +31,7 @@ namespace cellar
 
     private:
         struct Node {Data v; Data t;};
+        std::vector<Data> _ctrlPts;
         std::vector<Node> _nodes;
     };
 
@@ -34,7 +39,11 @@ namespace cellar
 
     // IMPLEMENTATION
     template<typename Data>
-    CubicSplinePath<Data>::CubicSplinePath(const std::vector<Data>& ctrlPts)
+    CubicSplinePath<Data>::CubicSplinePath(
+            double duration,
+            const std::vector<Data>& ctrlPts) :
+        LeafPath<Data>(duration),
+        _ctrlPts(ctrlPts)
     {
         assert(ctrlPts.size() >= 4);
         int lastCtrlPt = ctrlPts.size() - 1;
@@ -86,6 +95,12 @@ namespace cellar
     CubicSplinePath<Data>::~CubicSplinePath()
     {
 
+    }
+
+    template<typename Data>
+    const std::vector<Data>& CubicSplinePath<Data>::ctrlPts() const
+    {
+        return _ctrlPts;
     }
 
     template<typename Data>
@@ -159,6 +174,12 @@ namespace cellar
             h[1] * _nodes[i + 1].v +
             h[2] * _nodes[i].t +
             h[3] * _nodes[i + 1].t;
+    }
+
+    template<typename Data>
+    void CubicSplinePath<Data>::accept(PathVisitor<Data>& visitor)
+    {
+        visitor.visit(*this);
     }
 }
 

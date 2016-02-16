@@ -4,21 +4,25 @@
 #include <vector>
 
 #include "AbstractPath.h"
+#include "PathVisitor.h"
 
 
 namespace cellar
 {
     template<typename Data>
-    class CELLAR_EXPORT CubicSplinePath : public AbstractPath<Data>
+    class CELLAR_EXPORT BasisSplinePath : public LeafPath<Data>
     {
     public:
-        CubicSplinePath(const std::vector<Data>& ctrlPts);
-        virtual ~CubicSplinePath();
+        BasisSplinePath(double duration, const std::vector<Data>& ctrlPts);
+        virtual ~BasisSplinePath();
 
+        const std::vector<Data>& ctrlPts() const;
 
         virtual Data value(double t) const override;
         virtual Data tangent(double t) const override;
         virtual Data curvature(double t) const override;
+
+        virtual void accept(PathVisitor<Data>& visitor) override;
 
 
     protected:
@@ -27,6 +31,7 @@ namespace cellar
 
     private:
         struct Node {Data v; Data t;};
+        std::vector<Data> _ctrlPts;
         std::vector<Node> _nodes;
     };
 
@@ -34,7 +39,10 @@ namespace cellar
 
     // IMPLEMENTATION
     template<typename Data>
-    CubicSplinePath<Data>::CubicSplinePath(const std::vector<Data>& ctrlPts)
+    BasisSplinePath<Data>::BasisSplinePath(
+            double duration,
+            const std::vector<Data>& ctrlPts) :
+        LeafPath<Data>(duration)
     {
         assert(ctrlPts.size() >= 4);
         int lastCtrlPt = ctrlPts.size() - 1;
@@ -83,13 +91,19 @@ namespace cellar
     }
 
     template<typename Data>
-    CubicSplinePath<Data>::~CubicSplinePath()
+    BasisSplinePath<Data>::~BasisSplinePath()
     {
 
     }
 
     template<typename Data>
-    Data CubicSplinePath<Data>::value(double t) const
+    const std::vector<Data>& BasisSplinePath<Data>::ctrlPts() const
+    {
+        return _ctrlPts;
+    }
+
+    template<typename Data>
+    Data BasisSplinePath<Data>::value(double t) const
     {
         double u = glm::clamp(t, 0.0, 1.0);
         int i = findIntervall(u);
@@ -108,7 +122,7 @@ namespace cellar
     }
 
     template<typename Data>
-    Data CubicSplinePath<Data>::tangent(double t) const
+    Data BasisSplinePath<Data>::tangent(double t) const
     {
         double u = glm::clamp(t, 0.0, 1.0);
         int i = findIntervall(u);
@@ -126,7 +140,7 @@ namespace cellar
     }
 
     template<typename Data>
-    Data CubicSplinePath<Data>::curvature(double t) const
+    Data BasisSplinePath<Data>::curvature(double t) const
     {
         double u = glm::clamp(t, 0.0, 1.0);
         int i = findIntervall(u);
@@ -142,7 +156,7 @@ namespace cellar
     }
 
     template<typename Data>
-    int CubicSplinePath<Data>::findIntervall(double& t) const
+    int BasisSplinePath<Data>::findIntervall(double& t) const
     {
         int nbSections = _nodes.size() - 1;
         float u = t * (nbSections);
@@ -152,13 +166,19 @@ namespace cellar
     }
 
     template<typename Data>
-    Data CubicSplinePath<Data>::interpolate(int i, double h[]) const
+    Data BasisSplinePath<Data>::interpolate(int i, double h[]) const
     {
         return
             h[0] * _nodes[i].v +
             h[1] * _nodes[i + 1].v +
             h[2] * _nodes[i].t +
             h[3] * _nodes[i + 1].t;
+    }
+
+    template<typename Data>
+    void BasisSplinePath<Data>::accept(PathVisitor<Data>& visitor)
+    {
+        visitor.visit(*this);
     }
 }
 
