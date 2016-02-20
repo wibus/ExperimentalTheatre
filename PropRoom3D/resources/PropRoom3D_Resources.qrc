@@ -3,5 +3,7 @@
         <file>shaders/clip_space.vert</file>
         <file>shaders/post_prod_gl440.frag</file>
         <file>shaders/post_prod_gl130.frag</file>
+        <file>shaders/debugLine.frag</file>
+        <file>shaders/debugLine.vert</file>
     </qresource>
 </RCC>

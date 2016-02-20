@@ -18,6 +18,10 @@ SET(PROP3_LIGHT_HEADERS
     ${PROP3_SRC_DIR}/Node/Light/LightCast.h
     ${PROP3_SRC_DIR}/Node/Light/LightUtils.h)
 
+# Debug
+SET(PROP3_DEBUG_HEADERS
+    ${PROP3_SRC_DIR}/Node/Debug/DebugLine.h)
+
 # Coatings
 SET(PROP3_COATING_HEADERS
     ${PROP3_SRC_DIR}/Node/Prop/Coating/Coating.h
@@ -47,21 +51,22 @@ SET(PROP3_PROP_HEADERS
     ${PROP3_SURFACE_HEADERS}
     ${PROP3_SRC_DIR}/Node/Prop/Prop.h)
 
-# Rays
-SET(PROP3_RAY_HEADERS
-    ${PROP3_SRC_DIR}/Ray/Raycast.h
-    ${PROP3_SRC_DIR}/Ray/RayHitList.h
-    ${PROP3_SRC_DIR}/Ray/RayHitReport.h)
-
 # Nodes
 SET(PROP3_NODE_HEADERS
     ${PROP3_LIGHT_HEADERS}
+    ${PROP3_DEBUG_HEADERS}
     ${PROP3_PROP_HEADERS}
     ${PROP3_SRC_DIR}/Node/Node.h
     ${PROP3_SRC_DIR}/Node/Visitor.h
     ${PROP3_SRC_DIR}/Node/HandleNode.h
     ${PROP3_SRC_DIR}/Node/StageZone.h
     ${PROP3_SRC_DIR}/Node/StageSet.h)
+
+# Rays
+SET(PROP3_RAY_HEADERS
+    ${PROP3_SRC_DIR}/Ray/Raycast.h
+    ${PROP3_SRC_DIR}/Ray/RayHitList.h
+    ${PROP3_SRC_DIR}/Ray/RayHitReport.h)
 
 # Serialization
 SET(PROP3_SERIAL_HEADERS
@@ -131,6 +136,10 @@ SET(PROP3_LIGHT_SOURCES
     ${PROP3_SRC_DIR}/Node/Light/LightCast.cpp
     ${PROP3_SRC_DIR}/Node/Light/LightUtils.cpp)
 
+# Debug
+SET(PROP3_DEBUG_SOURCES
+    ${PROP3_SRC_DIR}/Node/Debug/DebugLine.cpp)
+
 # Coatings
 SET(PROP3_COATING_SOURCES
     ${PROP3_SRC_DIR}/Node/Prop/Coating/Coating.cpp
@@ -160,21 +169,22 @@ SET(PROP3_PROP_SOURCES
     ${PROP3_SURFACE_SOURCES}
     ${PROP3_SRC_DIR}/Node/Prop/Prop.cpp)
 
-# Rays
-SET(PROP3_RAY_SOURCES
-    ${PROP3_SRC_DIR}/Ray/Raycast.cpp
-    ${PROP3_SRC_DIR}/Ray/RayHitList.cpp
-    ${PROP3_SRC_DIR}/Ray/RayHitReport.cpp)
-
 # Nodes
 SET(PROP3_NODE_SOURCES
     ${PROP3_LIGHT_SOURCES}
+    ${PROP3_DEBUG_SOURCES}
     ${PROP3_PROP_SOURCES}
     ${PROP3_SRC_DIR}/Node/Node.cpp
     ${PROP3_SRC_DIR}/Node/Visitor.cpp
     ${PROP3_SRC_DIR}/Node/HandleNode.cpp
     ${PROP3_SRC_DIR}/Node/StageZone.cpp
     ${PROP3_SRC_DIR}/Node/StageSet.cpp)
+
+# Rays
+SET(PROP3_RAY_SOURCES
+    ${PROP3_SRC_DIR}/Ray/Raycast.cpp
+    ${PROP3_SRC_DIR}/Ray/RayHitList.cpp
+    ${PROP3_SRC_DIR}/Ray/RayHitReport.cpp)
 
 # Serialization
 SET(PROP3_SERIAL_SOURCES
@@ -225,6 +235,8 @@ SET(PROP3_RCC_FILES
     ${PROP3_SRC_DIR}/resources/PropRoom3D_Resources.qrc)
 SET(PROP3_SHADER_FILES
     ${PROP3_SRC_DIR}/resources/shaders/clip_space.vert
+    ${PROP3_SRC_DIR}/resources/shaders/debugLine.vert
+    ${PROP3_SRC_DIR}/resources/shaders/debugLine.frag
     ${PROP3_SRC_DIR}/resources/shaders/post_prod_gl130.frag
     ${PROP3_SRC_DIR}/resources/shaders/post_prod_gl440.frag)
 SET(PROP3_RESOURCE_FILES

@@ -1,6 +1,8 @@
 #version 130
 
+uniform vec2 DepthRange;
 uniform sampler2D ImageTex;
+uniform sampler2D DepthTex;
 uniform vec3 TemperatureRgb;
 uniform float ContrastValue;
 uniform float LuminosityValue;
@@ -117,4 +119,11 @@ void main()
     vec3 saturatedColor = clamp(adjustedIntensityColor, 0.0, 1.0);
 
     FragColor = vec4(saturatedColor, 1);
+
+    // Depth
+    float n = -DepthRange[0];
+    float f = -DepthRange[1];
+    float wd = texture(DepthTex, screenCoord).r;
+    float ndcDepth = (wd*(-(f+n)) - 2*f*n) / (-wd * (f-n));
+    gl_FragDepth = clamp((ndcDepth + 1.0) / 2.0, 0.0, 0.9999);
 }

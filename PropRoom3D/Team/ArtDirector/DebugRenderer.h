@@ -4,7 +4,6 @@
 #include <GLM/glm.hpp>
 
 #include <CellarWorkbench/GL/GlProgram.h>
-#include <CellarWorkbench/GL/GlVao.h>
 
 #include <PropRoom3D/libPropRoom3D_global.h>
 
@@ -30,7 +29,8 @@ namespace prop3
         glm::dmat4 _viewMat;
         glm::dmat4 _projMat;
         cellar::GlProgram _lineProgram;
-        cellar::GlVao _lineVao;
+        unsigned int _lineVbo;
+        unsigned int _lineVao;
     };
 }
 

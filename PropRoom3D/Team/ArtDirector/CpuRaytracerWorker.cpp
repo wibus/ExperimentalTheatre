@@ -20,6 +20,7 @@
 #include "Serial/JsonReader.h"
 
 #include "../AbstractTeam.h"
+#include "ArtDirectorServer.h"
 
 #include "Film/StaticFilm.h"
 
@@ -133,7 +134,8 @@ namespace prop3
             apertureBeg.z /= apertureBeg.w;
             glm::dvec4 apertureEnd = _projInvMatrix * glm::dvec4(0.0, 0.0, 1.0, 1.0);
             apertureEnd.z /= apertureEnd.w;
-            _aperture = _confusionRadius * ((apertureBeg.z - apertureEnd.z) - 1.0);
+            _aperture = _confusionRadius * ((apertureBeg.z - apertureEnd.z) -
+                                            ArtDirectorServer::IMAGE_DEPTH);
         });
     }
 
@@ -312,8 +314,8 @@ namespace prop3
             raycast.invDir = 1.0 / raycast.direction;
 
             _workingSample = glm::dvec4();
-            while(_workingSample.w == 0.0
-                   && _runningPredicate)
+            //while(_workingSample.w == 0.0
+            //       && _runningPredicate)
             {
                 fireScreenRay(raycast);
             }
@@ -538,7 +540,7 @@ namespace prop3
                     commitSample(currSamp * _backdrop->raycast(ray));
                 else
                 {
-                    double depth = ray.limit;
+                    double depth = 400.0;
                     glm::dvec4 sample = currSamp * _backdrop->raycast(ray);
                     commitSample(glm::dvec4(glm::dvec3(sample) / sample.w, depth));
                 }

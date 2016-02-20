@@ -10,6 +10,7 @@
 
 namespace prop3
 {
+    class DebugLine;
     class Backdrop;
     class Material;
     class Visitor;
@@ -44,6 +45,12 @@ namespace prop3
         virtual void makeTraveling(Visitor& visitor);
 
 
+        // Debug props
+        const std::vector<DebugLine>& debugLines() const;
+        void addDebugLine(const DebugLine& line);
+        void clearDebugLines();
+
+
         // Timestamps
         bool updateTimeStamp();
 
@@ -55,6 +62,8 @@ namespace prop3
         std::shared_ptr<Backdrop> _backdrop;
         TimeStamp _lastTimeStamp;
         bool _stageSetChanged;
+
+        std::vector<DebugLine> _debugLines;
     };
 
 
@@ -73,6 +82,11 @@ namespace prop3
     inline bool StageSet::stageSetChanged() const
     {
         return _stageSetChanged;
+    }
+
+    inline const std::vector<DebugLine>& StageSet::debugLines() const
+    {
+        return _debugLines;
     }
 }
 

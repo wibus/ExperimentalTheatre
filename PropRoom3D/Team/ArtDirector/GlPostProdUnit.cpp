@@ -59,6 +59,18 @@ namespace prop3
         _colorBufferTexId = id;
     }
 
+    void GlPostProdUnit::setDepthBufferTexId(unsigned int id)
+    {
+        _depthBufferTexId = id;
+    }
+
+    void GlPostProdUnit::updateDepthRange(const glm::vec2& range)
+    {
+        _postProdProgram.pushProgram();
+        _postProdProgram.setVec2f("DepthRange", range);
+        _postProdProgram.popProgram();
+    }
+
     void GlPostProdUnit::setup()
     {
         // Full screen triangle VAO
@@ -67,6 +79,7 @@ namespace prop3
             { 3, -1, 1},
             {-1,  3, 1}
         };
+
 
         glGenVertexArrays(1, &_fullscreenVao);
         glBindVertexArray(_fullscreenVao);
@@ -111,6 +124,8 @@ namespace prop3
         _postProdProgram.link();
         _postProdProgram.pushProgram();
         _postProdProgram.setInt("ImageTex", 0);
+        _postProdProgram.setInt("DepthTex", 1);
+        _postProdProgram.setVec2f("DepthRange", glm::vec2(0, 1));
         _postProdProgram.setFloat("AdaptationFactor", _adaptationFactor);
         _postProdProgram.setFloat("ContrastValue",    _contrastValue);
         _postProdProgram.setFloat("LuminosityValue",  _luminosityValue);
@@ -131,6 +146,8 @@ namespace prop3
 
         _postProdProgram.pushProgram();
 
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, _depthBufferTexId);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
 
@@ -139,11 +156,9 @@ namespace prop3
             glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &_filteringFunc);
         }
 
-        glDisable(GL_DEPTH_TEST);
         glBindVertexArray(_fullscreenVao);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glBindVertexArray(0);
-        glEnable(GL_DEPTH_TEST);
 
         _postProdProgram.popProgram();
     }

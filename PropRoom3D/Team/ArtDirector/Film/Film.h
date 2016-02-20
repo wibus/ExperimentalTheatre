@@ -36,6 +36,8 @@ namespace prop3
         bool newFrameCompleted();
 
 
+        const std::vector<float>& depthBuffer() const;
+
         virtual const std::vector<glm::vec3>& colorBuffer(ColorOutput colorOutput) = 0;
 
 
@@ -82,6 +84,7 @@ namespace prop3
         size_t _framePassCount;
         glm::ivec2 _frameResolution;
         std::vector<glm::vec3> _colorBuffer;
+        std::vector<float> _depthBuffer;
         ColorOutput _colorOutput;
 
         std::mutex _cvMutex;
@@ -140,6 +143,11 @@ namespace prop3
     inline void Film::resizeTiles(int width, int height)
     {
         resizeTiles(glm::ivec2(width, height));
+    }
+
+    inline const std::vector<float>& Film::depthBuffer() const
+    {
+        return _depthBuffer;
     }
 
     inline double Film::pixelDivergence(int i, int j) const

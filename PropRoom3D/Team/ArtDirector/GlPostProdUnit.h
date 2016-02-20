@@ -21,6 +21,8 @@ namespace prop3
         virtual const float* lowpassKernel() const;
 
         virtual void setColorBufferTexId(unsigned int id);
+        virtual void setDepthBufferTexId(unsigned int id);
+        virtual void updateDepthRange(const glm::vec2& range);
 
         virtual void setup();
         virtual void execute();
@@ -46,6 +48,7 @@ namespace prop3
 
     private:
         unsigned int _colorBufferTexId;
+        unsigned int _depthBufferTexId;
 
         cellar::GlProgram _postProdProgram;
         unsigned int _fullscreenVao;

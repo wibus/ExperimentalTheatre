@@ -8,6 +8,7 @@
 #include <CellarWorkbench/Misc/Log.h>
 
 #include "CpuRaytracerEngine.h"
+#include "DebugRenderer.h"
 #include "Film/Film.h"
 #include "GlPostProdUnit.h"
 #include "Node/StageSet.h"
@@ -16,9 +17,11 @@
 namespace prop3
 {
     const double ArtDirectorServer::FORCE_REFRESH_DT = 0.0;
+    const double ArtDirectorServer::IMAGE_DEPTH = 100.0;
 
     ArtDirectorServer::ArtDirectorServer() :
         _colorBufferTexId(0),
+        _debugRenderer(new DebugRenderer()),
         _postProdUnit(new GlPostProdUnit())
     {
 #ifdef NDEBUG
@@ -45,7 +48,17 @@ namespace prop3
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        clearColorTexture();
+        // Depth texture
+        glGenTextures(1, &_depthBufferTexId);
+        glBindTexture(GL_TEXTURE_2D, _depthBufferTexId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        clearTextures();
+
 
         _stageSet = stageSet;
 
@@ -60,8 +73,11 @@ namespace prop3
         if(_postProdUnit)
         {
             _postProdUnit->setColorBufferTexId(_colorBufferTexId);
+            _postProdUnit->setDepthBufferTexId(_depthBufferTexId);
             _postProdUnit->setup();
         }
+
+        _debugRenderer->setup();
 
         camera()->refresh();
     }
@@ -70,7 +86,7 @@ namespace prop3
     {
         if(_stageSet->stageSetChanged())
         {
-            clearColorTexture();
+            clearTextures();
         }
 
         _localRaytracer->update(_stageSet);
@@ -100,12 +116,14 @@ namespace prop3
         }
 
         _postProdUnit->execute();
+
+        _debugRenderer->draw(_stageSet);
     }
 
     void ArtDirectorServer::terminate()
     {
         _localRaytracer->terminate();
-        clearColorTexture();
+        clearTextures();
 
         // TODO wbussiere 2015-05-01 : terminate clients
     }
@@ -118,7 +136,7 @@ namespace prop3
 
     void ArtDirectorServer::notify(cellar::CameraMsg &msg)
     {
-        clearColorTexture();
+        clearTextures();
         if(msg.change == cellar::CameraMsg::EChange::VIEWPORT)
         {
             const glm::ivec2& viewport = msg.camera.viewport();
@@ -126,11 +144,24 @@ namespace prop3
         }
         else if(msg.change == cellar::CameraMsg::EChange::PROJECTION)
         {
-            _localRaytracer->updateProjection(msg.camera.projectionMatrix());
+            const glm::mat4& proj = msg.camera.projectionMatrix();
+            _localRaytracer->updateProjection(proj);
+            _debugRenderer->updateProjection(proj);
+
+            glm::mat4 invProj = glm::inverse(proj);
+            glm::vec4 nearVec = invProj * glm::vec4(0, 0, -1, 1);
+            glm::vec4 farVec = invProj * glm::vec4(0, 0, 1, 1);
+            glm::vec2 depthRange(
+                -nearVec.z / nearVec.w,
+                -farVec.z / farVec.w);
+
+            _postProdUnit->updateDepthRange(depthRange);
+
         }
         else if(msg.change == cellar::CameraMsg::EChange::VIEW)
         {
             _localRaytracer->updateView(msg.camera.viewMatrix());
+            _debugRenderer->updateView(msg.camera.viewMatrix());
         }
 
 
@@ -160,9 +191,9 @@ namespace prop3
         else if(colorOuputType == RaytracerState::COLOROUTPUT_PRIORITY)
             colorOutput = Film::ColorOutput::PRIORITY;
 
-
         auto film = _localRaytracer->film();
         glm::ivec2 viewportSize = film->frameResolution();
+        const std::vector<float>& depthBuffer = film->depthBuffer();
         const std::vector<glm::vec3>& colorBuffer = film->colorBuffer(colorOutput);
 
         // Send image to GPU
@@ -170,6 +201,16 @@ namespace prop3
         glTexImage2D(GL_TEXTURE_2D,         0,  GL_RGB32F,
                      viewportSize.x,        viewportSize.y,
                      0, GL_RGB, GL_FLOAT,   colorBuffer.data());
+
+        if(!depthBuffer.empty())
+        {
+            glBindTexture(GL_TEXTURE_2D, _depthBufferTexId);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F,
+                         viewportSize.x,        viewportSize.y,
+                         0, GL_RED, GL_FLOAT, depthBuffer.data());
+        }
+
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     void ArtDirectorServer::printConvergence()
@@ -228,12 +269,18 @@ namespace prop3
             'I', false, ss.str(), "CpuRaytracerServer"));
     }
 
-    void ArtDirectorServer::clearColorTexture()
+    void ArtDirectorServer::clearTextures()
     {
+        const float maxDepth = INFINITY;
         const float black[] = {0, 0, 0};
 
         glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_FLOAT, black);
+
+        glBindTexture(GL_TEXTURE_2D, _depthBufferTexId);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, 1, 1, 0,
+                     GL_RED, GL_FLOAT, &maxDepth);
+
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 }

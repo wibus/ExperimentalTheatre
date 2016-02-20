@@ -62,7 +62,7 @@ namespace prop3
         virtual void updateFilm(std::shared_ptr<Film>& film);
 
 
-        // TODO
+        // Modes
         virtual void useStochasticTracing(bool use);
         virtual void usePixelJittering(bool use);
         virtual void useDepthOfField(bool use);

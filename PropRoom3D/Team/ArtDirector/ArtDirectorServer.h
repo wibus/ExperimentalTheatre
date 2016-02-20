@@ -12,6 +12,7 @@ namespace prop3
     class CpuRaytracerEngine;
     class GlPostProdUnit;
     class RaytracerState;
+    class DebugRenderer;
 
 
     class PROP3D_EXPORT ArtDirectorServer :
@@ -36,15 +37,18 @@ namespace prop3
 
 
         static const double FORCE_REFRESH_DT;
+        static const double IMAGE_DEPTH;
 
     protected:
         virtual void sendBuffersToGpu();
         virtual void printConvergence();
-        virtual void clearColorTexture();
+        virtual void clearTextures();
 
     private:
         unsigned int _colorBufferTexId;
+        unsigned int _depthBufferTexId;
         std::shared_ptr<CpuRaytracerEngine> _localRaytracer;
+        std::shared_ptr<DebugRenderer> _debugRenderer;
         std::shared_ptr<GlPostProdUnit> _postProdUnit;
         std::shared_ptr<StageSet> _stageSet;
     };

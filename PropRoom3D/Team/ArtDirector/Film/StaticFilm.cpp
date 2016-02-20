@@ -35,6 +35,9 @@ namespace prop3
 
             _colorBuffer.clear();
             _colorBuffer.resize(pixelCount, color);
+
+            _depthBuffer.clear();
+            _depthBuffer.resize(pixelCount, INFINITY);
         }
     }
 
@@ -87,5 +90,6 @@ namespace prop3
     void StaticFilm::addSample(int index, const glm::dvec4& sample)
     {
         _colorBuffer[index] = glm::dvec3(sample);
+        _depthBuffer[index] = sample.w;
     }
 }

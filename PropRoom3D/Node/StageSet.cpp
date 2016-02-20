@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include "Node/Visitor.h"
+#include "Node/Debug/DebugLine.h"
 #include "Node/Prop/Material/Material.h"
 #include "Node/Light/Backdrop/ProceduralSun.h"
 
@@ -104,4 +105,21 @@ namespace prop3
         _lastTimeStamp = maxTimeStamp;
         return _stageSetChanged;
     }
+
+    void StageSet::addDebugLine(const DebugLine& line)
+    {
+        _debugLines.push_back(line);
+
+        // We do not want to update its timestamp or otherwise
+        // it would invalidate current raytraced frame.
+    }
+
+    void StageSet::clearDebugLines()
+    {
+        _debugLines.clear();
+
+        // We do not want to update its timestamp or otherwise
+        // it would invalidate current raytraced frame.
+    }
 }
+
