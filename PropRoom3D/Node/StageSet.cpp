@@ -3,8 +3,8 @@
 #include <algorithm>
 
 #include "Node/Visitor.h"
-#include "Prop/Material/Material.h"
-#include "Light/Backdrop/ProceduralSun.h"
+#include "Node/Prop/Material/Material.h"
+#include "Node/Light/Backdrop/ProceduralSun.h"
 
 using namespace std;
 

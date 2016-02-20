@@ -2,50 +2,50 @@
 
 # Backdrops
 SET(PROP3_BACKDROP_HEADERS
-    ${PROP3_SRC_DIR}/Light/Backdrop/Backdrop.h
-    ${PROP3_SRC_DIR}/Light/Backdrop/ProceduralSun.h)
+    ${PROP3_SRC_DIR}/Node/Light/Backdrop/Backdrop.h
+    ${PROP3_SRC_DIR}/Node/Light/Backdrop/ProceduralSun.h)
 
 # Light Bulbs
 SET(PROP3_LIGHTBULB_HEADERS
-    ${PROP3_SRC_DIR}/Light/LightBulb/LightBulb.h
-    ${PROP3_SRC_DIR}/Light/LightBulb/CircularLight.h
-    ${PROP3_SRC_DIR}/Light/LightBulb/SphericalLight.h)
+    ${PROP3_SRC_DIR}/Node/Light/LightBulb/LightBulb.h
+    ${PROP3_SRC_DIR}/Node/Light/LightBulb/CircularLight.h
+    ${PROP3_SRC_DIR}/Node/Light/LightBulb/SphericalLight.h)
 
 # Light
 SET(PROP3_LIGHT_HEADERS
     ${PROP3_BACKDROP_HEADERS}
     ${PROP3_LIGHTBULB_HEADERS}
-    ${PROP3_SRC_DIR}/Light/LightCast.h
-    ${PROP3_SRC_DIR}/Light/LightUtils.h)
+    ${PROP3_SRC_DIR}/Node/Light/LightCast.h
+    ${PROP3_SRC_DIR}/Node/Light/LightUtils.h)
 
 # Coatings
 SET(PROP3_COATING_HEADERS
-    ${PROP3_SRC_DIR}/Prop/Coating/Coating.h
-    ${PROP3_SRC_DIR}/Prop/Coating/StdCoating.h
-    ${PROP3_SRC_DIR}/Prop/Coating/EmissiveCoating.h
-    ${PROP3_SRC_DIR}/Prop/Coating/UniformStdCoating.h
-    ${PROP3_SRC_DIR}/Prop/Coating/TexturedStdCoating.h)
+    ${PROP3_SRC_DIR}/Node/Prop/Coating/Coating.h
+    ${PROP3_SRC_DIR}/Node/Prop/Coating/StdCoating.h
+    ${PROP3_SRC_DIR}/Node/Prop/Coating/EmissiveCoating.h
+    ${PROP3_SRC_DIR}/Node/Prop/Coating/UniformStdCoating.h
+    ${PROP3_SRC_DIR}/Node/Prop/Coating/TexturedStdCoating.h)
 
 # Materials
 SET(PROP3_MATERIAL_HEADERS
-    ${PROP3_SRC_DIR}/Prop/Material/Material.h
-    ${PROP3_SRC_DIR}/Prop/Material/StdMaterial.h
-    ${PROP3_SRC_DIR}/Prop/Material/UniformStdMaterial.h)
+    ${PROP3_SRC_DIR}/Node/Prop/Material/Material.h
+    ${PROP3_SRC_DIR}/Node/Prop/Material/StdMaterial.h
+    ${PROP3_SRC_DIR}/Node/Prop/Material/UniformStdMaterial.h)
 
 # Surfaces
 SET(PROP3_SURFACE_HEADERS
-    ${PROP3_SRC_DIR}/Prop/Surface/Surface.h
-    ${PROP3_SRC_DIR}/Prop/Surface/Box.h
-    ${PROP3_SRC_DIR}/Prop/Surface/Plane.h
-    ${PROP3_SRC_DIR}/Prop/Surface/Quadric.h
-    ${PROP3_SRC_DIR}/Prop/Surface/Sphere.h)
+    ${PROP3_SRC_DIR}/Node/Prop/Surface/Surface.h
+    ${PROP3_SRC_DIR}/Node/Prop/Surface/Box.h
+    ${PROP3_SRC_DIR}/Node/Prop/Surface/Plane.h
+    ${PROP3_SRC_DIR}/Node/Prop/Surface/Quadric.h
+    ${PROP3_SRC_DIR}/Node/Prop/Surface/Sphere.h)
 
 # Prop
 SET(PROP3_PROP_HEADERS
     ${PROP3_COATING_HEADERS}
     ${PROP3_MATERIAL_HEADERS}
     ${PROP3_SURFACE_HEADERS}
-    ${PROP3_SRC_DIR}/Prop/Prop.h)
+    ${PROP3_SRC_DIR}/Node/Prop/Prop.h)
 
 # Rays
 SET(PROP3_RAY_HEADERS
@@ -55,6 +55,8 @@ SET(PROP3_RAY_HEADERS
 
 # Nodes
 SET(PROP3_NODE_HEADERS
+    ${PROP3_LIGHT_HEADERS}
+    ${PROP3_PROP_HEADERS}
     ${PROP3_SRC_DIR}/Node/Node.h
     ${PROP3_SRC_DIR}/Node/Visitor.h
     ${PROP3_SRC_DIR}/Node/HandleNode.h
@@ -81,6 +83,7 @@ SET(PROP3_ART_DIRECTOR_HEADERS
     ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorDummy.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorClient.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorServer.h
+    ${PROP3_SRC_DIR}/Team/ArtDirector/DebugRenderer.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerEngine.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerWorker.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/GlPostProdUnit.h
@@ -102,8 +105,6 @@ SET(PROP3_TEAM_HEADERS
 # All the header files #
 SET(PROP3_HEADERS
     ${PROP3_NODE_HEADERS}
-    ${PROP3_LIGHT_HEADERS}
-    ${PROP3_PROP_HEADERS}
     ${PROP3_RAY_HEADERS}
     ${PROP3_SERIAL_HEADERS}
     ${PROP3_TEAM_HEADERS}
@@ -114,50 +115,50 @@ SET(PROP3_HEADERS
 
 # Backdrops
 SET(PROP3_BACKDROP_SOURCES
-    ${PROP3_SRC_DIR}/Light/Backdrop/Backdrop.cpp
-    ${PROP3_SRC_DIR}/Light/Backdrop/ProceduralSun.cpp)
+    ${PROP3_SRC_DIR}/Node/Light/Backdrop/Backdrop.cpp
+    ${PROP3_SRC_DIR}/Node/Light/Backdrop/ProceduralSun.cpp)
 
 # Light Bulbs
 SET(PROP3_LIGHTBULB_SOURCES
-    ${PROP3_SRC_DIR}/Light/LightBulb/LightBulb.cpp
-    ${PROP3_SRC_DIR}/Light/LightBulb/CircularLight.cpp
-    ${PROP3_SRC_DIR}/Light/LightBulb/SphericalLight.cpp)
+    ${PROP3_SRC_DIR}/Node/Light/LightBulb/LightBulb.cpp
+    ${PROP3_SRC_DIR}/Node/Light/LightBulb/CircularLight.cpp
+    ${PROP3_SRC_DIR}/Node/Light/LightBulb/SphericalLight.cpp)
 
 # Light
 SET(PROP3_LIGHT_SOURCES
     ${PROP3_BACKDROP_SOURCES}
     ${PROP3_LIGHTBULB_SOURCES}
-    ${PROP3_SRC_DIR}/Light/LightCast.cpp
-    ${PROP3_SRC_DIR}/Light/LightUtils.cpp)
+    ${PROP3_SRC_DIR}/Node/Light/LightCast.cpp
+    ${PROP3_SRC_DIR}/Node/Light/LightUtils.cpp)
 
 # Coatings
 SET(PROP3_COATING_SOURCES
-    ${PROP3_SRC_DIR}/Prop/Coating/Coating.cpp
-    ${PROP3_SRC_DIR}/Prop/Coating/StdCoating.cpp
-    ${PROP3_SRC_DIR}/Prop/Coating/EmissiveCoating.cpp
-    ${PROP3_SRC_DIR}/Prop/Coating/UniformStdCoating.cpp
-    ${PROP3_SRC_DIR}/Prop/Coating/TexturedStdCoating.cpp)
+    ${PROP3_SRC_DIR}/Node/Prop/Coating/Coating.cpp
+    ${PROP3_SRC_DIR}/Node/Prop/Coating/StdCoating.cpp
+    ${PROP3_SRC_DIR}/Node/Prop/Coating/EmissiveCoating.cpp
+    ${PROP3_SRC_DIR}/Node/Prop/Coating/UniformStdCoating.cpp
+    ${PROP3_SRC_DIR}/Node/Prop/Coating/TexturedStdCoating.cpp)
 
 # Materials
 SET(PROP3_MATERIAL_SOURCES
-    ${PROP3_SRC_DIR}/Prop/Material/Material.cpp
-    ${PROP3_SRC_DIR}/Prop/Material/StdMaterial.cpp
-    ${PROP3_SRC_DIR}/Prop/Material/UniformStdMaterial.cpp)
+    ${PROP3_SRC_DIR}/Node/Prop/Material/Material.cpp
+    ${PROP3_SRC_DIR}/Node/Prop/Material/StdMaterial.cpp
+    ${PROP3_SRC_DIR}/Node/Prop/Material/UniformStdMaterial.cpp)
 
 # Surfaces
 SET(PROP3_SURFACE_SOURCES
-    ${PROP3_SRC_DIR}/Prop/Surface/Surface.cpp
-    ${PROP3_SRC_DIR}/Prop/Surface/Box.cpp
-    ${PROP3_SRC_DIR}/Prop/Surface/Plane.cpp
-    ${PROP3_SRC_DIR}/Prop/Surface/Quadric.cpp
-    ${PROP3_SRC_DIR}/Prop/Surface/Sphere.cpp)
+    ${PROP3_SRC_DIR}/Node/Prop/Surface/Surface.cpp
+    ${PROP3_SRC_DIR}/Node/Prop/Surface/Box.cpp
+    ${PROP3_SRC_DIR}/Node/Prop/Surface/Plane.cpp
+    ${PROP3_SRC_DIR}/Node/Prop/Surface/Quadric.cpp
+    ${PROP3_SRC_DIR}/Node/Prop/Surface/Sphere.cpp)
 
 # Props
 SET(PROP3_PROP_SOURCES
     ${PROP3_COATING_SOURCES}
     ${PROP3_MATERIAL_SOURCES}
     ${PROP3_SURFACE_SOURCES}
-    ${PROP3_SRC_DIR}/Prop/Prop.cpp)
+    ${PROP3_SRC_DIR}/Node/Prop/Prop.cpp)
 
 # Rays
 SET(PROP3_RAY_SOURCES
@@ -167,6 +168,8 @@ SET(PROP3_RAY_SOURCES
 
 # Nodes
 SET(PROP3_NODE_SOURCES
+    ${PROP3_LIGHT_SOURCES}
+    ${PROP3_PROP_SOURCES}
     ${PROP3_SRC_DIR}/Node/Node.cpp
     ${PROP3_SRC_DIR}/Node/Visitor.cpp
     ${PROP3_SRC_DIR}/Node/HandleNode.cpp
@@ -192,6 +195,7 @@ SET(PROP3_ART_DIRECTOR_SOURCES
     ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorDummy.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorClient.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorServer.cpp
+    ${PROP3_SRC_DIR}/Team/ArtDirector/DebugRenderer.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerEngine.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerWorker.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/GlPostProdUnit.cpp
@@ -211,8 +215,6 @@ SET(PROP3_TEAM_SOURCES
 # All the source files #
 SET(PROP3_SOURCES
     ${PROP3_NODE_SOURCES}
-    ${PROP3_LIGHT_SOURCES}
-    ${PROP3_PROP_SOURCES}
     ${PROP3_RAY_SOURCES}
     ${PROP3_SERIAL_SOURCES}
     ${PROP3_TEAM_SOURCES})

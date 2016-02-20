@@ -4,8 +4,8 @@
 #include "Ray/Raycast.h"
 #include "Ray/RayHitList.h"
 #include "Ray/RayHitReport.h"
-#include "Light/LightCast.h"
-#include "Prop/Coating/EmissiveCoating.h"
+#include "Node/Light/LightCast.h"
+#include "Node/Prop/Coating/EmissiveCoating.h"
 
 
 namespace prop3

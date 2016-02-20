@@ -6,7 +6,7 @@
 
 #include <CellarWorkbench/Misc/Log.h>
 
-#include "Prop/Prop.h"
+#include "Node/Prop/Prop.h"
 #include "Node/StageSet.h"
 #include "Serial/JsonWriter.h"
 #include "Film/StaticFilm.h"

@@ -1,8 +1,8 @@
 #include "ProceduralSun.h"
 
-#include "Light/LightCast.h"
-#include "Light/LightUtils.h"
-#include "Prop/Material/Material.h"
+#include "Node/Light/LightCast.h"
+#include "Node/Light/LightUtils.h"
+#include "Node/Prop/Material/Material.h"
 #include "Ray/Raycast.h"
 #include "Ray/RayHitList.h"
 #include "Node/Visitor.h"

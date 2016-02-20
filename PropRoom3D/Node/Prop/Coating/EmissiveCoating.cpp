@@ -2,7 +2,7 @@
 
 #include "Node/Visitor.h"
 #include "Ray/RayHitReport.h"
-#include "Light/LightBulb/LightBulb.h"
+#include "Node/Light/LightBulb/LightBulb.h"
 
 
 namespace prop3

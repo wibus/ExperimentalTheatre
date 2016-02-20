@@ -3,9 +3,9 @@
 #include <GLM/gtc/matrix_transform.hpp>
 
 #include "Ray/Raycast.h"
-#include "Light/LightCast.h"
-#include "Prop/Surface/Surface.h"
-#include "Prop/Coating/EmissiveCoating.h"
+#include "Node/Light/LightCast.h"
+#include "Node/Prop/Surface/Surface.h"
+#include "Node/Prop/Coating/EmissiveCoating.h"
 
 
 namespace prop3

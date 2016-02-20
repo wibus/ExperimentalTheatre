@@ -2,9 +2,9 @@
 
 #include <GLM/gtc/matrix_transform.hpp>
 
-#include "Light/LightCast.h"
+#include "Node/Light/LightCast.h"
 #include "Ray/RayHitReport.h"
-#include "Prop/Material/Material.h"
+#include "Node/Prop/Material/Material.h"
 
 
 namespace prop3

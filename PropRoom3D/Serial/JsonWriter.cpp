@@ -14,22 +14,22 @@
 
 #include "Node/StageSet.h"
 
-#include "Prop/Prop.h"
+#include "Node/Prop/Prop.h"
 
-#include "Prop/Surface/Box.h"
-#include "Prop/Surface/Plane.h"
-#include "Prop/Surface/Quadric.h"
-#include "Prop/Surface/Sphere.h"
+#include "Node/Prop/Surface/Box.h"
+#include "Node/Prop/Surface/Plane.h"
+#include "Node/Prop/Surface/Quadric.h"
+#include "Node/Prop/Surface/Sphere.h"
 
-#include "Prop/Material/UniformStdMaterial.h"
+#include "Node/Prop/Material/UniformStdMaterial.h"
 
-#include "Prop/Coating/EmissiveCoating.h"
-#include "Prop/Coating/UniformStdCoating.h"
-#include "Prop/Coating/TexturedStdCoating.h"
+#include "Node/Prop/Coating/EmissiveCoating.h"
+#include "Node/Prop/Coating/UniformStdCoating.h"
+#include "Node/Prop/Coating/TexturedStdCoating.h"
 
-#include "Light/Backdrop/ProceduralSun.h"
-#include "Light/LightBulb/CircularLight.h"
-#include "Light/LightBulb/SphericalLight.h"
+#include "Node/Light/Backdrop/ProceduralSun.h"
+#include "Node/Light/LightBulb/CircularLight.h"
+#include "Node/Light/LightBulb/SphericalLight.h"
 
 
 using namespace std;

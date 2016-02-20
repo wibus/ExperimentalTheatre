@@ -3,18 +3,18 @@
 #include <list>
 #include <iostream>
 
-#include "Prop/Prop.h"
-#include "Prop/Surface/Surface.h"
-#include "Prop/Coating/Coating.h"
-#include "Prop/Material/Material.h"
+#include "Node/Prop/Prop.h"
+#include "Node/Prop/Surface/Surface.h"
+#include "Node/Prop/Coating/Coating.h"
+#include "Node/Prop/Material/Material.h"
 
 #include "Ray/Raycast.h"
 #include "Ray/RayHitList.h"
 #include "Ray/RayHitReport.h"
 
-#include "Light/LightCast.h"
-#include "Light/Backdrop/Backdrop.h"
-#include "Light/LightBulb/LightBulb.h"
+#include "Node/Light/LightCast.h"
+#include "Node/Light/Backdrop/Backdrop.h"
+#include "Node/Light/LightBulb/LightBulb.h"
 
 #include "Node/StageSet.h"
 #include "Serial/JsonReader.h"
@@ -464,7 +464,8 @@ namespace prop3
                 // If non-stochatic draft is active
                 if(!_useStochasticTracing)
                 {
-                    return commitSample(glm::dvec4(draft(reportMin), 1.0));
+                    double depth = ray.limit;
+                    return commitSample(glm::dvec4(draft(reportMin), depth));
                 }
 
                 _tempChildRayArray.clear();
@@ -533,7 +534,15 @@ namespace prop3
             }
             else if(_backdrop.get() != nullptr)
             {
-                commitSample(currSamp * _backdrop->raycast(ray));
+                if(_useStochasticTracing)
+                    commitSample(currSamp * _backdrop->raycast(ray));
+                else
+                {
+                    double depth = ray.limit;
+                    glm::dvec4 sample = currSamp * _backdrop->raycast(ray);
+                    commitSample(glm::dvec4(glm::dvec3(sample) / sample.w, depth));
+                }
+
             }
 
 

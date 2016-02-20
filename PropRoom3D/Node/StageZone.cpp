@@ -1,8 +1,8 @@
 #include "StageZone.h"
 
-#include "Prop/Prop.h"
-#include "Prop/Surface/Surface.h"
-#include "Light/LightBulb/LightBulb.h"
+#include "Node/Prop/Prop.h"
+#include "Node/Prop/Surface/Surface.h"
+#include "Node/Light/LightBulb/LightBulb.h"
 #include "Node/Visitor.h"
 
 
