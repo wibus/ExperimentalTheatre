@@ -29,11 +29,7 @@ namespace prop3
         CpuRaytracerEngine(unsigned int workerCount);
         virtual ~CpuRaytracerEngine();
 
-        virtual void setup(
-                double divergenceThreshold,
-                unsigned int sampleCountThreshold,
-                double timeThreshold,
-                const RaytracerState::DraftParams& draftParams);
+        virtual void setup(const RaytracerState::DraftParams& draftParams);
 
         virtual void terminate();
 

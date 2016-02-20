@@ -62,14 +62,8 @@ namespace prop3
     }
 
     void CpuRaytracerEngine::setup(
-            double divergenceThreshold,
-            unsigned int sampleCountThreshold,
-            double timeThreshold,
             const RaytracerState::DraftParams& draftParams)
     {
-        _protectedState.setDivergenceThreshold(divergenceThreshold);
-        _protectedState.setSampleCountThreshold(sampleCountThreshold);
-        _protectedState.setRenderTimeThreshold(timeThreshold);
         _protectedState.setDraftParams(draftParams);
 
         setupFilms();

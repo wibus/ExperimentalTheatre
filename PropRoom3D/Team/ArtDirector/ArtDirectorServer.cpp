@@ -49,23 +49,13 @@ namespace prop3
 
         _stageSet = stageSet;
 
-
-        unsigned int sampleCountThreshold = 4096;
-        //unsigned int sampleCountThreshold = 2;
-        double divergenceThreshold = 3.500e-3;
-        double timeThreshold = 900.0;
-
         RaytracerState::DraftParams draftParams;
         draftParams.sizeRatio = 4;
         draftParams.levelCount = 1;
         draftParams.frameCountPerLevel = 1;
         draftParams.fastDraftEnabled = true;
 
-        _localRaytracer->setup(
-            divergenceThreshold,
-            sampleCountThreshold,
-            timeThreshold,
-            draftParams);
+        _localRaytracer->setup(draftParams);
 
         if(_postProdUnit)
         {

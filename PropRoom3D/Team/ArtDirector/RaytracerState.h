@@ -48,12 +48,6 @@ namespace prop3
 
             void resetSampleCount();
 
-            void setDivergenceThreshold(double divergenceThreshold);
-
-            void setSampleCountThreshold(unsigned int sampleCountThreshold);
-
-            void setRenderTimeThreshold(double renderTimeThreshold);
-
             void setDivergence(double divergence);
 
             void setDraftLevel(int draftLevel);
@@ -69,13 +63,8 @@ namespace prop3
             bool _interrupted;
 
             std::chrono::steady_clock::time_point _startTime;
-            double _renderTimeThreshold;
-
             unsigned int _sampleCount;
-            unsigned int _sampleCountThreshold;
-
             double _divergence;
-            double _divergenceThreshold;
 
             DraftParams _draftParams;
             int _draftLevel;
@@ -89,15 +78,21 @@ namespace prop3
         bool interrupted() const;
 
 
+        void setSampleCountThreshold(unsigned int sampleCountThreshold);
+
         unsigned int sampleCount() const;
 
         bool runningOutOfSamples() const;
 
 
+        void setRenderTimeThreshold(double renderTimeThreshold);
+
         double renderTime() const;
 
         bool runningOutOfTime() const;
 
+
+        void setDivergenceThreshold(double divergenceThreshold);
 
         double divergence() const;
 
@@ -140,6 +135,11 @@ namespace prop3
         ProtectedState& _protectedState;
         bool _isUpdateEachTileEnabled;
         std::string _colorOutputType;
+
+        unsigned int _sampleCountThreshold;
+        double _renderTimeThreshold;
+        double _divergenceThreshold;
+
     };
 
 
@@ -162,7 +162,7 @@ namespace prop3
 
     inline bool RaytracerState::runningOutOfSamples() const
     {
-        return sampleCount() >= _protectedState._sampleCountThreshold;
+        return sampleCount() >= _sampleCountThreshold;
     }
 
     inline double RaytracerState::renderTime() const
@@ -175,7 +175,7 @@ namespace prop3
 
     inline bool RaytracerState::runningOutOfTime() const
     {
-        return renderTime() >= _protectedState._renderTimeThreshold;
+        return renderTime() >= _renderTimeThreshold;
     }
 
     inline double RaytracerState::divergence() const
@@ -185,13 +185,12 @@ namespace prop3
 
     inline double RaytracerState::divergenceThreshold() const
     {
-        return _protectedState._divergenceThreshold;
+        return _divergenceThreshold;
     }
 
     inline bool RaytracerState::converged() const
     {
-        return _protectedState._divergenceThreshold >=
-               _protectedState._divergence;
+        return _divergenceThreshold >= divergence();
     }
 
     inline int RaytracerState::draftLevel() const
