@@ -77,7 +77,7 @@ namespace prop3
 
         _nextTileId = 0;
         _framePassCount = 0;
-        _priorityThreshold = 0.0;
+        _priorityThreshold = 1.0;
         _maxPixelWeight = 1.0;
 
 
@@ -173,7 +173,7 @@ namespace prop3
         }
         else
         {
-            _priorityThreshold = 0.0;
+            _priorityThreshold = 1.0;
         }
     }
 
@@ -222,7 +222,7 @@ namespace prop3
                 glm::dvec3(trueSample) / trueSample.w);
 
             glm::dvec3 dColor = sampColor - oldColor;
-            double dMean = glm::dot(dColor, dColor);
+            double dMean = glm::length(dColor);
             double trueWeight = trueSample.w;
 
             _weightedVarianceBuffer[index] += glm::dvec2(dMean, trueWeight);
@@ -234,9 +234,9 @@ namespace prop3
 
             if(newWeight > _priorityWeightThreshold)
             {
-                double scale = glm::length(newColor) + 1e-3;
+                double scale = glm::length(newColor) + 5e-2;
                 double newVar = newWeightedVar.x / newWeightedVar.y;
-                double newDiv = glm::sqrt(newVar) / (scale * newWeight);
+                double newDiv = newVar / (scale * newWeight);
                 _divergenceBuffer[index] = newDiv;
 
                 if(_colorOutput == ColorOutput::DIVERGENCE)
@@ -283,7 +283,7 @@ namespace prop3
     glm::vec3 ConvergentFilm::varianceToColor(const glm::dvec2& variance) const
     {
         if(variance.y > 0.0)
-            return glm::vec3((variance.x / variance.y) * 10.0);
+            return glm::vec3((variance.x / variance.y) * 2.0);
         else
             return glm::dvec3(1.0);
     }

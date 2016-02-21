@@ -294,8 +294,9 @@ namespace prop3
             glm::dvec3(0.0));
 
         int pixId = 0;
-        for(Tile::Iterator it = tile->begin();
-            it != tile->end(); ++it, ++pixId)
+        for(TileIterator it = tile->begin();
+            it != tile->end() && _runningPredicate;
+            ++it, ++pixId)
         {
             if(_useDepthOfField && _aperture > 0.0)
             {
@@ -313,17 +314,7 @@ namespace prop3
             raycast.direction = glm::normalize(pixWorldPos - raycast.origin);
             raycast.invDir = 1.0 / raycast.direction;
 
-            _workingSample = glm::dvec4();
-            //while(_workingSample.w == 0.0
-            //       && _runningPredicate)
-            {
-                fireScreenRay(raycast);
-            }
-
-            if(_runningPredicate)
-            {
-                it.addSample(_workingSample);
-            }
+            fireScreenRay(it, raycast);
         }
     }
 
@@ -419,145 +410,168 @@ namespace prop3
     }
 */
     void CpuRaytracerWorker::fireScreenRay(
+            TileIterator& iterator,
             const Raycast& fromEyeRay)
     {
-        int bounceCount = 1;
-        int rayBatchEnd = 1;
-        _rayBounceArray.clear();
-        _rayBounceArray.push_back(fromEyeRay);
+        double weightSum = 0;
+        int pixelCycleCount = 0;
+        double expextedWeightSum =
+            iterator.resquestedSampleWeight();
 
-        size_t rayId = 0;
-        while(rayId < _rayBounceArray.size())
+        while(_runningPredicate &&
+              ++pixelCycleCount <= 5 &&
+              weightSum < expextedWeightSum)
         {
-            Raycast ray = _rayBounceArray[rayId];
+            _workingSample = glm::dvec4(0);
 
-            // Find nearest ray-surface intersection
-            const Coating* dummyCoat = nullptr;
-            const Material* dummyMat = nullptr;
-            const glm::dvec3 dummyVec = glm::dvec3();
-            RayHitReport reportMin(Raycast::BACKDROP_LIMIT,
-                                   dummyVec, dummyVec, dummyVec,
-                                   dummyCoat, dummyMat, dummyMat);
-            double hitDistance = findNearestIntersection(ray, reportMin);
-            ray.limit = hitDistance;
+            size_t rayId = 0;
+            int bounceCount = 1;
+            int rayBatchEnd = 1;
+            _rayBounceArray.clear();
+            _rayBounceArray.push_back(fromEyeRay);
 
-            if(reportMin.innerMat == Surface::ENVIRONMENT_MATERIAL.get() ||
-               reportMin.innerMat == nullptr)
-                    reportMin.innerMat = _ambMaterial.get();
-
-            if(reportMin.outerMat == Surface::ENVIRONMENT_MATERIAL.get() ||
-               reportMin.outerMat == nullptr)
-                    reportMin.outerMat = _ambMaterial.get();
-
-            reportMin.compile(ray.direction);
-
-            // Compute maximum travelled distance in current material
-            const Material* currMat = reportMin.currMaterial;
-            double matPathLen = currMat->lightFreePathLength(ray);
-            ray.limit = glm::min(matPathLen, hitDistance);
-
-            glm::dvec3 matAtt = currMat->lightAttenuation(ray);
-            glm::dvec4 currSamp = ray.sample * glm::dvec4(matAtt, 1.0);
-            ray.virtDist += ray.limit * ray.entropy;
-            ray.pathLength += ray.limit;
-
-            if(ray.limit != Raycast::BACKDROP_LIMIT)
+            while(rayId < _rayBounceArray.size())
             {
-                // If non-stochatic draft is active
-                if(!_useStochasticTracing)
+                Raycast ray = _rayBounceArray[rayId];
+
+                const Coating* zCoat = nullptr;
+                const Material* zMat = nullptr;
+                const glm::dvec3 zVec3 = glm::dvec3();
+                RayHitReport reportMin(Raycast::BACKDROP_LIMIT,
+                        zVec3, zVec3, zVec3, zCoat, zMat, zMat);
+
+                // Find nearest ray-surface intersection
+                double hitDistance = findNearestIntersection(ray, reportMin);
+                ray.limit = hitDistance;
+
+                if(reportMin.innerMat == Surface::ENVIRONMENT_MATERIAL.get() ||
+                   reportMin.innerMat == nullptr)
+                        reportMin.innerMat = _ambMaterial.get();
+
+                if(reportMin.outerMat == Surface::ENVIRONMENT_MATERIAL.get() ||
+                   reportMin.outerMat == nullptr)
+                        reportMin.outerMat = _ambMaterial.get();
+
+                reportMin.compile(ray.direction);
+
+
+                // Compute maximum travelled distance in current material
+                const Material* currMat = reportMin.currMaterial;
+                double matPathLen = currMat->lightFreePathLength(ray);
+                ray.limit = glm::min(matPathLen, hitDistance);
+
+                glm::dvec3 matAtt = currMat->lightAttenuation(ray);
+                glm::dvec4 currSamp = ray.sample * glm::dvec4(matAtt, 1.0);
+                ray.virtDist += ray.limit * ray.entropy;
+                ray.pathLength += ray.limit;
+
+                if(ray.limit != Raycast::BACKDROP_LIMIT)
                 {
-                    double depth = ray.limit;
-                    return commitSample(glm::dvec4(draft(reportMin), depth));
-                }
-
-                _tempChildRayArray.clear();
-                if(matPathLen < hitDistance)
-                {
-                    // Inderect lighting
-                    currMat->scatterLight(
-                        _tempChildRayArray,
-                        ray);
-
-                    /*
-                    // Direct lighting
-                    commitSample(currSamp *
-                        gatherScatteredLight(
-                            *currMat,
-                            ray);
-                    */
-                }
-                else
-                {
-                    const Coating* coating = reportMin.coating;
-
-                    // Inderect lighting
-                    commitSample(currSamp *
-                        coating->indirectBrdf(
-                            _tempChildRayArray,
-                            reportMin,
-                            ray));
-
-                    // Direct lighting
-                    gatherReflectedLight(
-                        *coating,
-                        reportMin,
-                        currSamp,
-                        ray);
-                }
-
-                if(bounceCount < _maxScreenBounceCount)
-                {
-                    size_t childCount = _tempChildRayArray.size();
-                    for(size_t i=0; i < childCount; ++i)
+                    // If non-stochatic draft is active
+                    if(!_useStochasticTracing)
                     {
-                        Raycast& childRay = _tempChildRayArray[i];
-                        childRay.sample *= currSamp;
+                        double depth = ray.limit;
+                        iterator.addSample(glm::dvec4(draft(reportMin), depth));
+                        return;
+                    }
 
-                        if(childRay.sample.a > _minScreenRayWeight)
+                    _tempChildRayArray.clear();
+                    if(matPathLen < hitDistance)
+                    {
+                        // Inderect lighting
+                        currMat->scatterLight(
+                            _tempChildRayArray,
+                            ray);
+
+                        /*
+                        // Direct lighting
+                        commitSample(currSamp *
+                            gatherScatteredLight(
+                                *currMat,
+                                ray);
+                        */
+                    }
+                    else
+                    {
+                        const Coating* coating = reportMin.coating;
+
+                        // Inderect lighting
+                        commitSample(currSamp *
+                            coating->indirectBrdf(
+                                _tempChildRayArray,
+                                reportMin,
+                                ray));
+
+                        // Direct lighting
+                        gatherReflectedLight(
+                            *coating,
+                            reportMin,
+                            currSamp,
+                            ray);
+                    }
+
+                    if(bounceCount < _maxScreenBounceCount)
+                    {
+                        size_t childCount = _tempChildRayArray.size();
+                        for(size_t i=0; i < childCount; ++i)
                         {
-                            glm::dvec3 color = glm::dvec3(childRay.sample) / childRay.sample.a;
-                            if(color.r > _screenRayIntensityThreshold ||
-                               color.g > _screenRayIntensityThreshold ||
-                               color.b > _screenRayIntensityThreshold)
-                            {
-                                childRay.entropy = Raycast::mixEntropies(ray.entropy, childRay.entropy);
-                                childRay.pathLength = ray.pathLength;
-                                childRay.virtDist = ray.virtDist;
+                            Raycast& childRay = _tempChildRayArray[i];
+                            childRay.sample *= currSamp;
 
-                                _rayBounceArray.push_back(childRay);
-                            }
-                            else
+                            if(childRay.sample.a > _minScreenRayWeight)
                             {
-                               commitSample(glm::dvec4(0, 0, 0, childRay.sample.a / 2.0));
+                                glm::dvec3 color = glm::dvec3(childRay.sample) / childRay.sample.a;
+                                if(color.r > _screenRayIntensityThreshold ||
+                                   color.g > _screenRayIntensityThreshold ||
+                                   color.b > _screenRayIntensityThreshold)
+                                {
+                                    childRay.entropy = Raycast::mixEntropies(ray.entropy, childRay.entropy);
+                                    childRay.pathLength = ray.pathLength;
+                                    childRay.virtDist = ray.virtDist;
+
+                                    _rayBounceArray.push_back(childRay);
+                                }
+                                else
+                                {
+                                   commitSample(glm::dvec4(0, 0, 0, childRay.sample.a / 2.0));
+                                }
                             }
                         }
                     }
                 }
-            }
-            else if(_backdrop.get() != nullptr)
-            {
-                if(_useStochasticTracing)
-                    commitSample(currSamp * _backdrop->raycast(ray));
-                else
+                else if(_backdrop.get() != nullptr)
                 {
-                    double depth = 400.0;
-                    glm::dvec4 sample = currSamp * _backdrop->raycast(ray);
-                    commitSample(glm::dvec4(glm::dvec3(sample) / sample.w, depth));
+                    if(_useStochasticTracing)
+                    {
+                        commitSample(currSamp * _backdrop->raycast(ray));
+                    }
+                    else
+                    {
+                        double depth = 400.0;
+                        glm::dvec4 sample = currSamp * _backdrop->raycast(ray);
+                        iterator.addSample(glm::dvec4(glm::dvec3(sample) / sample.w, depth));
+                        return;
+                    }
                 }
 
+
+                // Check bounce group end
+                if(++rayId == rayBatchEnd)
+                {
+                    // Check if we are satisfied with accumulated samples
+                    if(bounceCount >= _sufficientScreenRayBounce &&
+                       _workingSample.w >= _sufficientScreenRayWeight)
+                        break;
+
+                    ++bounceCount;
+                    rayBatchEnd = _rayBounceArray.size();
+                }
             }
 
-
-            // Check bounce group end
-            if(++rayId == rayBatchEnd)
+            if(_workingSample.w != 0)
             {
-                // Check if we are satisfied with accumulated samples
-                if(bounceCount >= _sufficientScreenRayBounce &&
-                   _workingSample.w >= _sufficientScreenRayWeight)
-                    break;
-
-                ++bounceCount;
-                rayBatchEnd = _rayBounceArray.size();
+                weightSum += _workingSample.w;
+                iterator.addSample(_workingSample);
             }
         }
     }

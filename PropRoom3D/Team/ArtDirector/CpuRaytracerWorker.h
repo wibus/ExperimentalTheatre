@@ -36,6 +36,7 @@ namespace prop3
 
     class Film;
     class Tile;
+    class TileIterator;
 
     struct SearchZone;
 
@@ -78,6 +79,7 @@ namespace prop3
         //        const Raycast& fromLightRay);
 
         virtual void fireScreenRay(
+                TileIterator& iterator,
                 const Raycast& fromEyeRay);
 
         //virtual glm::dvec3 gatherScatteredLight(

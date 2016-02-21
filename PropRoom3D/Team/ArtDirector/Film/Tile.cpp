@@ -8,7 +8,7 @@ namespace prop3
     const glm::ivec2 Tile::END_PIXEL = glm::ivec2(-1,-1);
 
 
-    Tile::Iterator::Iterator(
+    TileIterator::TileIterator(
             Tile& tile,
             double threshold,
             const glm::ivec2& startPos) :
@@ -18,9 +18,15 @@ namespace prop3
     {
     }
 
-    Tile::Iterator& Tile::Iterator::operator++()
+    double TileIterator::resquestedSampleWeight() const
     {
-        if(_position != END_PIXEL)
+        double baseWeight = _tile.pixelPriority(_position) / _threshold;
+        return baseWeight * baseWeight;
+    }
+
+    TileIterator& TileIterator::operator++()
+    {
+        if(_position != Tile::END_PIXEL)
         {
             do
             {
@@ -30,7 +36,7 @@ namespace prop3
 
                     if(++_position.y >= _tile.maxCorner().y)
                     {
-                        _position = END_PIXEL;
+                        _position = Tile::END_PIXEL;
                         return *this;
                     }
                 }
@@ -61,12 +67,12 @@ namespace prop3
 
     }
 
-    Tile::Iterator Tile::begin()
+    TileIterator Tile::begin()
     {
-        return ++Iterator(*this, _priorityThreshold, _startPix);
+        return ++TileIterator(*this, _priorityThreshold, _startPix);
     }
 
-    Tile::Iterator Tile::end()
+    TileIterator Tile::end()
     {
         return _endIterator;
     }
