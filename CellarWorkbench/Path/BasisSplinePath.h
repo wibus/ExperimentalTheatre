@@ -16,6 +16,7 @@ namespace cellar
         BasisSplinePath(double duration, const std::vector<Data>& ctrlPts);
         virtual ~BasisSplinePath();
 
+        std::vector<Data>& ctrlPts();
         const std::vector<Data>& ctrlPts() const;
 
         virtual Data value(double t) const override;
@@ -94,6 +95,12 @@ namespace cellar
     BasisSplinePath<Data>::~BasisSplinePath()
     {
 
+    }
+
+    template<typename Data>
+    std::vector<Data>& BasisSplinePath<Data>::ctrlPts()
+    {
+        return _ctrlPts;
     }
 
     template<typename Data>

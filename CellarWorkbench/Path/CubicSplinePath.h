@@ -16,6 +16,7 @@ namespace cellar
         CubicSplinePath(double duration, const std::vector<Data>& ctrlPts);
         virtual ~CubicSplinePath();
 
+        std::vector<Data>& ctrlPts();
         const std::vector<Data>& ctrlPts() const;
 
         virtual Data value(double t) const override;
@@ -95,6 +96,12 @@ namespace cellar
     CubicSplinePath<Data>::~CubicSplinePath()
     {
 
+    }
+
+    template<typename Data>
+    std::vector<Data>& CubicSplinePath<Data>::ctrlPts()
+    {
+        return _ctrlPts;
     }
 
     template<typename Data>

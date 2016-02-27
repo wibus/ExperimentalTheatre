@@ -15,9 +15,14 @@ namespace cellar
         virtual ~LinearPath();
 
 
+        Data& begin();
+
         Data begin() const;
 
         void setBegin(const Data& begin);
+
+
+        Data& end();
 
         Data end() const;
 
@@ -58,6 +63,12 @@ namespace cellar
     }
 
     template<typename Data>
+    inline Data& LinearPath<Data>::begin()
+    {
+        return _begin;
+    }
+
+    template<typename Data>
     inline Data LinearPath<Data>::begin() const
     {
         return _begin;
@@ -67,6 +78,12 @@ namespace cellar
     inline void LinearPath<Data>::setBegin(const Data& begin)
     {
         _begin = begin;
+    }
+
+    template<typename Data>
+    inline Data& LinearPath<Data>::end()
+    {
+        return _end;
     }
 
     template<typename Data>
