@@ -5,5 +5,7 @@
         <file>shaders/post_prod_gl130.frag</file>
         <file>shaders/debugLine.frag</file>
         <file>shaders/debugLine.vert</file>
+        <file>shaders/debugPoint.frag</file>
+        <file>shaders/debugPoint.vert</file>
     </qresource>
 </RCC>

@@ -10,7 +10,8 @@
 
 namespace prop3
 {
-    class DebugLine;
+    class DebugLineStrip;
+    class DebugPointCloud;
     class Backdrop;
     class Material;
     class Visitor;
@@ -46,9 +47,13 @@ namespace prop3
 
 
         // Debug props
-        const std::vector<DebugLine>& debugLines() const;
-        void addDebugLine(const DebugLine& line);
+        const std::vector<DebugLineStrip>& debugLines() const;
+        void addDebugLine(const DebugLineStrip& line);
         void clearDebugLines();
+
+        const std::vector<DebugPointCloud>& debugPoints() const;
+        void addDebugPoints(const DebugPointCloud& points);
+        void clearDebugPoints();
 
 
         // Timestamps
@@ -63,7 +68,8 @@ namespace prop3
         TimeStamp _lastTimeStamp;
         bool _stageSetChanged;
 
-        std::vector<DebugLine> _debugLines;
+        std::vector<DebugLineStrip> _debugLines;
+        std::vector<DebugPointCloud> _debugPoints;
     };
 
 
@@ -84,9 +90,14 @@ namespace prop3
         return _stageSetChanged;
     }
 
-    inline const std::vector<DebugLine>& StageSet::debugLines() const
+    inline const std::vector<DebugLineStrip>& StageSet::debugLines() const
     {
         return _debugLines;
+    }
+
+    inline const std::vector<DebugPointCloud>& StageSet::debugPoints() const
+    {
+        return _debugPoints;
     }
 }
 

@@ -20,7 +20,8 @@ SET(PROP3_LIGHT_HEADERS
 
 # Debug
 SET(PROP3_DEBUG_HEADERS
-    ${PROP3_SRC_DIR}/Node/Debug/DebugLine.h)
+    ${PROP3_SRC_DIR}/Node/Debug/DebugLineStrip.h
+    ${PROP3_SRC_DIR}/Node/Debug/DebugPointCloud.h)
 
 # Coatings
 SET(PROP3_COATING_HEADERS
@@ -138,7 +139,8 @@ SET(PROP3_LIGHT_SOURCES
 
 # Debug
 SET(PROP3_DEBUG_SOURCES
-    ${PROP3_SRC_DIR}/Node/Debug/DebugLine.cpp)
+    ${PROP3_SRC_DIR}/Node/Debug/DebugLineStrip.cpp
+    ${PROP3_SRC_DIR}/Node/Debug/DebugPointCloud.cpp)
 
 # Coatings
 SET(PROP3_COATING_SOURCES
@@ -237,6 +239,8 @@ SET(PROP3_SHADER_FILES
     ${PROP3_SRC_DIR}/resources/shaders/clip_space.vert
     ${PROP3_SRC_DIR}/resources/shaders/debugLine.vert
     ${PROP3_SRC_DIR}/resources/shaders/debugLine.frag
+    ${PROP3_SRC_DIR}/resources/shaders/debugPoint.vert
+    ${PROP3_SRC_DIR}/resources/shaders/debugPoint.frag
     ${PROP3_SRC_DIR}/resources/shaders/post_prod_gl130.frag
     ${PROP3_SRC_DIR}/resources/shaders/post_prod_gl440.frag)
 SET(PROP3_RESOURCE_FILES

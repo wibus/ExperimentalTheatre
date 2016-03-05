@@ -30,29 +30,30 @@ namespace prop3
 
     void AbstractTeam::setup()
     {
-        if(_choreographer.get() != nullptr)
-            _choreographer->setup(_stageSet);
         for(auto& artDir : _artDirectors)
             artDir->setup(_stageSet);
+        if(_choreographer.get() != nullptr)
+            _choreographer->setup(_stageSet);
     }
 
     void AbstractTeam::terminate()
     {
         _stageSet->clear();
 
-        if(_choreographer.get() != nullptr)
-            _choreographer->terminate();
         for(auto& artDir : _artDirectors)
             artDir->terminate();
+        if(_choreographer.get() != nullptr)
+            _choreographer->terminate();
     }
 
     void AbstractTeam::update(double dt)
     {
         _stageSet->updateTimeStamp();
-        if(_choreographer.get() != nullptr)
-            _choreographer->update(dt);
+
         for(auto& artDir : _artDirectors)
             artDir->update(dt);
+        if(_choreographer.get() != nullptr)
+            _choreographer->update(dt);
     }
 
     bool AbstractTeam::saveScene(const string& fileName, bool prettyPrint)

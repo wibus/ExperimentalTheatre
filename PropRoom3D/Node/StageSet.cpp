@@ -3,7 +3,8 @@
 #include <algorithm>
 
 #include "Node/Visitor.h"
-#include "Node/Debug/DebugLine.h"
+#include "Node/Debug/DebugLineStrip.h"
+#include "Node/Debug/DebugPointCloud.h"
 #include "Node/Prop/Material/Material.h"
 #include "Node/Light/Backdrop/ProceduralSun.h"
 
@@ -106,7 +107,7 @@ namespace prop3
         return _stageSetChanged;
     }
 
-    void StageSet::addDebugLine(const DebugLine& line)
+    void StageSet::addDebugLine(const DebugLineStrip& line)
     {
         _debugLines.push_back(line);
 
@@ -117,6 +118,22 @@ namespace prop3
     void StageSet::clearDebugLines()
     {
         _debugLines.clear();
+
+        // We do not want to update its timestamp or otherwise
+        // it would invalidate current raytraced frame.
+    }
+
+    void StageSet::addDebugPoints(const DebugPointCloud& points)
+    {
+        _debugPoints.push_back(points);
+
+        // We do not want to update its timestamp or otherwise
+        // it would invalidate current raytraced frame.
+    }
+
+    void StageSet::clearDebugPoints()
+    {
+        _debugPoints.clear();
 
         // We do not want to update its timestamp or otherwise
         // it would invalidate current raytraced frame.

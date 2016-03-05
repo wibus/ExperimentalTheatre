@@ -25,12 +25,18 @@ namespace prop3
         virtual void updateView(const glm::dmat4& view);
         virtual void updateProjection(const glm::dmat4& proj);
 
+    protected:
+        virtual void updateMatrices();
+
     private:
         glm::dmat4 _viewMat;
         glm::dmat4 _projMat;
+
         cellar::GlProgram _lineProgram;
-        unsigned int _lineVbo;
-        unsigned int _lineVao;
+        cellar::GlProgram _pointProgram;
+        unsigned int _vbo;
+        unsigned int _vao;
+
     };
 }
 

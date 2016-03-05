@@ -118,9 +118,9 @@ namespace prop3
             _viewProjInverse = _viewInvMatrix * _projInvMatrix;
             _camPos = glm::dvec3(_viewInvMatrix * glm::dvec4(0, 0, 0, 1));
 
-            glm::dvec3 camDir = glm::dvec3(_viewInvMatrix * glm::dvec4(0.0, 0.0, -1.0, 0.0));
-            _confusionSide = glm::normalize(glm::cross(camDir, glm::dvec3(0.0, 0.0, 1.0)));
-            _confusionUp = glm::normalize(glm::cross(_confusionSide, camDir));
+            _camDir = glm::normalize(glm::dvec3(_viewInvMatrix * glm::dvec4(0.0, 0.0, -1.0, 0.0)));
+            _confusionSide = glm::normalize(glm::cross(_camDir, glm::dvec3(0.0, 0.0, 1.0)));
+            _confusionUp = glm::normalize(glm::cross(_confusionSide, _camDir));
         });
     }
 
@@ -470,7 +470,7 @@ namespace prop3
                     // If non-stochatic draft is active
                     if(!_useStochasticTracing)
                     {
-                        double depth = ray.limit;
+                        double depth = ray.limit * glm::dot(ray.direction, _camDir);
                         iterator.addSample(glm::dvec4(draft(reportMin), depth));
                         return;
                     }

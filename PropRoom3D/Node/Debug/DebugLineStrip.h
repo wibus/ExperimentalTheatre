@@ -1,5 +1,5 @@
-#ifndef PROPROOM3D_DEBUGLINE_H
-#define PROPROOM3D_DEBUGLINE_H
+#ifndef PROPROOM3D_DEBUGLINESTRIP_H
+#define PROPROOM3D_DEBUGLINESTRIP_H
 
 #include <vector>
 
@@ -10,11 +10,11 @@
 
 namespace prop3
 {
-    class PROP3D_EXPORT DebugLine
+    class PROP3D_EXPORT DebugLineStrip
     {
     public:
-        DebugLine(const glm::dvec3& color = glm::dvec3(1.0));
-        ~DebugLine();
+        DebugLineStrip(const glm::dvec3& color = glm::dvec3(1.0));
+        ~DebugLineStrip();
 
         void clearVertices();
         void addVertex(const glm::dvec3& position);
@@ -32,15 +32,15 @@ namespace prop3
 
 
     // IMPLEMENTATION //
-    inline const std::vector<glm::dvec3>& DebugLine::vertices() const
+    inline const std::vector<glm::dvec3>& DebugLineStrip::vertices() const
     {
         return _vertices;
     }
 
-    inline glm::dvec3 DebugLine::color() const
+    inline glm::dvec3 DebugLineStrip::color() const
     {
         return _color;
     }
 }
 
-#endif // PROPROOM3D_DEBUGLINE_H
+#endif // PROPROOM3D_DEBUGLINESTRIP_H

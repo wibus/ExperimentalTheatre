@@ -136,6 +136,7 @@ namespace prop3
         glm::dmat4 _projInvMatrix;
         glm::dmat4 _viewProjInverse;
         glm::dvec3 _camPos;
+        glm::dvec3 _camDir;
         double _aperture;
         double _confusionRadius;
         glm::dvec3 _confusionSide;
