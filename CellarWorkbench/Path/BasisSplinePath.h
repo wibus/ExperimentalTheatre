@@ -25,6 +25,8 @@ namespace cellar
 
         virtual void accept(PathVisitor<Data>& visitor) override;
 
+        virtual void update() override;
+
 
     protected:
         virtual int findIntervall(double& t) const;
@@ -45,50 +47,7 @@ namespace cellar
             const std::vector<Data>& ctrlPts) :
         LeafPath<Data>(duration)
     {
-        assert(ctrlPts.size() >= 4);
-        int lastCtrlPt = ctrlPts.size() - 1;
-        int nodeCount = ctrlPts.size() - 2;
-        int lastNode = nodeCount - 1;
-        _nodes.resize(nodeCount);
-
-        _nodes[0].t = ctrlPts[1] - ctrlPts[0];
-        _nodes[lastNode].t = ctrlPts[lastCtrlPt] - ctrlPts[lastCtrlPt-1];
-
-        for(int i=0; i < nodeCount; ++i)
-            _nodes[i].v = ctrlPts[i+1];
-
-
-        // System variables
-        int nbEq = nodeCount - 2;
-        if(nbEq > 0)
-        {
-            // Construction du vecteur resultant a partir des
-            // tangentes aux extremites et des positions des points de controle
-            std::vector<Data> res(nbEq);
-            res[0] = (_nodes[2].v - _nodes[0].v - _nodes[0].t / 3.0) * 3.0;
-            for (int i = 1; i < nbEq - 1; ++i) res[i] = 3.0 * (_nodes[i + 2].v - _nodes[i].v);
-            res[nbEq - 1] = (_nodes[lastNode].v - _nodes[nodeCount - 3].v - _nodes[lastNode].t / 3.0) * 3.0;
-
-            // Quelques variables temporaires
-            std::vector<double> gam(nbEq);
-            double a = 1, b = 4, c = 1;
-            double bet = b;
-
-            // Resolution du systeme tridiagonal
-            // Reference : http://www.haoli.org/nr/bookcpdf/c2-4.pdf
-            // Bon demelage d'indices :) !
-            _nodes[1].t = res[0] / bet;
-            for (int i = 1; i < nbEq; ++i)
-            {
-                gam[i] = c / bet;
-                bet = b - a * gam[i];
-                _nodes[i + 1].t = (res[i] - a * _nodes[i].t) / bet;
-            }
-            for (int i = nbEq - 2; i >= 0; --i)
-            {
-                _nodes[i + 1].t -= gam[i + 1] * _nodes[i + 2].t;
-            }
-        }
+        update();
     }
 
     template<typename Data>
@@ -186,6 +145,55 @@ namespace cellar
     void BasisSplinePath<Data>::accept(PathVisitor<Data>& visitor)
     {
         visitor.visit(*this);
+    }
+
+    template<typename Data>
+    void BasisSplinePath<Data>::update()
+    {
+        assert(_ctrlPts.size() >= 4);
+        int lastCtrlPt = _ctrlPts.size() - 1;
+        int nodeCount = _ctrlPts.size() - 2;
+        int lastNode = nodeCount - 1;
+        _nodes.resize(nodeCount);
+
+        _nodes[0].t = _ctrlPts[1] - _ctrlPts[0];
+        _nodes[lastNode].t = _ctrlPts[lastCtrlPt] - _ctrlPts[lastCtrlPt-1];
+
+        for(int i=0; i < nodeCount; ++i)
+            _nodes[i].v = _ctrlPts[i+1];
+
+
+        // System variables
+        int nbEq = nodeCount - 2;
+        if(nbEq > 0)
+        {
+            // Construction du vecteur resultant a partir des
+            // tangentes aux extremites et des positions des points de controle
+            std::vector<Data> res(nbEq);
+            res[0] = (_nodes[2].v - _nodes[0].v - _nodes[0].t / 3.0) * 3.0;
+            for (int i = 1; i < nbEq - 1; ++i) res[i] = 3.0 * (_nodes[i + 2].v - _nodes[i].v);
+            res[nbEq - 1] = (_nodes[lastNode].v - _nodes[nodeCount - 3].v - _nodes[lastNode].t / 3.0) * 3.0;
+
+            // Quelques variables temporaires
+            std::vector<double> gam(nbEq);
+            double a = 1, b = 4, c = 1;
+            double bet = b;
+
+            // Resolution du systeme tridiagonal
+            // Reference : http://www.haoli.org/nr/bookcpdf/c2-4.pdf
+            // Bon demelage d'indices :) !
+            _nodes[1].t = res[0] / bet;
+            for (int i = 1; i < nbEq; ++i)
+            {
+                gam[i] = c / bet;
+                bet = b - a * gam[i];
+                _nodes[i + 1].t = (res[i] - a * _nodes[i].t) / bet;
+            }
+            for (int i = nbEq - 2; i >= 0; --i)
+            {
+                _nodes[i + 1].t -= gam[i + 1] * _nodes[i + 2].t;
+            }
+        }
     }
 }
 

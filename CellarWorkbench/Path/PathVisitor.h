@@ -7,6 +7,8 @@
 namespace cellar
 {
     template<typename Data>
+    class PointPath;
+    template<typename Data>
     class LinearPath;
     template<typename Data>
     class CubicSplinePath;
@@ -24,6 +26,8 @@ namespace cellar
 
     public:
         virtual ~PathVisitor();
+
+        virtual void visit(PointPath<Data>& path) = 0;
 
         virtual void visit(LinearPath<Data>& path) = 0;
 

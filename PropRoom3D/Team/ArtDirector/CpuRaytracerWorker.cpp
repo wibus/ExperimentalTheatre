@@ -547,9 +547,10 @@ namespace prop3
                     }
                     else
                     {
-                        double depth = 400.0;
                         glm::dvec4 sample = currSamp * _backdrop->raycast(ray);
-                        iterator.addSample(glm::dvec4(glm::dvec3(sample) / sample.w, depth));
+                        iterator.addSample(glm::dvec4(
+                                glm::dvec3(sample) / sample.w,
+                                ArtDirectorServer::IMAGE_DEPTH));
                         return;
                     }
                 }

@@ -17,7 +17,7 @@
 namespace prop3
 {
     const double ArtDirectorServer::FORCE_REFRESH_DT = 0.0;
-    const double ArtDirectorServer::IMAGE_DEPTH = 100.0;
+    const double ArtDirectorServer::IMAGE_DEPTH = 400.0;
 
     ArtDirectorServer::ArtDirectorServer() :
         _colorBufferTexId(0),

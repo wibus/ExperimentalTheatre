@@ -29,6 +29,8 @@ namespace cellar
 
         virtual void accept(PathVisitor<Data>& visitor) = 0;
 
+        virtual void update() = 0;
+
     private:
     };
 

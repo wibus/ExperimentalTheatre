@@ -35,6 +35,8 @@ namespace cellar
 
         virtual void accept(PathVisitor<Data>& visitor) override;
 
+        virtual void update() override;
+
 
     private:
         Data _begin;
@@ -120,6 +122,12 @@ namespace cellar
     void LinearPath<Data>::accept(PathVisitor<Data>& visitor)
     {
         visitor.visit(*this);
+    }
+
+    template<typename Data>
+    void LinearPath<Data>::update()
+    {
+
     }
 }
 
