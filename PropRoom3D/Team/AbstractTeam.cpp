@@ -40,20 +40,20 @@ namespace prop3
     {
         _stageSet->clear();
 
-        for(auto& artDir : _artDirectors)
-            artDir->terminate();
         if(_choreographer.get() != nullptr)
             _choreographer->terminate();
+        for(auto& artDir : _artDirectors)
+            artDir->terminate();
     }
 
     void AbstractTeam::update(double dt)
     {
         _stageSet->updateTimeStamp();
 
-        for(auto& artDir : _artDirectors)
-            artDir->update(dt);
         if(_choreographer.get() != nullptr)
             _choreographer->update(dt);
+        for(auto& artDir : _artDirectors)
+            artDir->update(dt);
     }
 
     bool AbstractTeam::saveScene(const string& fileName, bool prettyPrint)
