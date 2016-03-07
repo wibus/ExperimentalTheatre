@@ -13,11 +13,16 @@ namespace cellar
     class CELLAR_EXPORT CubicSplinePath : public LeafPath<Data>
     {
     public:
-        CubicSplinePath(double duration, const std::vector<Data>& ctrlPts);
+        CubicSplinePath(double duration,
+                        const std::vector<Data>& ctrlPts,
+                        const std::vector<double>& weights);
         virtual ~CubicSplinePath();
 
         std::vector<Data>& ctrlPts();
         const std::vector<Data>& ctrlPts() const;
+
+        std::vector<double>& weights();
+        const std::vector<double>& weights() const;
 
         virtual Data value(double t) const override;
         virtual Data tangent(double t) const override;
@@ -34,6 +39,7 @@ namespace cellar
 
     private:
         struct Node {Data v; Data t;};
+        std::vector<double> _weights;
         std::vector<Data> _ctrlPts;
         std::vector<Node> _nodes;
     };
@@ -44,10 +50,13 @@ namespace cellar
     template<typename Data>
     CubicSplinePath<Data>::CubicSplinePath(
             double duration,
-            const std::vector<Data>& ctrlPts) :
+            const std::vector<Data>& ctrlPts,
+            const std::vector<double>& weights) :
         LeafPath<Data>(duration),
+        _weights(weights),
         _ctrlPts(ctrlPts)
     {
+        assert(ctrlPts.size() == weights.size());
         update();
     }
 
@@ -67,6 +76,18 @@ namespace cellar
     const std::vector<Data>& CubicSplinePath<Data>::ctrlPts() const
     {
         return _ctrlPts;
+    }
+
+    template<typename Data>
+    std::vector<double>& CubicSplinePath<Data>::weights()
+    {
+        return _weights;
+    }
+
+    template<typename Data>
+    const std::vector<double>& CubicSplinePath<Data>::weights() const
+    {
+        return _weights;
     }
 
     template<typename Data>
@@ -135,11 +156,14 @@ namespace cellar
     template<typename Data>
     Data CubicSplinePath<Data>::interpolate(int i, double h[]) const
     {
+        double w0 = _weights[i+1];
+        double w1 = _weights[i+2];
+
         return
             h[0] * _nodes[i].v +
             h[1] * _nodes[i + 1].v +
-            h[2] * _nodes[i].t +
-            h[3] * _nodes[i + 1].t;
+            h[2] * w0 * _nodes[i].t +
+            h[3] * w1 * _nodes[i + 1].t;
     }
 
     template<typename Data>
