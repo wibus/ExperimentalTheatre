@@ -234,7 +234,8 @@ namespace prop3
 
             if(newWeight > _priorityWeightThreshold)
             {
-                double scale = glm::length(newColor) + 5e-2;
+                const double WEIGHT_OFFSET = 0.25;
+                double scale = glm::length(newColor) + WEIGHT_OFFSET;
                 double newVar = newWeightedVar.x / newWeightedVar.y;
                 double newDiv = newVar / (scale * newWeight);
                 _divergenceBuffer[index] = newDiv;

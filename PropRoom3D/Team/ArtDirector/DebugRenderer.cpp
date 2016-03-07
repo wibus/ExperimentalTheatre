@@ -54,6 +54,9 @@ namespace prop3
            stageSet->debugPoints().empty())
             return;
 
+        glPointSize(12.0f);
+        glLineWidth(6.0f);
+
         glBindVertexArray(_vao);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
@@ -70,7 +73,6 @@ namespace prop3
         }
         _lineProgram.popProgram();
 
-        glPointSize(8.0f);
         _pointProgram.pushProgram();
         for(const DebugPointCloud& point : stageSet->debugPoints())
         {
@@ -84,6 +86,9 @@ namespace prop3
         }
         _pointProgram.popProgram();
 
+
+        glPointSize(1.0f);
+        glLineWidth(1.0f);
 
         glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -103,14 +108,14 @@ namespace prop3
 
     void DebugRenderer::updateMatrices()
     {
-        glm::dmat4 pvMat = _projMat * _viewMat;
-
         _lineProgram.pushProgram();
-        _lineProgram.setMat4f("PVM", pvMat);
+        _lineProgram.setMat4f("P", _projMat);
+        _lineProgram.setMat4f("VM", _viewMat);
         _lineProgram.popProgram();
 
         _pointProgram.pushProgram();
-        _pointProgram.setMat4f("PVM", pvMat);
+        _pointProgram.setMat4f("P", _projMat);
+        _pointProgram.setMat4f("VM", _viewMat);
         _pointProgram.popProgram();
     }
 }

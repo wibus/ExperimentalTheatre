@@ -13,8 +13,11 @@ namespace cellar
     class CELLAR_EXPORT BasisSplinePath : public LeafPath<Data>
     {
     public:
-        BasisSplinePath(double duration, const std::vector<Data>& ctrlPts);
+        BasisSplinePath(double duration, int degree,
+                        const std::vector<Data>& ctrlPts);
         virtual ~BasisSplinePath();
+
+        int degree() const;
 
         std::vector<Data>& ctrlPts();
         const std::vector<Data>& ctrlPts() const;
@@ -29,13 +32,14 @@ namespace cellar
 
 
     protected:
-        virtual int findIntervall(double& t) const;
-        virtual Data interpolate(int i, double h[]) const;
+        virtual int findIntervall(double t) const;
+        virtual void basisFunctions(int i, double t, double* N) const;
 
     private:
         struct Node {Data v; Data t;};
         std::vector<Data> _ctrlPts;
-        std::vector<Node> _nodes;
+        std::vector<double> _knots;
+        int _degree;
     };
 
 
@@ -43,17 +47,39 @@ namespace cellar
     // IMPLEMENTATION
     template<typename Data>
     BasisSplinePath<Data>::BasisSplinePath(
-            double duration,
+            double duration, int degree,
             const std::vector<Data>& ctrlPts) :
-        LeafPath<Data>(duration)
+        LeafPath<Data>(duration),
+        _degree(degree),
+        _ctrlPts(ctrlPts),
+        _knots()
     {
-        update();
+        int m = _ctrlPts.size() + degree;
+        _knots.resize(m + 1);
+
+        int knotCount = _knots.size();
+        for(int i=0; i < _degree; ++i)
+        {
+            _knots[i]  = double(0.0);
+            _knots[knotCount - i - 1]  = double(1.0);
+        }
+
+        for(int i=degree; i < knotCount-_degree; ++i)
+        {
+            _knots[i] = double(i - degree) / (1.0 + knotCount - (_degree+1)*2.0);
+        }
     }
 
     template<typename Data>
     BasisSplinePath<Data>::~BasisSplinePath()
     {
 
+    }
+
+    template<typename Data>
+    int BasisSplinePath<Data>::degree() const
+    {
+        return _degree;
     }
 
     template<typename Data>
@@ -71,74 +97,96 @@ namespace cellar
     template<typename Data>
     Data BasisSplinePath<Data>::value(double t) const
     {
-        double u = glm::clamp(t, 0.0, 1.0);
-        int i = findIntervall(u);
+        // On trouve l'intervalle des fonctions
+        // de base à évaluer pour le paramètre donné
+        int span = findIntervall(t);
 
-        float u2 = u * u,
-              u3 = u2 * u;
+        // Le nombre de poids pour point de contrôle
+        // est égal à l'ordre de la B-Spline
+        double *N = new double[_degree+1];
 
-        double h[] = {
-            2*u3 - 3*u2 + 1,
-            -2*u3 + 3*u2,
-            u3 - 2*u2 + u,
-            u3 - u2
-        };
+        // On va chercher le poids des pt de contrôle
+        basisFunctions(span, t, N);
+        int firstCtrlPt = span - _degree;
+        int lastCtrlPt = firstCtrlPt + _degree;
 
-        return interpolate(i, h);
+        // On calcul la somme pondérée des pt
+        Data val;
+        for(int i=firstCtrlPt; i<=lastCtrlPt; ++i)
+        {
+            val += _ctrlPts[i] *
+                   N[i-firstCtrlPt];
+        }
+
+        delete N;
+
+        return val;
     }
 
     template<typename Data>
     Data BasisSplinePath<Data>::tangent(double t) const
     {
-        double u = glm::clamp(t, 0.0, 1.0);
-        int i = findIntervall(u);
-
-        float u2 = u * u;
-
-        double h[] = {
-            6*u2  - 6*u,
-            -6*u2 + 6*u,
-            3*u2  - 4*u + 1,
-            3*u2  - 2*u
-        };
-
-        return interpolate(i, h);
+        return Data(0);
     }
 
     template<typename Data>
     Data BasisSplinePath<Data>::curvature(double t) const
     {
-        double u = glm::clamp(t, 0.0, 1.0);
-        int i = findIntervall(u);
-
-        double h[] = {
-            12*u  - 6,
-            -12*u + 6,
-            6*u  - 4,
-            6*u  - 2
-        };
-
-        return interpolate(i, h);
+        return Data(0);
     }
 
     template<typename Data>
-    int BasisSplinePath<Data>::findIntervall(double& t) const
+    int BasisSplinePath<Data>::findIntervall(double t) const
     {
-        int nbSections = _nodes.size() - 1;
-        float u = t * (nbSections);
-        int i = (int)glm::floor(u);
-        t = u - i;
-        return i;
+        // On suppose le vecteur nodal ouvert
+        // donc, on borne la recherche d'intervalle
+        int currKnot = _degree + 1;
+        int lastKnot = _knots.size() - (_degree + 1);
+
+        // L'index d'intervalle correspond à l'index du noeud
+        // qui borne inférieurement l'intervalle
+        while(currKnot < lastKnot)
+        {
+            if(t <= _knots[currKnot])
+            {
+                return currKnot-1;
+            }
+            ++currKnot;
+        }
+
+        // Dernier interval non null si vecteur nodal ouvert
+        return currKnot-1;
     }
 
     template<typename Data>
-    Data BasisSplinePath<Data>::interpolate(int i, double h[]) const
+    void BasisSplinePath<Data>::basisFunctions(int i, double t, double* N) const
     {
-        return
-            h[0] * _nodes[i].v +
-            h[1] * _nodes[i + 1].v +
-            h[2] * _nodes[i].t +
-            h[3] * _nodes[i + 1].t;
+        N[0] = 1.0;
+
+         // Initialisation des poids à gauche
+         // et à droite des fonctions de base
+         double* left  = new double[_degree + 1];
+         double* right = new double[_degree + 1];
+
+         // Voir note de cours sur courbe B-Splinaire
+         for(int j=1; j<=_degree; ++j)
+         {
+             left[j] = t - _knots[i+1-j];
+             right[j] = _knots[i+j]-t;
+             double saved = 0.0;
+
+             for(int r=0; r<j; ++r)
+             {
+                 double temp = N[r]/(right[r+1]+left[j-r]);
+                 N[r] = saved + right[r+1]*temp;
+                 saved = left[j-r]*temp;
+             }
+
+             N[j] = saved;
+         }
+
+         delete left;
+         delete right;
     }
 
     template<typename Data>
@@ -150,50 +198,6 @@ namespace cellar
     template<typename Data>
     void BasisSplinePath<Data>::update()
     {
-        assert(_ctrlPts.size() >= 4);
-        int lastCtrlPt = _ctrlPts.size() - 1;
-        int nodeCount = _ctrlPts.size() - 2;
-        int lastNode = nodeCount - 1;
-        _nodes.resize(nodeCount);
-
-        _nodes[0].t = _ctrlPts[1] - _ctrlPts[0];
-        _nodes[lastNode].t = _ctrlPts[lastCtrlPt] - _ctrlPts[lastCtrlPt-1];
-
-        for(int i=0; i < nodeCount; ++i)
-            _nodes[i].v = _ctrlPts[i+1];
-
-
-        // System variables
-        int nbEq = nodeCount - 2;
-        if(nbEq > 0)
-        {
-            // Construction du vecteur resultant a partir des
-            // tangentes aux extremites et des positions des points de controle
-            std::vector<Data> res(nbEq);
-            res[0] = (_nodes[2].v - _nodes[0].v - _nodes[0].t / 3.0) * 3.0;
-            for (int i = 1; i < nbEq - 1; ++i) res[i] = 3.0 * (_nodes[i + 2].v - _nodes[i].v);
-            res[nbEq - 1] = (_nodes[lastNode].v - _nodes[nodeCount - 3].v - _nodes[lastNode].t / 3.0) * 3.0;
-
-            // Quelques variables temporaires
-            std::vector<double> gam(nbEq);
-            double a = 1, b = 4, c = 1;
-            double bet = b;
-
-            // Resolution du systeme tridiagonal
-            // Reference : http://www.haoli.org/nr/bookcpdf/c2-4.pdf
-            // Bon demelage d'indices :) !
-            _nodes[1].t = res[0] / bet;
-            for (int i = 1; i < nbEq; ++i)
-            {
-                gam[i] = c / bet;
-                bet = b - a * gam[i];
-                _nodes[i + 1].t = (res[i] - a * _nodes[i].t) / bet;
-            }
-            for (int i = nbEq - 2; i >= 0; --i)
-            {
-                _nodes[i + 1].t -= gam[i + 1] * _nodes[i + 2].t;
-            }
-        }
     }
 }
 

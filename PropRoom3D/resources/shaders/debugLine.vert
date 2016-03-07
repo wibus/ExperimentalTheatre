@@ -1,11 +1,13 @@
 #version 400
 
-uniform mat4 PVM;
+uniform mat4 P;
+uniform mat4 VM;
 
 in vec3 position;
 
 
 void main()
 {
-    gl_Position = PVM * vec4(position, 1);
+    const float OFFSET = 0.01; // meters
+    gl_Position = P * (VM * vec4(position, 1) + vec4(0, 0, OFFSET, 0));
 }
