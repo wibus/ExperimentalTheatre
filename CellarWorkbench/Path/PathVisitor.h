@@ -15,6 +15,8 @@ namespace cellar
     template<typename Data>
     class BasisSplinePath;
     template<typename Data>
+    class PolynomialPath;
+    template<typename Data>
     class CompositePath;
 
 
@@ -34,6 +36,8 @@ namespace cellar
         virtual void visit(CubicSplinePath<Data>& path) = 0;
 
         virtual void visit(BasisSplinePath<Data>& path) = 0;
+
+        virtual void visit(PolynomialPath<Data>& path) = 0;
 
         virtual void visit(CompositePath<Data>& path) = 0;
     };

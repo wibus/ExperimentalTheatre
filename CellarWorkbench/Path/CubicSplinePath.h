@@ -56,7 +56,6 @@ namespace cellar
         _weights(weights),
         _ctrlPts(ctrlPts)
     {
-        assert(ctrlPts.size() == weights.size());
         update();
     }
 
@@ -176,6 +175,8 @@ namespace cellar
     void CubicSplinePath<Data>::update()
     {
         assert(_ctrlPts.size() >= 4);
+        assert(_ctrlPts.size() == _weights.size());
+
         int lastCtrlPt = _ctrlPts.size() - 1;
         int nodeCount = _ctrlPts.size() - 2;
         int lastNode = nodeCount - 1;

@@ -61,6 +61,7 @@ SET(CELLAR_PATH_HEADERS
     ${CELLAR_SRC_DIR}/Path/LinearPath.h
     ${CELLAR_SRC_DIR}/Path/BasisSplinePath.h
     ${CELLAR_SRC_DIR}/Path/CubicSplinePath.h
+    ${CELLAR_SRC_DIR}/Path/PolynomialPath.h
     ${CELLAR_SRC_DIR}/Path/CompositePath.h
     ${CELLAR_SRC_DIR}/Path/PathVisitor.h)
 
