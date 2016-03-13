@@ -41,26 +41,30 @@ namespace cellar
         virtual std::string csv(double dt);
 
     private:
-        enum class ENodePos {
-            First,
-            Second,
-            Middle,
-            BeforeLast,
-            Last
-        };
+        virtual void findIntervall(double t, int& beg, int& end) const;
 
         struct CELLAR_EXPORT Node
         {
             double eval(double t) const;
-            void buildFront(double center, double intervall, double weight, ENodePos pos);
-            void buildDuring(double center, double intervall, double weight, ENodePos pos);
-            void buildBack(double center, double intervall, double weight, ENodePos pos);
-            // The index of the coeffs equals its degree
-            glm::dvec3 _before;
-            glm::dvec3 _during;
-            glm::dvec3 _after;
-            double _lowerBound;
-            double _upperBound;
+            void build(double center, double intervall, double weight, int pos);
+
+            static const int FIRST = 0;
+            static const int SECOND = 1;
+            static const int MIDDLE = 2;
+            static const int BEFORE_LAST = 3;
+            static const int LAST = 4;
+
+            const double P[5][5] = {{ 1.000000, -0.611111, 0.118056, -0.006944, 0.000000  },
+                                    { 0.000000, 2.370370, -1.777778, 0.444444, -0.037037  },
+                                    { 0.000000, 0.000000, 1.000000, -0.500000, 0.062500  },
+                                    { 0.000000, 0.000000, -0.000000, 0.148148, -0.037037  },
+                                    { 0.000000, 0.000000, 0.034722, 0.006944, 0.000000  }};
+
+        private:
+            int _pos;
+            double _scale;
+            double _origin;
+            double _weight;
         };
 
         std::vector<double> _weights;
@@ -117,14 +121,12 @@ namespace cellar
     template<typename Data>
     Data PolynomialPath<Data>::value(double t) const
     {
-        int intervalCount = _ctrlPts.size() - 1;
-        int start = int(t * intervalCount) - 1;
-        int end = glm::min(start + 4, int(_ctrlPts.size()));
-        start = glm::max(0, start);
+        int beg, end;
+        findIntervall(t, beg, end);
 
         Data value(0);
         double weight = 0.0;
-        for(int i = start; i < end; ++i)
+        for(int i = beg; i <= end; ++i)
         {
             double w = _nodes[i].eval(t);
             value += _ctrlPts[i] * w;
@@ -155,7 +157,7 @@ namespace cellar
     template<typename Data>
     void PolynomialPath<Data>::update()
     {
-        assert(_ctrlPts.size() >= 4);
+        assert(_ctrlPts.size() >= 5);
         assert(_ctrlPts.size() == _weights.size());
 
         _nodes.resize(_ctrlPts.size());
@@ -163,131 +165,58 @@ namespace cellar
         double len = 1.0 / intervalCount;
 
         // First node
-        _nodes[0].buildFront( 0.0, len, _weights[0], ENodePos::First);
-        _nodes[0].buildDuring(0.0, len, _weights[0], ENodePos::First);
-        _nodes[0].buildBack(  0.0, len, _weights[0], ENodePos::First);
+        _nodes[0].build( 0.0, len, _weights[0], Node::FIRST);
 
         // Second node
-        _nodes[1].buildFront( len, len, _weights[1], ENodePos::Second);
-        _nodes[1].buildDuring(len, len, _weights[1], ENodePos::Second);
-        _nodes[1].buildBack(  len, len, _weights[1], ENodePos::Second);
+        _nodes[1].build( len, len, _weights[1], Node::SECOND);
+
+        // Middle nodes
+        for(size_t i=2; i < _nodes.size() - 2; ++i)
+        {
+            _nodes[i].build( i * len, len, _weights[i], Node::MIDDLE);
+        }
 
         // Second to last node
         size_t s = _nodes.size() - 2;
-        _nodes[s].buildFront( 1.0-len, len, _weights[s], ENodePos::BeforeLast);
-        _nodes[s].buildDuring(1.0-len, len, _weights[s], ENodePos::BeforeLast);
-        _nodes[s].buildBack(  1.0-len, len, _weights[s], ENodePos::BeforeLast);
+        _nodes[s].build( 1.0-len, len, _weights[s], Node::BEFORE_LAST);
+
         // Last node
         size_t l = _nodes.size() - 1;
-        _nodes[l].buildFront( 1.0, len, _weights[l], ENodePos::Last);
-        _nodes[l].buildDuring(1.0, len, _weights[l], ENodePos::Last);
-        _nodes[l].buildBack(  1.0, len, _weights[l], ENodePos::Last);
+        _nodes[l].build( 1.0, len, _weights[l], Node::LAST);
+    }
 
-        for(size_t i=2; i < _nodes.size() - 2; ++i)
-        {
-            _nodes[i].buildFront( i * len, len, _weights[i], ENodePos::Middle);
-            _nodes[i].buildDuring(i * len, len, _weights[i], ENodePos::Middle);
-            _nodes[i].buildBack(  i * len, len, _weights[i], ENodePos::Middle);
-        }
+    template<typename Data>
+    void PolynomialPath<Data>::findIntervall(double t, int& beg, int& end) const
+    {
+        int intervalCount = _ctrlPts.size() - 1;
+        int mid = int(t * intervalCount);
+        beg = glm::max(mid - 3, 0);
+        end = glm::min(mid + 4, int(_ctrlPts.size()-1));
     }
 
     template<typename Data>
     double PolynomialPath<Data>::Node::eval(double t) const
     {
-        glm::dvec3 poly;
-        if(t <= _lowerBound)
-        {
-            poly = _before;
-        }
-        else if(t >= _upperBound)
-        {
-            poly = _after;
-        }
-        else
-        {
-            poly = _during;
-        }
+        double u = (t - _origin) * _scale;
 
-        return poly[0] + t*(poly[1] + t*(poly[2]));
+        if(u < 0 || u > 4)
+            return 0.0;
+
+        return (P[_pos][0] +
+                 u*(P[_pos][1] +
+                  u*(P[_pos][2] +
+                   u*(P[_pos][3] +
+                    u*(P[_pos][4])
+                )))) * _weight;
     }
 
     template<typename Data>
-    void PolynomialPath<Data>::Node::buildFront(double center, double intervall, double weight, ENodePos pos)
+    void PolynomialPath<Data>::Node::build(double center, double intervall, double weight, int pos)
     {
-        if(pos == ENodePos::First)
-        {
-            _lowerBound = 0.0;
-            _before = glm::dvec3(weight, 0.0, 0.0);
-        }
-        else if(pos == ENodePos::Second)
-        {
-            _lowerBound = 0.0;
-            _before = glm::dvec3(0.0, 0.0, 0.0);
-        }
-        else
-        {
-            _lowerBound = center - intervall;
-
-            double t0 = center - 2.0 * intervall;
-            double t1 = center - intervall;
-            double t2 = center;
-            glm::mat3 A(
-                1.0,   1.0,   1.0,
-                t0,    t1,    t2,
-                t0*t0, t1*t1, t2*t2);
-            glm::dvec3 R(0.0, 0.25, weight);
-            _before = glm::inverse(A) * R;
-        }
-    }
-
-    template<typename Data>
-    void PolynomialPath<Data>::Node::buildDuring(double center, double intervall, double weight, ENodePos pos)
-    {
-        double t0 = center - intervall;
-        double t1 = center;
-        double t2 = center + intervall;
-        glm::mat3 A(
-            1.0,   1.0,   1.0,
-            t0,    t1,    t2,
-            t0*t0, t1*t1, t2*t2);
-
-        glm::dvec3 R(0.25, weight, 0.25);
-        if(pos == ENodePos::Second)
-            R[0] = 0.0;
-        else if(pos == ENodePos::BeforeLast)
-            R[2] = 0.0;
-
-        _during = glm::inverse(A) * R;
-    }
-
-    template<typename Data>
-    void PolynomialPath<Data>::Node::buildBack(double center, double intervall, double weight, ENodePos pos)
-    {
-        if(pos == ENodePos::BeforeLast)
-        {
-            _upperBound = 1.0;
-            _after = glm::dvec3(0.0, 0.0, 0.0);
-        }
-        else
-        if(pos == ENodePos::Last)
-        {
-            _upperBound = 1.0;
-            _after = glm::dvec3(weight, 0.0, 0.0);
-        }
-        else
-        {
-            _upperBound = center + intervall;
-
-            double t0 = center;
-            double t1 = center + intervall;
-            double t2 = center + 2.0 * intervall;
-            glm::mat3 A(
-                1.0,   1.0,   1.0,
-                t0,    t1,    t2,
-                t0*t0, t1*t1, t2*t2);
-            glm::dvec3 R(weight, 0.25, 0.0);
-            _after = glm::inverse(A) * R;
-        }
+        _scale = 1.0 / intervall;
+        _origin = center - pos * intervall;
+        _weight = weight;
+        _pos = pos;
     }
 
     template<typename Data>
@@ -296,13 +225,10 @@ namespace cellar
         std::string data;
         for(double t = 0.0; t <= 1.0; t += dt)
         {
-            int intervalCount = _ctrlPts.size() - 1;
-            int start = int(t * intervalCount) - 1;
-            int end = glm::min(start + 4, int(_ctrlPts.size()));
-            start = glm::max(0, start);
-
+            int beg, end;
+            findIntervall(t, beg, end);
             for(size_t i=0; i < _nodes.size(); ++i)
-                if(start <= i && i < end)
+                if(beg <= i && i <= end)
                     data += std::to_string(_nodes[i].eval(t)) + ",";
                 else
                     data += "0,";
