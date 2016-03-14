@@ -1,6 +1,8 @@
 #include "Log.h"
 
 #include <fstream>
+#include <iostream>
+
 using namespace std;
 
 
@@ -25,9 +27,12 @@ namespace cellar
         _out(0x0),
         _logMessages()
     {
+        _out = &std::cout;
+        /*
         ofstream* log = new ofstream;
         log->open("Log.txt");
         _out = log;
+        */
     }
 
     Log::~Log()

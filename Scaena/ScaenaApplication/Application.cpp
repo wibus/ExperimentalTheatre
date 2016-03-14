@@ -54,22 +54,24 @@ namespace scaena
 
     int Application::execute()
     {
-        if(_qApp == 0x0)
+        if(_qApp.get() == nullptr)
             // Application was not initialized
         {
             getLog().postMessage(
               new Message('E', true,
                 "Application::init() need to be called before execute()",
                 "Application"));
+            terminate();
             return -1;
         }
 
-        if(_play == 0x0)
+        if(_play.get() == nullptr)
         {
             getLog().postMessage(
               new Message('E', true,
                 "No play or a null pointer was assigned at init()",
                 "Application"));
+            terminate();
             return -1;
         }
 
@@ -80,21 +82,30 @@ namespace scaena
         {
             _qApp->exec();
         }
-        _play->terminate();
+        terminate();
 
         return 0;
     }
 
     void Application::aboutToQuitSlot()
     {
-        getLog().postMessage(new Message('I',false,"Total running time : " +
-                                         toString(_totalTime.stop()) +
-                                         " seconds", "Application"));
         emit aboutToQuitSignal();
     }
 
     void Application::terminate()
     {
-        _qApp->exit();
+        if(_play.get() != nullptr && _play->isPlaying())
+            _play->terminate();
+
+        _play.reset();
+
+        if(_qApp.get() != nullptr)
+            _qApp->exit();
+
+        _qApp.reset();
+
+        getLog().postMessage( new Message('I',false,
+            "Total running time : " + toString(_totalTime.stop()) + " seconds",
+            "Application"));
     }
 }

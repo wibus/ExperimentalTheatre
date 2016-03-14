@@ -16,7 +16,6 @@ using namespace scaena;
 
 int main(int argc, char** argv) try
 {
-    getLog().setOuput(std::cout);
     getApplication().init(argc, argv);
     
     
