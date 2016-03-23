@@ -413,14 +413,14 @@ namespace prop3
             TileIterator& iterator,
             const Raycast& fromEyeRay)
     {
-        double weightSum = 0;
+        glm::dvec4 sampleSum(0.0);
         int pixelCycleCount = 0;
         double expextedWeightSum =
             iterator.resquestedSampleWeight();
 
         while(_runningPredicate &&
               ++pixelCycleCount <= 5 &&
-              weightSum < expextedWeightSum)
+              sampleSum.w < expextedWeightSum)
         {
             _workingSample = glm::dvec4(0);
 
@@ -569,12 +569,11 @@ namespace prop3
                 }
             }
 
-            if(_workingSample.w != 0)
-            {
-                weightSum += _workingSample.w;
-                iterator.addSample(_workingSample);
-            }
+            sampleSum += _workingSample;
         }
+
+        if(sampleSum.w > 0.0)
+            iterator.addSample(sampleSum);
     }
 /*
     glm::dvec3 CpuRaytracerWorker::gatherScatteredLight(
@@ -970,7 +969,6 @@ namespace prop3
 
     inline void CpuRaytracerWorker::commitSample(const glm::dvec4& sample)
     {
-        // Using the power heuristic (B=2)
         _workingSample += sample;
     }
 }

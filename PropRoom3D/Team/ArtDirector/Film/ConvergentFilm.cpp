@@ -200,10 +200,8 @@ namespace prop3
     void ConvergentFilm::addSample(int index, const glm::dvec4& sample)
     {
         // Power heuristic weight optimization
-        glm::dvec4 trueSample = sample * sample.w;
-
         glm::dvec4 oldSample = _weightedColorBuffer[index];
-        glm::dvec4 newSample = oldSample + trueSample;
+        glm::dvec4 newSample = oldSample + sample;
         _weightedColorBuffer[index] = newSample;
 
         glm::dvec3 newColor = sampleToColor(newSample);
@@ -213,25 +211,26 @@ namespace prop3
         if(_colorOutput == ColorOutput::WEIGHT)
             _colorBuffer[index] = weightToColor(newSample);
 
-        double newWeight = newSample.w;
-        if(newWeight > _varianceWeightThreshold)
+        double oldWeight = oldSample.w;
+        if(oldWeight > _varianceWeightThreshold)
         {
             glm::dvec3 oldColor = glm::min(_maxPixelIntensity,
                 glm::dvec3(oldSample) / oldSample.w);
             glm::dvec3 sampColor = glm::min(_maxPixelIntensity,
-                glm::dvec3(trueSample) / trueSample.w);
+                glm::dvec3(sample) / sample.w);
 
+            double sampWeight = sample.w;
             glm::dvec3 dColor = sampColor - oldColor;
-            double dMean = glm::length(dColor);
-            double trueWeight = trueSample.w;
+            double dMean = glm::length(dColor) * sampWeight;
 
-            _weightedVarianceBuffer[index] += glm::dvec2(dMean, trueWeight);
+            _weightedVarianceBuffer[index] += glm::dvec2(dMean * sampWeight, sampWeight);
             glm::dvec2 newWeightedVar = _weightedVarianceBuffer[index];
 
             if(_colorOutput == ColorOutput::VARIANCE)
                 _colorBuffer[index] = varianceToColor(newWeightedVar);
 
 
+            double newWeight = newSample.w;
             if(newWeight > _priorityWeightThreshold)
             {
                 const double WEIGHT_OFFSET = 0.25;
