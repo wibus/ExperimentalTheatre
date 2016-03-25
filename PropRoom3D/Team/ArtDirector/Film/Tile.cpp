@@ -60,6 +60,8 @@ namespace prop3
         _priorityThreshold(threshold),
         _divergenceSum(0.0)
     {
+        glm::ivec2 tileDim = _maxCorner - _minCorner;
+        _pixelCount = tileDim.x * + tileDim.y;
     }
 
     Tile::~Tile()

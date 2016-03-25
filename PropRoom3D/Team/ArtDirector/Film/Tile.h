@@ -47,6 +47,7 @@ namespace prop3
 
         const glm::ivec2& minCorner() const;
         const glm::ivec2& maxCorner() const;
+        unsigned int pixelCount() const;
 
         TileIterator begin();
         TileIterator end();
@@ -68,7 +69,6 @@ namespace prop3
         void setDivergenceSum(double sum);
         double divergenceSum() const;
 
-
         static const glm::ivec2 END_PIXEL;
 
     protected:
@@ -78,6 +78,7 @@ namespace prop3
         const glm::ivec2 _minCorner;
         const glm::ivec2 _maxCorner;
         const glm::ivec2 _startPix;
+        unsigned int _pixelCount;
         double _tilePriority;
         double _priorityThreshold;
         double _divergenceSum;
@@ -114,6 +115,11 @@ namespace prop3
     inline const glm::ivec2& Tile::maxCorner() const
     {
         return _maxCorner;
+    }
+
+    inline unsigned int Tile::pixelCount() const
+    {
+        return _pixelCount;
     }
 
     inline double Tile::tilePriority() const

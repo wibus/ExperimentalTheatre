@@ -1,5 +1,7 @@
 #include "ConvergentFilm.h"
 
+#include <algorithm>
+
 
 namespace prop3
 {
@@ -109,13 +111,20 @@ namespace prop3
 
     double ConvergentFilm::compileDivergence() const
     {
-        double divSum = 0.0;
         double tileCount = _tiles.size();
+        std::vector<double> tileVal(tileCount);
         for(size_t i=0; i < tileCount; ++i)
-            divSum += _tiles[i]->divergenceSum();
+            tileVal[i] = _tiles[i]->divergenceSum()
+                           / _tiles[i]->pixelCount();
 
-        double divCount = _divergenceBuffer.size();
-        return glm::sqrt(divSum / divCount);
+        std::sort(tileVal.begin(), tileVal.end(), std::greater<double>());
+
+        double meanSum = 0;
+        const int MEAN_TILE_COUNT = 16;
+        for(int i=0; i < MEAN_TILE_COUNT; ++i)
+            meanSum += glm::sqrt(tileVal[i]);
+
+        return meanSum / MEAN_TILE_COUNT;
     }
 
     void ConvergentFilm::tileCompleted(Tile& tile)
