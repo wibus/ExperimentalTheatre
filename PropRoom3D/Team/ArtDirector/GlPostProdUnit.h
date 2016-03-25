@@ -37,6 +37,10 @@ namespace prop3
         virtual void setImageLuminosity(float zeroToOne);
         virtual void saveOutputImage();
 
+        virtual void fetchImageMinAndMax(
+                glm::dvec3& minComp,
+                glm::dvec3& maxComp);
+
         static const int DEFAULT_WHITE_TEMPERATURE;
 
 

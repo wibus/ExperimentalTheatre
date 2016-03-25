@@ -105,8 +105,7 @@ vec3 adjustWhite(vec3 color)
 
 vec3 adjustIntensity(vec3 color)
 {
-    vec3 centeredColor = color - vec3(0.5);
-    vec3 luminosityColor = centeredColor + vec3(LuminosityValue);
+    vec3 luminosityColor = color - vec3(0.5 - LuminosityValue);
     vec3 contrastColor = luminosityColor * ContrastValue;
     return contrastColor + vec3(0.5);
 }

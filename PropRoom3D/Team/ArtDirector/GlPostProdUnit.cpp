@@ -286,6 +286,45 @@ namespace prop3
         }
     }
 
+    void GlPostProdUnit::fetchImageMinAndMax(
+            glm::dvec3& minComp,
+            glm::dvec3& maxComp)
+    {
+        if(_colorBufferTexId != 0)
+        {
+            minComp = glm::dvec3(INFINITY);
+            maxComp = glm::dvec3(-INFINITY);
+
+            GLint width, height;
+            glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
+            glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+            glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+
+            GLfloat* buffer = new GLfloat[width*height * 3];
+            glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, buffer);
+            glBindTexture(GL_TEXTURE_2D, 0);
+
+            size_t idx = 0;
+            for(int h=0; h < height; ++h)
+            {
+                for(int w=0; w < width; ++w)
+                {
+                    glm::dvec3 pixel(buffer[idx], buffer[idx+1], buffer[idx+2]);
+                    minComp = glm::min(minComp, pixel);
+                    maxComp = glm::max(maxComp, pixel);
+                    idx += 3;
+                }
+            }
+
+            delete[] buffer;
+        }
+        else
+        {
+            minComp = glm::dvec3(0);
+            maxComp = glm::dvec3(1);
+        }
+    }
+
     void GlPostProdUnit::updateKernel(double variance, int size)
     {
         buildLowpassKernel(_lowpassKernel, variance, size);
