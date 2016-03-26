@@ -167,14 +167,11 @@ namespace prop3
 
         if(_framePassCount > _priorityWeightThreshold)
         {
-            if((_framePassCount % _prioritySpanCycleCount) == 0)
-                _prioritizer->launchPrioritization(*this);
-
+            _prioritizer->launchPrioritization(*this);
             double topPriority = _prioritizer->maxFramePriority();
             topPriority = glm::min(topPriority, 1.0);
-
-            double baseRand = _linearRand.gen1();
-            _priorityThreshold = baseRand * topPriority * 0.85;
+            double baseRand = _linearRand.gen1(0.35, 0.55);
+            _priorityThreshold = baseRand * topPriority;
         }
         else
         {
