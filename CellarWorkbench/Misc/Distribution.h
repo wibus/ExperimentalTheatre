@@ -39,13 +39,16 @@ namespace cellar
         LinearRand();
         ~LinearRand();
 
-        double gen1(double maxVal = double(1.0)) const;
+        double gen1() const;
+        double gen1(double maxVal) const;
         double gen1(double minVal, double maxVal) const;
 
-        glm::dvec2 gen2(glm::dvec2 maxVal = glm::dvec2(1.0)) const;
+        glm::dvec2 gen2() const;
+        glm::dvec2 gen2(glm::dvec2 maxVal) const;
         glm::dvec2 gen2(glm::dvec2 minVal, glm::dvec2 maxVal) const;
 
-        glm::dvec3 gen3(glm::dvec3 maxVal = glm::dvec3(1.0)) const;
+        glm::dvec3 gen3() const;
+        glm::dvec3 gen3(glm::dvec3 maxVal) const;
         glm::dvec3 gen3(glm::dvec3 minVal, glm::dvec3 maxVal) const;
 
 
@@ -103,9 +106,14 @@ namespace cellar
         return _array[++idx];
     }
 
+    inline double LinearRand::gen1() const
+    {
+        return g_masterRandomArray.next(_randArrayIdx);
+    }
+
     inline double LinearRand::gen1(double maxVal) const
     {
-        return gen1(0.0, maxVal);
+        return g_masterRandomArray.next(_randArrayIdx) * maxVal;
     }
 
     inline double LinearRand::gen1(double minVal, double maxVal) const
@@ -113,9 +121,14 @@ namespace cellar
         return g_masterRandomArray.next(_randArrayIdx) * (maxVal - minVal) + minVal;
     }
 
+    inline glm::dvec2 LinearRand::gen2() const
+    {
+        return glm::dvec2(gen1(), gen1());
+    }
+
     inline glm::dvec2 LinearRand::gen2(glm::dvec2 maxVal) const
     {
-        return gen2(glm::dvec2(0.0), maxVal);
+        return glm::dvec2(gen1(maxVal.x), gen1(maxVal.y));
     }
 
     inline glm::dvec2 LinearRand::gen2(glm::dvec2 minVal, glm::dvec2 maxVal) const
@@ -124,9 +137,14 @@ namespace cellar
                           gen1(minVal.y, maxVal.y));
     }
 
+    inline glm::dvec3 LinearRand::gen3() const
+    {
+        return glm::dvec3(gen1(), gen1(), gen1());
+    }
+
     inline glm::dvec3 LinearRand::gen3(glm::dvec3 maxVal) const
     {
-        return gen3(glm::dvec3(0.0), maxVal);
+        return glm::dvec3(gen1(maxVal.x), gen1(maxVal.y), gen1(maxVal.z));
     }
 
     inline glm::dvec3 LinearRand::gen3(glm::dvec3 minVal, glm::dvec3 maxVal) const
@@ -138,16 +156,17 @@ namespace cellar
     inline glm::dvec2 DiskRand::gen(double radius) const
     {
         return gen(radius,
-                   _linearRand.gen1(1.0),
+                   _linearRand.gen1(),
                    _linearRand.gen1(2.0 * glm::pi<double>()));
     }
 
-    inline glm::dvec2 DiskRand::gen(double radius,
-                          double zeroToOne,
-                          double zeroToTwoPi) const
+    inline glm::dvec2 DiskRand::gen(
+            double radius,
+            double zeroToOne,
+            double zeroToTwoPi) const
     {
-        return glm::dvec2(glm::cos(zeroToTwoPi), glm::sin(zeroToTwoPi)) *
-                    glm::sqrt(zeroToOne) * radius;
+        return glm::dvec2(glm::cos(zeroToTwoPi), glm::sin(zeroToTwoPi))
+                   * glm::sqrt(zeroToOne) * radius;
     }
 
     inline glm::dvec3 SphereRand::gen(double radius) const

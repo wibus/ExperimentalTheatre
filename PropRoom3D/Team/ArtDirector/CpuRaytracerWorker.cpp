@@ -284,7 +284,7 @@ namespace prop3
 
         if(_usePixelJittering)
         {
-            frameOrig += _linearRand.gen2(glm::dvec2(-0.5), glm::dvec2(0.5));
+            frameOrig += _linearRand.gen2() - glm::dvec2(0.5);
         }
 
         Raycast raycast(

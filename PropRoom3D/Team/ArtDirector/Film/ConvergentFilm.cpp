@@ -115,7 +115,7 @@ namespace prop3
             tile->setDivergenceSum(tilePixCount);
         }
 
-        _prioritizer->reset(_frameResolution, 5, 2.5);
+        _prioritizer->reset(_frameResolution, 5, 2.0);
     }
 
     double ConvergentFilm::compileDivergence() const
@@ -173,7 +173,7 @@ namespace prop3
             double topPriority = _prioritizer->maxFramePriority();
             topPriority = glm::min(topPriority, 1.0);
 
-            double baseRand = _linearRand.gen1(0.0, 1.0);
+            double baseRand = _linearRand.gen1();
             _priorityThreshold = baseRand * topPriority * 0.85;
         }
         else
@@ -267,7 +267,7 @@ namespace prop3
 
     glm::vec3 ConvergentFilm::weightToColor(const glm::dvec4& sample) const
     {
-        return glm::vec3(sample.w / 25.0);
+        return glm::vec3(sample.w / 200.0);
     }
 
     glm::vec3 ConvergentFilm::divergenceToColor(double divergence) const
