@@ -80,7 +80,8 @@ SET(PROP3_FILM_HEADERS
     ${PROP3_SRC_DIR}/Team/ArtDirector/Film/Film.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/Film/Tile.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/Film/ConvergentFilm.h
-    ${PROP3_SRC_DIR}/Team/ArtDirector/Film/StaticFilm.h)
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Film/StaticFilm.h
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Film/PixelPrioritizer.h)
 
 # Art Director
 SET(PROP3_ART_DIRECTOR_HEADERS
@@ -199,7 +200,8 @@ SET(PROP3_FILM_SOURCES
     ${PROP3_SRC_DIR}/Team/ArtDirector/Film/Film.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/Film/Tile.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/Film/ConvergentFilm.cpp
-    ${PROP3_SRC_DIR}/Team/ArtDirector/Film/StaticFilm.cpp)
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Film/StaticFilm.cpp
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Film/PixelPrioritizer.cpp)
 
 # Art Director
 SET(PROP3_ART_DIRECTOR_SOURCES

@@ -78,7 +78,7 @@ namespace prop3
         //virtual void fireLightRay(
         //        const Raycast& fromLightRay);
 
-        virtual void fireScreenRay(
+        virtual glm::dvec4 fireScreenRay(
                 TileIterator& iterator,
                 const Raycast& fromEyeRay);
 

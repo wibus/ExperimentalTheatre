@@ -8,8 +8,12 @@
 
 namespace prop3
 {
+    class PixelPrioritizer;
+
     class PROP3D_EXPORT ConvergentFilm : public Film
     {
+        friend class PixelPrioritizer;
+
     public:
         ConvergentFilm();
         virtual ~ConvergentFilm();
@@ -50,21 +54,25 @@ namespace prop3
         std::vector<double> _divergenceBuffer;
 
         // Priority stabilizes over time
-        std::vector<double> _priorityBuffer;
+        std::vector<double> _priorityRawBuffer;
+        std::vector<double> _priorityRefBuffer;
 
         // rgb accumulation and its total weight
         std::vector<glm::dvec4> _weightedColorBuffer;
 
         double _varianceWeightThreshold;
+        int _prioritySpanCycleCount;
         double _priorityWeightThreshold;
         double _priorityWeightBias;
         double _priorityScale;
 
         glm::dvec3 _maxPixelIntensity;
-        double _maxPixelWeight;
 
         // Random distribution
         cellar::LinearRand _linearRand;
+
+        // Pixel Prioritizer
+        std::shared_ptr<PixelPrioritizer> _prioritizer;
     };
 }
 
