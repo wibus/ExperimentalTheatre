@@ -178,6 +178,11 @@ namespace prop3
         return _localRaytracer->raytracerState();
     }
 
+    std::shared_ptr<Film> ArtDirectorServer::film() const
+    {
+        return _localRaytracer->film();
+    }
+
     void ArtDirectorServer::sendBuffersToGpu()
     {
         std::string colorOuputType = raytracerState()->colorOutputType();
@@ -190,6 +195,10 @@ namespace prop3
             colorOutput = Film::ColorOutput::VARIANCE;
         else if(colorOuputType == RaytracerState::COLOROUTPUT_PRIORITY)
             colorOutput = Film::ColorOutput::PRIORITY;
+        else if(colorOuputType == RaytracerState::COLOROUTPUT_REFERENCE)
+            colorOutput = Film::ColorOutput::REFERENCE;
+        else if(colorOuputType == RaytracerState::COLOROUTPUT_COMPATIBILITY)
+            colorOutput = Film::ColorOutput::COMPATIBILITY;
 
         auto film = _localRaytracer->film();
         glm::ivec2 viewportSize = film->frameResolution();

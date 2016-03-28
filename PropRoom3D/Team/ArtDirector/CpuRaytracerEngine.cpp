@@ -169,6 +169,9 @@ namespace prop3
                _raytracerState->runningOutOfSamples())
             {
                 interruptWorkers();
+
+                if(_raytracerState->converged())
+                    _currentFilm->backupAsReferenceShot();
             }
         }
     }

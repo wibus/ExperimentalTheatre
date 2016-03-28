@@ -41,6 +41,21 @@ namespace prop3
         }
     }
 
+    void StaticFilm::backupAsReferenceShot()
+    {
+        // Do nothing
+    }
+
+    bool StaticFilm::saveReferenceShot(const std::string& name)
+    {
+        return false;
+    }
+
+    bool StaticFilm::loadReferenceShot(const std::string& name)
+    {
+        return false;
+    }
+
     double StaticFilm::compileDivergence() const
     {
         return 1.0;

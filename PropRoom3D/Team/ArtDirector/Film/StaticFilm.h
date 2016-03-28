@@ -21,6 +21,12 @@ namespace prop3
         virtual void clear(const glm::dvec3& color = glm::dvec3(0),
                            bool hardReset = false) override;
 
+        virtual void backupAsReferenceShot() override;
+
+        virtual bool saveReferenceShot(const std::string& name) override;
+
+        virtual bool loadReferenceShot(const std::string& name) override;
+
         virtual double compileDivergence() const override;
 
         virtual void tileCompleted(Tile& tile) override;

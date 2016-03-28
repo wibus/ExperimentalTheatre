@@ -13,6 +13,7 @@ namespace prop3
     class GlPostProdUnit;
     class RaytracerState;
     class DebugRenderer;
+    class Film;
 
 
     class PROP3D_EXPORT ArtDirectorServer :
@@ -34,6 +35,8 @@ namespace prop3
         std::shared_ptr<GlPostProdUnit> postProdUnit() const;
 
         std::shared_ptr<RaytracerState> raytracerState() const;
+
+        std::shared_ptr<Film> film() const;
 
 
         static const double FORCE_REFRESH_DT;

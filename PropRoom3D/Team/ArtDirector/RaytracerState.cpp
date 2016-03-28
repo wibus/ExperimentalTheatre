@@ -11,6 +11,8 @@ namespace prop3
     const std::string RaytracerState::COLOROUTPUT_DIVERGENCE = "Divergence";
     const std::string RaytracerState::COLOROUTPUT_VARIANCE = "Variance";
     const std::string RaytracerState::COLOROUTPUT_PRIORITY = "Priority";
+    const std::string RaytracerState::COLOROUTPUT_REFERENCE = "Reference";
+    const std::string RaytracerState::COLOROUTPUT_COMPATIBILITY = "Compatiblity";
 
     RaytracerState::DraftParams::DraftParams() :
         levelCount(0),

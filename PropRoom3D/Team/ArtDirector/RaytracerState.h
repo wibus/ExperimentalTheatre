@@ -130,6 +130,8 @@ namespace prop3
         static const std::string COLOROUTPUT_DIVERGENCE;
         static const std::string COLOROUTPUT_VARIANCE;
         static const std::string COLOROUTPUT_PRIORITY;
+        static const std::string COLOROUTPUT_REFERENCE;
+        static const std::string COLOROUTPUT_COMPATIBILITY;
 
     private:
         ProtectedState& _protectedState;

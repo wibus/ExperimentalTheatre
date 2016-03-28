@@ -27,6 +27,12 @@ namespace prop3
         virtual void clear(const glm::dvec3& color = glm::dvec3(0),
                            bool hardReset = false) override;
 
+        virtual void backupAsReferenceShot() override;
+
+        virtual bool saveReferenceShot(const std::string& name) override;
+
+        virtual bool loadReferenceShot(const std::string& name) override;
+
         virtual double compileDivergence() const override;
 
         virtual void tileCompleted(Tile& tile) override;
@@ -45,20 +51,28 @@ namespace prop3
         glm::vec3 divergenceToColor(double divergence) const;
         glm::vec3 varianceToColor(const glm::dvec2& variance) const;
         glm::vec3 priorityToColor(double priority) const;
+        glm::vec3 compatibilityToColor(double compatibility) const;
 
+        double toDivergence(
+                const glm::dvec2& variance,
+                const glm::dvec3& color,
+                double weight) const;
+
+        double refShotCompatibility(unsigned int index) const;
+
+
+
+        // RGB accumulation and its total weight
+        std::vector<glm::dvec4> _sampleBuffer;
 
         // Variance stabilzes over time
-        std::vector<glm::dvec2> _weightedVarianceBuffer;
+        std::vector<glm::dvec2> _varianceBuffer;
 
         // Divergence decreases over time
         std::vector<double> _divergenceBuffer;
 
         // Priority stabilizes over time
-        std::vector<double> _priorityRawBuffer;
-        std::vector<double> _priorityRefBuffer;
-
-        // rgb accumulation and its total weight
-        std::vector<glm::dvec4> _weightedColorBuffer;
+        std::vector<double> _priorityBuffer;
 
         double _varianceWeightThreshold;
         int _prioritySpanCycleCount;
@@ -73,6 +87,12 @@ namespace prop3
 
         // Pixel Prioritizer
         std::shared_ptr<PixelPrioritizer> _prioritizer;
+
+        struct ReferenceShot
+        {
+            std::vector<glm::dvec4> sampleBuffer;
+            std::vector<glm::dvec2> varianceBuffer;
+        } _referenceFilm;
     };
 }
 

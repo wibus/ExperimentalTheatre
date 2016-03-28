@@ -1,5 +1,6 @@
 #include "ConvergentFilm.h"
 
+#include <fstream>
 #include <algorithm>
 
 #include "PixelPrioritizer.h"
@@ -8,11 +9,10 @@
 namespace prop3
 {
     ConvergentFilm::ConvergentFilm() :
-        _weightedVarianceBuffer(1, glm::dvec2(0)),
+        _sampleBuffer(1, glm::dvec4(0)),
+        _varianceBuffer(1, glm::dvec2(0)),
         _divergenceBuffer(1, 1.0),
-        _priorityRawBuffer(1, 1.0),
-        _priorityRefBuffer(1, 1.0),
-        _weightedColorBuffer(1, glm::dvec4(0)),
+        _priorityBuffer(1, 1.0),
         _varianceWeightThreshold(4.0),
         _priorityWeightThreshold(7.0),
         _prioritySpanCycleCount(4),
@@ -47,12 +47,13 @@ namespace prop3
             {
             case ColorOutput::ALBEDO :
                 for(int i=0; i < pixelCount; ++i)
-                    _colorBuffer[i] = sampleToColor(_weightedColorBuffer[i]);
+                    _colorBuffer[i] = sampleToColor(_sampleBuffer[i] +
+                        _referenceFilm.sampleBuffer[i] * refShotCompatibility(i));
                 break;
 
             case ColorOutput::WEIGHT :
                 for(int i=0; i < pixelCount; ++i)
-                    _colorBuffer[i] = weightToColor(_weightedColorBuffer[i]);
+                    _colorBuffer[i] = weightToColor(_sampleBuffer[i]);
                 break;
 
             case ColorOutput::DIVERGENCE :
@@ -62,12 +63,24 @@ namespace prop3
 
             case ColorOutput::VARIANCE :
                 for(int i=0; i < pixelCount; ++i)
-                    _colorBuffer[i] = varianceToColor(_weightedVarianceBuffer[i]);
+                    _colorBuffer[i] = varianceToColor(_varianceBuffer[i] +
+                        _referenceFilm.varianceBuffer[i] * refShotCompatibility(i));
                 break;
 
             case ColorOutput::PRIORITY :
                 for(int i=0; i < pixelCount; ++i)
-                    _colorBuffer[i] = priorityToColor(_priorityRefBuffer[i]);
+                    _colorBuffer[i] = priorityToColor(_priorityBuffer[i]);
+                break;
+
+            case ColorOutput::REFERENCE :
+                for(int i=0; i < pixelCount; ++i)
+                    _colorBuffer[i] = sampleToColor(_referenceFilm.sampleBuffer[i]);
+                break;
+
+            case ColorOutput::COMPATIBILITY :
+                for(int i=0; i < pixelCount; ++i)
+                    _colorBuffer[i] = compatibilityToColor(
+                        refShotCompatibility(i));
                 break;
             }
         }
@@ -90,21 +103,18 @@ namespace prop3
         _colorBuffer.clear();
         _colorBuffer.resize(pixelCount, color);
 
-        _weightedVarianceBuffer.clear();
-        _weightedVarianceBuffer.resize(pixelCount, glm::dvec2(0));
+        glm::dvec4 sample(color, 0.0);
+        _sampleBuffer.clear();
+        _sampleBuffer.resize(pixelCount, sample);
+
+        _varianceBuffer.clear();
+        _varianceBuffer.resize(pixelCount, glm::dvec2(0));
 
         _divergenceBuffer.clear();
         _divergenceBuffer.resize(pixelCount, 1.0);
 
-        _priorityRawBuffer.clear();
-        _priorityRawBuffer.resize(pixelCount, 1.0);
-
-        _priorityRefBuffer.clear();
-        _priorityRefBuffer.resize(pixelCount, 1.0);
-
-        glm::dvec4 sample(color, 0.0);
-        _weightedColorBuffer.clear();
-        _weightedColorBuffer.resize(pixelCount, sample);
+        _priorityBuffer.clear();
+        _priorityBuffer.resize(pixelCount, 1.0);
 
         for(const auto& tile : _tiles)
         {
@@ -115,7 +125,90 @@ namespace prop3
             tile->setDivergenceSum(tilePixCount);
         }
 
-        _prioritizer->reset(_frameResolution, 5, 2.0);
+        if(hardReset)
+        {
+            _prioritizer->reset(_frameResolution, 5, 1.0);
+
+            // Clear reference shot
+            backupAsReferenceShot();
+        }
+    }
+
+    void ConvergentFilm::backupAsReferenceShot()
+    {
+        size_t pixelCount = _sampleBuffer.size();
+        _referenceFilm.sampleBuffer.resize(pixelCount);
+        _referenceFilm.varianceBuffer.resize(pixelCount);
+        for(size_t i=0; i < pixelCount; ++i)
+        {
+            const glm::dvec4& curSamp = _sampleBuffer[i];
+            const glm::dvec2& curVar = _varianceBuffer[i];
+            const glm::dvec4& refSamp = _referenceFilm.sampleBuffer[i];
+            const glm::dvec2& refVar = _referenceFilm.varianceBuffer[i];
+
+            double compatibility = refShotCompatibility(i);
+
+            _referenceFilm.sampleBuffer[i] = curSamp + refSamp * compatibility;
+            _referenceFilm.varianceBuffer[i] = curVar + refVar * compatibility;
+        }
+    }
+
+    bool ConvergentFilm::saveReferenceShot(const std::string& name)
+    {
+        std::ofstream film(name, std::ios_base::trunc | std::ios_base::binary);
+
+        if(film.is_open())
+        {
+            film.write((char*)_referenceFilm.sampleBuffer.data(),
+                       sizeof(_referenceFilm.sampleBuffer.front()) *
+                       _referenceFilm.sampleBuffer.size());
+
+            film.write((char*)_referenceFilm.varianceBuffer.data(),
+                       sizeof(_referenceFilm.varianceBuffer.front()) *
+                       _referenceFilm.varianceBuffer.size());
+
+            film.close();
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    bool ConvergentFilm::loadReferenceShot(const std::string& name)
+    {
+        std::ifstream film(name, std::ios_base::binary);
+
+        if(film.is_open())
+        {
+            film.read((char*)_referenceFilm.sampleBuffer.data(),
+                       sizeof(_referenceFilm.sampleBuffer.front()) *
+                       _referenceFilm.sampleBuffer.size());
+
+            film.read((char*)_referenceFilm.varianceBuffer.data(),
+                       sizeof(_referenceFilm.varianceBuffer.front()) *
+                       _referenceFilm.varianceBuffer.size());
+
+            film.close();
+
+
+            int pixelCount = _referenceFilm.sampleBuffer.size();
+            if(_colorOutput == ColorOutput::REFERENCE)
+            {
+                for(int i=0; i < pixelCount; ++i)
+                    _colorBuffer[i] = sampleToColor(_referenceFilm.sampleBuffer[i]);
+            }
+            else if(_colorOutput == ColorOutput::COMPATIBILITY)
+            {
+                for(int i=0; i < pixelCount; ++i)
+                    _colorBuffer[i] = compatibilityToColor(
+                            refShotCompatibility(i));
+            }
+        }
+        else
+        {
+            return false;
+        }
     }
 
     double ConvergentFilm::compileDivergence() const
@@ -168,10 +261,10 @@ namespace prop3
         if(_framePassCount > _priorityWeightThreshold)
         {
             _prioritizer->launchPrioritization(*this);
+
             double topPriority = _prioritizer->maxFramePriority();
             topPriority = glm::min(topPriority, 1.0);
-            double baseRand = _linearRand.gen1(0.35, 0.55);
-            _priorityThreshold = baseRand * topPriority;
+            _priorityThreshold = 0.25 * topPriority;
         }
         else
         {
@@ -181,7 +274,7 @@ namespace prop3
 
     glm::dvec4 ConvergentFilm::pixelSample(int index) const
     {
-        return _weightedColorBuffer[index];
+        return _sampleBuffer[index];
     }
 
     double ConvergentFilm::pixelDivergence(int index) const
@@ -191,7 +284,7 @@ namespace prop3
 
     double ConvergentFilm::pixelPriority(int index) const
     {
-        return _priorityRefBuffer[index];
+        return _priorityBuffer[index];
     }
 
     void ConvergentFilm::setColor(int index, const glm::dvec3& color)
@@ -202,16 +295,9 @@ namespace prop3
     void ConvergentFilm::addSample(int index, const glm::dvec4& sample)
     {
         // Power heuristic weight optimization
-        glm::dvec4 oldSample = _weightedColorBuffer[index];
+        glm::dvec4 oldSample = _sampleBuffer[index];
         glm::dvec4 newSample = oldSample + sample;
-        _weightedColorBuffer[index] = newSample;
-
-        glm::dvec3 newColor = sampleToColor(newSample);
-        if(_colorOutput == ColorOutput::ALBEDO)
-            _colorBuffer[index] = newColor;
-
-        if(_colorOutput == ColorOutput::WEIGHT)
-            _colorBuffer[index] = weightToColor(newSample);
+        _sampleBuffer[index] = newSample;
 
         double oldWeight = oldSample.w;
         if(oldWeight > _varianceWeightThreshold)
@@ -225,31 +311,50 @@ namespace prop3
             glm::dvec3 dColor = sampColor - oldColor;
             double dMean = glm::length(dColor) * sampWeight;
 
-            _weightedVarianceBuffer[index] += glm::dvec2(dMean * sampWeight, sampWeight);
-            glm::dvec2 newWeightedVar = _weightedVarianceBuffer[index];
-
-            if(_colorOutput == ColorOutput::VARIANCE)
-                _colorBuffer[index] = varianceToColor(newWeightedVar);
+            _varianceBuffer[index] += glm::dvec2(dMean * sampWeight, sampWeight);
+            glm::dvec2 newWeightedVar = _varianceBuffer[index];
 
 
-            double newWeight = newSample.w;
-            if(newWeight > _priorityWeightThreshold)
+            // Mix current pixel with reference shot's own
+            const glm::dvec4& refSamp = _referenceFilm.sampleBuffer[index];
+            const glm::dvec2& refVar = _referenceFilm.varianceBuffer[index];
+            double compatibility = refShotCompatibility(index);
+            glm::dvec2 mixedVar = newWeightedVar + refVar * compatibility;
+            glm::dvec4 mixedSamp = newSample + refSamp * compatibility;
+            glm::dvec3 mixedColor = sampleToColor(mixedSamp);
+
+
+            double newDiv = 1.0;
+            double mixedWeight = mixedSamp.w;
+            if(newSample.w > _priorityWeightThreshold)
             {
-                const double WEIGHT_OFFSET = 0.25;
-                double scale = glm::length(newColor) + WEIGHT_OFFSET;
-                double newVar = newWeightedVar.x / newWeightedVar.y;
-                double newDiv = newVar / (scale * newWeight);
+                newDiv = toDivergence(
+                    mixedVar, mixedColor, mixedWeight);
                 _divergenceBuffer[index] = newDiv;
-
-                if(_colorOutput == ColorOutput::DIVERGENCE)
-                    _colorBuffer[index] = divergenceToColor(newDiv);
-
-
-                double weightPrio = newWeight*newWeight*newWeight;
-                double newPrio = _priorityScale *
-                    (newDiv + _priorityWeightBias / weightPrio);
-                _priorityRawBuffer[index] = newPrio;
             }
+
+            if(_colorOutput == ColorOutput::ALBEDO)
+                _colorBuffer[index] = mixedColor;
+
+            else if(_colorOutput == ColorOutput::WEIGHT)
+                _colorBuffer[index] = weightToColor(mixedSamp);
+
+            else if(_colorOutput == ColorOutput::VARIANCE)
+                _colorBuffer[index] = varianceToColor(mixedVar);
+
+            else if(_colorOutput == ColorOutput::DIVERGENCE)
+                _colorBuffer[index] = divergenceToColor(newDiv);
+
+            else if(_colorOutput == ColorOutput::COMPATIBILITY)
+                _colorBuffer[index] = compatibilityToColor(compatibility);
+        }
+        else
+        {
+            if(_colorOutput == ColorOutput::ALBEDO)
+                _colorBuffer[index] = sampleToColor(newSample);
+
+            else if(_colorOutput == ColorOutput::WEIGHT)
+                _colorBuffer[index] = weightToColor(newSample);
         }
     }
 
@@ -283,5 +388,39 @@ namespace prop3
     glm::vec3 ConvergentFilm::priorityToColor(double priority) const
     {
         return glm::vec3(priority);
+    }
+
+    glm::vec3 ConvergentFilm::compatibilityToColor(double compatibility) const
+    {
+        return glm::vec3(compatibility);
+    }
+
+    double ConvergentFilm::toDivergence(
+            const glm::dvec2& variance,
+            const glm::dvec3& color,
+            double weight) const
+    {
+        const double WEIGHT_OFFSET = 0.25;
+        double scale = glm::length(color) + WEIGHT_OFFSET;
+        double newVar = variance.x / variance.y;
+        return newVar / (scale * weight);
+    }
+
+    double ConvergentFilm::refShotCompatibility(unsigned int index) const
+    {
+        const glm::dvec4& refSamp = _referenceFilm.sampleBuffer[index];
+        const glm::dvec4& sample = _sampleBuffer[index];
+
+        if(refSamp.w > 0.0)
+        {
+            glm::dvec3 refCol = glm::dvec3(refSamp) / refSamp.w;
+            glm::dvec3 curCol = glm::dvec3(sample) / sample.w;
+            double dist = glm::distance(curCol, refCol) * sample.w;
+            return glm::smoothstep(0.0, 1.0, (1.0 - dist * 0.35) * sample.w / 32.0 - 0.15);
+        }
+        else
+        {
+            return 0.0;
+        }
     }
 }

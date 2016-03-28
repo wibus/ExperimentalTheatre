@@ -15,7 +15,7 @@ namespace prop3
     class PROP3D_EXPORT Film
     {
     public:
-        enum class ColorOutput {ALBEDO, WEIGHT, DIVERGENCE, VARIANCE, PRIORITY};
+        enum class ColorOutput {ALBEDO, WEIGHT, DIVERGENCE, VARIANCE, PRIORITY, REFERENCE, COMPATIBILITY};
 
         Film();
         virtual ~Film();
@@ -43,6 +43,12 @@ namespace prop3
 
         virtual void clear(const glm::dvec3& color = glm::dvec3(0),
                            bool hardReset = false) = 0;
+
+        virtual void backupAsReferenceShot() = 0;
+
+        virtual bool saveReferenceShot(const std::string& name) = 0;
+
+        virtual bool loadReferenceShot(const std::string& name) = 0;
 
         virtual double compileDivergence() const = 0;
 
