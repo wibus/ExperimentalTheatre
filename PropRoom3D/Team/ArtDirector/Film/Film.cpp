@@ -150,7 +150,7 @@ namespace prop3
         // Put center tiles in at the begining to start with them
         glm::dvec2 target = glm::dvec2(_frameResolution) / 2.0 + glm::dvec2(0.5, 0.3);
         std::sort(_tiles.begin(), _tiles.end(), [target]
-            (const std::shared_ptr<Tile>& t1, std::shared_ptr<Tile>& t2){
+            (const std::shared_ptr<Tile>& t1, const std::shared_ptr<Tile>& t2){
                 return glm::distance(glm::dvec2(t1->minCorner()), target) <
                        glm::distance(glm::dvec2(t2->minCorner()), target);
         });
