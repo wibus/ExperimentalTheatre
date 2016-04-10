@@ -23,9 +23,13 @@ namespace prop3
 
         virtual void backupAsReferenceShot() override;
 
-        virtual bool saveReferenceShot(const std::string& name) override;
+        virtual bool saveReferenceShot(const std::string& name) const override;
 
         virtual bool loadReferenceShot(const std::string& name) override;
+
+        virtual bool saveFilm(const std::string& name) const override;
+
+        virtual bool loadFilm(const std::string& name) override;
 
         virtual double compileDivergence() const override;
 

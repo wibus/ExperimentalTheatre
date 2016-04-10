@@ -46,12 +46,22 @@ namespace prop3
         // Do nothing
     }
 
-    bool StaticFilm::saveReferenceShot(const std::string& name)
+    bool StaticFilm::saveReferenceShot(const std::string& name) const
     {
         return false;
     }
 
     bool StaticFilm::loadReferenceShot(const std::string& name)
+    {
+        return false;
+    }
+
+    bool StaticFilm::saveFilm(const std::string& name) const
+    {
+        return false;
+    }
+
+    bool StaticFilm::loadFilm(const std::string& name)
     {
         return false;
     }

@@ -153,20 +153,49 @@ namespace prop3
         }
     }
 
-    bool ConvergentFilm::saveReferenceShot(const std::string& name)
+    bool ConvergentFilm::saveReferenceShot(const std::string& name) const
+    {
+        return saveContent(name,
+            _referenceFilm.sampleBuffer,
+            _referenceFilm.varianceBuffer);
+    }
+
+    bool ConvergentFilm::loadReferenceShot(const std::string& name)
+    {
+        return loadContent(name,
+            _referenceFilm.sampleBuffer,
+            _referenceFilm.varianceBuffer);
+    }
+
+    bool ConvergentFilm::saveFilm(const std::string& name) const
+    {
+        return saveContent(name,
+            _sampleBuffer,
+            _varianceBuffer);
+    }
+
+    bool ConvergentFilm::loadFilm(const std::string& name)
+    {
+        return loadContent(name,
+            _sampleBuffer,
+            _varianceBuffer);
+    }
+
+    bool ConvergentFilm::saveContent(
+            const std::string& name,
+            const std::vector<glm::dvec4>& samples,
+            const std::vector<glm::dvec2>& variances) const
     {
         std::ofstream film(name, std::ios_base::trunc | std::ios_base::binary);
 
         if(film.is_open())
         {
-            film.write((char*)_referenceFilm.sampleBuffer.data(),
-                       sizeof(_referenceFilm.sampleBuffer.front()) *
-                       _referenceFilm.sampleBuffer.size());
-
-            film.write((char*)_referenceFilm.varianceBuffer.data(),
-                       sizeof(_referenceFilm.varianceBuffer.front()) *
-                       _referenceFilm.varianceBuffer.size());
-
+            film.write((char*)samples.data(),
+                       sizeof(samples.front()) *
+                       samples.size());
+            film.write((char*)variances.data(),
+                       sizeof(variances.front()) *
+                       variances.size());
             film.close();
         }
         else
@@ -175,35 +204,37 @@ namespace prop3
         }
     }
 
-    bool ConvergentFilm::loadReferenceShot(const std::string& name)
+    bool ConvergentFilm::loadContent(
+            const std::string& name,
+            std::vector<glm::dvec4>& samples,
+            std::vector<glm::dvec2>& variances)
     {
         std::ifstream film(name, std::ios_base::binary);
 
         if(film.is_open())
         {
-            film.read((char*)_referenceFilm.sampleBuffer.data(),
-                       sizeof(_referenceFilm.sampleBuffer.front()) *
-                       _referenceFilm.sampleBuffer.size());
-
-            film.read((char*)_referenceFilm.varianceBuffer.data(),
-                       sizeof(_referenceFilm.varianceBuffer.front()) *
-                       _referenceFilm.varianceBuffer.size());
-
+            film.read((char*)samples.data(),
+                       sizeof(samples.front()) *
+                       samples.size());
+            film.read((char*)variances.data(),
+                       sizeof(variances.front()) *
+                       variances.size());
             film.close();
 
 
-            int pixelCount = _referenceFilm.sampleBuffer.size();
-            if(_colorOutput == ColorOutput::REFERENCE)
-            {
-                for(int i=0; i < pixelCount; ++i)
-                    _colorBuffer[i] = sampleToColor(_referenceFilm.sampleBuffer[i]);
-            }
-            else if(_colorOutput == ColorOutput::COMPATIBILITY)
-            {
-                for(int i=0; i < pixelCount; ++i)
-                    _colorBuffer[i] = compatibilityToColor(
-                            refShotCompatibility(i));
-            }
+            int pixelCount = samples.size();
+
+            // Compute film divergence &
+            // output new film in specified color buffer
+            for(int p=0; p < pixelCount; ++p)
+                addSample(p, glm::dvec4(0.0));
+
+            // Compute tile metrics
+            for(const auto& tile : _tiles)
+                tileCompleted(*tile);
+
+            // Force prioritization
+            endTileReached();
         }
         else
         {
@@ -302,12 +333,15 @@ namespace prop3
         double oldWeight = oldSample.w;
         if(oldWeight > _varianceWeightThreshold)
         {
+            double sampWeight = sample.w;
+            glm::dvec3 sampColor = glm::dvec3(sample);
+            if(sampWeight > 0.0)
+                sampColor = glm::min(
+                    _maxPixelIntensity,
+                    sampColor / sampWeight);
+
             glm::dvec3 oldColor = glm::min(_maxPixelIntensity,
                 glm::dvec3(oldSample) / oldSample.w);
-            glm::dvec3 sampColor = glm::min(_maxPixelIntensity,
-                glm::dvec3(sample) / sample.w);
-
-            double sampWeight = sample.w;
             glm::dvec3 dColor = sampColor - oldColor;
             double dMean = glm::length(dColor) * sampWeight;
 

@@ -29,9 +29,13 @@ namespace prop3
 
         virtual void backupAsReferenceShot() override;
 
-        virtual bool saveReferenceShot(const std::string& name) override;
+        virtual bool saveReferenceShot(const std::string& name) const override;
 
         virtual bool loadReferenceShot(const std::string& name) override;
+
+        virtual bool saveFilm(const std::string& name) const override;
+
+        virtual bool loadFilm(const std::string& name) override;
 
         virtual double compileDivergence() const override;
 
@@ -45,6 +49,15 @@ namespace prop3
         virtual glm::dvec4 pixelSample(int index) const override;
         virtual void setColor(int index, const glm::dvec3& color) override;
         virtual void addSample(int index, const glm::dvec4& sample) override;
+
+        virtual bool saveContent(
+                const std::string& name,
+                const std::vector<glm::dvec4>& samples,
+                const std::vector<glm::dvec2>& variances) const;
+        virtual bool loadContent(
+                const std::string& name,
+                std::vector<glm::dvec4>& samples,
+                std::vector<glm::dvec2>& variances);
 
         glm::vec3 sampleToColor(const glm::dvec4& sample) const;
         glm::vec3 weightToColor(const glm::dvec4& sample) const;

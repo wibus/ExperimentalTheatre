@@ -46,9 +46,13 @@ namespace prop3
 
         virtual void backupAsReferenceShot() = 0;
 
-        virtual bool saveReferenceShot(const std::string& name) = 0;
+        virtual bool saveReferenceShot(const std::string& name) const = 0;
 
         virtual bool loadReferenceShot(const std::string& name) = 0;
+
+        virtual bool saveFilm(const std::string& name) const = 0;
+
+        virtual bool loadFilm(const std::string& name) = 0;
 
         virtual double compileDivergence() const = 0;
 
