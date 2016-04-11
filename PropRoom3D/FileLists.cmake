@@ -94,7 +94,8 @@ SET(PROP3_ART_DIRECTOR_HEADERS
     ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerEngine.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerWorker.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/GlPostProdUnit.h
-    ${PROP3_SRC_DIR}/Team/ArtDirector/RaytracerState.h)
+    ${PROP3_SRC_DIR}/Team/ArtDirector/RaytracerState.h
+    ${PROP3_SRC_DIR}/Team/ArtDirector/SearchStructure.h)
 
 # Choreographer
 SET(PROP3_CHOREOGRAPHER_HEADERS
@@ -213,7 +214,8 @@ SET(PROP3_ART_DIRECTOR_SOURCES
     ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerEngine.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/CpuRaytracerWorker.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/GlPostProdUnit.cpp
-    ${PROP3_SRC_DIR}/Team/ArtDirector/RaytracerState.cpp)
+    ${PROP3_SRC_DIR}/Team/ArtDirector/RaytracerState.cpp
+    ${PROP3_SRC_DIR}/Team/ArtDirector/SearchStructure.cpp)
 
 # Choreographer
 SET(PROP3_CHOREOGRAPHER_SOURCES

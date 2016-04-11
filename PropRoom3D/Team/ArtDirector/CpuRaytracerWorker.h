@@ -3,7 +3,6 @@
 
 #include <memory>
 #include <vector>
-#include <queue>
 
 #include <atomic>
 #include <mutex>
@@ -15,9 +14,7 @@
 
 #include <CellarWorkbench/Misc/Distribution.h>
 
-#include "../../libPropRoom3D_global.h"
-
-#include "Ray/RayHitList.h"
+#include <PropRoom3D/Ray/RayHitList.h>
 
 
 namespace prop3
@@ -26,19 +23,13 @@ namespace prop3
     class RayHitReport;
     class StageSet;
     class Backdrop;
-    class LightBulb;
-    class Material;
-    class Coating;
-    class Surface;
-    class Prop;
 
-    class AbstractTeam;
+    class SearchStructure;
 
     class Film;
     class Tile;
     class TileIterator;
 
-    struct SearchZone;
 
 
     class PROP3D_EXPORT CpuRaytracerWorker
@@ -57,10 +48,11 @@ namespace prop3
         virtual bool isRunning();
 
         // Updates
-        virtual void updateStageSet(const std::string& stream);
         virtual void updateView(const glm::dmat4& view);
         virtual void updateProjection(const glm::dmat4& proj);
         virtual void updateFilm(std::shared_ptr<Film>& film);
+        virtual void updateSearchStructure(
+            const std::shared_ptr<SearchStructure>& searchStructure);
 
 
         // Modes
@@ -96,15 +88,6 @@ namespace prop3
         //        std::vector<Raycast>& outRaycasts,
         //       const glm::dvec3& targetPos);
 
-
-        virtual void compileSearchStructures();
-
-        virtual double findNearestIntersection(
-                const Raycast& raycast,
-                RayHitReport& reportMin);
-
-        virtual bool intersectsScene(
-                const Raycast& raycast);
 
         virtual glm::dvec3 draft(const RayHitReport& report);
 
@@ -145,16 +128,12 @@ namespace prop3
         glm::dvec4 _workingSample;
         std::shared_ptr<Film> _workingFilm;
 
-        std::string _stageSetStream;
-        std::shared_ptr<AbstractTeam> _team;
+        std::shared_ptr<StageSet> _stageSet;
         std::shared_ptr<Backdrop> _backdrop;
         std::shared_ptr<Material> _ambMaterial;
-        std::shared_ptr<StageSet> _stageSet;
+        std::shared_ptr<SearchStructure> _searchStructure;
 
         //std::vector<RayHitReport> _lightHitReports;
-        std::vector<SearchZone> _searchZones;
-        std::vector<std::shared_ptr<const Surface>> _searchSurfaces;
-        std::vector<std::shared_ptr<const LightBulb>> _searchLights;
 
         // Memory pools
         RayHitList _rayHitList;

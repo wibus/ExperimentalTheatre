@@ -11,13 +11,13 @@
 #include "Ray/Raycast.h"
 #include "Ray/RayHitList.h"
 #include "Ray/RayHitReport.h"
+#include "SearchStructure.h"
 
 #include "Node/Light/LightCast.h"
 #include "Node/Light/Backdrop/Backdrop.h"
 #include "Node/Light/LightBulb/LightBulb.h"
 
 #include "Node/StageSet.h"
-#include "Serial/JsonReader.h"
 
 #include "../AbstractTeam.h"
 #include "ArtDirectorServer.h"
@@ -27,15 +27,6 @@
 
 namespace prop3
 {
-    class WorkerTeam : public AbstractTeam
-    {
-    public:
-        WorkerTeam() :
-            AbstractTeam(nullptr /* Choreographer */)
-        {
-        }
-    };
-
     void CpuRaytracerWorker::launchWorker(
         const std::shared_ptr<CpuRaytracerWorker>& worker)
     {
@@ -58,10 +49,8 @@ namespace prop3
         _sufficientScreenRayWeight(0.75),
         _minScreenRayWeight(0.04),
         _aperture(0.0),
-        _confusionRadius(0.1),
-        _team(new WorkerTeam())
+        _confusionRadius(0.1)
     {
-        _team->setup();
     }
 
     CpuRaytracerWorker::~CpuRaytracerWorker()
@@ -103,14 +92,6 @@ namespace prop3
     {
         return _runningPredicate;
     }
-
-    void CpuRaytracerWorker::updateStageSet(const std::string& stream)
-    {
-        skipAndExecute([this, &stream](){
-            _stageSetStream = stream;
-        });
-    }
-
     void CpuRaytracerWorker::updateView(const glm::dmat4& view)
     {
         skipAndExecute([this, &view](){
@@ -145,6 +126,18 @@ namespace prop3
             _workingFilm = film;
         });
     }
+
+    void CpuRaytracerWorker::updateSearchStructure(
+            const std::shared_ptr<SearchStructure>& searchStructure)
+    {
+        skipAndExecute([this, &searchStructure](){
+            _stageSet = searchStructure->team()->stageSet();
+            _backdrop = _stageSet->backdrop();
+            _ambMaterial = _stageSet->ambientMaterial();
+            _searchStructure = searchStructure;
+        });
+    }
+
 
     void CpuRaytracerWorker::useStochasticTracing(bool use)
     {
@@ -190,8 +183,7 @@ namespace prop3
                     return true;
 
                 if(_runningPredicate &&
-                    (!_searchSurfaces.empty() ||
-                     !_stageSetStream.empty()))
+                    (!_searchStructure->isEmpty()))
                 {
                     tile = _workingFilm->nextTile();
                     return tile != _workingFilm->endTile();
@@ -204,19 +196,6 @@ namespace prop3
             if(_terminatePredicate)
             {
                 return;
-            }
-
-            // Verify if stageSet stream was updated
-            if(!_stageSetStream.empty())
-            {
-                StageSetJsonReader reader;
-                reader.deserialize(*_team, _stageSetStream);
-                _ambMaterial = _team->stageSet()->ambientMaterial();
-                _backdrop = _team->stageSet()->backdrop();
-                _stageSet = _team->stageSet();
-                _stageSetStream.clear();
-
-                compileSearchStructures();
             }
 
             /*// Shoot rays
@@ -447,7 +426,8 @@ namespace prop3
                     zVec3, zVec3, zVec3, zCoat, zMat, zMat);
 
             // Find nearest ray-surface intersection
-            double hitDistance = findNearestIntersection(ray, reportMin);
+            double hitDistance = _searchStructure->
+                findNearestIntersection(ray, reportMin, _rayHitList);
             ray.limit = hitDistance;
 
             if(reportMin.innerMat == Surface::ENVIRONMENT_MATERIAL.get() ||
@@ -634,7 +614,7 @@ namespace prop3
         std::vector<LightCast> lightRays;
         _backdrop->fireOn(lightRays, hitReport.position, _lightDirectRayCount);
 
-        for(const auto& light : _searchLights)
+        for(const auto& light : _searchStructure->lights())
             light->fireOn(lightRays, hitReport.position, _lightDirectRayCount);
 
         //gatherLightHitsToward(lightCasts, hitReport.position);
@@ -663,7 +643,7 @@ namespace prop3
                 glm::dvec4 pathSamp = lighSamp * outSample;
                 if(pathSamp.w > _minScreenRayWeight)
                 {
-                    if(!intersectsScene(lightCast))
+                    if(!_searchStructure->intersectsScene(lightCast, _rayHitList))
                     {
                         commitSample(pathSamp *
                              coating.directBrdf(
@@ -723,239 +703,6 @@ namespace prop3
         }
     }
 */
-
-    struct SearchZone
-    {
-        size_t parent;
-        size_t endZone;
-        size_t begLight;
-        size_t endLight;
-        size_t begSurf;
-        size_t endSurf;
-        Surface* bounds;
-    };
-
-    void CpuRaytracerWorker::compileSearchStructures()
-    {
-        _searchZones.clear();
-        _searchSurfaces.clear();
-        _searchLights.clear();
-
-        if(!_stageSet->isVisible())
-            return;
-
-        std::vector<std::pair<StageZone*, size_t>> zoneStack;
-        zoneStack.push_back(std::make_pair(_stageSet.get(), -1));
-        while(!zoneStack.empty())
-        {
-            StageZone* zone = zoneStack.back().first;
-            size_t parentId = zoneStack.back().second;
-            zoneStack.pop_back();
-
-            size_t addedSubzones = 0;
-            for(size_t s=0; s < zone->subzones().size(); ++s)
-            {
-                StageZone* subz = zone->subzones()[s].get();
-
-                if(!subz->isVisible())
-                    continue;
-
-                // Bubble up unbounded subzones
-                if(subz->bounds().get() == StageZone::UNBOUNDED.get())
-                {
-                    // Bubble up props
-                    size_t propCount = subz->props().size();
-                    for(size_t p=0; p < propCount; ++p)
-                    {
-                        auto prop = subz->props()[p];
-                        if(prop->isVisible())
-                            zone->addProp(subz->props()[p]);
-                    }
-
-                    // Bubble up lights
-                    size_t lightCount = subz->lights().size();
-                    for(size_t l=0; l < lightCount; ++l)
-                    {
-                        auto light = subz->lights()[l];
-                        if(light->isVisible())
-                            zone->addLight(light);
-                    }
-
-                    // Bubble up subzones
-                    size_t subzCount = subz->subzones().size();
-                    for(size_t z=0; z < subzCount; ++z)
-                    {
-                        auto subsubz = subz->subzones()[z];
-                        if(subsubz->isVisible())
-                            zone->addSubzone(subsubz);
-                    }
-                }
-                else
-                {
-                    size_t currId = _searchZones.size();
-                    zoneStack.push_back(std::make_pair(subz, currId));
-                    ++addedSubzones;
-                }
-            }
-
-
-            size_t lightCount = zone->lights().size();
-            size_t startLightCount = _searchLights.size();
-            for(size_t l=0; l < lightCount; ++l)
-            {
-                auto light = zone->lights()[l];
-                if(light->isVisible())
-                    _searchLights.push_back(light);
-            }
-            size_t endLightCount = _searchLights.size();
-            size_t addedLights = endLightCount - startLightCount;
-
-
-            size_t propCount = zone->props().size();
-            size_t startSurfCount = _searchSurfaces.size();
-            for(size_t p=0; p < propCount; ++p)
-            {
-                auto prop = zone->props()[p];
-                if(prop->isVisible())
-                {
-                    size_t surfCount = prop->surfaces().size();
-                    for(size_t s=0; s < surfCount; ++s)
-                    {
-                        _searchSurfaces.push_back(prop->surfaces()[s]);
-                    }
-                }
-            }
-            size_t endSurfCount = _searchSurfaces.size();
-            size_t addedSurfaces = endSurfCount - startSurfCount;
-
-
-            if(addedSubzones == 0 && addedLights == 0 && addedSurfaces == 0)
-                continue;
-
-            SearchZone searchZone;
-            searchZone.parent = parentId;
-            searchZone.endZone = _searchZones.size() + 1;
-            searchZone.endLight = _searchLights.size();
-            searchZone.begLight = searchZone.endLight - addedLights;
-            searchZone.endSurf = _searchSurfaces.size();
-            searchZone.begSurf = searchZone.endSurf - addedSurfaces;
-            searchZone.bounds = zone->bounds().get();
-            _searchZones.push_back(searchZone);
-        }
-
-		int last = int(_searchZones.size() - 1);
-		for(int i = last; i >= 0; --i)
-        {
-            const SearchZone& zone = _searchZones[i];
-            if(zone.parent != -1)
-            {
-                SearchZone& parent = _searchZones[zone.parent];
-                parent.endZone = glm::max(parent.endZone, zone.endZone);
-            }
-        }
-    }
-
-    double CpuRaytracerWorker::findNearestIntersection(
-            const Raycast& raycast,
-            RayHitReport& reportMin)
-    {
-        Raycast ray(raycast);
-
-        size_t zId = 0;
-        size_t zoneCount = _searchZones.size();
-        while(zId < zoneCount)
-        {
-            const SearchZone& zone = _searchZones[zId];
-
-            if(zone.bounds == StageZone::UNBOUNDED.get() ||
-               zone.bounds->intersects(ray, _rayHitList))
-            {
-                for(size_t s = zone.begSurf; s < zone.endSurf; ++s)
-                {
-                    _rayHitList.clear();
-
-                    _searchSurfaces[s]->raycast(ray, _rayHitList);
-
-                    RayHitReport* node = _rayHitList.head;
-                    while(node != nullptr)
-                    {
-                        if(0.0 < node->length && node->length < ray.limit)
-                        {
-                            ray.limit = node->length;
-                            reportMin = *node;
-                        }
-
-                        node = node->_next;
-                    }
-                }
-
-                for(size_t l = zone.begLight; l < zone.endLight; ++l)
-                {
-                    _rayHitList.clear();
-
-                    _searchLights[l]->raycast(ray, _rayHitList);
-
-                    RayHitReport* node = _rayHitList.head;
-                    while(node != nullptr)
-                    {
-                        if(0.0 < node->length && node->length < ray.limit)
-                        {
-                            ray.limit = node->length;
-                            reportMin = *node;
-                        }
-
-                        node = node->_next;
-                    }
-                }
-
-                ++zId;
-            }
-            else
-            {
-                zId = zone.endZone;
-            }
-        }
-
-        return reportMin.length;
-    }
-
-    bool CpuRaytracerWorker::intersectsScene(
-            const Raycast& raycast)
-    {
-        _rayHitList.clear();
-
-        size_t zId = 0;
-        size_t zoneCount = _searchZones.size();
-        while(zId < zoneCount)
-        {
-            const SearchZone& zone = _searchZones[zId];
-
-            if(zone.bounds == StageZone::UNBOUNDED.get() ||
-               zone.bounds->intersects(raycast, _rayHitList))
-            {
-                for(size_t s = zone.begSurf; s < zone.endSurf; ++s)
-                {
-                    if(_searchSurfaces[s]->intersects(raycast, _rayHitList))
-                        return true;
-                }
-
-                for(size_t l = zone.begLight; l < zone.endLight; ++l)
-                {
-                    if(_searchLights[l]->intersects(raycast, _rayHitList))
-                        return true;
-                }
-
-                ++zId;
-            }
-            else
-            {
-                zId = zone.endZone;
-            }
-        }
-
-        return false;
-    }
-
     glm::dvec3 CpuRaytracerWorker::draft(
         const RayHitReport& report)
     {

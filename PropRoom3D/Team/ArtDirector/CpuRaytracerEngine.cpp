@@ -13,6 +13,7 @@
 #include "Film/ConvergentFilm.h"
 #include "CpuRaytracerWorker.h"
 #include "RaytracerState.h"
+#include "SearchStructure.h"
 
 
 namespace prop3
@@ -249,12 +250,19 @@ namespace prop3
 
     void CpuRaytracerEngine::dispatchStageSet(const std::shared_ptr<StageSet>& stageSet)
     {
+        for(auto& w : _workerObjects)
+        {
+            w->stop();
+        }
+
         StageSetJsonWriter writer;
         std::string stageSetStream = writer.serialize(*stageSet);
+        std::shared_ptr<SearchStructure> searchStructure(
+            new SearchStructure(stageSetStream));
 
         for(auto& w : _workerObjects)
         {
-            w->updateStageSet(stageSetStream);
+            w->updateSearchStructure(searchStructure);
         }
     }
 
