@@ -56,12 +56,17 @@ namespace prop3
         return false;
     }
 
-    bool StaticFilm::saveFilm(const std::string& name) const
+    bool StaticFilm::clearReferenceShot()
     {
         return false;
     }
 
-    bool StaticFilm::loadFilm(const std::string& name)
+    bool StaticFilm::saveRawFilm(const std::string& name) const
+    {
+        return false;
+    }
+
+    bool StaticFilm::loadRawFilm(const std::string& name)
     {
         return false;
     }

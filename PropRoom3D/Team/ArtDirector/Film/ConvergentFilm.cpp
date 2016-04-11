@@ -2,12 +2,47 @@
 
 #include <fstream>
 #include <algorithm>
+#include <numeric>
 
 #include "PixelPrioritizer.h"
 
 
 namespace prop3
 {
+    const double ConvergentFilm::RawPixel::COLOR_SCALING = 1000.0;
+    const double ConvergentFilm::RawPixel::VARIANCE_SCALING = 4000.0;
+
+    ConvergentFilm::RawPixel::RawPixel() :
+        weight(0.0), v(0), r(0), g(0), b(0)
+    {
+
+    }
+
+    ConvergentFilm::RawPixel::RawPixel(
+            const glm::dvec4& sample,
+            const glm::dvec2& variance)
+    {
+        var = variance.x;
+        weight = sample.w;
+        vw = (weight - variance.y) * VARIANCE_SCALING;
+        r = glm::min(double(std::numeric_limits<unsigned short>::max()), sample.r / weight * COLOR_SCALING);
+        g = glm::min(double(std::numeric_limits<unsigned short>::max()), sample.g / weight * COLOR_SCALING);
+        b = glm::min(double(std::numeric_limits<unsigned short>::max()), sample.b / weight * COLOR_SCALING);
+    }
+
+    void ConvergentFilm::RawPixel::toRaw(
+            glm::dvec4& sample,
+            glm::dvec2& variance) const
+    {
+        variance.x = var;
+        sample.w = weight;
+        variance.y = weight - vw / VARIANCE_SCALING;
+        sample.r = weight * r / COLOR_SCALING;
+        sample.g = weight * g / COLOR_SCALING;
+        sample.b = weight * b / COLOR_SCALING;
+    }
+
+
     ConvergentFilm::ConvergentFilm() :
         _sampleBuffer(1, glm::dvec4(0)),
         _varianceBuffer(1, glm::dvec2(0)),
@@ -100,9 +135,6 @@ namespace prop3
         _priorityThreshold = 1.0;
 
 
-        _colorBuffer.clear();
-        _colorBuffer.resize(pixelCount, color);
-
         glm::dvec4 sample(color, 0.0);
         _sampleBuffer.clear();
         _sampleBuffer.resize(pixelCount, sample);
@@ -116,6 +148,10 @@ namespace prop3
         _priorityBuffer.clear();
         _priorityBuffer.resize(pixelCount, 1.0);
 
+        _colorBuffer.clear();
+        _colorBuffer.resize(pixelCount, color);
+
+
         for(const auto& tile : _tiles)
         {
             glm::ivec2 tileResolution = tile->maxCorner() - tile->minCorner();
@@ -125,12 +161,11 @@ namespace prop3
             tile->setDivergenceSum(tilePixCount);
         }
 
+
         if(hardReset)
         {
             _prioritizer->reset(_frameResolution, 5, 1.0);
-
-            // Clear reference shot
-            backupAsReferenceShot();
+            clearReferenceShot();
         }
     }
 
@@ -167,14 +202,25 @@ namespace prop3
             _referenceFilm.varianceBuffer);
     }
 
-    bool ConvergentFilm::saveFilm(const std::string& name) const
+    bool ConvergentFilm::clearReferenceShot()
+    {
+        size_t pixelCount = _sampleBuffer.size();
+
+        _referenceFilm.sampleBuffer.clear();
+        _referenceFilm.sampleBuffer.resize(pixelCount, glm::dvec4(0));
+
+        _referenceFilm.varianceBuffer.clear();
+        _referenceFilm.varianceBuffer.resize(pixelCount, glm::dvec2(0));
+    }
+
+    bool ConvergentFilm::saveRawFilm(const std::string& name) const
     {
         return saveContent(name,
             _sampleBuffer,
             _varianceBuffer);
     }
 
-    bool ConvergentFilm::loadFilm(const std::string& name)
+    bool ConvergentFilm::loadRawFilm(const std::string& name)
     {
         return loadContent(name,
             _sampleBuffer,
@@ -190,12 +236,14 @@ namespace prop3
 
         if(film.is_open())
         {
-            film.write((char*)samples.data(),
-                       sizeof(samples.front()) *
-                       samples.size());
-            film.write((char*)variances.data(),
-                       sizeof(variances.front()) *
-                       variances.size());
+            size_t pixelCount = samples.size();
+            _rawPixelPool.resize(pixelCount);
+            for(size_t p=0; p < pixelCount; ++p)
+                _rawPixelPool[p] = RawPixel(samples[p], variances[p]);
+
+            film.write((char*)_rawPixelPool.data(),
+                       sizeof(_rawPixelPool.front()) *
+                       _rawPixelPool.size());
             film.close();
         }
         else
@@ -213,16 +261,16 @@ namespace prop3
 
         if(film.is_open())
         {
-            film.read((char*)samples.data(),
-                       sizeof(samples.front()) *
-                       samples.size());
-            film.read((char*)variances.data(),
-                       sizeof(variances.front()) *
-                       variances.size());
+            size_t pixelCount = samples.size();
+            _rawPixelPool.resize(pixelCount);
+            film.read((char*)_rawPixelPool.data(),
+                      sizeof(_rawPixelPool.front()) *
+                      _rawPixelPool.size());
             film.close();
 
+            for(size_t p=0; p < pixelCount; ++p)
+                _rawPixelPool[p].toRaw(samples[p], variances[p]);
 
-            int pixelCount = samples.size();
 
             // Compute film divergence &
             // output new film in specified color buffer
@@ -250,10 +298,11 @@ namespace prop3
             tileVal[i] = _tiles[i]->divergenceSum()
                            / _tiles[i]->pixelCount();
 
-        std::sort(tileVal.begin(), tileVal.end(), std::greater<double>());
+        const int MEAN_TILE_COUNT = 16;
+        std::nth_element(tileVal.begin(), tileVal.begin() + MEAN_TILE_COUNT,
+                         tileVal.end(), std::greater<double>());
 
         double meanSum = 0;
-        const int MEAN_TILE_COUNT = 16;
         for(int i=0; i < MEAN_TILE_COUNT; ++i)
             meanSum += glm::sqrt(tileVal[i]);
 

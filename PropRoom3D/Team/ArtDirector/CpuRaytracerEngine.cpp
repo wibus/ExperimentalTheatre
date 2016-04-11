@@ -22,7 +22,8 @@ namespace prop3
     CpuRaytracerEngine::CpuRaytracerEngine() :
         _protectedState(),
         _raytracerState(new RaytracerState(_protectedState)),
-        _viewportSize(1, 1)
+        _viewportSize(1, 1),
+        _cameraChanged(false)
     {
         // hardware_concurrency is only a hint on the number of cores
         _protectedState.setWorkerCount(
@@ -39,7 +40,8 @@ namespace prop3
     CpuRaytracerEngine::CpuRaytracerEngine(unsigned int  workerCount) :
         _protectedState(),
         _raytracerState(new RaytracerState(_protectedState)),
-        _viewportSize(1, 1)
+        _viewportSize(1, 1),
+        _cameraChanged(false)
     {
         _protectedState.setWorkerCount( workerCount );
 
@@ -87,10 +89,15 @@ namespace prop3
 
     void CpuRaytracerEngine::update(const std::shared_ptr<StageSet>& stageSet)
     {
-        if(stageSet->stageSetChanged())
+        bool stageChanged = stageSet->stageSetChanged();
+        if(stageChanged || _cameraChanged)
         {
             abortRendering();
-            dispatchStageSet(stageSet);
+
+            if(stageChanged)
+                dispatchStageSet(stageSet);
+
+            _cameraChanged = false;
         }
 
         if(stageSet->props().empty())
@@ -191,10 +198,6 @@ namespace prop3
         // Stop workers
         interruptWorkers();
 
-        // Reset buffers
-        hardReset();
-
-
         // Draft films: intermediate resolution shots
         _viewportSize = glm::ivec2(width, height);
         int levelCount = _raytracerState->draftLevelCount();
@@ -226,7 +229,7 @@ namespace prop3
 
     void CpuRaytracerEngine::updateView(const glm::dmat4& view)
     {
-        abortRendering();
+        _cameraChanged = true;
 
         for(auto& w : _workerObjects)
         {
@@ -236,7 +239,7 @@ namespace prop3
 
     void CpuRaytracerEngine::updateProjection(const glm::dmat4& proj)
     {
-        abortRendering();
+        _cameraChanged = true;
 
         for(auto& w : _workerObjects)
         {
@@ -261,7 +264,7 @@ namespace prop3
         interruptWorkers();
 
         // Reset buffers
-        hardReset();
+        softReset();
 
         // Reset draft state
         if(_raytracerState->isDrafter())
@@ -398,16 +401,36 @@ namespace prop3
         resize(_viewportSize.x, _viewportSize.y);
     }
 
-    void CpuRaytracerEngine::hardReset()
+    void CpuRaytracerEngine::softReset()
     {
         _protectedState.resetSampleCount();
-        for(auto& film : _films)
+
+        // Manage drafting films
+        for(size_t f=0; f < _films.size()-1; ++f)
         {
-            film->clear();
+            _films[f]->clear();
         }
 
         if(!_films.empty())
         {
+            // Manage Main Film
+            if(_raytracerState->filmRawFilePath() !=
+               RaytracerState::UNSPECIFIED_RAW_FILE)
+            {
+                if(!_films.back()->loadRawFilm(
+                    _raytracerState->filmRawFilePath()))
+                {
+                    _raytracerState->setFilmRawFilePath(
+                        RaytracerState::UNSPECIFIED_RAW_FILE);
+                    _films.back()->clear();
+                }
+            }
+            else
+            {
+                _films.back()->clear();
+            }
+
+
             _currentFilm = _films.front();
         }
     }

@@ -30,12 +30,11 @@ namespace prop3
         virtual void backupAsReferenceShot() override;
 
         virtual bool saveReferenceShot(const std::string& name) const override;
-
         virtual bool loadReferenceShot(const std::string& name) override;
+        virtual bool clearReferenceShot() override;
 
-        virtual bool saveFilm(const std::string& name) const override;
-
-        virtual bool loadFilm(const std::string& name) override;
+        virtual bool saveRawFilm(const std::string& name) const override;
+        virtual bool loadRawFilm(const std::string& name) override;
 
         virtual double compileDivergence() const override;
 
@@ -101,11 +100,32 @@ namespace prop3
         // Pixel Prioritizer
         std::shared_ptr<PixelPrioritizer> _prioritizer;
 
+
         struct ReferenceShot
         {
             std::vector<glm::dvec4> sampleBuffer;
             std::vector<glm::dvec2> varianceBuffer;
         } _referenceFilm;
+
+
+        struct RawPixel
+        {
+            RawPixel();
+            RawPixel(const glm::dvec4& sample, const glm::dvec2& variance);
+            void toRaw(glm::dvec4& sample, glm::dvec2& variance) const;
+
+            float var;
+            float weight;
+            unsigned short vw;
+            unsigned short v;
+            unsigned short r;
+            unsigned short g;
+            unsigned short b;
+
+            static const double COLOR_SCALING;
+            static const double VARIANCE_SCALING;
+        };
+        mutable std::vector<RawPixel> _rawPixelPool;
     };
 }
 

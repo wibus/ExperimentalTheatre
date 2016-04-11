@@ -120,10 +120,19 @@ namespace prop3
 
 
         void setUpdateEachTile(bool enabled);
+
         bool isUpdateEachTileEnabled() const;
 
+
         void setColorOutputType(const std::string& colorOutput);
+
         std::string colorOutputType() const;
+
+
+        void setFilmRawFilePath(const std::string& filePath);
+
+        std::string filmRawFilePath() const;
+
 
         static const std::string COLOROUTPUT_ALBEDO;
         static const std::string COLOROUTPUT_WEIGHT;
@@ -133,15 +142,18 @@ namespace prop3
         static const std::string COLOROUTPUT_REFERENCE;
         static const std::string COLOROUTPUT_COMPATIBILITY;
 
+        static const std::string UNSPECIFIED_RAW_FILE;
+
+
     private:
         ProtectedState& _protectedState;
         bool _isUpdateEachTileEnabled;
         std::string _colorOutputType;
+        std::string _filmRawFilePath;
 
         unsigned int _sampleCountThreshold;
         double _renderTimeThreshold;
         double _divergenceThreshold;
-
     };
 
 
@@ -245,6 +257,11 @@ namespace prop3
     inline std::string RaytracerState::colorOutputType() const
     {
         return _colorOutputType;
+    }
+
+    inline std::string RaytracerState::filmRawFilePath() const
+    {
+        return _filmRawFilePath;
     }
 }
 

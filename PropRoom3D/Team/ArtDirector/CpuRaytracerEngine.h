@@ -56,7 +56,7 @@ namespace prop3
         virtual void interruptWorkers();
         virtual void setupWorkers();
         virtual void setupFilms();
-        virtual void hardReset();
+        virtual void softReset();
         virtual void incorporateFilm(
                 const Film& film);
 
@@ -69,6 +69,7 @@ namespace prop3
         RaytracerState::ProtectedState _protectedState;
         std::shared_ptr<RaytracerState> _raytracerState;
 
+        bool _cameraChanged;
         glm::ivec2 _viewportSize;
         std::vector<std::shared_ptr<Film>> _films;
         std::shared_ptr<Film> _currentFilm;

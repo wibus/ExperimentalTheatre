@@ -5,7 +5,6 @@
 
 namespace prop3
 {
-
     const std::string RaytracerState::COLOROUTPUT_ALBEDO = "Albedo";
     const std::string RaytracerState::COLOROUTPUT_WEIGHT = "Weight";
     const std::string RaytracerState::COLOROUTPUT_DIVERGENCE = "Divergence";
@@ -13,6 +12,9 @@ namespace prop3
     const std::string RaytracerState::COLOROUTPUT_PRIORITY = "Priority";
     const std::string RaytracerState::COLOROUTPUT_REFERENCE = "Reference";
     const std::string RaytracerState::COLOROUTPUT_COMPATIBILITY = "Compatiblity";
+
+    const std::string RaytracerState::UNSPECIFIED_RAW_FILE = "";
+
 
     RaytracerState::DraftParams::DraftParams() :
         levelCount(0),
@@ -136,5 +138,10 @@ namespace prop3
     void RaytracerState::setColorOutputType(const std::string& colorOutput)
     {
         _colorOutputType = colorOutput;
+    }
+
+    void RaytracerState::setFilmRawFilePath(const std::string& filePath)
+    {
+        _filmRawFilePath = filePath;
     }
 }
