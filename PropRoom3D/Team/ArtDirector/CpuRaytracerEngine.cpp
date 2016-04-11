@@ -24,7 +24,8 @@ namespace prop3
         _protectedState(),
         _raytracerState(new RaytracerState(_protectedState)),
         _viewportSize(1, 1),
-        _cameraChanged(false)
+        _cameraChanged(false),
+        _forceStageSetUpdate(false)
     {
         // hardware_concurrency is only a hint on the number of cores
         _protectedState.setWorkerCount(
@@ -90,13 +91,20 @@ namespace prop3
 
     void CpuRaytracerEngine::update(const std::shared_ptr<StageSet>& stageSet)
     {
-        bool stageChanged = stageSet->stageSetChanged();
+        bool stageChanged = stageSet->stageSetChanged() || _forceStageSetUpdate;
         if(stageChanged || _cameraChanged)
         {
             abortRendering();
 
             if(stageChanged)
+            {
                 dispatchStageSet(stageSet);
+                _forceStageSetUpdate = false;
+            }
+            else
+            {
+                _currentSearchStructure->resetHitCounters();
+            }
 
             _cameraChanged = false;
         }
@@ -171,6 +179,11 @@ namespace prop3
         }
         else
         {
+            if(_raytracerState->sampleCount() == 1)
+            {
+                optimizeSearchStructure();
+            }
+
             if(_raytracerState->sampleCount() > 2 && (
                _raytracerState->converged()) ||
                _raytracerState->runningOutOfTime() ||
@@ -197,7 +210,7 @@ namespace prop3
     void CpuRaytracerEngine::resize(int width, int height)
     {
         // Stop workers
-        interruptWorkers();
+        interruptWorkers(true);
 
         // Draft films: intermediate resolution shots
         _viewportSize = glm::ivec2(width, height);
@@ -236,6 +249,12 @@ namespace prop3
         {
             w->updateView(view);
         }
+
+        if(_currentSearchStructure.get() != nullptr)
+        {
+            if(_currentSearchStructure->isOptimized())
+                _forceStageSetUpdate = true;
+        }
     }
 
     void CpuRaytracerEngine::updateProjection(const glm::dmat4& proj)
@@ -246,30 +265,67 @@ namespace prop3
         {
             w->updateProjection(proj);
         }
+
+        if(_currentSearchStructure.get() != nullptr)
+        {
+            if(_currentSearchStructure->isOptimized())
+                _forceStageSetUpdate = true;
+        }
+    }
+
+    void CpuRaytracerEngine::interruptWorkers(bool wait)
+    {
+        _protectedState.setInterrupted( true );
+        for(auto& w : _workerObjects)
+            w->stop();
+
+        if(wait)
+        {
+            for(auto& w : _workerObjects)
+                w->waitForStop();
+        }
     }
 
     void CpuRaytracerEngine::dispatchStageSet(const std::shared_ptr<StageSet>& stageSet)
     {
-        for(auto& w : _workerObjects)
-        {
-            w->stop();
-        }
+        interruptWorkers(true);
 
         StageSetJsonWriter writer;
         std::string stageSetStream = writer.serialize(*stageSet);
-        std::shared_ptr<SearchStructure> searchStructure(
-            new SearchStructure(stageSetStream));
+        _currentSearchStructure.reset(new SearchStructure(stageSetStream));
 
         for(auto& w : _workerObjects)
         {
-            w->updateSearchStructure(searchStructure);
+            w->updateSearchStructure(_currentSearchStructure);
         }
+    }
+
+    void CpuRaytracerEngine::optimizeSearchStructure()
+    {
+        interruptWorkers(true);
+
+        size_t removedZones;
+        size_t removedSurfaces;
+        size_t removedLightBulbs;
+
+        _currentSearchStructure->removeHiddenSurfaces(
+                _raytracerState->surfaceRemovalThreshold(),
+                removedZones,
+                removedSurfaces,
+                removedLightBulbs);
+
+        cellar::getLog().postMessage(new cellar::Message('I', false,
+            "Hidden surface removed : "
+            + std::to_string(removedZones) + "z, "
+            + std::to_string(removedSurfaces) + "s, "
+            + std::to_string(removedLightBulbs) + "l, ",
+            "CpuRaytracerEngine"));
     }
 
     void CpuRaytracerEngine::abortRendering()
     {
         // Stop workers
-        interruptWorkers();
+        interruptWorkers(true);
 
         // Reset buffers
         softReset();
@@ -315,15 +371,6 @@ namespace prop3
         for(auto& w : _workerObjects)
         {
             w->updateFilm(_currentFilm);
-        }
-    }
-
-    void CpuRaytracerEngine::interruptWorkers()
-    {
-        _protectedState.setInterrupted( true );
-        for(auto& w : _workerObjects)
-        {
-            w->stop();
         }
     }
 

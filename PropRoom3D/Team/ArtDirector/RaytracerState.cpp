@@ -110,7 +110,8 @@ namespace prop3
         _colorOutputType(COLOROUTPUT_ALBEDO),
         _sampleCountThreshold(std::numeric_limits<unsigned int>::max()),
         _renderTimeThreshold(std::numeric_limits<double>::infinity()),
-        _divergenceThreshold(-1.0)
+        _divergenceThreshold(-1.0),
+        _surfaceRemovalThreshold(64)
     {
 
     }
@@ -128,6 +129,11 @@ namespace prop3
     void RaytracerState::setRenderTimeThreshold(double renderTimeThreshold)
     {
         _renderTimeThreshold = renderTimeThreshold;
+    }
+
+    void RaytracerState::setSurfaceRemovalThreshold(size_t threshold)
+    {
+        _surfaceRemovalThreshold = threshold;
     }
 
     void RaytracerState::setUpdateEachTile(bool enabled)

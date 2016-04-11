@@ -92,6 +92,12 @@ namespace prop3
     {
         return _runningPredicate;
     }
+
+    void CpuRaytracerWorker::waitForStop()
+    {
+        std::lock_guard<std::mutex> lk(_flowMutex);
+    }
+
     void CpuRaytracerWorker::updateView(const glm::dmat4& view)
     {
         skipAndExecute([this, &view](){

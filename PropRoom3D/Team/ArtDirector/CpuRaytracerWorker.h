@@ -46,6 +46,7 @@ namespace prop3
         virtual void stop();
         virtual void terminate();
         virtual bool isRunning();
+        virtual void waitForStop();
 
         // Updates
         virtual void updateView(const glm::dmat4& view);

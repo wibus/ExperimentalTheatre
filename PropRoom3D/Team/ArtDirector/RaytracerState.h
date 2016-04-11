@@ -101,6 +101,11 @@ namespace prop3
         bool converged() const;
 
 
+        void setSurfaceRemovalThreshold(size_t threshold);
+
+        size_t surfaceRemovalThreshold() const;
+
+
         int draftLevel() const;
 
         int draftLevelCount() const;
@@ -154,6 +159,7 @@ namespace prop3
         unsigned int _sampleCountThreshold;
         double _renderTimeThreshold;
         double _divergenceThreshold;
+        size_t _surfaceRemovalThreshold;
     };
 
 
@@ -205,6 +211,11 @@ namespace prop3
     inline bool RaytracerState::converged() const
     {
         return _divergenceThreshold >= divergence();
+    }
+
+    inline size_t RaytracerState::surfaceRemovalThreshold() const
+    {
+        return _surfaceRemovalThreshold;
     }
 
     inline int RaytracerState::draftLevel() const

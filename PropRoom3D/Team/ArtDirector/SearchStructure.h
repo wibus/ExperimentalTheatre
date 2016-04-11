@@ -13,6 +13,8 @@ namespace prop3
     class LightBulb;
 
     struct SearchZone;
+    struct SearchSurface;
+    struct SearchLightBulb;
 
     class Raycast;
     class RayHitList;
@@ -36,8 +38,18 @@ namespace prop3
                 const Raycast& raycast,
                 RayHitList& rayHitList) const;
 
+        void removeHiddenSurfaces(
+                size_t threshold,
+                size_t& removedZones,
+                size_t& removedSurfaces,
+                size_t& removedLightBulbs);
+
+        void resetHitCounters();
+
 
         bool isEmpty() const;
+
+        bool isOptimized() const;
 
         std::shared_ptr<AbstractTeam> team() const;
 
@@ -48,8 +60,11 @@ namespace prop3
         // Main Structures
         std::shared_ptr<AbstractTeam> _team;
         std::vector<SearchZone> _searchZones;
-        std::vector<std::shared_ptr<const Surface>> _searchSurfaces;
-        std::vector<std::shared_ptr<const LightBulb>> _searchLights;
+        std::vector<SearchSurface> _searchSurfaces;
+        std::vector<SearchLightBulb> _searchLights;
+
+        bool _isOptimized;
+        std::vector<std::shared_ptr<const LightBulb>> _lights;
     };
 
 
@@ -60,6 +75,11 @@ namespace prop3
         return _searchSurfaces.empty();
     }
 
+    inline bool SearchStructure::isOptimized() const
+    {
+        return _isOptimized;
+    }
+
     inline std::shared_ptr<AbstractTeam> SearchStructure::team() const
     {
         return _team;
@@ -67,7 +87,7 @@ namespace prop3
 
     inline const std::vector<std::shared_ptr<const LightBulb>>& SearchStructure::lights() const
     {
-        return _searchLights;
+        return _lights;
     }
 }
 

@@ -16,6 +16,7 @@ namespace prop3
     class StageSet;
     class Film;
     class CpuRaytracerWorker;
+    class SearchStructure;
 
 
     class PROP3D_EXPORT CpuRaytracerEngine
@@ -49,11 +50,12 @@ namespace prop3
 
 
     protected:
+        virtual void interruptWorkers(bool wait = false);
         virtual void dispatchStageSet(const std::shared_ptr<StageSet>& stageSet);
+        virtual void optimizeSearchStructure();
         virtual void abortRendering();
         virtual void skipDrafting();
         virtual void nextDraftSize();
-        virtual void interruptWorkers();
         virtual void setupWorkers();
         virtual void setupFilms();
         virtual void softReset();
@@ -70,6 +72,7 @@ namespace prop3
         std::shared_ptr<RaytracerState> _raytracerState;
 
         bool _cameraChanged;
+        bool _forceStageSetUpdate;
         glm::ivec2 _viewportSize;
         std::vector<std::shared_ptr<Film>> _films;
         std::shared_ptr<Film> _currentFilm;
@@ -77,6 +80,7 @@ namespace prop3
         friend class CpuRaytracerWorker;
         std::vector<std::thread> _workerThreads;
         std::vector<std::shared_ptr<CpuRaytracerWorker>> _workerObjects;
+        std::shared_ptr<SearchStructure> _currentSearchStructure;
     };
 }
 
