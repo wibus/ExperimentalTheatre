@@ -29,6 +29,7 @@ namespace cellar
         _inAndOutLocations(),
         _shaders(),
         _textures(),
+        _subroutines(),
         _cachedLocations()
     {
     }
@@ -80,18 +81,26 @@ namespace cellar
         return addShader(shader);
     }
 
-    void GlProgram::clearShaders()
+    void GlProgram::reset()
     {
+        _binary.reset();
+
         _shaders.clear();
+        _textures.clear();
+        _subroutines.clear();
+
+        _inAndOutLocations = GlInputsOutputs();
+
+        glDeleteProgram(_id);
+        _linked = false;
+        _id = 0;
     }
 
     bool GlProgram::link()
     {
         if(_id != 0)
         {
-            _binary.reset();
-            glDeleteProgram(_id);
-            _id = 0;
+            reset();
         }
 
         _id = glCreateProgram();
@@ -186,6 +195,44 @@ namespace cellar
                 getImageBank().getImage(imgName)
             )
         );
+    }
+
+    void GlProgram::setSubroutine(
+        GLenum shaderType,
+        const std::string& uniformName,
+        const std::string& subroutineName)
+    {
+        GLint location = glGetSubroutineUniformLocation(
+            _id, shaderType, uniformName.c_str());
+
+        if(location != -1)
+        {
+            GLuint index = glGetSubroutineIndex(
+                _id, shaderType, subroutineName.c_str());
+
+            if(index != GL_INVALID_INDEX)
+            {
+                std::vector<GLuint>& subLoc = _subroutines[shaderType];
+                if(subLoc.size() <= location)
+                    subLoc.resize(location+1);
+
+                subLoc[location] = index;
+            }
+            else
+            {
+                getLog().postMessage(new Message('E', false,
+                    "Shader stage doesn't provide this subroutine implementation : "
+                        + subroutineName,
+                    "GlProgram"));
+            }
+        }
+        else
+        {
+            getLog().postMessage(new Message('W', false,
+                "Shader stage doesn't provide this subroutine uniform : "
+                    + uniformName,
+                "GlProgram"));
+        }
     }
 
     void GlProgram::pushProgram(GLuint id)
@@ -506,5 +553,28 @@ namespace cellar
             glBindTexture(it->second.first, it->second.second);
         }
         glActiveTexture(GL_TEXTURE0);
+
+        for(const auto& sub : _subroutines)
+        {
+            GLint activeSubroutineUniformLocations = 0;
+            glGetProgramStageiv(_id, sub.first,
+                GL_ACTIVE_SUBROUTINE_UNIFORM_LOCATIONS,
+                &activeSubroutineUniformLocations);
+
+            if(activeSubroutineUniformLocations == sub.second.size())
+            {
+                glUniformSubroutinesuiv(sub.first,
+                    sub.second.size(), sub.second.data());
+            }
+            else
+            {
+                getLog().postMessage(new Message('E', false,
+                    "Shader active subroutine uniform locations for shader type " +
+                    to_string(sub.first) + " doesn't match specified one (" +
+                    to_string(sub.second.size()) + " != " +
+                    to_string(activeSubroutineUniformLocations) + ")",
+                    "GlProgram"));
+            }
+        }
     }
 }

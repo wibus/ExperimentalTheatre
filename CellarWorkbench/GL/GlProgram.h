@@ -43,7 +43,7 @@ namespace cellar
         bool addShader(const std::shared_ptr<GlShader>& shader);
         bool addShader(GLenum shaderType, const std::string& shaderName);
         bool addShader(GLenum shaderType, const std::vector<std::string>& shaderNames);
-        void clearShaders();
+        void reset();
         bool link();
 
         // Specific program states
@@ -55,6 +55,10 @@ namespace cellar
             GLenum activeTexUnit,
             GLenum target,
             const std::string& imgName);
+        void setSubroutine(
+            GLenum shaderType,
+            const std::string& uniformName,
+            const std::string& subroutineName);
 
 
         // Shader programs management
@@ -104,8 +108,10 @@ namespace cellar
         GlInputsOutputs _inAndOutLocations;
         std::set<std::shared_ptr<GlShader>> _shaders;
         std::map<GLenum, std::pair<GLenum, GLuint>> _textures;
-        mutable std::map<std::string, int> _cachedLocations;
+        std::map<GLenum, std::vector<GLuint>> _subroutines;
         std::shared_ptr<GlProgramBinary> _binary;
+
+        mutable std::map<std::string, int> _cachedLocations;
     };
 
 
