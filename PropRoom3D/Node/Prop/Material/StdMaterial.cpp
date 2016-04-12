@@ -1,5 +1,7 @@
 #include "StdMaterial.h"
 
+#include <CellarWorkbench/Misc/FastMath.h>
+
 #include "Ray/Raycast.h"
 
 
@@ -55,7 +57,7 @@ namespace prop3
             glm::dvec3 col = color(ray.origin);
             double scatterRate = 1 / (1 / opa - 1);
             double accumulation = ray.limit * scatterRate;
-            return glm::pow(col, glm::dvec3(accumulation));
+            return cellar::fast_pow(col, glm::dvec3(accumulation));
         }
     }
 

@@ -1,5 +1,7 @@
 #include "ProceduralSun.h"
 
+#include <CellarWorkbench/Misc/FastMath.h>
+
 #include "Node/Light/LightCast.h"
 #include "Node/Light/LightUtils.h"
 #include "Node/Prop/Material/Material.h"
@@ -36,7 +38,7 @@ namespace prop3
             double roughness)
     {
         double entropy = Raycast::totalEntropy(eyeRay, lightCast.raycast, roughness);
-        return glm::pow(ProceduralSun::SUN_SURFACE_RATIO, entropy);
+        return cellar::fast_pow(ProceduralSun::SUN_SURFACE_RATIO, entropy);
     }
 
     ProceduralSun::ProceduralSun() :
@@ -107,7 +109,7 @@ namespace prop3
 
         double dayHeight (dotSunTop - MIN_SUN_HEIGHT);
         double dayRatio = glm::max(0.0, dayHeight / (1.0 - MIN_SUN_HEIGHT));
-        double dayMix = 1.0 - glm::pow(1.0 - dayRatio, DAY_POWER);
+        double dayMix = 1.0 - cellar::fast_pow(1.0 - dayRatio, DAY_POWER);
 
         glm::dvec3 topColor = kelvinToRgb(100000);
         glm::dvec3 bottomColor = kelvinToRgb(glm::mix(2000, 6600, dayMix));
@@ -115,13 +117,13 @@ namespace prop3
 
         double diffuseHeight (dotDirTop - MIN_DIR_HEIGHT);
         double diffuseRatio = glm::max(0.0, diffuseHeight / (1.0 - MIN_DIR_HEIGHT));
-        double diffuseMix = 1.0 - glm::pow(1.0 - diffuseRatio, DIFFUSE_POWER);
+        double diffuseMix = 1.0 - cellar::fast_pow(1.0 - diffuseRatio, DIFFUSE_POWER);
         glm::dvec3 diffuseColor = glm::mix(bottomColor, topColor, diffuseMix);
-        double diffuseIntens = glm::mix(0.05, 1.0, 1.0 - glm::pow(1.0 - dayRatio, 4.0));
+        double diffuseIntens = glm::mix(0.05, 1.0, 1.0 - cellar::fast_pow(1.0 - dayRatio, 4.0));
 
         double haloRatio = (1.0 + dotDirSun) / 2.0;
-        double haloMix = glm::pow(haloRatio, HALO_POWER);
-        double halowIntensity = glm::mix(0.25, 1.0, 1.0 - glm::pow(1.0 - dayRatio, 4.0));
+        double haloMix = cellar::fast_pow(haloRatio, HALO_POWER);
+        double halowIntensity = glm::mix(0.25, 1.0, 1.0 - cellar::fast_pow(1.0 - dayRatio, 4.0));
 
 
         glm::dvec3 skyColor = glm::mix(
@@ -135,7 +137,7 @@ namespace prop3
         if(dotDirSun > SUN_COS_RADIUS - ringWidth)
         {
             glm::dvec3 sunColor = haloColor * _sunColor;
-            double sunProb = glm::pow(SUN_SURFACE_RATIO, ray.entropy);
+            double sunProb = cellar::fast_pow(SUN_SURFACE_RATIO, ray.entropy);
             if(dotDirSun > SUN_COS_RADIUS)
             {
                 sunSample = glm::dvec4(sunColor * sunProb, sunProb);
@@ -143,7 +145,7 @@ namespace prop3
             else
             {
                 double alpha = (dotDirSun - (SUN_COS_RADIUS - ringWidth)) / ringWidth;
-                double attenuation = glm::pow(0.3, 1.0/(1.0/(1.0-alpha) - 1.0)*3.0);
+                double attenuation = cellar::fast_pow(0.3, 1.0/(1.0/(1.0-alpha) - 1.0)*3.0);
                 sunSample = glm::dvec4((skyColor + sunColor * attenuation) * sunProb, sunProb);
             }
 
@@ -161,7 +163,7 @@ namespace prop3
         double dotSunTop = _sunDirection.z;
         double dayHeight (dotSunTop - MIN_SUN_HEIGHT);
         double dayRatio = glm::max(0.0, dayHeight / (1.0 - MIN_SUN_HEIGHT));
-        double dayMix = 1.0 - glm::pow(1.0 - dayRatio, DAY_POWER);
+        double dayMix = 1.0 - cellar::fast_pow(1.0 - dayRatio, DAY_POWER);
         glm::dvec3 haloFilter = kelvinToRgb(glm::mix(2000, 6600, dayMix));
 
         glm::dvec4 sunSample(haloFilter * _sunColor, 1.0);

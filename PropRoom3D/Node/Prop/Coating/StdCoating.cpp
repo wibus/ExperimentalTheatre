@@ -2,6 +2,8 @@
 
 #include <GLM/gtc/matrix_transform.hpp>
 
+#include <CellarWorkbench/Misc/FastMath.h>
+
 #include "Node/Light/LightCast.h"
 #include "Ray/RayHitReport.h"
 #include "Node/Prop/Material/Material.h"
@@ -246,7 +248,7 @@ namespace prop3
 
                 glm::dvec3 reflection = glm::reflect(incident, wallNormal);
                 double outDotReflect = glm::max(glm::dot(outDir, reflection), 0.0);
-                double reflectPower = glm::pow(outDotReflect, 1 / rough);
+                double reflectPower = cellar::fast_pow(outDotReflect, 1 / rough);
                 double reflectIntens = reflectPower * reflectLightSize;
                 reflectIntens = glm::mix(reflectIntens, diffuseIntens, rough);
                 double reflectWeight = reflectProb * reflectIntens;
@@ -267,7 +269,7 @@ namespace prop3
 
                 glm::dvec3 refraction = computeRefraction(lRIdx, eRIdx, incident, wallNormal);
                 double refractDotOut = glm::max(glm::dot(refraction, outDir), 0.0);
-                double refractPower = glm::pow(refractDotOut, 1 / rough);
+                double refractPower = cellar::fast_pow(refractDotOut, 1 / rough);
                 refractPower = glm::mix(refractPower, inDotNorm, rough);
 
                 double paintRefract = pOpa * (1 - paintReflectRatio);
@@ -298,10 +300,13 @@ namespace prop3
             return wallNormal;
 
         double phi = _linearRand.gen1(2.0 * glm::pi<double>());
-        double zee = glm::pow(_linearRand.gen1(), 1.0 / (1.0/rough + 1.0));
+        double zee = cellar::fast_pow(_linearRand.gen1(), 1.0 / (1.0/rough + 1.0));
         double rad = glm::sqrt(1.0 - zee*zee);
-        double csp = glm::cos(phi) * rad;
-        double snp = glm::sin(phi) * rad;
+
+        double c = glm::cos(phi);
+        double s = glm::sqrt(1.0 - c*c);
+        double csp = c * rad;
+        double snp = (phi > glm::pi<double>() ? -s : s) * rad;
 
         glm::dvec3 nonco = glm::abs(wallNormal.x) < glm::abs(wallNormal.z) ?
             glm::dvec3(1, 0, 0) : glm::dvec3(0, 0, 1);

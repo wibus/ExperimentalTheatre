@@ -617,18 +617,18 @@ namespace prop3
             const glm::dvec4& outSample,
             const Raycast& outRay)
     {
-        std::vector<LightCast> lightRays;
-        _backdrop->fireOn(lightRays, hitReport.position, _lightDirectRayCount);
+        _lightRays.clear();
+        _backdrop->fireOn(_lightRays, hitReport.position, _lightDirectRayCount);
 
         for(const auto& light : _searchStructure->lights())
-            light->fireOn(lightRays, hitReport.position, _lightDirectRayCount);
+            light->fireOn(_lightRays, hitReport.position, _lightDirectRayCount);
 
         //gatherLightHitsToward(lightCasts, hitReport.position);
 
-        size_t lightCastCount = lightRays.size();
+        size_t lightCastCount = _lightRays.size();
         for(size_t c=0; c < lightCastCount; ++c)
         {
-            LightCast& lightRay = lightRays[c];
+            LightCast& lightRay = _lightRays[c];
             Raycast& lightCast = lightRay.raycast;
 
             if(glm::dot(lightCast.direction, hitReport.normal) < 0.0)

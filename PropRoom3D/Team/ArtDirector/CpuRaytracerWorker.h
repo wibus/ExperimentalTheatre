@@ -20,6 +20,7 @@
 namespace prop3
 {
     class Raycast;
+    class LightCast;
     class RayHitReport;
     class StageSet;
     class Backdrop;
@@ -138,6 +139,7 @@ namespace prop3
 
         // Memory pools
         RayHitList _rayHitList;
+        std::vector<LightCast> _lightRays;
         std::vector<Raycast> _rayBounceArray;
         std::vector<Raycast> _tempChildRayArray;
 
