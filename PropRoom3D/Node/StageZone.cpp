@@ -8,7 +8,7 @@
 
 namespace prop3
 {
-    const std::shared_ptr<Surface> StageZone::UNBOUNDED;
+    const std::shared_ptr<Surface> StageZone::UNBOUNDED(nullptr);
 
 
     StageZone::StageZone(const std::string& name) :
@@ -20,7 +20,16 @@ namespace prop3
 
     StageZone::~StageZone()
     {
+        unregisterFrom(_bounds);
 
+        for(auto prop : _props)
+            unregisterFrom(prop);
+
+        for(auto light : _lights)
+            unregisterFrom(light);
+
+        for(auto zone : _subzones)
+            unregisterFrom(zone);
     }
 
     void StageZone::accept(Visitor& visitor)
@@ -42,6 +51,7 @@ namespace prop3
 
     void StageZone::setBounds(const std::shared_ptr<Surface>& bounds)
     {
+        swapChild(_bounds, bounds);
         _bounds = bounds;
 
         stampCurrentUpdate();
@@ -49,6 +59,7 @@ namespace prop3
 
     void StageZone::addProp(const std::shared_ptr<Prop>& prop)
     {
+        prop->registerObserver(*this);
         _props.push_back(prop);
 
         stampCurrentUpdate();
@@ -56,6 +67,7 @@ namespace prop3
 
     void StageZone::addLight(const std::shared_ptr<LightBulb>& light)
     {
+        light->registerObserver(*this);
         _lights.push_back(light);
 
         stampCurrentUpdate();
@@ -63,6 +75,7 @@ namespace prop3
 
     void StageZone::addSubzone(const std::shared_ptr<StageZone>& zone)
     {
+        zone->registerObserver(*this);
         _subzones.push_back(zone);
 
         stampCurrentUpdate();
@@ -70,9 +83,19 @@ namespace prop3
 
     void StageZone::clear()
     {
+        unregisterFrom(_bounds);
         _bounds = UNBOUNDED;
+
+        for(auto prop : _props)
+            unregisterFrom(prop);
         _props.clear();
+
+        for(auto light : _lights)
+            unregisterFrom(light);
         _lights.clear();
+
+        for(auto zone : _subzones)
+            unregisterFrom(zone);
         _subzones.clear();
 
         stampCurrentUpdate();
@@ -80,6 +103,8 @@ namespace prop3
 
     void StageZone::transform(const glm::dmat4& mat)
     {
+        blockUpdates();
+
         if(_bounds != UNBOUNDED)
             Surface::transform(_bounds, mat);
 
@@ -92,11 +117,13 @@ namespace prop3
         for(const auto& zone : _subzones)
             zone->transform(mat);
 
-        stampCurrentUpdate();
+        unblockUpdates();
     }
 
     void StageZone::translate(const glm::dvec3& dis)
     {
+        blockUpdates();
+
         if(_bounds != UNBOUNDED)
             Surface::translate(_bounds, dis);
 
@@ -109,11 +136,13 @@ namespace prop3
         for(const auto& zone : _subzones)
             zone->translate(dis);
 
-        stampCurrentUpdate();
+        unblockUpdates();
     }
 
     void StageZone::rotate(double angle, const glm::dvec3& axis)
     {
+        blockUpdates();
+
         if(_bounds != UNBOUNDED)
             Surface::rotate(_bounds, angle, axis);
 
@@ -126,11 +155,13 @@ namespace prop3
         for(const auto& zone : _subzones)
             zone->rotate(angle, axis);
 
-        stampCurrentUpdate();
+        unblockUpdates();
     }
 
     void StageZone::scale(double coeff)
     {
+        blockUpdates();
+
         if(_bounds != UNBOUNDED)
             Surface::scale(_bounds, coeff);
 
@@ -143,6 +174,6 @@ namespace prop3
         for(const auto& zone : _subzones)
             zone->scale(coeff);
 
-        stampCurrentUpdate();
+        unblockUpdates();
     }
 }

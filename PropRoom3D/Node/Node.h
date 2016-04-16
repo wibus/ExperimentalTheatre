@@ -4,6 +4,9 @@
 #include <vector>
 #include <memory>
 
+#include <CellarWorkbench/DesignPattern/SpecificSubject.h>
+#include <CellarWorkbench/DesignPattern/SpecificObserver.h>
+
 #include <PropRoom3D/libPropRoom3D_global.h>
 
 
@@ -32,7 +35,8 @@ namespace prop3
     };
 
 
-    class PROP3D_EXPORT Node
+    class PROP3D_EXPORT Node : public cellar::SpecificSubject<TimeStamp>,
+                               public cellar::SpecificObserver<TimeStamp>
     {
     protected:
         Node();
@@ -46,13 +50,21 @@ namespace prop3
 
         TimeStamp timeStamp() const;
 
+        virtual void notify(TimeStamp& childStamp) override;
 
     protected:
+        void blockUpdates();
+        void unblockUpdates();
         void stampCurrentUpdate();
+        void registerTo(const std::shared_ptr<Node>& child);
+        void unregisterFrom(const std::shared_ptr<Node>& child);
+        void swapChild(const std::shared_ptr<Node>& oldChild,
+                       const std::shared_ptr<Node>& newChild);
 
 
     private:
         TimeStamp _timeStamp;
+        bool _blockUpdates;
     };
 
 

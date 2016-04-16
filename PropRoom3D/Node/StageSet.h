@@ -57,16 +57,12 @@ namespace prop3
 
 
         // Timestamps
-        bool updateTimeStamp();
-
-        bool stageSetChanged() const;
+        bool stageSetChanged(const TimeStamp& reference);
 
 
     private:
         std::shared_ptr<Material> _ambientMaterial;
         std::shared_ptr<Backdrop> _backdrop;
-        TimeStamp _lastTimeStamp;
-        bool _stageSetChanged;
 
         std::vector<DebugLineStrip> _debugLines;
         std::vector<DebugPointCloud> _debugPoints;
@@ -83,11 +79,6 @@ namespace prop3
     inline std::shared_ptr<Backdrop> StageSet::backdrop() const
     {
         return _backdrop;
-    }
-
-    inline bool StageSet::stageSetChanged() const
-    {
-        return _stageSetChanged;
     }
 
     inline const std::vector<DebugLineStrip>& StageSet::debugLines() const

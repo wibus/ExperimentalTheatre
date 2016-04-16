@@ -48,8 +48,6 @@ namespace prop3
 
     void AbstractTeam::update(double dt)
     {
-        _stageSet->updateTimeStamp();
-
         if(_choreographer.get() != nullptr)
             _choreographer->update(dt);
         for(auto& artDir : _artDirectors)

@@ -22,7 +22,8 @@ namespace prop3
     ArtDirectorServer::ArtDirectorServer() :
         _colorBufferTexId(0),
         _debugRenderer(new DebugRenderer()),
-        _postProdUnit(new GlPostProdUnit())
+        _postProdUnit(new GlPostProdUnit()),
+        _lastUpdate(TimeStamp::getCurrentTimeStamp())
     {
 #ifdef NDEBUG
         _localRaytracer.reset(new CpuRaytracerEngine(8));
@@ -84,8 +85,9 @@ namespace prop3
 
     void ArtDirectorServer::update(double dt)
     {
-        if(_stageSet->stageSetChanged())
+        if(_stageSet->stageSetChanged(_lastUpdate))
         {
+            _lastUpdate = TimeStamp::getCurrentTimeStamp();
             clearTextures();
         }
 

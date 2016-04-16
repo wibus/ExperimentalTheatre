@@ -98,6 +98,13 @@ namespace prop3
 
     }
 
+    PhysicalSurface::~PhysicalSurface()
+    {
+        unregisterFrom(_coating);
+        unregisterFrom(_innerMat);
+        unregisterFrom(_outerMat);
+    }
+
     std::vector<std::shared_ptr<Node>> PhysicalSurface::children() const
     {
         return { _coating, _innerMat, _outerMat };
@@ -105,6 +112,7 @@ namespace prop3
 
     void PhysicalSurface::setCoating(const std::shared_ptr<Coating>& coating)
     {
+        swapChild(_coating, coating);
         _coating = coating;
 
         stampCurrentUpdate();
@@ -112,6 +120,7 @@ namespace prop3
 
     void PhysicalSurface::setInnerMaterial(const std::shared_ptr<Material>& mat)
     {
+        swapChild(_innerMat, mat);
         _innerMat = mat;
 
         stampCurrentUpdate();
@@ -119,6 +128,7 @@ namespace prop3
 
     void PhysicalSurface::setOuterMaterial(const std::shared_ptr<Material>& mat)
     {
+        swapChild(_outerMat, mat);
         _outerMat = mat;
 
         stampCurrentUpdate();
@@ -138,6 +148,13 @@ namespace prop3
         // don't exchange with child surface's material
         _innerMat.reset();
         _outerMat.reset();
+
+        registerTo(surf);
+    }
+
+    SurfaceShell::~SurfaceShell()
+    {
+        unregisterFrom(_surf);
     }
 
     void SurfaceShell::accept(Visitor& visitor)
@@ -216,6 +233,12 @@ namespace prop3
     SurfaceGhost::SurfaceGhost(const std::shared_ptr<Surface>& surf) :
         _surf(surf)
     {
+        registerTo(surf);
+    }
+
+    SurfaceGhost::~SurfaceGhost()
+    {
+        unregisterFrom(_surf);
     }
 
     void SurfaceGhost::accept(Visitor& visitor)
@@ -293,6 +316,12 @@ namespace prop3
     SurfaceInverse::SurfaceInverse(const std::shared_ptr<Surface>& surf) :
         _surf(surf)
     {
+        registerTo(surf);
+    }
+
+    SurfaceInverse::~SurfaceInverse()
+    {
+        unregisterFrom(_surf);
     }
 
     void SurfaceInverse::accept(Visitor& visitor)
@@ -385,6 +414,14 @@ namespace prop3
     SurfaceOr::SurfaceOr(const std::vector<std::shared_ptr<Surface>>& surfs) :
         _surfs(surfs)
     {
+        for(auto surf : _surfs)
+            registerTo(surf);
+    }
+
+    SurfaceOr::~SurfaceOr()
+    {
+        for(auto surf : _surfs)
+            unregisterFrom(surf);
     }
 
     void SurfaceOr::accept(Visitor& visitor)
@@ -487,20 +524,32 @@ namespace prop3
 
     void SurfaceOr::setCoating(const std::shared_ptr<Coating>& coating)
     {
+        blockUpdates();
+
         for(auto& surf : _surfs)
             surf->setCoating(coating);
+
+        unblockUpdates();
     }
 
     void SurfaceOr::setInnerMaterial(const std::shared_ptr<Material>& mat)
     {
+        blockUpdates();
+
         for(auto& surf : _surfs)
             surf->setInnerMaterial(mat);
+
+        unblockUpdates();
     }
 
     void SurfaceOr::setOuterMaterial(const std::shared_ptr<Material>& mat)
     {
+        blockUpdates();
+
         for(auto& surf : _surfs)
             surf->setOuterMaterial(mat);
+
+        unblockUpdates();
     }
 
     bool SurfaceOr::isAffineTransformable() const
@@ -537,8 +586,20 @@ namespace prop3
 
     void SurfaceOr::transform(const Transform& transform)
     {
+        blockUpdates();
+
         for(auto& surf : _surfs)
             applyTransformation(surf, transform);
+
+        unblockUpdates();
+    }
+
+    void SurfaceOr::add(const std::shared_ptr<Surface>& surface)
+    {
+        registerTo(surface);
+        _surfs.push_back(surface);
+
+        stampCurrentUpdate();
     }
 
 
@@ -546,6 +607,14 @@ namespace prop3
     SurfaceAnd::SurfaceAnd(const std::vector<std::shared_ptr<Surface>>& surfs) :
         _surfs(surfs)
     {
+        for(auto surf : _surfs)
+            registerTo(surf);
+    }
+
+    SurfaceAnd::~SurfaceAnd()
+    {
+        for(auto surf : _surfs)
+            unregisterFrom(surf);
     }
 
     void SurfaceAnd::accept(Visitor& visitor)
@@ -648,20 +717,32 @@ namespace prop3
 
     void SurfaceAnd::setCoating(const std::shared_ptr<Coating>& coating)
     {
+        blockUpdates();
+
         for(auto& surf : _surfs)
             surf->setCoating(coating);
+
+        unblockUpdates();
     }
 
     void SurfaceAnd::setInnerMaterial(const std::shared_ptr<Material>& mat)
     {
+        blockUpdates();
+
         for(auto& surf : _surfs)
             surf->setInnerMaterial(mat);
+
+        unblockUpdates();
     }
 
     void SurfaceAnd::setOuterMaterial(const std::shared_ptr<Material>& mat)
     {
+        blockUpdates();
+
         for(auto& surf : _surfs)
             surf->setOuterMaterial(mat);
+
+        unblockUpdates();
     }
 
     bool SurfaceAnd::isAffineTransformable() const
@@ -698,8 +779,20 @@ namespace prop3
 
     void SurfaceAnd::transform(const Transform& transform)
     {
+        blockUpdates();
+
         for(auto& surf : _surfs)
             applyTransformation(surf, transform);
+
+        unblockUpdates();
+    }
+
+    void SurfaceAnd::add(const std::shared_ptr<Surface>& surface)
+    {
+        registerTo(surface);
+        _surfs.push_back(surface);
+
+        stampCurrentUpdate();
     }
 
 

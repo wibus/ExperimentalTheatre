@@ -35,7 +35,8 @@ namespace prop3
             std::chrono::high_resolution_clock::now().time_since_epoch()).count();
     }
 
-    Node::Node()
+    Node::Node() :
+        _blockUpdates(false)
     {
         stampCurrentUpdate();
     }
@@ -50,8 +51,51 @@ namespace prop3
         return std::vector<std::shared_ptr<Node>>();
     }
 
+    void Node::notify(TimeStamp& childStamp)
+    {
+        stampCurrentUpdate();
+    }
+
+    void Node::blockUpdates()
+    {
+        _blockUpdates = true;
+    }
+
+    void Node::unblockUpdates()
+    {
+        _blockUpdates = false;
+        stampCurrentUpdate();
+    }
+
     void Node::stampCurrentUpdate()
     {
-        _timeStamp = TimeStamp::getCurrentTimeStamp();
+        if(!_blockUpdates)
+        {
+            _timeStamp = TimeStamp::getCurrentTimeStamp();
+            notifyObservers(_timeStamp);
+        }
+    }
+
+    void Node::registerTo(const std::shared_ptr<Node>& child)
+    {
+        if(child.get() != nullptr)
+        {
+            child->registerObserver(*this);
+        }
+    }
+
+    void Node::unregisterFrom(const std::shared_ptr<Node>& child)
+    {
+        if(child.get() != nullptr)
+        {
+            child->unregisterObserver(*this);
+        }
+    }
+
+    void Node::swapChild(const std::shared_ptr<Node>& oldChild,
+                         const std::shared_ptr<Node>& newChild)
+    {
+        unregisterFrom(oldChild);
+        registerTo(newChild);
     }
 }

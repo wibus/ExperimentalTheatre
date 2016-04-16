@@ -6,6 +6,8 @@
 
 #include "AbstractArtDirector.h"
 
+#include <PropRoom3D/Node/Node.h>
+
 
 namespace prop3
 {
@@ -54,6 +56,7 @@ namespace prop3
         std::shared_ptr<DebugRenderer> _debugRenderer;
         std::shared_ptr<GlPostProdUnit> _postProdUnit;
         std::shared_ptr<StageSet> _stageSet;
+        TimeStamp _lastUpdate;
     };
 }
 

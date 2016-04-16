@@ -22,6 +22,7 @@ namespace prop3
 
     CpuRaytracerEngine::CpuRaytracerEngine() :
         _protectedState(),
+        _lastTimeStamp(TimeStamp::getCurrentTimeStamp()),
         _raytracerState(new RaytracerState(_protectedState)),
         _viewportSize(1, 1),
         _cameraChanged(false)
@@ -40,6 +41,7 @@ namespace prop3
 
     CpuRaytracerEngine::CpuRaytracerEngine(unsigned int  workerCount) :
         _protectedState(),
+        _lastTimeStamp(TimeStamp::getCurrentTimeStamp()),
         _raytracerState(new RaytracerState(_protectedState)),
         _viewportSize(1, 1),
         _cameraChanged(false)
@@ -90,7 +92,7 @@ namespace prop3
 
     void CpuRaytracerEngine::update(const std::shared_ptr<StageSet>& stageSet)
     {
-        bool stageChanged = stageSet->stageSetChanged();
+        bool stageChanged = stageSet->stageSetChanged(_lastTimeStamp);
         if(stageChanged || _cameraChanged)
         {
             abortRendering();
@@ -104,6 +106,7 @@ namespace prop3
                 _searchStructure->resetHitCounters();
 
             _cameraChanged = false;
+            _lastTimeStamp = TimeStamp::getCurrentTimeStamp();
         }
 
         if(stageSet->props().empty())

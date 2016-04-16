@@ -96,6 +96,8 @@ namespace prop3
         PhysicalSurface();
 
     public:
+        virtual ~PhysicalSurface();
+
         virtual std::vector<std::shared_ptr<Node>> children() const override;
 
         virtual void setCoating(const std::shared_ptr<Coating>& coating) override;
@@ -123,6 +125,8 @@ namespace prop3
         SurfaceShell(const std::shared_ptr<Surface>& surf);
 
     public:
+        virtual ~SurfaceShell();
+
         // Node interface
         virtual void accept(Visitor& visitor) override;
         virtual std::vector<std::shared_ptr<Node>> children() const override;
@@ -159,6 +163,8 @@ namespace prop3
         SurfaceGhost(const std::shared_ptr<Surface>& surf);
 
     public:
+        virtual ~SurfaceGhost();
+
         // Node interface
         virtual void accept(Visitor& visitor) override;
         virtual std::vector<std::shared_ptr<Node>> children() const override;
@@ -193,6 +199,8 @@ namespace prop3
         SurfaceInverse(const std::shared_ptr<Surface>& surf);
 
     public:
+        virtual ~SurfaceInverse();
+
         // Node interface
         virtual void accept(Visitor& visitor) override;
         virtual std::vector<std::shared_ptr<Node>> children() const override;
@@ -228,6 +236,8 @@ namespace prop3
         SurfaceOr(const std::vector<std::shared_ptr<Surface>>& surfs);
 
     public:
+        virtual ~SurfaceOr();
+
         static std::shared_ptr<Surface> apply(
                 const std::vector<std::shared_ptr<Surface>>& surfs);
 
@@ -267,6 +277,8 @@ namespace prop3
         SurfaceAnd(const std::vector<std::shared_ptr<Surface>>& surfs);
 
     public:
+        virtual ~SurfaceAnd();
+
         static std::shared_ptr<Surface> apply(
                 const std::vector<std::shared_ptr<Surface>>& surfs);
 
@@ -358,20 +370,10 @@ namespace prop3
         return std::shared_ptr<SurfaceOr>(new SurfaceOr(surfs));
     }
 
-    inline void SurfaceOr::add(const std::shared_ptr<Surface>& surface)
-    {
-        _surfs.push_back(surface);
-    }
-
     inline std::shared_ptr<Surface> SurfaceAnd::apply(
             const std::vector<std::shared_ptr<Surface>>& surfs)
     {
         return std::shared_ptr<SurfaceAnd>(new SurfaceAnd(surfs));
-    }
-
-    inline void SurfaceAnd::add(const std::shared_ptr<Surface>& surface)
-    {
-        _surfs.push_back(surface);
     }
 }
 

@@ -16,15 +16,16 @@ namespace prop3
     StageSet::StageSet() :
         StageZone("Stage set"),
         _ambientMaterial(material::AIR),
-        _backdrop(new ProceduralSun()),
-        _stageSetChanged(false),
-        _lastTimeStamp()
+        _backdrop(new ProceduralSun())
     {
+        registerTo(_ambientMaterial);
+        registerTo(_backdrop);
     }
 
     StageSet::~StageSet()
     {
-
+        unregisterFrom(_ambientMaterial);
+        unregisterFrom(_backdrop);
     }
 
     void StageSet::accept(Visitor& visitor)
@@ -42,6 +43,7 @@ namespace prop3
 
     void StageSet::setAmbientMaterial(const std::shared_ptr<Material>& ambientMaterial)
     {
+        swapChild(_ambientMaterial, ambientMaterial);
         _ambientMaterial = ambientMaterial;
 
         stampCurrentUpdate();
@@ -49,6 +51,7 @@ namespace prop3
 
     void StageSet::setBackdrop(const std::shared_ptr<Backdrop>& backdrop)
     {
+        swapChild(_backdrop, backdrop);
         _backdrop = backdrop;
 
         stampCurrentUpdate();
@@ -85,26 +88,10 @@ namespace prop3
         }
     }
 
-    bool StageSet::updateTimeStamp()
+    bool StageSet::stageSetChanged(const TimeStamp &reference)
     {
-        TimeStamp maxTimeStamp = timeStamp();
-
-        vector<shared_ptr<Node>> nodes = children();
-        for(size_t i=0; i < nodes.size(); ++i)
-        {
-            shared_ptr<Node> node = nodes[i];
-
-            if(node.get() != nullptr)
-            {
-                vector<shared_ptr<Node>> children = node->children();
-                nodes.insert(nodes.end(), children.begin(), children.end());
-                maxTimeStamp = std::max(maxTimeStamp, node->timeStamp());
-            }
-        }
-
-        _stageSetChanged = _lastTimeStamp < maxTimeStamp;
-        _lastTimeStamp = maxTimeStamp;
-        return _stageSetChanged;
+        if(reference < timeStamp())
+            return true;
     }
 
     void StageSet::addDebugLine(const DebugLineStrip& line)

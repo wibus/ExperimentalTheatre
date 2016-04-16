@@ -9,12 +9,13 @@
 
 #include "RaytracerState.h"
 
+#include <PropRoom3D/Node/Node.h>
+
 
 namespace prop3
 {
-    class Prop;
-    class StageSet;
     class Film;
+    class StageSet;
     class CpuRaytracerWorker;
     class SearchStructure;
 
@@ -67,6 +68,7 @@ namespace prop3
     private:
         static const unsigned int DEFAULT_WORKER_COUNT;
 
+        TimeStamp _lastTimeStamp;
         RaytracerState::DraftParams _draftParams;
         RaytracerState::ProtectedState _protectedState;
         std::shared_ptr<RaytracerState> _raytracerState;
