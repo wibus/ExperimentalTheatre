@@ -24,10 +24,6 @@ namespace prop3
 
 
         // Light rays
-        virtual void raycast(const Raycast& ray, RayHitList& reports) const override;
-
-        virtual bool intersects(const Raycast& ray, RayHitList& reports) const override;
-
         virtual void fireOn(
                 std::vector<LightCast>& lightCasts,
                 const glm::dvec3& pos,
@@ -51,6 +47,7 @@ namespace prop3
     private:
         glm::dvec3 _center;
         double _radius;
+        double _radius2;
 
         glm::dvec3 _transformC;
 

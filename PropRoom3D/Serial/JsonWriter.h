@@ -64,6 +64,7 @@ namespace prop3
             virtual void visit(PlaneTexture& node) override;
             virtual void visit(Quadric& node) override;
             virtual void visit(Sphere& node) override;
+            virtual void visit(Disk& node) override;
 
 
             QJsonArray lightsArray;
@@ -118,6 +119,7 @@ namespace prop3
             virtual void visit(PlaneTexture& node) override;
             virtual void visit(Quadric& node) override;
             virtual void visit(Sphere& node) override;
+            virtual void visit(Disk& node) override;
 
             QJsonValue subTree;
 

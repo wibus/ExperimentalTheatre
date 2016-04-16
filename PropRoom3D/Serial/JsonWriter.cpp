@@ -20,6 +20,7 @@
 #include "Node/Prop/Surface/Plane.h"
 #include "Node/Prop/Surface/Quadric.h"
 #include "Node/Prop/Surface/Sphere.h"
+#include "Node/Prop/Surface/Disk.h"
 
 #include "Node/Prop/Material/UniformStdMaterial.h"
 
@@ -345,6 +346,20 @@ namespace prop3
         }
     }
 
+    void StageSetJsonWriter::HardwareBuilder::visit(Disk& node)
+    {
+        if(insertSurface(node))
+        {
+            QJsonObject obj;
+            setPhysicalProperties(node, obj);
+            obj[SURFACE_TYPE]    = SURFACE_TYPE_DISK;
+            obj[SURFACE_CENTER]  = toJson(node.center());
+            obj[SURFACE_NORMAL]  = toJson(node.normal());
+            obj[SURFACE_RADIUS]  = node.radius();
+            surfacesArray.append(obj);
+        }
+    }
+
 
     //////////////////////////
     // Surface Tree Builder //
@@ -570,6 +585,11 @@ namespace prop3
     }
 
     void StageSetJsonWriter::StageSetBuilder::visit(Sphere& node)
+    {
+        subTree = QJsonValue(_surfaceIdMap[&node]);
+    }
+
+    void StageSetJsonWriter::StageSetBuilder::visit(Disk& node)
     {
         subTree = QJsonValue(_surfaceIdMap[&node]);
     }

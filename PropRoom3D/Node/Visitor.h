@@ -29,6 +29,7 @@ namespace prop3
     class PlaneTexture;
     class Quadric;
     class Sphere;
+    class Disk;
 
     // Materials
     class Material;
@@ -80,6 +81,7 @@ namespace prop3
         virtual void visit(PlaneTexture& node);
         virtual void visit(Quadric& node);
         virtual void visit(Sphere& node);
+        virtual void visit(Disk& node);
 
         // Materials
         virtual void visit(UniformStdMaterial& node);

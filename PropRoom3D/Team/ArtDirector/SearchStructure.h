@@ -41,8 +41,7 @@ namespace prop3
         void removeHiddenSurfaces(
                 size_t threshold,
                 size_t& removedZones,
-                size_t& removedSurfaces,
-                size_t& removedLightBulbs);
+                size_t& removedSurfaces);
 
         void resetHitCounters();
 
@@ -61,7 +60,6 @@ namespace prop3
         std::shared_ptr<AbstractTeam> _team;
         std::vector<SearchZone> _searchZones;
         std::vector<SearchSurface> _searchSurfaces;
-        std::vector<SearchLightBulb> _searchLights;
 
         bool _isOptimized;
         std::vector<std::shared_ptr<const LightBulb>> _lights;

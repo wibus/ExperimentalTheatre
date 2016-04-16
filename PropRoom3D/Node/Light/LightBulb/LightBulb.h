@@ -40,20 +40,20 @@ namespace prop3
 
 
         // Light Rays
-        virtual void raycast(const Raycast& ray, RayHitList& reports) const = 0;
-
-        virtual bool intersects(const Raycast& ray, RayHitList& reports) const = 0;
-
         virtual void fireOn(
                 std::vector<LightCast>& lightCasts,
                 const glm::dvec3& pos,
                 unsigned int count) const = 0;
 
+
+        // Surface
+        std::shared_ptr<Surface> surface() const;
+
+
         // Properties
         virtual double area() const = 0;
 
         virtual double visibility(const Raycast& ray) const = 0;
-
 
         virtual void setIsOn(bool isOn);
         bool isOn() const;
@@ -61,19 +61,18 @@ namespace prop3
         void setRadiantFlux(const glm::dvec3& radiantFlux);
         glm::dvec3 radiantFlux() const;
 
-        virtual void setOuterMaterial(const std::shared_ptr<Material>& mat);
-        std::shared_ptr<Material> outerMaterial() const;
-
-        virtual void setTransform(const glm::dmat4& transform);
         glm::dmat4 transform() const;
 
 
     protected:
-        virtual double diffuseSize(
+        void setSurface(const std::shared_ptr<Surface>& surf);
+
+        double diffuseSize(
                 const LightCast& lightCast,
                 const Raycast& eyeRay,
                 double roughness) const;
 
+        void commitTransform(const glm::dmat4& mat);
         virtual void onTransform() = 0;
 
 
@@ -82,7 +81,6 @@ namespace prop3
         glm::dvec3 _radiantFlux;
         std::shared_ptr<Surface> _surface;
         std::shared_ptr<EmissiveCoating> _coating;
-        std::shared_ptr<Material> _outerMat;
         glm::dmat4 _invTransform;
         glm::dmat4 _transform;
     };
@@ -90,6 +88,11 @@ namespace prop3
 
 
     // IMPLEMENTATION //
+    inline std::shared_ptr<Surface> LightBulb::surface() const
+    {
+        return _surface;
+    }
+
     inline bool LightBulb::isOn() const
     {
         return _isOn;
@@ -98,11 +101,6 @@ namespace prop3
     inline glm::dvec3 LightBulb::radiantFlux() const
     {
         return _radiantFlux;
-    }
-
-    inline std::shared_ptr<Material> LightBulb::outerMaterial() const
-    {
-        return _outerMat;
     }
 
     inline glm::dmat4 LightBulb::transform() const

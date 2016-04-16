@@ -93,6 +93,11 @@ namespace prop3
 
     }
 
+    void Visitor::visit(Disk& node)
+    {
+
+    }
+
 
     // Materials
     void Visitor::visit(UniformStdMaterial& node)

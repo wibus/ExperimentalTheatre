@@ -41,6 +41,7 @@ SET(PROP3_MATERIAL_HEADERS
 SET(PROP3_SURFACE_HEADERS
     ${PROP3_SRC_DIR}/Node/Prop/Surface/Surface.h
     ${PROP3_SRC_DIR}/Node/Prop/Surface/Box.h
+    ${PROP3_SRC_DIR}/Node/Prop/Surface/Disk.h
     ${PROP3_SRC_DIR}/Node/Prop/Surface/Plane.h
     ${PROP3_SRC_DIR}/Node/Prop/Surface/Quadric.h
     ${PROP3_SRC_DIR}/Node/Prop/Surface/Sphere.h)
@@ -162,6 +163,7 @@ SET(PROP3_MATERIAL_SOURCES
 SET(PROP3_SURFACE_SOURCES
     ${PROP3_SRC_DIR}/Node/Prop/Surface/Surface.cpp
     ${PROP3_SRC_DIR}/Node/Prop/Surface/Box.cpp
+    ${PROP3_SRC_DIR}/Node/Prop/Surface/Disk.cpp
     ${PROP3_SRC_DIR}/Node/Prop/Surface/Plane.cpp
     ${PROP3_SRC_DIR}/Node/Prop/Surface/Quadric.cpp
     ${PROP3_SRC_DIR}/Node/Prop/Surface/Sphere.cpp)

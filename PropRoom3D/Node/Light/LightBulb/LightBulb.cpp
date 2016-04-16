@@ -30,27 +30,26 @@ namespace prop3
 
     void LightBulb::transform(const glm::dmat4& mat)
     {
-        _transform = mat * _transform;
-        _invTransform = _invTransform * glm::inverse(mat);
-
-        onTransform();
-
-        stampCurrentUpdate();
+        Surface::transform(_surface, mat);
+        commitTransform(mat);
     }
 
     void LightBulb::translate(const glm::dvec3& dis)
     {
-        transform(glm::translate(glm::dmat4(), dis));
+        Surface::translate(_surface, dis);
+        commitTransform(glm::translate(glm::dmat4(), dis));
     }
 
     void LightBulb::rotate(double angle, const glm::dvec3& axis)
     {
-        transform(glm::rotate(glm::dmat4(), angle, axis));
+        Surface::rotate(_surface, angle, axis);
+        commitTransform(glm::rotate(glm::dmat4(), angle, axis));
     }
 
     void LightBulb::scale(double coeff)
     {
-        transform(glm::scale(glm::dmat4(), glm::dvec3(coeff)));
+        Surface::scale(_surface, coeff);
+        commitTransform(glm::scale(glm::dmat4(), glm::dvec3(coeff)));
     }
 
     void LightBulb::setIsOn(bool isOn)
@@ -67,19 +66,10 @@ namespace prop3
         stampCurrentUpdate();
     }
 
-    void LightBulb::setOuterMaterial(const std::shared_ptr<Material>& mat)
+    void LightBulb::setSurface(const std::shared_ptr<Surface>& surf)
     {
-        _outerMat = mat;
-
-        stampCurrentUpdate();
-    }
-
-    void LightBulb::setTransform(const glm::dmat4& transform)
-    {
-        _transform = transform;
-        _invTransform = glm::inverse(_transform);
-
-        onTransform();
+        _surface = surf;
+        _surface->setCoating(_coating);
 
         stampCurrentUpdate();
     }
@@ -93,5 +83,14 @@ namespace prop3
         double diffDist = Raycast::totalDiffuseDist(eyeRay, lightCast.raycast, roughness);
         glm::dvec3 origin = lightCast.emittingPosition + lightCast.emittingDirection * diffDist;
         return visibility(Raycast(entropy, glm::dvec4(), origin, -lightCast.emittingDirection));
+    }
+
+    void LightBulb::commitTransform(const glm::dmat4& mat)
+    {
+        _transform = mat * _transform;
+        _invTransform = _invTransform * glm::inverse(mat);
+
+        onTransform();
+        stampCurrentUpdate();
     }
 }

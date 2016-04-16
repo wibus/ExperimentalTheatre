@@ -28,8 +28,6 @@ namespace prop3
     {
         size_t parent;
         size_t endZone;
-        size_t begLight;
-        size_t endLight;
         size_t begSurf;
         size_t endSurf;
         Surface* bounds;
@@ -52,23 +50,6 @@ namespace prop3
         mutable std::atomic_long hitCount;
     };
 
-    struct SearchLightBulb
-    {
-        SearchLightBulb(const std::shared_ptr<LightBulb>& lightBulb) :
-            lightBulb(lightBulb), hitCount(0) {}
-
-        SearchLightBulb(const SearchLightBulb& search) :
-            lightBulb(search.lightBulb), hitCount(search.hitCount.load()) {}
-
-        SearchLightBulb(SearchLightBulb&& search) :
-            lightBulb(search.lightBulb), hitCount(search.hitCount.load()) {}
-
-        inline LightBulb* operator -> () const {return lightBulb.get();}
-
-        std::shared_ptr<LightBulb> lightBulb;
-        mutable std::atomic_long hitCount;
-    };
-
 
     SearchStructure::SearchStructure(const std::string &stageStream) :
         _team(new WorkerTeam()),
@@ -82,7 +63,6 @@ namespace prop3
 
         _searchZones.clear();
         _searchSurfaces.clear();
-        _searchLights.clear();
 
         if(!stageSet->isVisible())
             return;
@@ -142,20 +122,22 @@ namespace prop3
             }
 
 
+            size_t startSurfCount = _searchSurfaces.size();
+
             size_t lightCount = zone->lights().size();
-            size_t startLightCount = _searchLights.size();
             for(size_t l=0; l < lightCount; ++l)
             {
                 auto light = zone->lights()[l];
                 if(light->isVisible())
-                    _searchLights.emplace_back(light);
-            }
-            size_t endLightCount = _searchLights.size();
-            size_t addedLights = endLightCount - startLightCount;
+                {
+                    _searchSurfaces.emplace_back(light->surface());
 
+                    if(light->isOn())
+                        _lights.push_back(light);
+                }
+            }
 
             size_t propCount = zone->props().size();
-            size_t startSurfCount = _searchSurfaces.size();
             for(size_t p=0; p < propCount; ++p)
             {
                 auto prop = zone->props()[p];
@@ -173,14 +155,12 @@ namespace prop3
             size_t addedSurfaces = endSurfCount - startSurfCount;
 
 
-            if(addedSubzones == 0 && addedLights == 0 && addedSurfaces == 0)
+            if(addedSubzones == 0 && addedSurfaces == 0)
                 continue;
 
             SearchZone searchZone;
             searchZone.parent = parentId;
             searchZone.endZone = _searchZones.size() + 1;
-            searchZone.endLight = _searchLights.size();
-            searchZone.begLight = searchZone.endLight - addedLights;
             searchZone.endSurf = _searchSurfaces.size();
             searchZone.begSurf = searchZone.endSurf - addedSurfaces;
             searchZone.bounds = zone->bounds().get();
@@ -197,11 +177,6 @@ namespace prop3
                 parent.endZone = glm::max(parent.endZone, zone.endZone);
             }
         }
-
-        for(const SearchLightBulb& l : _searchLights)
-        {
-            _lights.push_back(l.lightBulb);
-        }
     }
 
     SearchStructure::~SearchStructure()
@@ -217,7 +192,6 @@ namespace prop3
         Raycast ray(raycast);
 
         size_t minId = -1;
-        bool isMinSurf = true;
 
         size_t zId = 0;
         size_t zoneCount = _searchZones.size();
@@ -241,29 +215,7 @@ namespace prop3
                         {
                             ray.limit = node->length;
                             reportMin = *node;
-                            isMinSurf = true;
                             minId = s;
-                        }
-
-                        node = node->_next;
-                    }
-                }
-
-                for(size_t l = zone.begLight; l < zone.endLight; ++l)
-                {
-                    rayHitList.clear();
-
-                    _searchLights[l]->raycast(ray, rayHitList);
-
-                    RayHitReport* node = rayHitList.head;
-                    while(node != nullptr)
-                    {
-                        if(0.0 < node->length && node->length < ray.limit)
-                        {
-                            ray.limit = node->length;
-                            reportMin = *node;
-                            isMinSurf = false;
-                            minId = l;
                         }
 
                         node = node->_next;
@@ -280,10 +232,7 @@ namespace prop3
 
         if(!_isOptimized && reportMin.length != Raycast::BACKDROP_LIMIT)
         {
-            if(isMinSurf)
-                ++_searchSurfaces[minId].hitCount;
-            else
-                ++_searchLights[minId].hitCount;
+            ++_searchSurfaces[minId].hitCount;
         }
 
         return reportMin.length;
@@ -313,15 +262,6 @@ namespace prop3
                     }
                 }
 
-                for(size_t l = zone.begLight; l < zone.endLight; ++l)
-                {
-                    if(_searchLights[l]->intersects(raycast, rayHitList))
-                    {
-                        if(!_isOptimized) ++_searchLights[l].hitCount;
-                        return true;
-                    }
-                }
-
                 ++zId;
             }
             else
@@ -336,12 +276,10 @@ namespace prop3
     void SearchStructure::removeHiddenSurfaces(
             size_t threshold,
             size_t& removedZones,
-            size_t& removedSurfaces,
-            size_t& removedLightBulbs)
+            size_t& removedSurfaces)
     {
         removedZones = 0;
         removedSurfaces = 0;
-        removedLightBulbs = 0;
 
         std::vector<bool> removeSurface;
         removeSurface.reserve(_searchSurfaces.size());
@@ -351,16 +289,6 @@ namespace prop3
                     .load(std::memory_order_relaxed) < threshold;
             if(remove) ++removedSurfaces;
             removeSurface[i] = remove;
-        }
-
-        std::vector<bool> removeLightBulb;
-        removeLightBulb.reserve(_searchLights.size());
-        for(size_t i=0; i < _searchLights.size(); ++i)
-        {
-            bool remove = _searchLights[i].hitCount
-                    .load(std::memory_order_relaxed) < threshold;
-            if(remove) ++removedLightBulbs;
-            removeLightBulb[i] = remove;
         }
 
 
@@ -375,8 +303,6 @@ namespace prop3
                 remove = remove && removeZone[z];
             for(size_t s=zone.begSurf; s < zone.endSurf; ++s)
                 remove = remove && removeSurface[s];
-            for(size_t l=zone.begLight; l < zone.endLight; ++l)
-                remove = remove && removeLightBulb[l];
 
             if(remove)++removedZones;
             removeZone[i] = remove;
@@ -384,11 +310,9 @@ namespace prop3
 
         std::vector<SearchZone> newZones;
         std::vector<SearchSurface> newSurfs;
-        std::vector<SearchLightBulb> newLights;
 
         size_t cumZoneRemove = 0;
         size_t cumSurfRemove = 0;
-        size_t cumLightRemove = 0;
 
         for(int i=0; i < _searchZones.size(); ++i)
         {
@@ -398,7 +322,6 @@ namespace prop3
             {
                 ++cumZoneRemove;
                 cumSurfRemove += zone.endSurf - zone.begSurf;
-                cumLightRemove += zone.endLight - zone.begLight;
             }
             else
             {
@@ -413,16 +336,6 @@ namespace prop3
                 zone.begSurf -= preCumSurfRemove;
                 zone.endSurf -= cumSurfRemove;
 
-                size_t preCumLightRemove = cumLightRemove;
-                for(size_t l=zone.begLight; l < zone.endLight; ++l)
-                {
-                    if(removeLightBulb[l])
-                        ++cumLightRemove;
-                    else
-                        newLights.push_back(_searchLights[l]);
-                }
-                zone.begLight -= preCumLightRemove;
-                zone.endLight -= cumLightRemove;
 
                 for(size_t z=i+1; z < zone.endZone; ++z)
                 {
@@ -437,9 +350,8 @@ namespace prop3
 
         std::swap(_searchZones, newZones);
         std::swap(_searchSurfaces, newSurfs);
-        std::swap(_searchLights, newLights);
 
-        if(removedSurfaces > 0 || removedLightBulbs > 0)
+        if(removedSurfaces > 0)
             _isOptimized = true;
     }
 
@@ -447,8 +359,5 @@ namespace prop3
     {
         for(SearchSurface& surf : _searchSurfaces)
             surf.hitCount.store(0);
-
-        for(SearchLightBulb& light : _searchLights)
-            light.hitCount.store(0);
     }
 }

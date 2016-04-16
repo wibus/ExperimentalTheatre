@@ -306,19 +306,16 @@ namespace prop3
 
         size_t removedZones;
         size_t removedSurfaces;
-        size_t removedLightBulbs;
 
         _currentSearchStructure->removeHiddenSurfaces(
                 _raytracerState->surfaceRemovalThreshold(),
                 removedZones,
-                removedSurfaces,
-                removedLightBulbs);
+                removedSurfaces);
 
         cellar::getLog().postMessage(new cellar::Message('I', false,
             "Hidden surface removed : "
             + std::to_string(removedZones) + "z, "
-            + std::to_string(removedSurfaces) + "s, "
-            + std::to_string(removedLightBulbs) + "l, ",
+            + std::to_string(removedSurfaces) + "s",
             "CpuRaytracerEngine"));
     }
 

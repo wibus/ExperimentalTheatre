@@ -18,6 +18,7 @@
 #include "Node/Prop/Surface/Plane.h"
 #include "Node/Prop/Surface/Quadric.h"
 #include "Node/Prop/Surface/Sphere.h"
+#include "Node/Prop/Surface/Disk.h"
 
 #include "Node/Prop/Material/UniformStdMaterial.h"
 
@@ -168,7 +169,7 @@ namespace prop3
                 setHandleNodeProperties(*node, obj);
                 node->setIsOn(obj[LIGHT_IS_ON].toBool());
                 node->setRadiantFlux(dvec3FromJson(obj[LIGHT_RADIANT_FLUX]));
-                node->setTransform(dmat4FromJson(obj[LIGHT_TRANSFORM]));
+                node->transform(dmat4FromJson(obj[LIGHT_TRANSFORM]));
 
                 _lights.push_back(node);
             }
@@ -293,6 +294,13 @@ namespace prop3
             {
                 node = Sphere::sphere(
                     dvec3FromJson(obj[SURFACE_CENTER]),
+                    obj[SURFACE_RADIUS].toDouble());
+            }
+            else if(type == SURFACE_TYPE_DISK)
+            {
+                node = Disk::disk(
+                    dvec3FromJson(obj[SURFACE_CENTER]),
+                    dvec3FromJson(obj[SURFACE_NORMAL]),
                     obj[SURFACE_RADIUS].toDouble());
             }
             else

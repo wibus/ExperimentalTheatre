@@ -58,6 +58,7 @@ namespace prop3
     const QString SURFACE_TYPE_PLANETEXTURE         = "Plane Texture";
     const QString SURFACE_TYPE_QUADRIC              = "Quadric";
     const QString SURFACE_TYPE_SPHERE               = "Sphere";
+    const QString SURFACE_TYPE_DISK                 = "Disk";
     const QString SURFACE_OPERATOR_SHELL            = "Shell()";
     const QString SURFACE_OPERATOR_GHOST            = "~";
     const QString SURFACE_OPERATOR_INVERSE          = "!";
