@@ -232,7 +232,7 @@ namespace prop3
 
         if(!_isOptimized && reportMin.length != raycast.limit)
         {
-            incrementCounter(_searchSurfaces[minId], 1.0);
+            incrementCounter(_searchSurfaces[minId], ray.entropy);
         }
 
         return reportMin.length;
@@ -240,7 +240,8 @@ namespace prop3
 
     bool SearchStructure::intersectsScene(
             const Raycast& raycast,
-            RayHitList& rayHitList) const
+            RayHitList& rayHitList,
+            double incomingEntropy) const
     {
         rayHitList.clear();
 
@@ -258,7 +259,9 @@ namespace prop3
                     if(_searchSurfaces[s]->intersects(raycast, rayHitList))
                     {
                         if(!_isOptimized)
-                            incrementCounter(_searchSurfaces[s], 1.0);
+                            incrementCounter(_searchSurfaces[s],
+                                             incomingEntropy);
+
                         return true;
                     }
                 }
@@ -282,16 +285,20 @@ namespace prop3
         removedZones = 0;
         removedSurfaces = 0;
 
-        int surfSelect = 1;
-        if(threshold < 0)
-            surfSelect = -1;
+        bool invertRemoval = (threshold < 0);
+        threshold = glm::abs(threshold);
+
 
         std::vector<bool> removeSurface;
         removeSurface.reserve(_searchSurfaces.size());
         for(size_t i=0; i < _searchSurfaces.size(); ++i)
         {
             bool remove = _searchSurfaces[i].hitCount
-                .load(std::memory_order_relaxed) * surfSelect < threshold;
+                .load(std::memory_order_relaxed) < threshold;
+
+            if(invertRemoval)
+                remove = !remove;
+
             if(remove) ++removedSurfaces;
             removeSurface[i] = remove;
         }
@@ -368,6 +375,6 @@ namespace prop3
             const SearchSurface& surf,
             double entropy) const
     {
-        ++surf.hitCount;
+        surf.hitCount.fetch_add(1 + (1.0-entropy) * 99);
     }
 }

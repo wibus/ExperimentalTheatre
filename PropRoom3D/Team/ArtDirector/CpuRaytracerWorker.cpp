@@ -647,7 +647,8 @@ namespace prop3
                 glm::dvec4 pathSamp = lighSamp * outSample;
                 if(pathSamp.w > _minScreenRayWeight)
                 {
-                    if(!_searchStructure->intersectsScene(lightCast, _rayHitList))
+                    if(!_searchStructure->intersectsScene(
+                            lightCast, _rayHitList, outRay.entropy))
                     {
                         commitSample(pathSamp *
                              coating.directBrdf(

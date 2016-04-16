@@ -35,7 +35,8 @@ namespace prop3
 
         bool intersectsScene(
                 const Raycast& raycast,
-                RayHitList& rayHitList) const;
+                RayHitList& rayHitList,
+                double incomingEntropy) const;
 
         void removeHiddenSurfaces(
                 int threshold,
