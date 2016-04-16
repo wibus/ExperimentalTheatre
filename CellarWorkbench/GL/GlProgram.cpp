@@ -100,7 +100,10 @@ namespace cellar
     {
         if(_id != 0)
         {
-            reset();
+            _binary.reset();
+            _linked = false;
+            glDeleteProgram(_id);
+            _id = 0;
         }
 
         _id = glCreateProgram();
