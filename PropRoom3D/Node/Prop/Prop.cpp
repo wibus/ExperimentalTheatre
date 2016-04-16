@@ -36,6 +36,36 @@ namespace prop3
         stampCurrentUpdate();
     }
 
+    void Prop::setCoating(const std::shared_ptr<Coating>& coating)
+    {
+        blockUpdates();
+
+        for(auto& surf : _surfaces)
+            surf->setCoating(coating);
+
+        unblockUpdates();
+    }
+
+    void Prop::setInnerMaterial(const std::shared_ptr<Material>& mat)
+    {
+        blockUpdates();
+
+        for(auto& surf : _surfaces)
+            surf->setInnerMaterial(mat);
+
+        unblockUpdates();
+    }
+
+    void Prop::setOuterMaterial(const std::shared_ptr<Material>& mat)
+    {
+        blockUpdates();
+
+        for(auto& surf : _surfaces)
+            surf->setOuterMaterial(mat);
+
+        unblockUpdates();
+    }
+
     void Prop::clear()
     {
         for(auto surf : _surfaces)

@@ -12,6 +12,8 @@
 namespace prop3
 {
     class Surface;
+    class Coating;
+    class Material;
 
 
     class PROP3D_EXPORT Prop : public HandleNode
@@ -30,6 +32,10 @@ namespace prop3
         // Surface
         const std::vector<std::shared_ptr<Surface>>& surfaces() const;
         virtual void addSurface(const std::shared_ptr<Surface>& surface);
+
+        virtual void setCoating(const std::shared_ptr<Coating>& coating);
+        virtual void setInnerMaterial(const std::shared_ptr<Material>& mat);
+        virtual void setOuterMaterial(const std::shared_ptr<Material>& mat);
 
 
         // Clear
