@@ -42,6 +42,8 @@ namespace prop3
 
             void setInterrupted(bool interrupted);
 
+            void setHiddenSurfaceRemoved(bool removed);
+
             void incSampleCount();
 
             void addSampleCount(unsigned int count);
@@ -61,6 +63,7 @@ namespace prop3
 
             int _workerCount;
             bool _interrupted;
+            bool _hiddenSurfacesRemoved;
 
             std::chrono::steady_clock::time_point _startTime;
             unsigned int _sampleCount;
@@ -101,9 +104,13 @@ namespace prop3
         bool converged() const;
 
 
-        void setSurfaceRemovalThreshold(size_t threshold);
+        void setSurfaceVisibilityThreshold(int threshold);
 
-        size_t surfaceRemovalThreshold() const;
+        int surfaceVisibilityThreshold() const;
+
+        bool debuggingHiddenSurfaceRemoval() const;
+
+        bool hiddenSurfacesRemoved() const;
 
 
         int draftLevel() const;
@@ -159,7 +166,7 @@ namespace prop3
         unsigned int _sampleCountThreshold;
         double _renderTimeThreshold;
         double _divergenceThreshold;
-        size_t _surfaceRemovalThreshold;
+        int _surfaceVisibilityThreshold;
     };
 
 
@@ -213,9 +220,19 @@ namespace prop3
         return _divergenceThreshold >= divergence();
     }
 
-    inline size_t RaytracerState::surfaceRemovalThreshold() const
+    inline int RaytracerState::surfaceVisibilityThreshold() const
     {
-        return _surfaceRemovalThreshold;
+        return _surfaceVisibilityThreshold;
+    }
+
+    inline bool RaytracerState::debuggingHiddenSurfaceRemoval() const
+    {
+        return _surfaceVisibilityThreshold < 0;
+    }
+
+    inline bool RaytracerState::hiddenSurfacesRemoved() const
+    {
+        return _protectedState._hiddenSurfacesRemoved;
     }
 
     inline int RaytracerState::draftLevel() const

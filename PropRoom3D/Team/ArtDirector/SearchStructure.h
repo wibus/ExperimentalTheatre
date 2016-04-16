@@ -14,7 +14,6 @@ namespace prop3
 
     struct SearchZone;
     struct SearchSurface;
-    struct SearchLightBulb;
 
     class Raycast;
     class RayHitList;
@@ -39,7 +38,7 @@ namespace prop3
                 RayHitList& rayHitList) const;
 
         void removeHiddenSurfaces(
-                size_t threshold,
+                int threshold,
                 size_t& removedZones,
                 size_t& removedSurfaces);
 
@@ -54,6 +53,11 @@ namespace prop3
 
         const std::vector<std::shared_ptr<const LightBulb>>& lights() const;
 
+
+    protected:
+        void incrementCounter(
+                const SearchSurface& surf,
+                double entropy) const;
 
     private:
         // Main Structures

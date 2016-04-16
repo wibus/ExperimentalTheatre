@@ -230,9 +230,9 @@ namespace prop3
             }
         }
 
-        if(!_isOptimized && reportMin.length != Raycast::BACKDROP_LIMIT)
+        if(!_isOptimized && reportMin.length != raycast.limit)
         {
-            ++_searchSurfaces[minId].hitCount;
+            incrementCounter(_searchSurfaces[minId], 1.0);
         }
 
         return reportMin.length;
@@ -257,7 +257,8 @@ namespace prop3
                 {
                     if(_searchSurfaces[s]->intersects(raycast, rayHitList))
                     {
-                        if(!_isOptimized) ++_searchSurfaces[s].hitCount;
+                        if(!_isOptimized)
+                            incrementCounter(_searchSurfaces[s], 1.0);
                         return true;
                     }
                 }
@@ -274,19 +275,23 @@ namespace prop3
     }
 
     void SearchStructure::removeHiddenSurfaces(
-            size_t threshold,
+            int threshold,
             size_t& removedZones,
             size_t& removedSurfaces)
     {
         removedZones = 0;
         removedSurfaces = 0;
 
+        int surfSelect = 1;
+        if(threshold < 0)
+            surfSelect = -1;
+
         std::vector<bool> removeSurface;
         removeSurface.reserve(_searchSurfaces.size());
         for(size_t i=0; i < _searchSurfaces.size(); ++i)
         {
             bool remove = _searchSurfaces[i].hitCount
-                    .load(std::memory_order_relaxed) < threshold;
+                .load(std::memory_order_relaxed) * surfSelect < threshold;
             if(remove) ++removedSurfaces;
             removeSurface[i] = remove;
         }
@@ -350,14 +355,19 @@ namespace prop3
 
         std::swap(_searchZones, newZones);
         std::swap(_searchSurfaces, newSurfs);
-
-        if(removedSurfaces > 0)
-            _isOptimized = true;
+        _isOptimized = true;
     }
 
     void SearchStructure::resetHitCounters()
     {
         for(SearchSurface& surf : _searchSurfaces)
             surf.hitCount.store(0);
+    }
+
+    void SearchStructure::incrementCounter(
+            const SearchSurface& surf,
+            double entropy) const
+    {
+        ++surf.hitCount;
     }
 }

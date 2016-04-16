@@ -309,7 +309,7 @@ namespace prop3
                 raycast.direction = glm::normalize(pixWorldPos - raycast.origin);
                 raycast.invDir = 1.0 / raycast.direction;
 
-                sampleSum += fireScreenRay(it, raycast);
+                sampleSum += fireScreenRay(raycast);
             }
 
 
@@ -410,7 +410,6 @@ namespace prop3
     }
 */
     glm::dvec4 CpuRaytracerWorker::fireScreenRay(
-            TileIterator& iterator,
             const Raycast& fromEyeRay)
     {
         _workingSample = glm::dvec4(0);
@@ -617,9 +616,8 @@ namespace prop3
             const glm::dvec4& outSample,
             const Raycast& outRay)
     {
-        _lightRays.clear();
+        _lightRays.clear();        
         _backdrop->fireOn(_lightRays, hitReport.position, _lightDirectRayCount);
-
         for(const auto& light : _searchStructure->lights())
             light->fireOn(_lightRays, hitReport.position, _lightDirectRayCount);
 

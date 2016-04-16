@@ -29,7 +29,7 @@ namespace cellar
     {
         size_t arraySize = 1 << (sizeof(decltype(_sharedIdx)) * 8);
 
-        //*
+        /*
         std::random_device rd;
         std::mt19937_64 gen(rd());
         std::uniform_real_distribution<double> dis(0.0, 1.0);

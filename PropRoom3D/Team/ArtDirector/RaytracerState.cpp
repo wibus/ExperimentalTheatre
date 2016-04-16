@@ -41,6 +41,7 @@ namespace prop3
     RaytracerState::ProtectedState::ProtectedState() :
         _workerCount(0),
         _interrupted(true),
+        _hiddenSurfacesRemoved(false),
         _startTime(std::chrono::steady_clock::now()),
         _sampleCount(0),
         _divergence(1.0),
@@ -71,6 +72,11 @@ namespace prop3
     void RaytracerState::ProtectedState::setInterrupted(bool interrupted)
     {
         _interrupted = interrupted;
+    }
+
+    void RaytracerState::ProtectedState::setHiddenSurfaceRemoved(bool removed)
+    {
+        _hiddenSurfacesRemoved = removed;
     }
 
     void RaytracerState::ProtectedState::incSampleCount()
@@ -111,7 +117,7 @@ namespace prop3
         _sampleCountThreshold(std::numeric_limits<unsigned int>::max()),
         _renderTimeThreshold(std::numeric_limits<double>::infinity()),
         _divergenceThreshold(-1.0),
-        _surfaceRemovalThreshold(64)
+        _surfaceVisibilityThreshold(64)
     {
 
     }
@@ -131,9 +137,9 @@ namespace prop3
         _renderTimeThreshold = renderTimeThreshold;
     }
 
-    void RaytracerState::setSurfaceRemovalThreshold(size_t threshold)
+    void RaytracerState::setSurfaceVisibilityThreshold(int threshold)
     {
-        _surfaceRemovalThreshold = threshold;
+        _surfaceVisibilityThreshold = threshold;
     }
 
     void RaytracerState::setUpdateEachTile(bool enabled)

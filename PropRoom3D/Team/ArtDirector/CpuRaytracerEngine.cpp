@@ -24,8 +24,7 @@ namespace prop3
         _protectedState(),
         _raytracerState(new RaytracerState(_protectedState)),
         _viewportSize(1, 1),
-        _cameraChanged(false),
-        _forceStageSetUpdate(false)
+        _cameraChanged(false)
     {
         // hardware_concurrency is only a hint on the number of cores
         _protectedState.setWorkerCount(
@@ -91,20 +90,18 @@ namespace prop3
 
     void CpuRaytracerEngine::update(const std::shared_ptr<StageSet>& stageSet)
     {
-        bool stageChanged = stageSet->stageSetChanged() || _forceStageSetUpdate;
+        bool stageChanged = stageSet->stageSetChanged();
         if(stageChanged || _cameraChanged)
         {
             abortRendering();
 
-            if(stageChanged)
-            {
+            bool hiddenSurfaceRemoved = _raytracerState->hiddenSurfacesRemoved();
+            bool debuggingSurfRemoval = _raytracerState->debuggingHiddenSurfaceRemoval();
+
+            if(stageChanged || (hiddenSurfaceRemoved && !debuggingSurfRemoval))
                 dispatchStageSet(stageSet);
-                _forceStageSetUpdate = false;
-            }
             else
-            {
-                _currentSearchStructure->resetHitCounters();
-            }
+                _searchStructure->resetHitCounters();
 
             _cameraChanged = false;
         }
@@ -249,12 +246,6 @@ namespace prop3
         {
             w->updateView(view);
         }
-
-        if(_currentSearchStructure.get() != nullptr)
-        {
-            if(_currentSearchStructure->isOptimized())
-                _forceStageSetUpdate = true;
-        }
     }
 
     void CpuRaytracerEngine::updateProjection(const glm::dmat4& proj)
@@ -264,12 +255,6 @@ namespace prop3
         for(auto& w : _workerObjects)
         {
             w->updateProjection(proj);
-        }
-
-        if(_currentSearchStructure.get() != nullptr)
-        {
-            if(_currentSearchStructure->isOptimized())
-                _forceStageSetUpdate = true;
         }
     }
 
@@ -292,11 +277,12 @@ namespace prop3
 
         StageSetJsonWriter writer;
         std::string stageSetStream = writer.serialize(*stageSet);
-        _currentSearchStructure.reset(new SearchStructure(stageSetStream));
+        _searchStructure.reset(new SearchStructure(stageSetStream));
+        _protectedState.setHiddenSurfaceRemoved(false);
 
         for(auto& w : _workerObjects)
         {
-            w->updateSearchStructure(_currentSearchStructure);
+            w->updateSearchStructure(_searchStructure);
         }
     }
 
@@ -307,10 +293,12 @@ namespace prop3
         size_t removedZones;
         size_t removedSurfaces;
 
-        _currentSearchStructure->removeHiddenSurfaces(
-                _raytracerState->surfaceRemovalThreshold(),
+        _searchStructure->removeHiddenSurfaces(
+                _raytracerState->surfaceVisibilityThreshold(),
                 removedZones,
                 removedSurfaces);
+
+        _protectedState.setHiddenSurfaceRemoved(true);
 
         cellar::getLog().postMessage(new cellar::Message('I', false,
             "Hidden surface removed : "

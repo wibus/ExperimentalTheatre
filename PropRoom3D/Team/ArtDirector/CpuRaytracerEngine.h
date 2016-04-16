@@ -72,7 +72,6 @@ namespace prop3
         std::shared_ptr<RaytracerState> _raytracerState;
 
         bool _cameraChanged;
-        bool _forceStageSetUpdate;
         glm::ivec2 _viewportSize;
         std::vector<std::shared_ptr<Film>> _films;
         std::shared_ptr<Film> _currentFilm;
@@ -80,7 +79,7 @@ namespace prop3
         friend class CpuRaytracerWorker;
         std::vector<std::thread> _workerThreads;
         std::vector<std::shared_ptr<CpuRaytracerWorker>> _workerObjects;
-        std::shared_ptr<SearchStructure> _currentSearchStructure;
+        std::shared_ptr<SearchStructure> _searchStructure;
     };
 }
 
