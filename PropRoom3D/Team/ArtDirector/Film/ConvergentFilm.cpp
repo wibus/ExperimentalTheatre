@@ -48,7 +48,7 @@ namespace prop3
         _varianceBuffer(1, glm::dvec2(0)),
         _divergenceBuffer(1, 1.0),
         _priorityBuffer(1, 1.0),
-        _perceptibleIntensity(0.20),
+        _perceptibleIntensity(0.02),
         _varianceWeightThreshold(4.0),
         _priorityWeightThreshold(7.0),
         _prioritySpanCycleCount(4),
@@ -504,11 +504,12 @@ namespace prop3
             glm::dvec3 curCol = glm::dvec3(curSamp) / curSamp.w;
             double dist = glm::distance(curCol, refCol);
 
-            double stdev = _perceptibleIntensity * glm::sqrt(refVar.x / refVar.y);
+            double stdev = _perceptibleIntensity * glm::sqrt(
+                glm::sqrt(refVar.x / refVar.y) / _perceptibleIntensity);
             double weightRatio = glm::min(curSamp.w / refSamp.w, 1.0);
 
-            return glm::smoothstep(0.0, 1.0, (1.0 -
-                (dist / stdev)) * (weightRatio * weightRatio));
+            return glm::smoothstep(0.0, 1.0, weightRatio -
+                (dist / stdev) * weightRatio);
         }
         else
         {
