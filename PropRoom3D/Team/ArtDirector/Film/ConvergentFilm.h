@@ -86,8 +86,9 @@ namespace prop3
         // Priority stabilizes over time
         std::vector<double> _priorityBuffer;
 
-        double _varianceWeightThreshold;
         int _prioritySpanCycleCount;
+        double _perceptibleIntensity;
+        double _varianceWeightThreshold;
         double _priorityWeightThreshold;
         double _priorityWeightBias;
         double _priorityScale;

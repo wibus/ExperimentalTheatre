@@ -42,10 +42,11 @@ namespace prop3
 //        using std::chrono::high_resolution_clock;
 //        auto tStart = high_resolution_clock::now();
 
-        glm::ivec2 frameResolution = film.frameResolution();
-        std::vector<glm::dvec2>& refVarBuff = film._referenceFilm.varianceBuffer;
+        std::vector<glm::dvec4>& sampleBuff = film._sampleBuffer;
         std::vector<glm::dvec2>& rawVarBuff = film._varianceBuffer;
         std::vector<double>& prioBuff = film._priorityBuffer;
+        glm::ivec2 frameResolution = film.frameResolution();
+
 
         size_t kernelWidth = _gauss.size();
         size_t halfWidth = kernelWidth / 2;
@@ -62,38 +63,16 @@ namespace prop3
                 for(int k=1; k <= halfWidth; ++k)
                 {
                     if(i-k >= 0)
-                    {
-                        int index = lineBaseIdx+i-k;
-                        const glm::dvec2& var = rawVarBuff[index];
-                        const glm::dvec2& refVar = refVarBuff[index];
-                        double compatibility = film.refShotCompatibility(index);
-                        glm::dvec2 mixedVar = var + refVar * compatibility;
-
-                        _tmpBuff[idx] += _gauss[halfWidth-k] * mixedVar.x / mixedVar.y;
-                    }
+                        _tmpBuff[idx] += _gauss[halfWidth-k] * (rawVarBuff[idx-k].x / rawVarBuff[idx-k].y);
                     else
                         centerWeight += _gauss[halfWidth-k];
 
                     if(i+k < frameResolution.x)
-                    {
-                        int index = lineBaseIdx+i+k;
-                        const glm::dvec2& var = rawVarBuff[index];
-                        const glm::dvec2& refVar = refVarBuff[index];
-                        double compatibility = film.refShotCompatibility(index);
-                        glm::dvec2 mixedVar = var + refVar * compatibility;
-
-                        _tmpBuff[idx] += _gauss[halfWidth+k] * mixedVar.x / mixedVar.y;
-                    }
+                        _tmpBuff[idx] += _gauss[halfWidth+k] * (rawVarBuff[idx+k].x / rawVarBuff[idx+k].y);
                     else
                         centerWeight += _gauss[halfWidth+k];
                 }
-
-                const glm::dvec2& var = rawVarBuff[idx];
-                const glm::dvec2& refVar = refVarBuff[idx];
-                double compatibility = film.refShotCompatibility(idx);
-                glm::dvec2 mixedVar = var + refVar * compatibility;
-
-                _tmpBuff[idx] += centerWeight * mixedVar.x / mixedVar.y;
+                _tmpBuff[idx] += centerWeight * (rawVarBuff[idx].x / rawVarBuff[idx].y);
             }
         }
 
@@ -105,38 +84,35 @@ namespace prop3
             {
                 unsigned int idx = lineBaseIdx + i;
 
-                double bluredVar = 0.0;
+                double blurredVar = 0.0;
                 double centerWeight = _gauss[halfWidth];
                 for(int k=1; k <= halfWidth; ++k)
                 {
                     if(j-k >= 0)
-                        bluredVar += _gauss[halfWidth-k] *
+                        blurredVar += _gauss[halfWidth-k] *
                             _tmpBuff[(j-k)*frameResolution.x + i];
                     else
                         centerWeight += _gauss[halfWidth-k];
 
                     if(j+k < frameResolution.y)
-                        bluredVar += _gauss[halfWidth+k] *
+                        blurredVar += _gauss[halfWidth+k] *
                             _tmpBuff[(j+k)*frameResolution.x + i];
                     else
                         centerWeight += _gauss[halfWidth+k];
                 }
-                bluredVar += centerWeight * _tmpBuff[idx];
+                blurredVar += centerWeight * _tmpBuff[idx];
 
+                const glm::dvec4& sample = sampleBuff[idx];
+                glm::dvec3 color = glm::dvec3(sample) / sample.x;
+                double pixWeight = sample.w;
 
-                double compatibility = film.refShotCompatibility(idx);
-                glm::dvec4 mixedSample = film._sampleBuffer[idx] +
-                    film._referenceFilm.sampleBuffer[idx] * compatibility;
-                glm::dvec3 mixedCol = glm::dvec3(mixedSample) / mixedSample.w;
-                mixedCol = glm::min(mixedCol, film._maxPixelIntensity);
-                double mixedWeight = mixedSample.w;
+                double div = film.toDivergence(
+                    glm::dvec2(blurredVar, 1.0),
+                    color, pixWeight);
 
-                double divergence = film.toDivergence(
-                    glm::dvec2(bluredVar, 1.0), mixedCol, mixedWeight);
-
-                double weightPrio = mixedWeight*mixedWeight*mixedWeight;
+                double weightPrio = pixWeight*pixWeight*pixWeight;
                 prioBuff[idx] = film._priorityScale *
-                    (divergence + film._priorityWeightBias / weightPrio);
+                    (glm::sqrt(div) + film._priorityWeightBias / weightPrio);
             }
         }
 

@@ -48,6 +48,7 @@ namespace prop3
         _varianceBuffer(1, glm::dvec2(0)),
         _divergenceBuffer(1, 1.0),
         _priorityBuffer(1, 1.0),
+        _perceptibleIntensity(15.0),
         _varianceWeightThreshold(4.0),
         _priorityWeightThreshold(7.0),
         _prioritySpanCycleCount(4),
@@ -164,7 +165,7 @@ namespace prop3
 
         if(hardReset)
         {
-            _prioritizer->reset(_frameResolution, 5, 1.0);
+            _prioritizer->reset(_frameResolution, 5, 2.0);
             clearReferenceShot();
         }
     }
@@ -304,7 +305,7 @@ namespace prop3
 
         double meanSum = 0;
         for(int i=0; i < MEAN_TILE_COUNT; ++i)
-            meanSum += glm::sqrt(tileVal[i]);
+            meanSum += tileVal[i];
 
         return meanSum / MEAN_TILE_COUNT;
     }
@@ -322,7 +323,7 @@ namespace prop3
                 for(int i=tile.minCorner().x; i < tile.maxCorner().x; ++i, ++index)
                 {
                     double div = _divergenceBuffer[index];
-                    divergenceSum += div * div;
+                    divergenceSum += div;
                 }
             }
 
@@ -344,7 +345,12 @@ namespace prop3
 
             double topPriority = _prioritizer->maxFramePriority();
             topPriority = glm::min(topPriority, 1.0);
-            _priorityThreshold = 0.25 * topPriority;
+
+            double cycleDist = (_framePassCount-_prioritySpanCycleCount)/
+                                    (_prioritySpanCycleCount);
+            double scale = glm::exp(-cycleDist*cycleDist / _prioritySpanCycleCount);
+
+            _priorityThreshold = scale * topPriority;
         }
         else
         {
@@ -420,7 +426,7 @@ namespace prop3
                 _colorBuffer[index] = mixedColor;
 
             else if(_colorOutput == ColorOutput::WEIGHT)
-                _colorBuffer[index] = weightToColor(mixedSamp);
+                _colorBuffer[index] = weightToColor(newSample);
 
             else if(_colorOutput == ColorOutput::VARIANCE)
                 _colorBuffer[index] = varianceToColor(mixedVar);
@@ -483,10 +489,11 @@ namespace prop3
             const glm::dvec3& color,
             double weight) const
     {
-        const double WEIGHT_OFFSET = 0.25;
-        double scale = glm::length(color) + WEIGHT_OFFSET;
+        const double WEIGHT_OFFSET = 1.0;
+        glm::dvec3 clamped = glm::min(color, _maxPixelIntensity);
+        double scale = glm::length(clamped) + WEIGHT_OFFSET;
         double newVar = variance.x / variance.y;
-        return newVar / (scale * weight);
+        return newVar / (weight * scale);
     }
 
     double ConvergentFilm::refShotCompatibility(unsigned int index) const
@@ -498,8 +505,13 @@ namespace prop3
         {
             glm::dvec3 refCol = glm::dvec3(refSamp) / refSamp.w;
             glm::dvec3 curCol = glm::dvec3(sample) / sample.w;
-            double dist = glm::distance(curCol, refCol) * sample.w;
-            return glm::smoothstep(0.0, 1.0, (1.0 - dist * 0.35) * sample.w / 32.0 - 0.15);
+            double dist = glm::distance(curCol, refCol);
+
+            double edgeSqrDist = sample.w / _priorityWeightThreshold;
+            double weightScale = 1 - 1 / (1 + (edgeSqrDist*edgeSqrDist));
+
+            return weightScale * glm::smoothstep(0.0, 1.0,
+                (1.0 - dist*_perceptibleIntensity));
         }
         else
         {
