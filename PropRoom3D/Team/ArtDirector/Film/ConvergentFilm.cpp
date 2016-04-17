@@ -48,7 +48,7 @@ namespace prop3
         _varianceBuffer(1, glm::dvec2(0)),
         _divergenceBuffer(1, 1.0),
         _priorityBuffer(1, 1.0),
-        _perceptibleIntensity(15.0),
+        _perceptibleIntensity(0.20),
         _varianceWeightThreshold(4.0),
         _priorityWeightThreshold(7.0),
         _prioritySpanCycleCount(4),
@@ -343,14 +343,9 @@ namespace prop3
         {
             _prioritizer->launchPrioritization(*this);
 
-            double topPriority = _prioritizer->maxFramePriority();
-            topPriority = glm::min(topPriority, 1.0);
-
-            double cycleDist = (_framePassCount-_prioritySpanCycleCount)/
-                                    (_prioritySpanCycleCount);
-            double scale = glm::exp(-cycleDist*cycleDist / _prioritySpanCycleCount);
-
-            _priorityThreshold = scale * topPriority;
+            double avrgPriority = _prioritizer->averagePriority();
+            avrgPriority = glm::min(avrgPriority, 1.0);
+            _priorityThreshold = 0.75 * avrgPriority;
         }
         else
         {
@@ -410,20 +405,18 @@ namespace prop3
             double compatibility = refShotCompatibility(index);
             glm::dvec2 mixedVar = newWeightedVar + refVar * compatibility;
             glm::dvec4 mixedSamp = newSample + refSamp * compatibility;
-            glm::dvec3 mixedColor = sampleToColor(mixedSamp);
 
 
             double newDiv = 1.0;
-            double mixedWeight = mixedSamp.w;
             if(newSample.w > _priorityWeightThreshold)
             {
                 newDiv = toDivergence(
-                    mixedVar, mixedColor, mixedWeight);
+                    mixedSamp, mixedVar);
                 _divergenceBuffer[index] = newDiv;
             }
 
             if(_colorOutput == ColorOutput::ALBEDO)
-                _colorBuffer[index] = mixedColor;
+                _colorBuffer[index] = sampleToColor(mixedSamp);
 
             else if(_colorOutput == ColorOutput::WEIGHT)
                 _colorBuffer[index] = weightToColor(newSample);
@@ -485,11 +478,13 @@ namespace prop3
     }
 
     double ConvergentFilm::toDivergence(
-            const glm::dvec2& variance,
-            const glm::dvec3& color,
-            double weight) const
+            const glm::dvec4& sample,
+            const glm::dvec2& variance) const
     {
         const double WEIGHT_OFFSET = 1.0;
+
+        double weight = sample.w;
+        glm::dvec3 color = glm::dvec3(sample) / weight;
         glm::dvec3 clamped = glm::min(color, _maxPixelIntensity);
         double scale = glm::length(clamped) + WEIGHT_OFFSET;
         double newVar = variance.x / variance.y;
@@ -499,19 +494,21 @@ namespace prop3
     double ConvergentFilm::refShotCompatibility(unsigned int index) const
     {
         const glm::dvec4& refSamp = _referenceFilm.sampleBuffer[index];
-        const glm::dvec4& sample = _sampleBuffer[index];
+        const glm::dvec4& curSamp = _sampleBuffer[index];
+
+        const glm::dvec2& refVar = _referenceFilm.varianceBuffer[index];
 
         if(refSamp.w > 0.0)
         {
             glm::dvec3 refCol = glm::dvec3(refSamp) / refSamp.w;
-            glm::dvec3 curCol = glm::dvec3(sample) / sample.w;
+            glm::dvec3 curCol = glm::dvec3(curSamp) / curSamp.w;
             double dist = glm::distance(curCol, refCol);
 
-            double edgeSqrDist = sample.w / _priorityWeightThreshold;
-            double weightScale = 1 - 1 / (1 + (edgeSqrDist*edgeSqrDist));
+            double stdev = _perceptibleIntensity * glm::sqrt(refVar.x / refVar.y);
+            double weightRatio = glm::min(curSamp.w / refSamp.w, 1.0);
 
-            return weightScale * glm::smoothstep(0.0, 1.0,
-                (1.0 - dist*_perceptibleIntensity));
+            return glm::smoothstep(0.0, 1.0, (1.0 -
+                (dist / stdev)) * (weightRatio * weightRatio));
         }
         else
         {

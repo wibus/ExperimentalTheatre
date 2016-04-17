@@ -12,7 +12,7 @@ using namespace cellar;
 namespace prop3
 {
     PixelPrioritizer::PixelPrioritizer() :
-        _frameMaxPriority(1.0)
+        _frameAvrgPriority(1.0)
     {
 
     }
@@ -34,7 +34,7 @@ namespace prop3
 
         computeGaussLine(_gauss, blurWidth, blurVariance);
 
-        _frameMaxPriority = 1.0;
+        _frameAvrgPriority = 1.0;
     }
 
     bool PixelPrioritizer::launchPrioritization(ConvergentFilm& film)
@@ -42,10 +42,12 @@ namespace prop3
 //        using std::chrono::high_resolution_clock;
 //        auto tStart = high_resolution_clock::now();
 
-        std::vector<glm::dvec4>& sampleBuff = film._sampleBuffer;
+        std::vector<glm::dvec4>& refSampBuff = film._referenceFilm.sampleBuffer;
+        std::vector<glm::dvec4>& rawSampBuff = film._sampleBuffer;
         std::vector<glm::dvec2>& rawVarBuff = film._varianceBuffer;
         std::vector<double>& prioBuff = film._priorityBuffer;
         glm::ivec2 frameResolution = film.frameResolution();
+        size_t pixelCount = rawSampBuff.size();
 
 
         size_t kernelWidth = _gauss.size();
@@ -102,39 +104,43 @@ namespace prop3
                 }
                 blurredVar += centerWeight * _tmpBuff[idx];
 
-                const glm::dvec4& sample = sampleBuff[idx];
-                glm::dvec3 color = glm::dvec3(sample) / sample.x;
-                double pixWeight = sample.w;
+
+                double compatibility = film.refShotCompatibility(idx);
+                glm::dvec4 mixedSample = rawSampBuff[idx] +
+                        refSampBuff[idx] * compatibility;
 
                 double div = film.toDivergence(
-                    glm::dvec2(blurredVar, 1.0),
-                    color, pixWeight);
+                    mixedSample, glm::dvec2(blurredVar, 1.0));
 
+                double pixWeight = mixedSample.w;
                 double weightPrio = pixWeight*pixWeight*pixWeight;
                 prioBuff[idx] = film._priorityScale *
                     (glm::sqrt(div) + film._priorityWeightBias / weightPrio);
             }
         }
 
-        _frameMaxPriority = 0.0;
+        _frameAvrgPriority = 0.0;
         for(const std::shared_ptr<Tile>& tile : film._tiles)
         {
             double tileMaxPriority = 0.0;
             for(int j=tile->minCorner().y; j < tile->maxCorner().y; ++j)
             {
+                double tilePrioSum = 0.0;
                 int index = j * frameResolution.x + tile->minCorner().x;
                 for(int i=tile->minCorner().x; i < tile->maxCorner().x; ++i, ++index)
                 {
+                    tilePrioSum += prioBuff[index] * prioBuff[index];
+
                     if(tileMaxPriority < prioBuff[index])
                         tileMaxPriority = prioBuff[index];
                 }
 
-                if(_frameMaxPriority < tileMaxPriority)
-                    _frameMaxPriority = tileMaxPriority;
+                _frameAvrgPriority += tilePrioSum;
             }
 
             tile->setTilePriority(tileMaxPriority);
         }
+        _frameAvrgPriority = glm::sqrt(_frameAvrgPriority / pixelCount);
 
         if(film._colorOutput == Film::ColorOutput::PRIORITY)
         {
@@ -156,9 +162,9 @@ namespace prop3
 //            "PixelPrioritizer"));
     }
 
-    double PixelPrioritizer::maxFramePriority() const
+    double PixelPrioritizer::averagePriority() const
     {
-        return _frameMaxPriority;
+        return _frameAvrgPriority;
     }
 
      void PixelPrioritizer::computeGaussLine(

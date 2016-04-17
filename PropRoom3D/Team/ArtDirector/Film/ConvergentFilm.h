@@ -66,9 +66,8 @@ namespace prop3
         glm::vec3 compatibilityToColor(double compatibility) const;
 
         double toDivergence(
-                const glm::dvec2& variance,
-                const glm::dvec3& color,
-                double weight) const;
+                const glm::dvec4& sample,
+                const glm::dvec2& variance) const;
 
         double refShotCompatibility(unsigned int index) const;
 

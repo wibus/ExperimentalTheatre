@@ -22,7 +22,7 @@ namespace prop3
         virtual bool launchPrioritization(
                 ConvergentFilm& film);
 
-        virtual double maxFramePriority() const;
+        virtual double averagePriority() const;
 
     protected:
         virtual void computeGaussLine(
@@ -33,7 +33,7 @@ namespace prop3
     private:
         std::vector<double> _tmpBuff;
         std::vector<double> _gauss;
-        double _frameMaxPriority;
+        double _frameAvrgPriority;
     };
 }
 
