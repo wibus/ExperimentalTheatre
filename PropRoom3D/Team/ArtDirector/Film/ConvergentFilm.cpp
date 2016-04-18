@@ -483,37 +483,32 @@ namespace prop3
     {
         const double WEIGHT_OFFSET = 1.0;
 
-        double weight = sample.w;
-        glm::dvec3 color = glm::dvec3(sample) / weight;
+        glm::dvec3 color = sampleToColor(sample);
         glm::dvec3 clamped = glm::min(color, _maxPixelIntensity);
         double scale = glm::length(clamped) + WEIGHT_OFFSET;
         double newVar = variance.x / variance.y;
-        return newVar / (weight * scale);
+        return newVar / (sample.w * scale);
     }
 
     double ConvergentFilm::refShotCompatibility(unsigned int index) const
     {
+        const glm::dvec2& refVar = _referenceFilm.varianceBuffer[index];
         const glm::dvec4& refSamp = _referenceFilm.sampleBuffer[index];
+
+        if(refSamp.w == 0)
+            return 0.0;
+
         const glm::dvec4& curSamp = _sampleBuffer[index];
 
-        const glm::dvec2& refVar = _referenceFilm.varianceBuffer[index];
+        glm::dvec3 refCol = sampleToColor(refSamp);
+        glm::dvec3 curCol = sampleToColor(curSamp);
+        double dist = glm::distance(curCol, refCol);
 
-        if(refSamp.w > 0.0)
-        {
-            glm::dvec3 refCol = glm::dvec3(refSamp) / refSamp.w;
-            glm::dvec3 curCol = glm::dvec3(curSamp) / curSamp.w;
-            double dist = glm::distance(curCol, refCol);
+        double stdev = _perceptibleIntensity * glm::sqrt(
+            glm::sqrt(refVar.x / refVar.y) / _perceptibleIntensity);
+        double weightRatio = glm::min(curSamp.w / refSamp.w, 1.0);
 
-            double stdev = _perceptibleIntensity * glm::sqrt(
-                glm::sqrt(refVar.x / refVar.y) / _perceptibleIntensity);
-            double weightRatio = glm::min(curSamp.w / refSamp.w, 1.0);
-
-            return glm::smoothstep(0.0, 1.0, weightRatio -
-                (dist / stdev) * weightRatio);
-        }
-        else
-        {
-            return 0.0;
-        }
+        return glm::smoothstep(0.0, 1.0, weightRatio -
+            (dist / stdev) * weightRatio);
     }
 }
