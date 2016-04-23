@@ -42,9 +42,11 @@ namespace prop3
 
     GlPostProdUnit::~GlPostProdUnit()
     {
+        glDeleteTextures(1, &_colorBufferTexId);
         glDeleteVertexArrays(1, &_fullscreenVao);
         glDeleteBuffers(1, &_fullscreenVbo);
 
+        _colorBufferTexId = 0;
         _fullscreenVao = 0;
         _fullscreenVbo = 0;
     }
@@ -52,16 +54,6 @@ namespace prop3
     const float* GlPostProdUnit::lowpassKernel() const
     {
         return &(_lowpassKernel[0]);
-    }
-
-    void GlPostProdUnit::setColorBufferTexId(unsigned int id)
-    {
-        _colorBufferTexId = id;
-    }
-
-    void GlPostProdUnit::setDepthBufferTexId(unsigned int id)
-    {
-        _depthBufferTexId = id;
     }
 
     void GlPostProdUnit::updateDepthRange(const glm::vec2& range)
@@ -81,6 +73,7 @@ namespace prop3
         };
 
 
+        // Quad VAO
         glGenVertexArrays(1, &_fullscreenVao);
         glBindVertexArray(_fullscreenVao);
 
@@ -92,6 +85,27 @@ namespace prop3
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
+
+
+        // Color texture
+        glGenTextures(1, &_colorBufferTexId);
+        glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        // Depth texture
+        glGenTextures(1, &_depthBufferTexId);
+        glBindTexture(GL_TEXTURE_2D, _depthBufferTexId);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        clearOutput();
 
 
         // Compile Post Prod Shader
@@ -161,6 +175,45 @@ namespace prop3
         glBindVertexArray(0);
 
         _postProdProgram.popProgram();
+    }
+
+    void GlPostProdUnit::clearOutput()
+    {
+        const float maxDepth = INFINITY;
+        const float black[] = {0, 0, 0};
+
+        glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_FLOAT, black);
+
+        glBindTexture(GL_TEXTURE_2D, _depthBufferTexId);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, 1, 1, 0,
+                     GL_RED, GL_FLOAT, &maxDepth);
+
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    void GlPostProdUnit::update(Film& film,
+            Film::ColorOutput& colorOutput)
+    {
+        glm::ivec2 viewportSize = film.frameResolution();
+        const std::vector<float>& depthBuffer = film.depthBuffer();
+        const std::vector<glm::vec3>& colorBuffer = film.colorBuffer(colorOutput);
+
+        // Send image to GPU
+        glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
+        glTexImage2D(GL_TEXTURE_2D,         0,  GL_RGB32F,
+                     viewportSize.x,        viewportSize.y,
+                     0, GL_RGB, GL_FLOAT,   colorBuffer.data());
+
+        if(!depthBuffer.empty())
+        {
+            glBindTexture(GL_TEXTURE_2D, _depthBufferTexId);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F,
+                         viewportSize.x,        viewportSize.y,
+                         0, GL_RED, GL_FLOAT, depthBuffer.data());
+        }
+
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     void GlPostProdUnit::activateLowPassFilter(bool activate)

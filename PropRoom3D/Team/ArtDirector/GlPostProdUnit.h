@@ -5,7 +5,7 @@
 
 #include <CellarWorkbench/GL/GlProgram.h>
 
-#include "../../libPropRoom3D_global.h"
+#include "Film/Film.h"
 
 
 namespace prop3
@@ -20,12 +20,13 @@ namespace prop3
 
         virtual const float* lowpassKernel() const;
 
-        virtual void setColorBufferTexId(unsigned int id);
-        virtual void setDepthBufferTexId(unsigned int id);
         virtual void updateDepthRange(const glm::vec2& range);
 
         virtual void setup();
         virtual void execute();
+        virtual void clearOutput();
+        virtual void update(Film& film,
+            Film::ColorOutput& colorOutput);
 
         virtual void activateLowPassFilter(bool activate);
         virtual void activateAdaptativeFiltering(bool enable);

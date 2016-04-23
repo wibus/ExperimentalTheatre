@@ -47,11 +47,8 @@ namespace prop3
     protected:
         virtual void sendBuffersToGpu();
         virtual void printConvergence();
-        virtual void clearTextures();
 
     private:
-        unsigned int _colorBufferTexId;
-        unsigned int _depthBufferTexId;
         std::shared_ptr<CpuRaytracerEngine> _localRaytracer;
         std::shared_ptr<DebugRenderer> _debugRenderer;
         std::shared_ptr<GlPostProdUnit> _postProdUnit;

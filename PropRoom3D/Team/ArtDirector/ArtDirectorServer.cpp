@@ -20,7 +20,6 @@ namespace prop3
     const double ArtDirectorServer::IMAGE_DEPTH = 400.0;
 
     ArtDirectorServer::ArtDirectorServer() :
-        _colorBufferTexId(0),
         _debugRenderer(new DebugRenderer()),
         _postProdUnit(new GlPostProdUnit()),
         _lastUpdate(TimeStamp::getCurrentTimeStamp())
@@ -34,33 +33,10 @@ namespace prop3
 
     ArtDirectorServer::~ArtDirectorServer()
     {
-        glDeleteTextures(1, &_colorBufferTexId);
-        _colorBufferTexId = 0;
     }
 
     void ArtDirectorServer::setup(const std::shared_ptr<StageSet>& stageSet)
     {
-        // Color texture
-        glGenTextures(1, &_colorBufferTexId);
-        glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        // Depth texture
-        glGenTextures(1, &_depthBufferTexId);
-        glBindTexture(GL_TEXTURE_2D, _depthBufferTexId);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        clearTextures();
-
-
         _stageSet = stageSet;
 
         RaytracerState::DraftParams draftParams;
@@ -72,11 +48,7 @@ namespace prop3
         _localRaytracer->setup(draftParams);
 
         if(_postProdUnit)
-        {
-            _postProdUnit->setColorBufferTexId(_colorBufferTexId);
-            _postProdUnit->setDepthBufferTexId(_depthBufferTexId);
             _postProdUnit->setup();
-        }
 
         _debugRenderer->setup();
 
@@ -88,7 +60,7 @@ namespace prop3
         if(_stageSet->stageSetChanged(_lastUpdate))
         {
             _lastUpdate = TimeStamp::getCurrentTimeStamp();
-            clearTextures();
+            _postProdUnit->clearOutput();
         }
 
         _localRaytracer->update(_stageSet);
@@ -125,7 +97,7 @@ namespace prop3
     void ArtDirectorServer::terminate()
     {
         _localRaytracer->terminate();
-        clearTextures();
+        _postProdUnit->clearOutput();
 
         // TODO wbussiere 2015-05-01 : terminate clients
     }
@@ -138,7 +110,7 @@ namespace prop3
 
     void ArtDirectorServer::notify(cellar::CameraMsg &msg)
     {
-        clearTextures();
+        _postProdUnit->clearOutput();
         if(msg.change == cellar::CameraMsg::EChange::VIEWPORT)
         {
             const glm::ivec2& viewport = msg.camera.viewport();
@@ -202,26 +174,7 @@ namespace prop3
         else if(colorOuputType == RaytracerState::COLOROUTPUT_COMPATIBILITY)
             colorOutput = Film::ColorOutput::COMPATIBILITY;
 
-        auto film = _localRaytracer->film();
-        glm::ivec2 viewportSize = film->frameResolution();
-        const std::vector<float>& depthBuffer = film->depthBuffer();
-        const std::vector<glm::vec3>& colorBuffer = film->colorBuffer(colorOutput);
-
-        // Send image to GPU
-        glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
-        glTexImage2D(GL_TEXTURE_2D,         0,  GL_RGB32F,
-                     viewportSize.x,        viewportSize.y,
-                     0, GL_RGB, GL_FLOAT,   colorBuffer.data());
-
-        if(!depthBuffer.empty())
-        {
-            glBindTexture(GL_TEXTURE_2D, _depthBufferTexId);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F,
-                         viewportSize.x,        viewportSize.y,
-                         0, GL_RED, GL_FLOAT, depthBuffer.data());
-        }
-
-        glBindTexture(GL_TEXTURE_2D, 0);
+        _postProdUnit->update(*_localRaytracer->film(), colorOutput);
     }
 
     void ArtDirectorServer::printConvergence()
@@ -278,20 +231,5 @@ namespace prop3
 
         cellar::getLog().postMessage(new cellar::Message(
             'I', false, ss.str(), "CpuRaytracerServer"));
-    }
-
-    void ArtDirectorServer::clearTextures()
-    {
-        const float maxDepth = INFINITY;
-        const float black[] = {0, 0, 0};
-
-        glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_FLOAT, black);
-
-        glBindTexture(GL_TEXTURE_2D, _depthBufferTexId);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, 1, 1, 0,
-                     GL_RED, GL_FLOAT, &maxDepth);
-
-        glBindTexture(GL_TEXTURE_2D, 0);
     }
 }
