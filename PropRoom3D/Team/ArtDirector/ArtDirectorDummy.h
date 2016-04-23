@@ -6,6 +6,8 @@
 
 namespace prop3
 {
+    class CpuRaytracerEngine;
+
     class PROP3D_EXPORT ArtDirectorDummy :
             public AbstractArtDirector
     {

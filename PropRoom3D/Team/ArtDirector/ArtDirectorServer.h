@@ -31,18 +31,23 @@ namespace prop3
         virtual void terminate() override;
 
         virtual void resize(int width, int height) override;
-
         virtual void notify(cellar::CameraMsg &msg) override;
 
         std::shared_ptr<GlPostProdUnit> postProdUnit() const;
-
         std::shared_ptr<RaytracerState> raytracerState() const;
-
         std::shared_ptr<Film> film() const;
 
+        std::string ipAddress() const;
 
-        static const double FORCE_REFRESH_DT;
+        int tcpPort() const;
+        void setTcpPort(int port);
+
+        bool isRunning() const;
+        void turnOn();
+        void turnOff();
+
         static const double IMAGE_DEPTH;
+        static const int DEFAULT_TCP_PORT;
 
     protected:
         virtual void sendBuffersToGpu();

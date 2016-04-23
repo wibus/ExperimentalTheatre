@@ -16,8 +16,8 @@
 
 namespace prop3
 {
-    const double ArtDirectorServer::FORCE_REFRESH_DT = 0.0;
     const double ArtDirectorServer::IMAGE_DEPTH = 400.0;
+    const int ArtDirectorServer::DEFAULT_TCP_PORT = 8004;
 
     ArtDirectorServer::ArtDirectorServer() :
         _debugRenderer(new DebugRenderer()),
@@ -46,11 +46,8 @@ namespace prop3
         draftParams.fastDraftEnabled = true;
 
         _localRaytracer->setup(draftParams);
-
-        if(_postProdUnit)
-            _postProdUnit->setup();
-
         _debugRenderer->setup();
+        _postProdUnit->setup();
 
         camera()->refresh();
     }
@@ -155,6 +152,36 @@ namespace prop3
     std::shared_ptr<Film> ArtDirectorServer::film() const
     {
         return _localRaytracer->film();
+    }
+
+    std::string ArtDirectorServer::ipAddress() const
+    {
+        return "";
+    }
+
+    int ArtDirectorServer::tcpPort() const
+    {
+        return -1;
+    }
+
+    void ArtDirectorServer::setTcpPort(int port)
+    {
+
+    }
+
+    bool ArtDirectorServer::isRunning() const
+    {
+        return false;
+    }
+
+    void ArtDirectorServer::turnOn()
+    {
+
+    }
+
+    void ArtDirectorServer::turnOff()
+    {
+
     }
 
     void ArtDirectorServer::sendBuffersToGpu()

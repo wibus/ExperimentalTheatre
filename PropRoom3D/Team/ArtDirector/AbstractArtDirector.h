@@ -42,6 +42,8 @@ namespace prop3
         virtual const std::shared_ptr<cellar::Camera>& camera() const;
         virtual void setCamera(const std::shared_ptr<cellar::Camera>& camera);
 
+        constexpr static const double FORCE_REFRESH_DT = 0.0;
+
 
     private:
         std::shared_ptr<cellar::Camera> _camera;
