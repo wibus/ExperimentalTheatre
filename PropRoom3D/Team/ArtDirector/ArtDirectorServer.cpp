@@ -4,14 +4,21 @@
 #include <iostream>
 #include <sstream>
 
+#include <QTcpServer>
+#include <QTcpSocket>
+#include <QNetworkInterface>
+
 #include <CellarWorkbench/Camera/Camera.h>
 #include <CellarWorkbench/Misc/Log.h>
 
+#include "Film/ConvergentFilm.h"
+#include "Network/ServerSocket.h"
 #include "CpuRaytracerEngine.h"
 #include "DebugRenderer.h"
-#include "Film/Film.h"
 #include "GlPostProdUnit.h"
 #include "Node/StageSet.h"
+
+using namespace cellar;
 
 
 namespace prop3
@@ -20,6 +27,9 @@ namespace prop3
     const int ArtDirectorServer::DEFAULT_TCP_PORT = 8004;
 
     ArtDirectorServer::ArtDirectorServer() :
+        _tcpPort(0),
+        _tcpServer(nullptr),
+        _film(new ConvergentFilm()),
         _debugRenderer(new DebugRenderer()),
         _postProdUnit(new GlPostProdUnit()),
         _lastUpdate(TimeStamp::getCurrentTimeStamp())
@@ -33,6 +43,7 @@ namespace prop3
 
     ArtDirectorServer::~ArtDirectorServer()
     {
+        delete _tcpServer;
     }
 
     void ArtDirectorServer::setup(const std::shared_ptr<StageSet>& stageSet)
@@ -45,11 +56,16 @@ namespace prop3
         draftParams.frameCountPerLevel = 1;
         draftParams.fastDraftEnabled = true;
 
-        _localRaytracer->setup(draftParams);
+        _localRaytracer->setup(draftParams, _film);
         _debugRenderer->setup();
         _postProdUnit->setup();
 
         camera()->refresh();
+
+        delete _tcpServer;
+        _tcpServer = new QTcpServer();
+        connect(_tcpServer, &QTcpServer::newConnection,
+                this, &ArtDirectorServer::newConnection);
     }
 
     void ArtDirectorServer::update(double dt)
@@ -64,6 +80,21 @@ namespace prop3
 
         // TODO wbussiere 2015-05-01 : retreive client frames
         //_localRaytracer->pourFramesIn();
+
+        auto it = _sockets.begin();
+        while(it != _sockets.end())
+        {
+            if(!it->isOpen())
+            {
+                getLog().postMessage(new Message('W', false,
+                    "ServerSocket removed", "ArtDirectorServer"));
+                it = _sockets.erase(it);
+            }
+            else
+            {
+                ++it;
+            }
+        }
     }
 
     void ArtDirectorServer::draw(double dt)
@@ -105,15 +136,15 @@ namespace prop3
 		// Camera viewport is independent of OpenGL viewport.
     }
 
-    void ArtDirectorServer::notify(cellar::CameraMsg &msg)
+    void ArtDirectorServer::notify(CameraMsg &msg)
     {
         _postProdUnit->clearOutput();
-        if(msg.change == cellar::CameraMsg::EChange::VIEWPORT)
+        if(msg.change == CameraMsg::EChange::VIEWPORT)
         {
             const glm::ivec2& viewport = msg.camera.viewport();
             _localRaytracer->resize(viewport.x, viewport.y);
         }
-        else if(msg.change == cellar::CameraMsg::EChange::PROJECTION)
+        else if(msg.change == CameraMsg::EChange::PROJECTION)
         {
             const glm::mat4& proj = msg.camera.projectionMatrix();
             _localRaytracer->updateProjection(proj);
@@ -129,7 +160,7 @@ namespace prop3
             _postProdUnit->updateDepthRange(depthRange);
 
         }
-        else if(msg.change == cellar::CameraMsg::EChange::VIEW)
+        else if(msg.change == CameraMsg::EChange::VIEW)
         {
             _localRaytracer->updateView(msg.camera.viewMatrix());
             _debugRenderer->updateView(msg.camera.viewMatrix());
@@ -151,37 +182,111 @@ namespace prop3
 
     std::shared_ptr<Film> ArtDirectorServer::film() const
     {
-        return _localRaytracer->film();
+        return _film;
     }
 
     std::string ArtDirectorServer::ipAddress() const
     {
-        return "";
+        foreach(const QHostAddress &address, QNetworkInterface::allAddresses()) {
+            if (address.protocol() == QAbstractSocket::IPv4Protocol &&
+                address != QHostAddress(QHostAddress::LocalHost))
+                 return address.toString().toStdString();
+        }
+
+        return "localhost";
     }
 
     int ArtDirectorServer::tcpPort() const
     {
-        return -1;
+        return _tcpPort;
     }
 
     void ArtDirectorServer::setTcpPort(int port)
     {
-
+        if(!_tcpServer->isListening())
+        {
+            _tcpPort = port;
+        }
+        else
+        {
+            getLog().postMessage(new Message('W', false,
+                "Cannot change TCP port when server is already listening.",
+                "ArtDirectorServer"));
+        }
     }
 
     bool ArtDirectorServer::isRunning() const
     {
-        return false;
+        return _tcpServer->isListening();
     }
 
     void ArtDirectorServer::turnOn()
     {
+        if(!_tcpServer->isListening())
+        {
+            QHostAddress address(ipAddress().c_str());
+            _tcpServer->listen(address, _tcpPort);
 
+            if(_tcpServer->isListening())
+            {
+                getLog().postMessage(new Message('I', false,
+                    "Server up and running " +
+                    toString(address.toString(), _tcpPort),
+                    "ArtDirectorServer"));
+            }
+            else
+            {
+                getLog().postMessage(new Message('E', false,
+                    "Server could not list to TCP port " +
+                    toString(address.toString(), _tcpPort),
+                    "ArtDirectorServer"));
+            }
+        }
+        else
+        {
+            getLog().postMessage(new Message('W', false,
+                "Cannot turn TCP server up, because it's already listening.",
+                "ArtDirectorServer"));
+        }
     }
 
     void ArtDirectorServer::turnOff()
     {
+        if(_tcpServer->isListening())
+        {
+            _tcpServer->close();
 
+            _sockets.clear();
+
+            getLog().postMessage(new Message('W', false,
+                "Server turned off.", "ArtDirectorServer"));
+        }
+        else
+        {
+            getLog().postMessage(new Message('W', false,
+                "Cannot turn TCP server off, because it's not currently listening.",
+                "ArtDirectorServer"));
+        }
+    }
+
+    void ArtDirectorServer::newConnection()
+    {
+        if(_tcpServer->hasPendingConnections())
+        {
+            QTcpSocket* socket = _tcpServer->nextPendingConnection();
+            _sockets.emplace_back(socket, _film);
+
+            getLog().postMessage(new Message('W', false,
+                "New client connected " + toString(
+                    socket->peerAddress().toString(), socket->peerPort()),
+                "ArtDirectorServer"));
+        }
+        else
+        {
+            getLog().postMessage(new Message('W', false,
+                "New connection called, but no connection is currently pending.",
+                "ArtDirectorServer"));
+        }
     }
 
     void ArtDirectorServer::sendBuffersToGpu()
@@ -201,7 +306,7 @@ namespace prop3
         else if(colorOuputType == RaytracerState::COLOROUTPUT_COMPATIBILITY)
             colorOutput = Film::ColorOutput::COMPATIBILITY;
 
-        _postProdUnit->update(*_localRaytracer->film(), colorOutput);
+        _postProdUnit->update(*_localRaytracer->currentFilm(), colorOutput);
     }
 
     void ArtDirectorServer::printConvergence()
@@ -256,7 +361,7 @@ namespace prop3
             ss << " [Draft]";
         }
 
-        cellar::getLog().postMessage(new cellar::Message(
-            'I', false, ss.str(), "CpuRaytracerServer"));
+        getLog().postMessage(new Message(
+            'I', false, ss.str(), "ArtDirectorServer"));
     }
 }

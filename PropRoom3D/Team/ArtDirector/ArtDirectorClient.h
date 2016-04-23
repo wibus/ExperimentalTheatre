@@ -4,6 +4,8 @@
 #include <vector>
 #include <thread>
 
+class QTcpSocket;
+
 #include "AbstractArtDirector.h"
 
 #include <PropRoom3D/Node/Node.h>
@@ -15,6 +17,7 @@ namespace prop3
     class GlPostProdUnit;
     class RaytracerState;
     class DebugRenderer;
+    class ClientSocket;
     class Film;
 
 
@@ -33,13 +36,13 @@ namespace prop3
         virtual void resize(int width, int height) override;
         virtual void notify(cellar::CameraMsg &msg) override;
 
+        virtual bool isConnected() const;
         virtual void connectToServer();
-        virtual void deconnectFromServer();
+        virtual void disconnectFromServer();
+        virtual void setServerTcpPort(int port);
         virtual void setServerIpAddress(const std::string& ip);
-        virtual void setServerTcpPort(const std::string& port);
 
         std::shared_ptr<RaytracerState> raytracerState() const;
-
 
 
     protected:
@@ -47,9 +50,15 @@ namespace prop3
 
 
     private:
+        QTcpSocket* _tcpSocket;
+        std::shared_ptr<Film> _film;
+        std::unique_ptr<ClientSocket> _socket;
         std::shared_ptr<CpuRaytracerEngine> _localRaytracer;
         std::shared_ptr<GlPostProdUnit> _postProdUnit;
         std::shared_ptr<StageSet> _stageSet;
+
+        int _serverTcpPort;
+        std::string _serverIpAddress;
     };
 }
 

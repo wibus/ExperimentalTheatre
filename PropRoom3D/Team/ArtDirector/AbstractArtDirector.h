@@ -5,6 +5,8 @@
 
 #include <GLM/glm.hpp>
 
+#include <QObject>
+
 #include <CellarWorkbench/Camera/Camera.h>
 #include <CellarWorkbench/DesignPattern/SpecificObserver.h>
 
@@ -20,8 +22,11 @@ namespace prop3
 
 
     class PROP3D_EXPORT AbstractArtDirector :
+            public QObject,
             public cellar::SpecificObserver<cellar::CameraMsg>
     {
+        Q_OBJECT
+
     protected:
         AbstractArtDirector()
         {
@@ -49,6 +54,20 @@ namespace prop3
         std::shared_ptr<cellar::Camera> _camera;
     };
 
+    inline PROP3D_EXPORT std::string toString(const char* ip, int port)
+    {
+        return QString("(IP %1, PORT %2)").arg(ip).arg(port).toStdString();
+    }
+
+    inline PROP3D_EXPORT std::string toString(const std::string& ip , int port)
+    {
+        return toString(ip.c_str(), port);
+    }
+
+    inline PROP3D_EXPORT std::string toString(const QString& ip , int port)
+    {
+        return toString(ip.toStdString(), port);
+    }
 
 
     // IMPLEMENTATION //

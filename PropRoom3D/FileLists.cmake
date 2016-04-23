@@ -84,9 +84,16 @@ SET(PROP3_FILM_HEADERS
     ${PROP3_SRC_DIR}/Team/ArtDirector/Film/StaticFilm.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/Film/PixelPrioritizer.h)
 
+# Network
+SET(PROP3_NETWORK_HEADERS
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Network/NetworkTile.h
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Network/ClientSocket.h
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Network/ServerSocket.h)
+
 # Art Director
 SET(PROP3_ART_DIRECTOR_HEADERS
     ${PROP3_FILM_HEADERS}
+    ${PROP3_NETWORK_HEADERS}
     ${PROP3_SRC_DIR}/Team/ArtDirector/AbstractArtDirector.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorDummy.h
     ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorClient.h
@@ -206,9 +213,16 @@ SET(PROP3_FILM_SOURCES
     ${PROP3_SRC_DIR}/Team/ArtDirector/Film/StaticFilm.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/Film/PixelPrioritizer.cpp)
 
+# Network
+SET(PROP3_NETWORK_SOURCES
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Network/NetworkTile.cpp
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Network/ClientSocket.cpp
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Network/ServerSocket.cpp)
+
 # Art Director
 SET(PROP3_ART_DIRECTOR_SOURCES
     ${PROP3_FILM_SOURCES}
+    ${PROP3_NETWORK_SOURCES}
     ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorDummy.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorClient.cpp
     ${PROP3_SRC_DIR}/Team/ArtDirector/ArtDirectorServer.cpp

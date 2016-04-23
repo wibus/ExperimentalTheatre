@@ -1,12 +1,24 @@
 #include "ArtDirectorClient.h"
 
+#include <QTcpSocket>
+#include <QNetworkInterface>
+
+#include <CellarWorkbench/Misc/Log.h>
+
+#include "Film/ConvergentFilm.h"
+#include "Network/ClientSocket.h"
 #include "CpuRaytracerEngine.h"
 #include "GlPostProdUnit.h"
+
+using namespace cellar;
 
 
 namespace prop3
 {
     ArtDirectorClient::ArtDirectorClient() :
+        _tcpSocket(new QTcpSocket(this)),
+        _film(new ConvergentFilm()),
+        _socket(new ClientSocket(_tcpSocket, _film)),
         _postProdUnit(new GlPostProdUnit())
     {
 #ifdef NDEBUG
@@ -31,7 +43,7 @@ namespace prop3
         draftParams.frameCountPerLevel = 0;
         draftParams.fastDraftEnabled = false;
 
-        _localRaytracer->setup(draftParams);
+        _localRaytracer->setup(draftParams, _film);
         _postProdUnit->setup();
     }
 
@@ -76,24 +88,62 @@ namespace prop3
 
     }
 
-    void ArtDirectorClient::connectToServer()
+    bool ArtDirectorClient::isConnected() const
     {
-
+        return _socket->isConnected();
     }
 
-    void ArtDirectorClient::deconnectFromServer()
+    void ArtDirectorClient::connectToServer()
     {
+        if(!_tcpSocket->isOpen())
+        {
+            QHostAddress address(_serverIpAddress.c_str());
+            _tcpSocket->connectToHost(address, _serverTcpPort);
 
+            if(!_tcpSocket->waitForConnected())
+            {
+                _tcpSocket->close();
+
+                getLog().postMessage(new Message('E', false,
+                    "Could not reach the server " +
+                    toString(address.toString(), _serverTcpPort),
+                    "ArtDirectorClient"));
+            }
+        }
+        else
+        {
+            getLog().postMessage(new Message('W', false,
+                "A connection is already established with the server",
+                "ArtDirectorClient"));
+        }
+    }
+
+    void ArtDirectorClient::disconnectFromServer()
+    {
+        if(_tcpSocket->isOpen())
+        {
+            _tcpSocket->close();
+
+            getLog().postMessage(new Message('I', false,
+                "Server connection closed",
+                "ArtDirectorClient"));
+        }
+        else
+        {
+            getLog().postMessage(new Message('W', false,
+                "No connection is currently established with the server",
+                "ArtDirectorClient"));
+        }
+    }
+
+    void ArtDirectorClient::setServerTcpPort(int port)
+    {
+        _serverTcpPort = port;
     }
 
     void ArtDirectorClient::setServerIpAddress(const std::string& ip)
     {
-
-    }
-
-    void ArtDirectorClient::setServerTcpPort(const std::string& port)
-    {
-
+        _serverIpAddress = ip;
     }
 
     std::shared_ptr<RaytracerState> ArtDirectorClient::raytracerState() const
@@ -118,6 +168,6 @@ namespace prop3
         else if(colorOuputType == RaytracerState::COLOROUTPUT_COMPATIBILITY)
             colorOutput = Film::ColorOutput::COMPATIBILITY;
 
-        _postProdUnit->update(*_localRaytracer->film(), colorOutput);
+        _postProdUnit->update(*_localRaytracer->currentFilm(), colorOutput);
     }
 }

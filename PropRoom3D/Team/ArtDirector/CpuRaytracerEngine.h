@@ -31,19 +31,20 @@ namespace prop3
         CpuRaytracerEngine(unsigned int workerCount);
         virtual ~CpuRaytracerEngine();
 
-        virtual void setup(const RaytracerState::DraftParams& draftParams);
+        virtual void setup(const RaytracerState::DraftParams& draftParams,
+                           const std::shared_ptr<Film>& mainFilm);
 
         virtual void terminate();
 
         virtual bool newTileCompleted();
         virtual bool newFrameCompleted();
         virtual void manageNextFrame();
-        virtual std::shared_ptr<Film> film() const;
+        virtual std::shared_ptr<Film> currentFilm() const;
 
         std::shared_ptr<RaytracerState> raytracerState() const;
 
         virtual void update(const std::shared_ptr<StageSet>& stageSet);
-        virtual void pourFramesIn(const Film& film);
+        virtual void pourFramesIn(const Film& currentFilm);
 
         virtual void resize(int width, int height);
         virtual void updateView(const glm::dmat4& view);
@@ -58,10 +59,10 @@ namespace prop3
         virtual void skipDrafting();
         virtual void nextDraftSize();
         virtual void setupWorkers();
-        virtual void setupFilms();
+        virtual void setupFilms(const std::shared_ptr<Film>& mainFilm);
         virtual void softReset();
         virtual void incorporateFilm(
-                const Film& film);
+                const Film& currentFilm);
 
         virtual void performNonStochasticSyncronousDraf();
 

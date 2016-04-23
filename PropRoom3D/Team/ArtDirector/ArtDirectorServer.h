@@ -1,11 +1,13 @@
 #ifndef PROPROOM3D_ARTDIRECTORSERVER_H
 #define PROPROOM3D_ARTDIRECTORSERVER_H
 
+#include <list>
 #include <vector>
 #include <thread>
 
-#include "AbstractArtDirector.h"
+class QTcpServer;
 
+#include "AbstractArtDirector.h"
 #include <PropRoom3D/Node/Node.h>
 
 
@@ -15,12 +17,15 @@ namespace prop3
     class GlPostProdUnit;
     class RaytracerState;
     class DebugRenderer;
+    class ServerSocket;
     class Film;
 
 
     class PROP3D_EXPORT ArtDirectorServer :
             public AbstractArtDirector
     {
+        Q_OBJECT
+
     public:
         ArtDirectorServer();
         virtual ~ArtDirectorServer();
@@ -49,11 +54,19 @@ namespace prop3
         static const double IMAGE_DEPTH;
         static const int DEFAULT_TCP_PORT;
 
+    protected slots:
+        virtual void newConnection();
+
     protected:
         virtual void sendBuffersToGpu();
         virtual void printConvergence();
 
     private:
+        int _tcpPort;
+        QTcpServer* _tcpServer;
+        std::list<ServerSocket> _sockets;
+
+        std::shared_ptr<Film> _film;
         std::shared_ptr<CpuRaytracerEngine> _localRaytracer;
         std::shared_ptr<DebugRenderer> _debugRenderer;
         std::shared_ptr<GlPostProdUnit> _postProdUnit;

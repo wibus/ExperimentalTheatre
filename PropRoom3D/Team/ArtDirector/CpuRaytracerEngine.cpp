@@ -67,11 +67,12 @@ namespace prop3
     }
 
     void CpuRaytracerEngine::setup(
-            const RaytracerState::DraftParams& draftParams)
+            const RaytracerState::DraftParams& draftParams,
+            const std::shared_ptr<Film>& mainFilm)
     {
         _protectedState.setDraftParams(draftParams);
 
-        setupFilms();
+        setupFilms(mainFilm);
         setupWorkers();
     }
 
@@ -197,7 +198,7 @@ namespace prop3
         }
     }
 
-    std::shared_ptr<Film> CpuRaytracerEngine::film() const
+    std::shared_ptr<Film> CpuRaytracerEngine::currentFilm() const
     {
         return _currentFilm;
     }
@@ -395,7 +396,7 @@ namespace prop3
         }
     }
 
-    void CpuRaytracerEngine::setupFilms()
+    void CpuRaytracerEngine::setupFilms(const std::shared_ptr<Film>& mainFilm)
     {
         if(!_films.empty())
         {
@@ -427,7 +428,7 @@ namespace prop3
         size_t drafCount = _films.size();
 
         // Main film: full resolution shot
-        _films.push_back(std::shared_ptr<Film>(new ConvergentFilm()));
+        _films.push_back(mainFilm);
 
         _currentFilm = _films.front();
 
