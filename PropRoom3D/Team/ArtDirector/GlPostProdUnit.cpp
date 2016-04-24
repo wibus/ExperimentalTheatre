@@ -33,7 +33,7 @@ namespace prop3
         _lowpassKernelSize(3),
         _adaptationActivated(false),
         _adaptationFactor(1.0f),
-        _temperatureColor(DEFAULT_WHITE_TEMPERATURE),
+        _temperatureColor(1.0),
         _contrastValue(1.0f),
         _luminosityValue(0.0f),
         _isSetup(false)

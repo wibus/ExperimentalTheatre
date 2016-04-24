@@ -87,8 +87,8 @@ SET(PROP3_FILM_HEADERS
 # Network
 SET(PROP3_NETWORK_HEADERS
     ${PROP3_SRC_DIR}/Team/ArtDirector/Network/NetworkTile.h
-    ${PROP3_SRC_DIR}/Team/ArtDirector/Network/ClientSocket.h
-    ${PROP3_SRC_DIR}/Team/ArtDirector/Network/ServerSocket.h)
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Network/ServerSocket.h
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Network/UpdateMessage.h)
 
 # Art Director
 SET(PROP3_ART_DIRECTOR_HEADERS
@@ -115,6 +115,7 @@ SET(PROP3_TEAM_HEADERS
     ${PROP3_ART_DIRECTOR_HEADERS}
     ${PROP3_CHOREOGRAPHER_HEADERS}
     ${PROP3_SRC_DIR}/Team/AbstractTeam.h
+    ${PROP3_SRC_DIR}/Team/DummyTeam.h
     ${PROP3_SRC_DIR}/Team/StdTeam.h)
 
 
@@ -216,8 +217,8 @@ SET(PROP3_FILM_SOURCES
 # Network
 SET(PROP3_NETWORK_SOURCES
     ${PROP3_SRC_DIR}/Team/ArtDirector/Network/NetworkTile.cpp
-    ${PROP3_SRC_DIR}/Team/ArtDirector/Network/ClientSocket.cpp
-    ${PROP3_SRC_DIR}/Team/ArtDirector/Network/ServerSocket.cpp)
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Network/ServerSocket.cpp
+    ${PROP3_SRC_DIR}/Team/ArtDirector/Network/UpdateMessage.cpp)
 
 # Art Director
 SET(PROP3_ART_DIRECTOR_SOURCES
@@ -242,6 +243,7 @@ SET(PROP3_TEAM_SOURCES
     ${PROP3_ART_DIRECTOR_SOURCES}
     ${PROP3_CHOREOGRAPHER_SOURCES}
     ${PROP3_SRC_DIR}/Team/AbstractTeam.cpp
+    ${PROP3_SRC_DIR}/Team/DummyTeam.cpp
     ${PROP3_SRC_DIR}/Team/StdTeam.cpp)
 
 # All the source files #

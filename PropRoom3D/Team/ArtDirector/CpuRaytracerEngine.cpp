@@ -8,7 +8,6 @@
 
 #include "Node/Prop/Prop.h"
 #include "Node/StageSet.h"
-#include "Serial/JsonWriter.h"
 #include "Film/StaticFilm.h"
 #include "Film/ConvergentFilm.h"
 #include "CpuRaytracerWorker.h"
@@ -22,10 +21,10 @@ namespace prop3
 
     CpuRaytracerEngine::CpuRaytracerEngine() :
         _protectedState(),
-        _lastTimeStamp(TimeStamp::getCurrentTimeStamp()),
         _raytracerState(new RaytracerState(_protectedState)),
         _viewportSize(1, 1),
-        _cameraChanged(false)
+        _cameraChanged(false),
+        _stageSetUpdated(false)
     {
         // hardware_concurrency is only a hint on the number of cores
         _protectedState.setWorkerCount(
@@ -41,10 +40,10 @@ namespace prop3
 
     CpuRaytracerEngine::CpuRaytracerEngine(unsigned int  workerCount) :
         _protectedState(),
-        _lastTimeStamp(TimeStamp::getCurrentTimeStamp()),
         _raytracerState(new RaytracerState(_protectedState)),
         _viewportSize(1, 1),
-        _cameraChanged(false)
+        _cameraChanged(false),
+        _stageSetUpdated(false)
     {
         _protectedState.setWorkerCount( workerCount );
 
@@ -91,26 +90,25 @@ namespace prop3
         _workerThreads.clear();
     }
 
-    void CpuRaytracerEngine::update(const std::shared_ptr<StageSet>& stageSet)
+    void CpuRaytracerEngine::update()
     {
-        bool stageChanged = stageSet->stageSetChanged(_lastTimeStamp);
-        if(stageChanged || _cameraChanged)
+        if(_stageSetUpdated || _cameraChanged)
         {
             abortRendering();
 
             bool hiddenSurfaceRemoved = _raytracerState->hiddenSurfacesRemoved();
             bool debuggingSurfRemoval = _raytracerState->debuggingHiddenSurfaceRemoval();
 
-            if(stageChanged || (hiddenSurfaceRemoved && !debuggingSurfRemoval))
-                dispatchStageSet(stageSet);
-            else
+            if(_stageSetUpdated || (hiddenSurfaceRemoved && !debuggingSurfRemoval))
+                dispatchStageSet(_stageSetStream);
+            else if(_searchStructure.get() != nullptr)
                 _searchStructure->resetHitCounters();
 
             _cameraChanged = false;
-            _lastTimeStamp = TimeStamp::getCurrentTimeStamp();
+            _stageSetUpdated = false;
         }
 
-        if(stageSet->props().empty())
+        if(_stageSetStream.empty())
             return;
 
         if(!_raytracerState->isRendering())
@@ -262,6 +260,12 @@ namespace prop3
         }
     }
 
+    void CpuRaytracerEngine::updateStageSet(const std::string& stageSet)
+    {
+        _stageSetUpdated = true;
+        _stageSetStream = stageSet;
+    }
+
     void CpuRaytracerEngine::interruptWorkers(bool wait)
     {
         _protectedState.setInterrupted( true );
@@ -275,19 +279,66 @@ namespace prop3
         }
     }
 
-    void CpuRaytracerEngine::dispatchStageSet(const std::shared_ptr<StageSet>& stageSet)
+    void CpuRaytracerEngine::dispatchStageSet(const std::string& stageSet)
     {
         interruptWorkers(true);
 
-        StageSetJsonWriter writer;
-        std::string stageSetStream = writer.serialize(*stageSet);
-        _searchStructure.reset(new SearchStructure(stageSetStream));
+        _searchStructure.reset(new SearchStructure(stageSet));
         _protectedState.setHiddenSurfaceRemoved(false);
 
         for(auto& w : _workerObjects)
         {
             w->updateSearchStructure(_searchStructure);
         }
+    }
+
+    void CpuRaytracerEngine::setupFilms(const std::shared_ptr<Film>& mainFilm)
+    {
+        if(!_films.empty())
+        {
+            cellar::getLog().postMessage(new cellar::Message('I', false,
+                "Clearing current raytracer engine films",
+                "CpuRaytracerEngine"));
+
+            _films.clear();
+        }
+
+        if(_raytracerState->isDrafter())
+        {
+            // Drafts: non-stocastic and intermediate resolution shots
+            int draftLevelCount = _raytracerState->draftLevelCount();
+
+            // Non-Stochastic
+            if(_raytracerState->fastDraftEnabled())
+            {
+                _films.push_back(std::shared_ptr<Film>(new StaticFilm()));
+                --draftLevelCount;
+            }
+
+            // Intermediates
+            for(int i=0; i < draftLevelCount; ++i)
+            {
+                _films.push_back(std::shared_ptr<Film>(new ConvergentFilm()));
+            }
+        }
+        size_t drafCount = _films.size();
+
+        // Main film: full resolution shot
+        _films.push_back(mainFilm);
+
+        _currentFilm = _films.front();
+
+
+        cellar::getLog().postMessage(new cellar::Message('I', false,
+            "Scene will be raytraced with " + std::to_string(drafCount) + " drafts",
+            "CpuRaytracerEngine"));
+
+        bool fastDraft = _raytracerState->isDrafter() && _raytracerState->fastDraftEnabled();
+        cellar::getLog().postMessage(new cellar::Message('I', false,
+            "Fast draft " + std::string(fastDraft ? "enabled" : "disabled"),
+            "CpuRaytracerEngine"));
+
+        resize(_viewportSize.x, _viewportSize.y);
     }
 
     void CpuRaytracerEngine::optimizeSearchStructure()
@@ -394,55 +445,6 @@ namespace prop3
                     CpuRaytracerWorker::launchWorker,
                     _workerObjects[i])));
         }
-    }
-
-    void CpuRaytracerEngine::setupFilms(const std::shared_ptr<Film>& mainFilm)
-    {
-        if(!_films.empty())
-        {
-            cellar::getLog().postMessage(new cellar::Message('I', false,
-                "Clearing current raytracer engine films",
-                "CpuRaytracerEngine"));
-
-            _films.clear();
-        }
-
-        if(_raytracerState->isDrafter())
-        {
-            // Drafts: non-stocastic and intermediate resolution shots
-            int draftLevelCount = _raytracerState->draftLevelCount();
-
-            // Non-Stochastic
-            if(_raytracerState->fastDraftEnabled())
-            {
-                _films.push_back(std::shared_ptr<Film>(new StaticFilm()));
-                --draftLevelCount;
-            }
-
-			// Intermediates
-            for(int i=0; i < draftLevelCount; ++i)
-            {
-                _films.push_back(std::shared_ptr<Film>(new ConvergentFilm()));
-            }
-        }
-        size_t drafCount = _films.size();
-
-        // Main film: full resolution shot
-        _films.push_back(mainFilm);
-
-        _currentFilm = _films.front();
-
-
-        cellar::getLog().postMessage(new cellar::Message('I', false,
-            "Scene will be raytraced with " + std::to_string(drafCount) + " drafts",
-            "CpuRaytracerEngine"));
-
-        bool fastDraft = _raytracerState->isDrafter() && _raytracerState->fastDraftEnabled();
-        cellar::getLog().postMessage(new cellar::Message('I', false,
-            "Fast draft " + std::string(fastDraft ? "enabled" : "disabled"),
-            "CpuRaytracerEngine"));
-
-        resize(_viewportSize.x, _viewportSize.y);
     }
 
     void CpuRaytracerEngine::softReset()

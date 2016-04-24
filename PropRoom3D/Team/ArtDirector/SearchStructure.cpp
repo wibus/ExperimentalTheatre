@@ -1,7 +1,7 @@
 #include "SearchStructure.h"
 
 #include <atomic>
-#include "Team/AbstractTeam.h"
+#include "Team/DummyTeam.h"
 
 #include "Node/StageSet.h"
 #include "Node/Prop/Prop.h"
@@ -15,15 +15,6 @@
 
 namespace prop3
 {
-    class WorkerTeam : public AbstractTeam
-    {
-    public:
-        WorkerTeam() :
-            AbstractTeam(nullptr /* Choreographer */)
-        {
-        }
-    };
-
     struct SearchZone
     {
         size_t parent;
@@ -52,7 +43,7 @@ namespace prop3
 
 
     SearchStructure::SearchStructure(const std::string &stageStream) :
-        _team(new WorkerTeam()),
+        _team(new DummyTeam()),
         _isOptimized(false)
     {
         _team->setup();

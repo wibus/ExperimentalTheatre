@@ -17,6 +17,7 @@ namespace prop3
     class GlPostProdUnit;
     class RaytracerState;
     class DebugRenderer;
+    class UpdateMessage;
     class ServerSocket;
     class Film;
 
@@ -58,6 +59,7 @@ namespace prop3
         virtual void newConnection();
 
     protected:
+        virtual void updateClient(ServerSocket& socket);
         virtual void sendBuffersToGpu();
         virtual void printConvergence();
 
@@ -65,12 +67,16 @@ namespace prop3
         int _tcpPort;
         QTcpServer* _tcpServer;
         std::list<ServerSocket> _sockets;
+        std::unique_ptr<UpdateMessage> _updateMessage;
+        bool _mustUpdateClients;
+        bool _sceneIsStable;
 
         std::shared_ptr<Film> _film;
         std::shared_ptr<CpuRaytracerEngine> _localRaytracer;
         std::shared_ptr<DebugRenderer> _debugRenderer;
         std::shared_ptr<GlPostProdUnit> _postProdUnit;
         std::shared_ptr<StageSet> _stageSet;
+        std::string _stageSetStream;
         TimeStamp _lastUpdate;
     };
 }

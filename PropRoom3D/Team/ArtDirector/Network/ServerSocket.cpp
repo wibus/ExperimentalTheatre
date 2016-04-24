@@ -5,6 +5,8 @@
 
 #include <CellarWorkbench/Misc/Log.h>
 
+#include "UpdateMessage.h"
+
 using namespace cellar;
 
 
@@ -12,6 +14,7 @@ namespace prop3
 {
     ServerSocket::ServerSocket(QTcpSocket* socket,
                     const std::shared_ptr<Film>& film) :
+        _isConnected(true),
         _socket(socket),
         _film(film)
     {
@@ -19,7 +22,7 @@ namespace prop3
                 this, &ServerSocket::readTile);
 
         connect(_socket, &QTcpSocket::disconnected,
-                this, &ServerSocket::disconected);
+                this, &ServerSocket::disconnected);
     }
 
     ServerSocket::~ServerSocket()
@@ -28,11 +31,6 @@ namespace prop3
             _socket->disconnectFromHost();
 
         _socket->deleteLater();
-    }
-
-    bool ServerSocket::isOpen() const
-    {
-        return _socket->isOpen();
     }
 
     int ServerSocket::tcpPort() const
@@ -45,13 +43,24 @@ namespace prop3
         return _socket->peerAddress().toString();
     }
 
+    bool ServerSocket::isConnected() const
+    {
+        return _isConnected;
+    }
+
+    void ServerSocket::sendUpdate(const UpdateMessage& message)
+    {
+        message.writeMessage(*_socket);
+    }
+
     void ServerSocket::readTile()
     {
 
     }
 
-    void ServerSocket::disconected()
+    void ServerSocket::disconnected()
     {
+        _isConnected = false;
         getLog().postMessage(new Message('I', false,
             "Client disconnected from server",
             "ServerSocket"));

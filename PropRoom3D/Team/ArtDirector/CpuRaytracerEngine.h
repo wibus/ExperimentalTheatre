@@ -43,23 +43,24 @@ namespace prop3
 
         std::shared_ptr<RaytracerState> raytracerState() const;
 
-        virtual void update(const std::shared_ptr<StageSet>& stageSet);
+        virtual void update();
         virtual void pourFramesIn(const Film& currentFilm);
 
         virtual void resize(int width, int height);
         virtual void updateView(const glm::dmat4& view);
         virtual void updateProjection(const glm::dmat4& proj);
+        virtual void updateStageSet(const std::string& stageSet);
 
 
     protected:
         virtual void interruptWorkers(bool wait = false);
-        virtual void dispatchStageSet(const std::shared_ptr<StageSet>& stageSet);
+        virtual void dispatchStageSet(const std::string& stageSet);
+        virtual void setupFilms(const std::shared_ptr<Film>& mainFilm);
         virtual void optimizeSearchStructure();
         virtual void abortRendering();
         virtual void skipDrafting();
         virtual void nextDraftSize();
         virtual void setupWorkers();
-        virtual void setupFilms(const std::shared_ptr<Film>& mainFilm);
         virtual void softReset();
         virtual void incorporateFilm(
                 const Film& currentFilm);
@@ -69,7 +70,6 @@ namespace prop3
     private:
         static const unsigned int DEFAULT_WORKER_COUNT;
 
-        TimeStamp _lastTimeStamp;
         RaytracerState::DraftParams _draftParams;
         RaytracerState::ProtectedState _protectedState;
         std::shared_ptr<RaytracerState> _raytracerState;
@@ -82,6 +82,9 @@ namespace prop3
         friend class CpuRaytracerWorker;
         std::vector<std::thread> _workerThreads;
         std::vector<std::shared_ptr<CpuRaytracerWorker>> _workerObjects;
+
+        bool _stageSetUpdated;
+        std::string _stageSetStream;
         std::shared_ptr<SearchStructure> _searchStructure;
     };
 }

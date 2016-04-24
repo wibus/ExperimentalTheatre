@@ -5,8 +5,8 @@
 
 #include <CellarWorkbench/Misc/Log.h>
 
+#include "Network/UpdateMessage.h"
 #include "Film/ConvergentFilm.h"
-#include "Network/ClientSocket.h"
 #include "CpuRaytracerEngine.h"
 #include "GlPostProdUnit.h"
 
@@ -16,16 +16,27 @@ using namespace cellar;
 namespace prop3
 {
     ArtDirectorClient::ArtDirectorClient() :
-        _tcpSocket(new QTcpSocket(this)),
+        _socket(new QTcpSocket(this)),
         _film(new ConvergentFilm()),
-        _socket(new ClientSocket(_tcpSocket, _film)),
-        _postProdUnit(new GlPostProdUnit())
+        _postProdUnit(new GlPostProdUnit()),
+        _isConnected(false)
     {
 #ifdef NDEBUG
         _localRaytracer.reset(new CpuRaytracerEngine(8));
 #else
         _localRaytracer.reset(new CpuRaytracerEngine(8));
 #endif
+
+        _socket->setReadBufferSize(0);
+
+        connect(_socket, &QTcpSocket::connected,
+                this, &ArtDirectorClient::connected);
+
+        connect(_socket, &QTcpSocket::disconnected,
+                this, &ArtDirectorClient::disconected);
+
+        connect(_socket, &QTcpSocket::readyRead,
+                this, &ArtDirectorClient::readMessage);
     }
 
     ArtDirectorClient::~ArtDirectorClient()
@@ -49,7 +60,44 @@ namespace prop3
 
     void ArtDirectorClient::update(double dt)
     {
+        if(_updateMessage.get() != nullptr)
+        {
+            getLog().postMessage(new Message('I', false,
+                "Consuming Update message",
+                "ArtDirectorClient"));
 
+            _localRaytracer->updateStageSet(
+                _updateMessage->stageSetStream);
+
+            if(_updateMessage->proj != camera()->projectionMatrix())
+            {
+                camera()->updateProjection(_updateMessage->proj);
+
+                _localRaytracer->updateProjection(
+                    _updateMessage->proj);
+            }
+
+            if(_updateMessage->view != camera()->viewMatrix())
+            {
+                camera()->updateView(_updateMessage->view);
+
+                _localRaytracer->updateView(
+                    _updateMessage->view);
+            }
+
+            if(_updateMessage->viewport != camera()->viewport())
+            {
+                camera()->updateViewport(_updateMessage->viewport);
+
+                _localRaytracer->resize(
+                    _updateMessage->viewport.x,
+                    _updateMessage->viewport.y);
+            }
+
+            _updateMessage.reset();
+        }
+
+        _localRaytracer->update();
     }
 
     void ArtDirectorClient::draw(double dt)
@@ -88,26 +136,35 @@ namespace prop3
 
     }
 
+    std::shared_ptr<RaytracerState> ArtDirectorClient::raytracerState() const
+    {
+        return _localRaytracer->raytracerState();
+    }
+
     bool ArtDirectorClient::isConnected() const
     {
-        return _socket->isConnected();
+        return _isConnected;
     }
 
     void ArtDirectorClient::connectToServer()
     {
-        if(!_tcpSocket->isOpen())
+        if(!_socket->isOpen())
         {
             QHostAddress address(_serverIpAddress.c_str());
-            _tcpSocket->connectToHost(address, _serverTcpPort);
+            _socket->connectToHost(address, _serverTcpPort);
 
-            if(!_tcpSocket->waitForConnected())
+            if(!_socket->waitForConnected())
             {
-                _tcpSocket->close();
-
                 getLog().postMessage(new Message('E', false,
                     "Could not reach the server " +
                     toString(address.toString(), _serverTcpPort),
                     "ArtDirectorClient"));
+
+                getLog().postMessage(new Message('E', false,
+                    _socket->errorString().toStdString(),
+                    "ArtDirectorClient"));
+
+                _socket->close();
             }
         }
         else
@@ -120,9 +177,9 @@ namespace prop3
 
     void ArtDirectorClient::disconnectFromServer()
     {
-        if(_tcpSocket->isOpen())
+        if(_socket->isOpen())
         {
-            _tcpSocket->close();
+            _socket->close();
 
             getLog().postMessage(new Message('I', false,
                 "Server connection closed",
@@ -146,9 +203,31 @@ namespace prop3
         _serverIpAddress = ip;
     }
 
-    std::shared_ptr<RaytracerState> ArtDirectorClient::raytracerState() const
+    void ArtDirectorClient::connected()
     {
-        return _localRaytracer->raytracerState();
+        _isConnected = true;
+
+        getLog().postMessage(new Message('I', false,
+            "New connection established with server",
+            "ArtDirectorClient"));
+    }
+
+    void ArtDirectorClient::disconected()
+    {
+        _socket->close();
+        _isConnected = false;
+
+        _localRaytracer->updateStageSet("");
+
+        getLog().postMessage(new Message('I', false,
+            "Server disconnected from client",
+            "ArtDirectorClient"));
+    }
+
+    void ArtDirectorClient::readMessage()
+    {
+        if(_socket->bytesAvailable())
+            _updateMessage.reset(new UpdateMessage(*_socket));
     }
 
     void ArtDirectorClient::sendBuffersToGpu()
