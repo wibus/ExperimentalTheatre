@@ -136,6 +136,10 @@ namespace prop3
         _priorityThreshold = 1.0;
 
 
+        while(!_tileMsgs.empty())
+            _tileMsgs.pop();
+
+
         glm::dvec4 sample(color, 0.0);
         _sampleBuffer.clear();
         _sampleBuffer.resize(pixelCount, sample);
@@ -331,6 +335,33 @@ namespace prop3
         }
     }
 
+    bool ConvergentFilm::incomingTileMessagesAvailable() const
+    {
+        return !_tileMsgs.empty();
+    }
+
+    std::shared_ptr<TileMessage> ConvergentFilm::nextIncomingTileMessage()
+    {
+        std::shared_ptr<TileMessage> msg;
+
+        _tileMsgMutex.lock();
+        if(!_tileMsgs.empty())
+        {
+            msg = _tileMsgs.front();
+            _tileMsgs.pop();
+        }
+        _tileMsgMutex.unlock();
+
+        return msg;
+    }
+
+    void ConvergentFilm::addIncomingTileMessage(const std::shared_ptr<TileMessage>& msg)
+    {
+        _tileMsgMutex.lock();
+        _tileMsgs.push(msg);
+        _tileMsgMutex.unlock();
+    }
+
     void ConvergentFilm::endTileReached()
     {
         _cvMutex.lock();
@@ -367,12 +398,6 @@ namespace prop3
     {
         return _priorityBuffer[index];
     }
-
-    void ConvergentFilm::setColor(int index, const glm::dvec3& color)
-    {
-        _colorBuffer[index] = color;
-    }
-
     void ConvergentFilm::addSample(int index, const glm::dvec4& sample)
     {
         // Power heuristic weight optimization

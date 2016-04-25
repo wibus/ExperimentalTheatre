@@ -5,8 +5,6 @@
 #include <vector>
 #include <thread>
 
-class QTcpServer;
-
 #include "AbstractArtDirector.h"
 #include <PropRoom3D/Node/Node.h>
 
@@ -18,8 +16,10 @@ namespace prop3
     class RaytracerState;
     class DebugRenderer;
     class UpdateMessage;
-    class ServerSocket;
+    class TcpServer;
+
     class Film;
+    class ConvergentFilm;
 
 
     class PROP3D_EXPORT ArtDirectorServer :
@@ -55,23 +55,20 @@ namespace prop3
         static const double IMAGE_DEPTH;
         static const int DEFAULT_TCP_PORT;
 
-    protected slots:
-        virtual void newConnection();
-
     protected:
-        virtual void updateClient(ServerSocket& socket);
         virtual void sendBuffersToGpu();
         virtual void printConvergence();
 
+    protected:
+        void shotChanged();
+
     private:
         int _tcpPort;
-        QTcpServer* _tcpServer;
-        std::list<ServerSocket> _sockets;
-        std::unique_ptr<UpdateMessage> _updateMessage;
-        bool _mustUpdateClients;
-        bool _sceneIsStable;
+        TcpServer* _tcpServer;
+        bool _rebuildUpdateMsg;
+        bool _shotIsStable;
 
-        std::shared_ptr<Film> _film;
+        std::shared_ptr<ConvergentFilm> _film;
         std::shared_ptr<CpuRaytracerEngine> _localRaytracer;
         std::shared_ptr<DebugRenderer> _debugRenderer;
         std::shared_ptr<GlPostProdUnit> _postProdUnit;

@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 
+class QObject;
 class QIODevice;
 class QByteArray;
 
@@ -26,8 +27,7 @@ namespace prop3
 
         bool isComplete() const;
 
-        size_t uid;
-        size_t size;
+        int uid;
         glm::mat4 view;
         glm::mat4 proj;
         glm::ivec2 viewport;

@@ -18,7 +18,7 @@ namespace prop3
     class RaytracerState;
     class DebugRenderer;
     class UpdateMessage;
-    class Film;
+    class NetworkFilm;
 
 
     class PROP3D_EXPORT ArtDirectorClient :
@@ -53,11 +53,12 @@ namespace prop3
 
     protected:
         virtual void sendBuffersToGpu();
+        virtual void sendTilesToServer();
 
 
     private:
         QTcpSocket* _socket;
-        std::shared_ptr<Film> _film;
+        std::shared_ptr<NetworkFilm> _film;
         std::shared_ptr<StageSet> _stageSet;
         std::unique_ptr<UpdateMessage> _updateMessage;
         std::shared_ptr<GlPostProdUnit> _postProdUnit;

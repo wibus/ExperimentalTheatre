@@ -6,6 +6,7 @@
 namespace prop3
 {
     Film::Film() :
+        _stateUid(-1),
         _framePassCount(0),
         _frameResolution(1, 1),
         _colorBuffer(1, glm::dvec3(0.0)),
@@ -23,6 +24,11 @@ namespace prop3
     Film::~Film()
     {
 
+    }
+
+    void Film::setStateUid(int uid)
+    {
+        _stateUid = uid;
     }
 
     void Film::resizeFrame(const glm::ivec2& resolution)
@@ -88,6 +94,18 @@ namespace prop3
         _newFrameCompleted = true;
     }
 
+    std::shared_ptr<Tile> Film::getTile(size_t id)
+    {
+        if(id < _tiles.size())
+        {
+            return _tiles[id];
+        }
+        else
+        {
+            return std::shared_ptr<Tile>();
+        }
+    }
+
     std::shared_ptr<Tile> Film::nextTile()
     {
         std::lock_guard<std::mutex> lk(_tilesMutex);
@@ -110,6 +128,21 @@ namespace prop3
         }
 
         return endTile();
+    }
+
+    bool Film::incomingTileMessagesAvailable() const
+    {
+        return false;
+    }
+
+    std::shared_ptr<TileMessage> Film::nextIncomingTileMessage()
+    {
+        return std::shared_ptr<TileMessage>();
+    }
+
+    std::shared_ptr<TileMessage> Film::nextOutgoingTileMessage()
+    {
+        return std::shared_ptr<TileMessage>();
     }
 
     std::shared_ptr<Tile> Film::endTile()
@@ -154,6 +187,9 @@ namespace prop3
                 return glm::distance(glm::dvec2(t1->minCorner()), target) <
                        glm::distance(glm::dvec2(t2->minCorner()), target);
         });
+
+        for(size_t i=0; i < tileCount; ++i)
+            _tiles[i]->setTileId(i);
 
         _nextTileId = 0;
     }

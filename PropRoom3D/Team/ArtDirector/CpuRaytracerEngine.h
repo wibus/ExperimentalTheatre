@@ -36,15 +36,15 @@ namespace prop3
 
         virtual void terminate();
 
+        virtual void manageNextFrame();
         virtual bool newTileCompleted();
         virtual bool newFrameCompleted();
-        virtual void manageNextFrame();
         virtual std::shared_ptr<Film> currentFilm() const;
 
         std::shared_ptr<RaytracerState> raytracerState() const;
 
         virtual void update();
-        virtual void pourFramesIn(const Film& currentFilm);
+        virtual void interrupt();
 
         virtual void resize(int width, int height);
         virtual void updateView(const glm::dmat4& view);
@@ -62,8 +62,6 @@ namespace prop3
         virtual void nextDraftSize();
         virtual void setupWorkers();
         virtual void softReset();
-        virtual void incorporateFilm(
-                const Film& currentFilm);
 
         virtual void performNonStochasticSyncronousDraf();
 

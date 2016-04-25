@@ -24,6 +24,8 @@
 
 #include "Film/StaticFilm.h"
 
+#include "Network/TileMessage.h"
+
 
 namespace prop3
 {
@@ -37,6 +39,7 @@ namespace prop3
         _isSingleShot(false),
         _runningPredicate(false),
         _terminatePredicate(false),
+        _incomingTileOnly(false),
         _useStochasticTracing(true),
         _usePixelJittering(true),
         _useDepthOfField(true),
@@ -144,6 +147,10 @@ namespace prop3
         });
     }
 
+    void CpuRaytracerWorker::setProcessIncomingTileOnly(bool only)
+    {
+        _incomingTileOnly = only;
+    }
 
     void CpuRaytracerWorker::useStochasticTracing(bool use)
     {
@@ -188,6 +195,9 @@ namespace prop3
                 if(_terminatePredicate)
                     return true;
 
+                if(_workingFilm->incomingTileMessagesAvailable())
+                    return true;
+
                 if(_runningPredicate &&
                     (!_searchStructure->isEmpty()))
                 {
@@ -204,24 +214,44 @@ namespace prop3
                 return;
             }
 
-            /*// Shoot rays
-            if(_runningPredicate &&
-               _lightRayIntensityThreshold != INFINITY)
-                shootFromLights();
-            */
-
-            while(tile != _workingFilm->endTile())
+            // Decode incoming tile messages
+            while(_runningPredicate)
             {
-                tile->lock();
-                shootFromScreen(tile);
-                tile->unlock();
+                // Process as much incoming tiles as possible
+                while(_runningPredicate)
+                {
+                    std::shared_ptr<TileMessage> msg =
+                        _workingFilm->nextIncomingTileMessage();
 
-                if(_runningPredicate)
-                    tile = _workingFilm->nextTile();
-                else
-                    break;
+                    if(msg.get() != nullptr)
+                        msg->decode();
+                    else
+                        break;
+                }
+
+                // Generate a single new tile
+                if(!_incomingTileOnly)
+                {
+                    /*// Shoot rays
+                    if(_runningPredicate &&
+                       _lightRayIntensityThreshold != INFINITY)
+                        shootFromLights();
+                    */
+
+                    if(tile != _workingFilm->endTile())
+                    {
+                        tile->lock();
+                        shootFromScreen(tile);
+                        tile->unlock();
+
+                        if(_runningPredicate)
+                            tile = _workingFilm->nextTile();
+                        else
+                            break;
+                    }
+                }
+
             }
-
 
             // Stop if single shot
             if(_isSingleShot)

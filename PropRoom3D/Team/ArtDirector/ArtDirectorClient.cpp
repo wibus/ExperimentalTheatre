@@ -5,8 +5,9 @@
 
 #include <CellarWorkbench/Misc/Log.h>
 
+#include "Film/NetworkFilm.h"
+#include "Network/TileMessage.h"
 #include "Network/UpdateMessage.h"
-#include "Film/ConvergentFilm.h"
 #include "CpuRaytracerEngine.h"
 #include "GlPostProdUnit.h"
 
@@ -17,7 +18,7 @@ namespace prop3
 {
     ArtDirectorClient::ArtDirectorClient() :
         _socket(new QTcpSocket(this)),
-        _film(new ConvergentFilm()),
+        _film(new NetworkFilm()),
         _postProdUnit(new GlPostProdUnit()),
         _isConnected(false)
     {
@@ -66,6 +67,10 @@ namespace prop3
                 "Consuming Update message",
                 "ArtDirectorClient"));
 
+            _localRaytracer->interrupt();
+
+            _film->setStateUid(_updateMessage->uid);
+
             _localRaytracer->updateStageSet(
                 _updateMessage->stageSetStream);
 
@@ -98,6 +103,8 @@ namespace prop3
         }
 
         _localRaytracer->update();
+
+        sendTilesToServer();
     }
 
     void ArtDirectorClient::draw(double dt)
@@ -113,9 +120,6 @@ namespace prop3
             {
                 if(!raytracerState()->isUpdateEachTileEnabled())
                     sendBuffersToGpu();
-
-                // Let raytracer manage its drafts
-                _localRaytracer->manageNextFrame();
             }
         }
 
@@ -180,6 +184,11 @@ namespace prop3
         if(_socket->isOpen())
         {
             _socket->close();
+            _isConnected = false;
+            _film->setStateUid(-1);
+
+            _localRaytracer->updateStageSet("");
+            _film->clear(glm::dvec3(0.0), true);
 
             getLog().postMessage(new Message('I', false,
                 "Server connection closed",
@@ -216,8 +225,10 @@ namespace prop3
     {
         _socket->close();
         _isConnected = false;
+        _film->setStateUid(-1);
 
         _localRaytracer->updateStageSet("");
+        _film->clear(glm::dvec3(0.0), true);
 
         getLog().postMessage(new Message('I', false,
             "Server disconnected from client",
@@ -226,8 +237,17 @@ namespace prop3
 
     void ArtDirectorClient::readMessage()
     {
-        if(_socket->bytesAvailable())
+        while(_socket->bytesAvailable() > 0)
+        {
             _updateMessage.reset(new UpdateMessage(*_socket));
+
+            if(!_updateMessage->isComplete())
+            {
+                getLog().postMessage(new Message('E', false,
+                    "Incomplete message received",
+                    "ArtDirectorClient"));
+            }
+        }
     }
 
     void ArtDirectorClient::sendBuffersToGpu()
@@ -248,5 +268,25 @@ namespace prop3
             colorOutput = Film::ColorOutput::COMPATIBILITY;
 
         _postProdUnit->update(*_localRaytracer->currentFilm(), colorOutput);
+    }
+
+    void ArtDirectorClient::sendTilesToServer()
+    {
+        size_t processedTileCount = 0;
+        size_t filmTileCount = _film->tileCount();
+
+        std::shared_ptr<TileMessage> msg;
+        while((msg = _film->nextOutgoingTileMessage()).get() != nullptr &&
+              ++processedTileCount <= filmTileCount)
+        {
+            msg->write(*_socket);
+        }
+
+        if(processedTileCount > filmTileCount)
+        {
+            getLog().postMessage(new Message('I', false,
+                "Network is too slow compared to tile completion",
+                "ArtDirectorClient"));
+        }
     }
 }

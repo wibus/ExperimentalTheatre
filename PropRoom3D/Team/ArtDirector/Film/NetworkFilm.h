@@ -1,16 +1,18 @@
-#ifndef PROPROOM3D_STATICFILM_H
-#define PROPROOM3D_STATICFILM_H
+#ifndef PROPROOM3D_NETWORKFILM_H
+#define PROPROOM3D_NETWORKFILM_H
+
+#include <queue>
 
 #include "Film.h"
 
 
 namespace prop3
 {
-    class PROP3D_EXPORT StaticFilm : public Film
+    class PROP3D_EXPORT NetworkFilm : public Film
     {
     public:
-        StaticFilm();
-        virtual ~StaticFilm();
+        NetworkFilm();
+        virtual ~NetworkFilm();
 
         using Film::pixelSample;
         using Film::addSample;
@@ -34,6 +36,9 @@ namespace prop3
 
         virtual void tileCompleted(Tile& tile) override;
 
+        virtual std::shared_ptr<TileMessage> nextOutgoingTileMessage() override;
+        void addOutgoingTileMessage(const std::shared_ptr<TileMessage>& msg);
+
 
     protected:
         virtual void endTileReached() override;
@@ -42,8 +47,11 @@ namespace prop3
         virtual glm::dvec4 pixelSample(int index) const override;
         virtual void addSample(int index, const glm::dvec4& sample) override;
 
-        int _tileCompletedCount;
+
+        std::mutex _tileMsgMutex;
+        std::queue<std::shared_ptr<TileMessage>> _tileMsgs;
+        std::vector<glm::dvec4> _sampleBuffer;
     };
 }
 
-#endif // PROPROOM3D_STATICFILM_H
+#endif // PROPROOM3D_NETWORKFILM_H

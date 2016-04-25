@@ -5,6 +5,9 @@
 
 #include <CellarWorkbench/Misc/Log.h>
 
+#include "../Film/ConvergentFilm.h"
+#include "../Film/Tile.h"
+#include "TileMessage.h"
 #include "UpdateMessage.h"
 
 using namespace cellar;
@@ -12,35 +15,19 @@ using namespace cellar;
 
 namespace prop3
 {
-    ServerSocket::ServerSocket(QTcpSocket* socket,
-                    const std::shared_ptr<Film>& film) :
+    ServerSocket::ServerSocket(qintptr socketDescriptor,
+                    const std::shared_ptr<ConvergentFilm>& film,
+                    const std::shared_ptr<UpdateMessage>& msg) :
+        _socketDescriptor(socketDescriptor),
         _isConnected(true),
-        _socket(socket),
-        _film(film)
+        _film(film),
+        _msg(msg)
     {
-        connect(_socket, &QTcpSocket::readyRead,
-                this, &ServerSocket::readTile);
 
-        connect(_socket, &QTcpSocket::disconnected,
-                this, &ServerSocket::disconnected);
     }
 
     ServerSocket::~ServerSocket()
     {
-        if(_socket->isOpen())
-            _socket->disconnectFromHost();
-
-        _socket->deleteLater();
-    }
-
-    int ServerSocket::tcpPort() const
-    {
-        return _socket->peerPort();
-    }
-
-    QString ServerSocket::ipAddress() const
-    {
-        return _socket->peerAddress().toString();
     }
 
     bool ServerSocket::isConnected() const
@@ -48,21 +35,70 @@ namespace prop3
         return _isConnected;
     }
 
-    void ServerSocket::sendUpdate(const UpdateMessage& message)
+    void ServerSocket::sendUpdate(const std::shared_ptr<UpdateMessage>& msg)
     {
-        message.writeMessage(*_socket);
+        _msg = msg;
+        emit sendMsgSig();
     }
 
-    void ServerSocket::readTile()
+    void ServerSocket::readyRead()
     {
+        while(_socket->bytesAvailable())
+        {
+            std::shared_ptr<TileMessage> msg(new TileMessage(*_film));
+            msg->read(*_socket);
 
+            if(!msg->isValid())
+            {
+                getLog().postMessage(new Message('E', false,
+                    "Received tile is invalid",
+                    "ServerSocket"));
+            }
+            else if(msg->uid() == _film->stateUid())
+            {
+                _film->addIncomingTileMessage(msg);
+            }
+        }
+    }
+
+    void ServerSocket::sendMsgSlot()
+    {
+        if(_msg.get() != nullptr)
+        {
+            _msg->writeMessage(*_socket);
+            _msg.reset();
+        }
     }
 
     void ServerSocket::disconnected()
     {
         _isConnected = false;
+
         getLog().postMessage(new Message('I', false,
             "Client disconnected from server",
             "ServerSocket"));
+
+        emit finished();
+    }
+
+    void ServerSocket::start()
+    {
+        _socket = new QTcpSocket();
+
+        if(!_socket->setSocketDescriptor(_socketDescriptor))
+        {
+            getLog().postMessage(new Message('E', false,
+                "Could not retreive client's socket",
+                "ServerSocket"));
+
+            _isConnected = false;
+            return;
+        }
+
+        connect(_socket, SIGNAL(readyRead()), this, SLOT(readyRead()), Qt::DirectConnection);
+        connect(this, &ServerSocket::sendMsgSig, this, &ServerSocket::sendMsgSlot, Qt::QueuedConnection);
+        connect(_socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
+
+        sendMsgSlot();
     }
 }

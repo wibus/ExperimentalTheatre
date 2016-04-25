@@ -12,6 +12,9 @@
 
 namespace prop3
 {
+    class TileMessage;
+
+
     class PROP3D_EXPORT Film
     {
     public:
@@ -20,12 +23,16 @@ namespace prop3
         Film();
         virtual ~Film();
 
+        int stateUid() const;
+        void setStateUid(int uid);
+
         int frameWidth() const;
         int frameHeight() const;
         glm::ivec2 frameResolution() const;
         void resizeFrame(int frameWidth, int frameHeight);
         virtual void resizeFrame(const glm::ivec2& resolution);
 
+        size_t tileCount() const;
         int tilesWidth() const;
         int tilesHeight() const;
         glm::ivec2 tilesResolution() const;
@@ -61,19 +68,23 @@ namespace prop3
         double pixelPriority(int i, int j) const;
         double pixelPriority(const glm::ivec2& position) const;
 
+
         glm::dvec4 pixelSample(int i, int j) const;
         glm::dvec4 pixelSample(const glm::ivec2& position) const;
 
         void addSample(int i, int j, const glm::dvec4& sample);
         void addSample(const glm::ivec2& position, const glm::dvec4& sample);
 
-        void setColor(int i, int j, const glm::dvec3& color);
-        void setColor(const glm::ivec2& position, const glm::dvec3& color);
 
         virtual void mergeFilm(const Film& film);
 
+        virtual std::shared_ptr<Tile> getTile(size_t id);
         virtual std::shared_ptr<Tile> nextTile();
         virtual std::shared_ptr<Tile> endTile();
+
+        virtual bool incomingTileMessagesAvailable() const;
+        virtual std::shared_ptr<TileMessage> nextIncomingTileMessage();
+        virtual std::shared_ptr<TileMessage> nextOutgoingTileMessage();
 
         void waitForFrameCompletion();
         virtual void tileCompleted(Tile& tile) = 0;
@@ -84,11 +95,11 @@ namespace prop3
         virtual double pixelDivergence(int index) const = 0;
         virtual double pixelPriority(int index) const = 0;
         virtual glm::dvec4 pixelSample(int index) const = 0;
-        virtual void setColor(int index, const glm::dvec3& color) = 0;
         virtual void addSample(int index, const glm::dvec4& sample) = 0;
 
         virtual void buildTiles();
 
+        int _stateUid;
 
         size_t _framePassCount;
         glm::ivec2 _frameResolution;
@@ -114,6 +125,11 @@ namespace prop3
 
 
     // IMPLEMENTATION //
+    inline int Film::stateUid() const
+    {
+        return _stateUid;
+    }
+
     inline int Film::frameWidth() const
     {
         return _frameResolution.x;
@@ -132,6 +148,11 @@ namespace prop3
     inline void Film::resizeFrame(int width, int height)
     {
         resizeFrame(glm::ivec2(width, height));
+    }
+
+    inline size_t Film::tileCount() const
+    {
+        return _tiles.size();
     }
 
     inline int Film::tilesWidth() const
@@ -204,20 +225,6 @@ namespace prop3
             const glm::dvec4& sample)
     {
         addSample(position.x, position.y, sample);
-    }
-
-    inline void Film::setColor(
-            int i, int j, const glm::dvec3& color)
-    {
-        int index = i + j * _frameResolution.x;
-        setColor(index, color);
-    }
-
-    inline void Film::setColor(
-            const glm::ivec2& position,
-            const glm::dvec3& color)
-    {
-        setColor(position.x, position.y, color);
     }
 }
 

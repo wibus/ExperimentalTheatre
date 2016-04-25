@@ -58,6 +58,7 @@ namespace prop3
 
 
         // Modes
+        virtual void setProcessIncomingTileOnly(bool only);
         virtual void useStochasticTracing(bool use);
         virtual void usePixelJittering(bool use);
         virtual void useDepthOfField(bool use);
@@ -102,6 +103,7 @@ namespace prop3
         std::condition_variable _cv;
         std::mutex _flowMutex;
 
+        std::atomic<bool> _incomingTileOnly;
         std::atomic<bool> _useStochasticTracing;
         std::atomic<bool> _usePixelJittering;
         std::atomic<bool> _useDepthOfField;

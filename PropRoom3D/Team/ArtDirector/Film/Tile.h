@@ -49,14 +49,18 @@ namespace prop3
         const glm::ivec2& maxCorner() const;
         unsigned int pixelCount() const;
 
+        void setTileId(size_t id);
+        size_t tileId() const;
+
         TileIterator begin();
         TileIterator end();
 
         void lock();
         void unlock();
 
-        void setColor(const glm::ivec2& position,
-                      const glm::dvec3& color);
+        glm::dvec4 pixelSample(int i, int j) const;
+        void addSample(int i, int j,
+                       const glm::dvec4& sample);
         void addSample(const glm::ivec2& position,
                        const glm::dvec4& sample);
 
@@ -73,6 +77,7 @@ namespace prop3
 
     protected:
         Film& _film;
+        size_t _tileId;
         std::mutex _mutex;
         TileIterator _endIterator;
         const glm::ivec2 _minCorner;
@@ -120,6 +125,11 @@ namespace prop3
     inline unsigned int Tile::pixelCount() const
     {
         return _pixelCount;
+    }
+
+    inline size_t Tile::tileId() const
+    {
+        return _tileId;
     }
 
     inline double Tile::tilePriority() const

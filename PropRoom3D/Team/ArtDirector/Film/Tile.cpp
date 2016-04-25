@@ -52,6 +52,7 @@ namespace prop3
                const glm::ivec2& minCorner,
                const glm::ivec2& maxCorner) :
         _film(film),
+        _tileId(-1),
         _endIterator(*this, 0.0, END_PIXEL),
         _minCorner(minCorner),
         _maxCorner(maxCorner),
@@ -67,6 +68,11 @@ namespace prop3
     Tile::~Tile()
     {
 
+    }
+
+    void Tile::setTileId(size_t id)
+    {
+        _tileId = id;
     }
 
     TileIterator Tile::begin()
@@ -100,18 +106,23 @@ namespace prop3
         _priorityThreshold = threshold;
     }
 
-    void Tile::setColor(
-            const glm::ivec2& position,
-            const glm::dvec3& color)
+    glm::dvec4 Tile::pixelSample(int i, int j) const
     {
-        _film.setColor(position, color);
+        return _film.pixelSample(i, j);
+    }
+
+    void Tile::addSample(
+            int i, int j,
+            const glm::dvec4& sample)
+    {
+        _film.addSample(i, j, sample);
     }
 
     void Tile::addSample(
             const glm::ivec2& position,
             const glm::dvec4& sample)
     {
-        _film.addSample(position, sample);
+        addSample(position.x, position.y, sample);
     }
 
     double Tile::pixelPriority(const glm::ivec2& position) const

@@ -1,6 +1,8 @@
 #ifndef PROPROOM3D_CONVERGENTFILM_H
 #define PROPROOM3D_CONVERGENTFILM_H
 
+#include <queue>
+
 #include <CellarWorkbench/Misc/Distribution.h>
 
 #include "Film.h"
@@ -40,13 +42,16 @@ namespace prop3
 
         virtual void tileCompleted(Tile& tile) override;
 
+        virtual bool incomingTileMessagesAvailable() const override;
+        virtual std::shared_ptr<TileMessage> nextIncomingTileMessage() override;
+        void addIncomingTileMessage(const std::shared_ptr<TileMessage>& msg);
+
 
     protected:
         virtual void endTileReached() override;
         virtual double pixelDivergence(int index) const override;
         virtual double pixelPriority(int index) const override;
         virtual glm::dvec4 pixelSample(int index) const override;
-        virtual void setColor(int index, const glm::dvec3& color) override;
         virtual void addSample(int index, const glm::dvec4& sample) override;
 
         virtual bool saveContent(
@@ -99,6 +104,9 @@ namespace prop3
 
         // Pixel Prioritizer
         std::shared_ptr<PixelPrioritizer> _prioritizer;
+
+        std::mutex _tileMsgMutex;
+        std::queue<std::shared_ptr<TileMessage>> _tileMsgs;
 
 
         struct ReferenceShot

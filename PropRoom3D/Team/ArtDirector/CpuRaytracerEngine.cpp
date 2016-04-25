@@ -112,11 +112,30 @@ namespace prop3
             return;
 
         if(!_raytracerState->isRendering())
+        {
+            if(_currentFilm->incomingTileMessagesAvailable())
+            {
+                for(auto& w : _workerObjects)
+                {
+                    if(!w->isRunning())
+                    {
+                        w->setProcessIncomingTileOnly(true);
+                        w->start(true);
+                    }
+                }
+            }
+
             return;
+        }
 
         if(_raytracerState->interrupted())
         {
             _protectedState.setInterrupted( false );
+
+            for(auto& w : _workerObjects)
+            {
+                w->setProcessIncomingTileOnly(false);
+            }
 
             if(_raytracerState->isDrafter())
             {
@@ -143,22 +162,9 @@ namespace prop3
         }
     }
 
-    void CpuRaytracerEngine::pourFramesIn(
-            const Film& film)
+    void CpuRaytracerEngine::interrupt()
     {
-        skipDrafting();
-
-        incorporateFilm(film);
-    }
-
-    bool CpuRaytracerEngine::newTileCompleted()
-    {
-        return _currentFilm->newTileCompleted();
-    }
-
-    bool CpuRaytracerEngine::newFrameCompleted()
-    {
-        return _currentFilm->newFrameCompleted();
+        interruptWorkers(true);
     }
 
     void CpuRaytracerEngine::manageNextFrame()
@@ -194,6 +200,16 @@ namespace prop3
                     _currentFilm->backupAsReferenceShot();
             }
         }
+    }
+
+    bool CpuRaytracerEngine::newTileCompleted()
+    {
+        return _currentFilm->newTileCompleted();
+    }
+
+    bool CpuRaytracerEngine::newFrameCompleted()
+    {
+        return _currentFilm->newFrameCompleted();
     }
 
     std::shared_ptr<Film> CpuRaytracerEngine::currentFilm() const
@@ -481,18 +497,12 @@ namespace prop3
         }
     }
 
-    void CpuRaytracerEngine::incorporateFilm(const Film& film)
-    {
-        _currentFilm->mergeFilm(film);
-
-        _protectedState.setDivergence(_currentFilm->compileDivergence());
-    }
-
     void CpuRaytracerEngine::performNonStochasticSyncronousDraf()
     {
+        interruptWorkers(true);
+
         for(auto& w : _workerObjects)
         {
-            w->stop();
             w->updateFilm(_currentFilm);
             w->useStochasticTracing(false);
             w->usePixelJittering(false);

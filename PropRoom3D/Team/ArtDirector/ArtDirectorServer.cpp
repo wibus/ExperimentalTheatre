@@ -13,7 +13,7 @@
 
 #include "Film/ConvergentFilm.h"
 #include "Network/UpdateMessage.h"
-#include "Network/ServerSocket.h"
+#include "Network/TcpServer.h"
 #include "Serial/JsonWriter.h"
 #include "CpuRaytracerEngine.h"
 #include "DebugRenderer.h"
@@ -30,10 +30,8 @@ namespace prop3
 
     ArtDirectorServer::ArtDirectorServer() :
         _tcpPort(0),
-        _tcpServer(nullptr),
-        _updateMessage(nullptr),
-        _sceneIsStable(false),
-        _mustUpdateClients(false),
+        _shotIsStable(false),
+        _rebuildUpdateMsg(false),
         _film(new ConvergentFilm()),
         _debugRenderer(new DebugRenderer()),
         _postProdUnit(new GlPostProdUnit()),
@@ -68,9 +66,8 @@ namespace prop3
         camera()->refresh();
 
         delete _tcpServer;
-        _tcpServer = new QTcpServer();
-        connect(_tcpServer, &QTcpServer::newConnection,
-                this, &ArtDirectorServer::newConnection);
+        _tcpServer = nullptr;
+        _tcpServer = new TcpServer(_film, this);
     }
 
     void ArtDirectorServer::update(double dt)
@@ -80,47 +77,26 @@ namespace prop3
             StageSetJsonWriter writer;
             _stageSetStream = writer.serialize(*_stageSet);
             _localRaytracer->updateStageSet(_stageSetStream);
-
             _lastUpdate = TimeStamp::getCurrentTimeStamp();
-            _postProdUnit->clearOutput();
-            _mustUpdateClients = true;
-            _sceneIsStable = false;
+            shotChanged();
         }
 
         _localRaytracer->update();
 
-
-        // Remove disconnected clients
-        auto it = _sockets.begin();
-        while(it != _sockets.end())
+        // Build update message if the shot is stable
+        if(_rebuildUpdateMsg)
         {
-            if(!it->isConnected())
+            if(_shotIsStable)
             {
-                getLog().postMessage(new Message('W', false,
-                    "ServerSocket removed", "ArtDirectorServer"));
-                it = _sockets.erase(it);
+                _rebuildUpdateMsg = false;
+                std::shared_ptr<UpdateMessage> msg(
+                    new UpdateMessage(*camera(), _stageSetStream));
+                _tcpServer->dispatchUpdateMessage(msg);
+                _film->setStateUid(msg->uid);
             }
             else
             {
-                ++it;
-            }
-        }
-
-        // Update remaining clients
-        if(_mustUpdateClients)
-        {
-            if(_sceneIsStable)
-            {
-                _mustUpdateClients = false;
-                _updateMessage.reset(new UpdateMessage(
-                                *camera(), _stageSetStream));
-
-                for(ServerSocket& socket : _sockets)
-                    updateClient(socket);
-            }
-            else
-            {
-                _sceneIsStable = true;
+                _shotIsStable = true;
             }
         }
     }
@@ -153,7 +129,9 @@ namespace prop3
     {
         _localRaytracer->terminate();
         _postProdUnit->clearOutput();
-        _sockets.clear();
+
+        delete _tcpServer;
+        _tcpServer = nullptr;
     }
 
     void ArtDirectorServer::resize(int width, int height)
@@ -164,9 +142,8 @@ namespace prop3
 
     void ArtDirectorServer::notify(CameraMsg &msg)
     {
-        _sceneIsStable = false;
-        _mustUpdateClients = true;
-        _postProdUnit->clearOutput();
+        shotChanged();
+
         if(msg.change == CameraMsg::EChange::VIEWPORT)
         {
             const glm::ivec2& viewport = msg.camera.viewport();
@@ -281,8 +258,6 @@ namespace prop3
         {
             _tcpServer->close();
 
-            _sockets.clear();
-
             getLog().postMessage(new Message('W', false,
                 "Server turned off.", "ArtDirectorServer"));
         }
@@ -291,46 +266,6 @@ namespace prop3
             getLog().postMessage(new Message('W', false,
                 "Cannot turn TCP server off, because it's not currently listening.",
                 "ArtDirectorServer"));
-        }
-    }
-
-    void ArtDirectorServer::newConnection()
-    {
-        if(_tcpServer->hasPendingConnections())
-        {
-            QTcpSocket* socket = _tcpServer->nextPendingConnection();
-
-            if(!socket->waitForConnected())
-            {
-                getLog().postMessage(new Message('W', false,
-                    "Connection was pending but never connect " + toString(
-                        socket->peerAddress().toString(), socket->peerPort()),
-                    "ArtDirectorServer"));
-            }
-            else
-            {
-                getLog().postMessage(new Message('W', false,
-                    "New client connected " + toString(
-                        socket->peerAddress().toString(), socket->peerPort()),
-                    "ArtDirectorServer"));
-
-                _sockets.emplace_back(socket, _film);
-                updateClient(_sockets.back());
-            }
-        }
-        else
-        {
-            getLog().postMessage(new Message('W', false,
-                "New connection called, but no connection is currently pending.",
-                "ArtDirectorServer"));
-        }
-    }
-
-    void ArtDirectorServer::updateClient(ServerSocket& socket)
-    {
-        if(!_mustUpdateClients && _sceneIsStable)
-        {
-            socket.sendUpdate(*_updateMessage);
         }
     }
 
@@ -352,6 +287,16 @@ namespace prop3
             colorOutput = Film::ColorOutput::COMPATIBILITY;
 
         _postProdUnit->update(*_localRaytracer->currentFilm(), colorOutput);
+    }
+
+    void ArtDirectorServer::shotChanged()
+    {
+        _shotIsStable = false;
+        _rebuildUpdateMsg = true;
+
+        _postProdUnit->clearOutput();
+
+        _film->setStateUid(-1);
     }
 
     void ArtDirectorServer::printConvergence()

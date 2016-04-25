@@ -112,11 +112,6 @@ namespace prop3
         return glm::dvec4(_colorBuffer[index], 1.0);
     }
 
-    void StaticFilm::setColor(int index, const glm::dvec3& color)
-    {
-        _colorBuffer[index] = color;
-    }
-
     void StaticFilm::addSample(int index, const glm::dvec4& sample)
     {
         _colorBuffer[index] = glm::dvec3(sample);

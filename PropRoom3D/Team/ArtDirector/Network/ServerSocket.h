@@ -1,6 +1,7 @@
 #ifndef PROPROOM3D_SERVERSOCKET_H
 #define PROPROOM3D_SERVERSOCKET_H
 
+#include <mutex>
 #include <memory>
 
 #include <QObject>
@@ -11,7 +12,7 @@ class QTcpSocket;
 
 namespace prop3
 {
-    class Film;
+    class ConvergentFilm;
     class UpdateMessage;
 
     class PROP3D_EXPORT ServerSocket : public QObject
@@ -19,25 +20,31 @@ namespace prop3
         Q_OBJECT
 
     public:
-        ServerSocket(QTcpSocket* socket,
-            const std::shared_ptr<Film>& film);
+        ServerSocket(qintptr socketId,
+            const std::shared_ptr<ConvergentFilm>& film,
+            const std::shared_ptr<UpdateMessage>& msg);
         ~ServerSocket();
 
-        int tcpPort() const;
-        QString ipAddress() const;
         bool isConnected() const;
 
-        void sendUpdate(const UpdateMessage& message);
+        void sendUpdate(const std::shared_ptr<UpdateMessage>& msg);
 
+    signals:
+        void finished();
+        void sendMsgSig();
 
-    protected slots:
-        void readTile();
+    public slots:
+        void start();
+        void readyRead();
+        void sendMsgSlot();
         void disconnected();
 
     private:
         bool _isConnected;
         QTcpSocket* _socket;
-        std::shared_ptr<Film> _film;
+        qintptr _socketDescriptor;
+        std::shared_ptr<ConvergentFilm> _film;
+        std::shared_ptr<UpdateMessage> _msg;
     };
 }
 
