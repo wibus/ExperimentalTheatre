@@ -138,7 +138,7 @@ namespace prop3
 
     double NetworkFilm::pixelPriority(int index) const
     {
-        return 1.0;
+        return 2.0;
     }
 
     glm::dvec4 NetworkFilm::pixelSample(int index) const
@@ -148,7 +148,7 @@ namespace prop3
 
     void NetworkFilm::addSample(int index, const glm::dvec4& sample)
     {
-        _sampleBuffer[index] += sample;
+        _sampleBuffer[index] = sample;
 
         _colorBuffer[index] =
                 glm::dvec3(_sampleBuffer[index]) /

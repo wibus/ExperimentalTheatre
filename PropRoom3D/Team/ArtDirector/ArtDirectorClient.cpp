@@ -284,7 +284,7 @@ namespace prop3
 
         if(processedTileCount > filmTileCount)
         {
-            getLog().postMessage(new Message('I', false,
+            getLog().postMessage(new Message('W', false,
                 "Network is too slow compared to tile completion",
                 "ArtDirectorClient"));
         }
