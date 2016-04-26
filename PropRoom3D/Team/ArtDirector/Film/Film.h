@@ -39,9 +39,6 @@ namespace prop3
         void resizeTiles(int tilesWidth, int tilesHeight);
         virtual void resizeTiles(const glm::ivec2& resolution);
 
-        bool newTileCompleted();
-        bool newFrameCompleted();
-
 
         const std::vector<float>& depthBuffer() const;
 
@@ -69,6 +66,7 @@ namespace prop3
         double pixelPriority(const glm::ivec2& position) const;
 
 
+        // Samples
         glm::dvec4 pixelSample(int i, int j) const;
         glm::dvec4 pixelSample(const glm::ivec2& position) const;
 
@@ -76,18 +74,21 @@ namespace prop3
         void addSample(const glm::ivec2& position, const glm::dvec4& sample);
 
 
-        virtual void mergeFilm(const Film& film);
+        // Tiles
+        bool newTileCompleted();
+        bool newFrameCompleted();
 
         virtual std::shared_ptr<Tile> getTile(size_t id);
         virtual std::shared_ptr<Tile> nextTile();
         virtual std::shared_ptr<Tile> endTile();
 
-        virtual bool incomingTileMessagesAvailable() const;
-        virtual std::shared_ptr<TileMessage> nextIncomingTileMessage();
-        virtual std::shared_ptr<TileMessage> nextOutgoingTileMessage();
-
         void waitForFrameCompletion();
+        virtual bool needNewTiles() const;
         virtual void tileCompleted(Tile& tile) = 0;
+
+        virtual bool incomingTileAvailable() const;
+        virtual std::shared_ptr<TileMessage> nextIncomingTile();
+        virtual std::shared_ptr<TileMessage> nextOutgoingTile();
 
 
     protected:

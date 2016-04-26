@@ -43,7 +43,7 @@ namespace prop3
         virtual ~CpuRaytracerWorker();
 
         // States
-        virtual void start(bool singleShot = false);
+        virtual void start(bool incomingTileOnly = false);
         virtual void stop();
         virtual void terminate();
         virtual bool isRunning();
@@ -58,7 +58,6 @@ namespace prop3
 
 
         // Modes
-        virtual void setProcessIncomingTileOnly(bool only);
         virtual void useStochasticTracing(bool use);
         virtual void usePixelJittering(bool use);
         virtual void useDepthOfField(bool use);
@@ -97,7 +96,6 @@ namespace prop3
 
 
     private:
-        std::atomic<bool> _isSingleShot;
         std::atomic<bool> _runningPredicate;
         std::atomic<bool> _terminatePredicate;
         std::condition_variable _cv;

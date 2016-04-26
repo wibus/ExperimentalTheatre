@@ -113,16 +113,11 @@ namespace prop3
 
         if(!_raytracerState->isRendering())
         {
-            if(_currentFilm->incomingTileMessagesAvailable())
+            if(_currentFilm->incomingTileAvailable())
             {
                 for(auto& w : _workerObjects)
-                {
                     if(!w->isRunning())
-                    {
-                        w->setProcessIncomingTileOnly(true);
                         w->start(true);
-                    }
-                }
             }
 
             return;
@@ -131,11 +126,6 @@ namespace prop3
         if(_raytracerState->interrupted())
         {
             _protectedState.setInterrupted( false );
-
-            for(auto& w : _workerObjects)
-            {
-                w->setProcessIncomingTileOnly(false);
-            }
 
             if(_raytracerState->isDrafter())
             {
@@ -364,8 +354,11 @@ namespace prop3
         size_t removedZones;
         size_t removedSurfaces;
 
+        int surfVisToPixCount = _raytracerState->surfaceVisibilityThreshold()
+                * (_currentFilm->frameWidth() * _currentFilm->frameHeight());
+
         _searchStructure->removeHiddenSurfaces(
-                _raytracerState->surfaceVisibilityThreshold(),
+                surfVisToPixCount,
                 removedZones,
                 removedSurfaces);
 
@@ -507,7 +500,7 @@ namespace prop3
             w->useStochasticTracing(false);
             w->usePixelJittering(false);
             w->useDepthOfField(false);
-            w->start(true);
+            w->start();
         }
 
         _currentFilm->waitForFrameCompletion();

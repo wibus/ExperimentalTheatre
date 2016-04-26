@@ -276,7 +276,7 @@ namespace prop3
         size_t filmTileCount = _film->tileCount();
 
         std::shared_ptr<TileMessage> msg;
-        while((msg = _film->nextOutgoingTileMessage()).get() != nullptr &&
+        while((msg = _film->nextOutgoingTile()).get() != nullptr &&
               ++processedTileCount <= filmTileCount)
         {
             msg->write(*_socket);

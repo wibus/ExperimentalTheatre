@@ -12,8 +12,8 @@ namespace prop3
         StaticFilm();
         virtual ~StaticFilm();
 
-        using Film::pixelSample;
         using Film::addSample;
+        using Film::pixelSample;
         using Film::pixelPriority;
 
         virtual const std::vector<glm::vec3>& colorBuffer(ColorOutput colorOutput) override;
@@ -32,8 +32,8 @@ namespace prop3
 
         virtual double compileDivergence() const override;
 
+        virtual bool needNewTiles() const override;
         virtual void tileCompleted(Tile& tile) override;
-
 
     protected:
         virtual void endTileReached() override;

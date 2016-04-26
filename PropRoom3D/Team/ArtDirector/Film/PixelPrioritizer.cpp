@@ -60,7 +60,7 @@ namespace prop3
             {
                 unsigned int idx = lineBaseIdx + i;
 
-                _tmpBuff[idx] = 0.0;
+                _tmpBuff[idx] = 1.0e-9;
                 double centerWeight = _gauss[halfWidth];
                 for(int k=1; k <= halfWidth; ++k)
                 {

@@ -1,6 +1,9 @@
 #include "SearchStructure.h"
 
 #include <atomic>
+
+#include <CellarWorkbench/Misc/Log.h>
+
 #include "Team/DummyTeam.h"
 
 #include "Node/StageSet.h"
@@ -11,6 +14,8 @@
 #include "Serial/JsonReader.h"
 
 #include "Ray/RayHitList.h"
+
+using namespace cellar;
 
 
 namespace prop3
@@ -280,9 +285,8 @@ namespace prop3
         threshold = glm::abs(threshold);
 
 
-        std::vector<bool> removeSurface;
-        removeSurface.reserve(_searchSurfaces.size());
-        for(size_t i=0; i < _searchSurfaces.size(); ++i)
+        std::vector<bool> removeSurface(_searchSurfaces.size());
+        for(int i=0; i < _searchSurfaces.size(); ++i)
         {
             bool remove = _searchSurfaces[i].hitCount
                 .load(std::memory_order_relaxed) < threshold;
@@ -290,14 +294,15 @@ namespace prop3
             if(invertRemoval)
                 remove = !remove;
 
-            if(remove) ++removedSurfaces;
+            if(remove)
+                ++removedSurfaces;
+
             removeSurface[i] = remove;
         }
 
 
-        std::vector<bool> removeZone;
-        removeZone.reserve(_searchZones.size());
-        for(int i=_searchZones.size()-1; i > 0; --i)
+        std::vector<bool> removeZone(_searchZones.size());
+        for(int i=_searchZones.size()-1; i >= 0; --i)
         {
             SearchZone& zone = _searchZones[i];
 
@@ -340,12 +345,13 @@ namespace prop3
                 zone.endSurf -= cumSurfRemove;
 
 
+                size_t remZoneCount = 0;
                 for(size_t z=i+1; z < zone.endZone; ++z)
                 {
                     if(removeZone[z])
-                        --zone.endZone;
+                        ++remZoneCount;
                 }
-                zone.endZone -= cumZoneRemove;
+                zone.endZone -= (cumZoneRemove + remZoneCount);
 
                 newZones.push_back(zone);
             }

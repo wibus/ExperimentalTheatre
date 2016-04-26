@@ -14,8 +14,8 @@ namespace prop3
         NetworkFilm();
         virtual ~NetworkFilm();
 
-        using Film::pixelSample;
         using Film::addSample;
+        using Film::pixelSample;
         using Film::pixelPriority;
 
         virtual const std::vector<glm::vec3>& colorBuffer(ColorOutput colorOutput) override;
@@ -36,8 +36,8 @@ namespace prop3
 
         virtual void tileCompleted(Tile& tile) override;
 
-        virtual std::shared_ptr<TileMessage> nextOutgoingTileMessage() override;
-        void addOutgoingTileMessage(const std::shared_ptr<TileMessage>& msg);
+        virtual std::shared_ptr<TileMessage> nextOutgoingTile() override;
+        void addOutgoingTile(const std::shared_ptr<TileMessage>& msg);
 
 
     protected:

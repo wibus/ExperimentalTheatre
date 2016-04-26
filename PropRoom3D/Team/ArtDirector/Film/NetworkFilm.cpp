@@ -96,11 +96,11 @@ namespace prop3
 
         if(msg->isValid())
         {
-            addOutgoingTileMessage(msg);
+            addOutgoingTile(msg);
         }
     }
 
-    std::shared_ptr<TileMessage> NetworkFilm::nextOutgoingTileMessage()
+    std::shared_ptr<TileMessage> NetworkFilm::nextOutgoingTile()
     {
         std::shared_ptr<TileMessage> msg;
 
@@ -115,7 +115,7 @@ namespace prop3
         return msg;
     }
 
-    void NetworkFilm::addOutgoingTileMessage(const std::shared_ptr<TileMessage>& msg)
+    void NetworkFilm::addOutgoingTile(const std::shared_ptr<TileMessage>& msg)
     {
         _tileMsgMutex.lock();
         _tileMsgs.push(msg);

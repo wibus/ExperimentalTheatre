@@ -121,7 +121,8 @@ namespace prop3
                 }
                 else
                 {
-                    tile->addSample(x, y, sample);
+                    if(sample.w > 0.0)
+                        tile->addSample(x, y, sample);
                 }
             }
         }

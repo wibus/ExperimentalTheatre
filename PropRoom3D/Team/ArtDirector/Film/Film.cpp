@@ -67,33 +67,6 @@ namespace prop3
         return is;
     }
 
-    void Film::mergeFilm(const Film& film)
-    {
-        size_t tileId = _tiles.size();
-        while(tileId > 0)
-        {
-            std::shared_ptr<Tile> tile = _tiles[--tileId];
-
-            tile->lock();
-
-            const glm::ivec2 minCorner = tile->minCorner();
-            const glm::ivec2 maxCorner = tile->maxCorner();
-            for(int j=minCorner.y; j < maxCorner.y; ++j)
-            {
-                for(int i=minCorner.x; i < maxCorner.x; ++i)
-                {
-                    int index = j*frameWidth() + i;
-                    addSample(index, film.pixelSample(index));
-                }
-            }
-
-            tile->unlock();
-        }
-
-        _newTileCompleted = true;
-        _newFrameCompleted = true;
-    }
-
     std::shared_ptr<Tile> Film::getTile(size_t id)
     {
         if(id < _tiles.size())
@@ -130,17 +103,28 @@ namespace prop3
         return endTile();
     }
 
-    bool Film::incomingTileMessagesAvailable() const
+    void Film::waitForFrameCompletion()
+    {
+        std::unique_lock<std::mutex> lk(_cvMutex);
+        _cv.wait(lk, [&](){ return _newFrameCompleted; });
+    }
+
+    bool Film::needNewTiles() const
+    {
+        return true;
+    }
+
+    bool Film::incomingTileAvailable() const
     {
         return false;
     }
 
-    std::shared_ptr<TileMessage> Film::nextIncomingTileMessage()
+    std::shared_ptr<TileMessage> Film::nextIncomingTile()
     {
         return std::shared_ptr<TileMessage>();
     }
 
-    std::shared_ptr<TileMessage> Film::nextOutgoingTileMessage()
+    std::shared_ptr<TileMessage> Film::nextOutgoingTile()
     {
         return std::shared_ptr<TileMessage>();
     }
@@ -148,12 +132,6 @@ namespace prop3
     std::shared_ptr<Tile> Film::endTile()
     {
         return _endTile;
-    }
-
-    void Film::waitForFrameCompletion()
-    {
-        std::unique_lock<std::mutex> lk(_cvMutex);
-        _cv.wait(lk, [&](){ return _newFrameCompleted; });
     }
 
     void Film::buildTiles()

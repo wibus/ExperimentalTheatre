@@ -20,8 +20,8 @@ namespace prop3
         ConvergentFilm();
         virtual ~ConvergentFilm();
 
-        using Film::pixelSample;
         using Film::addSample;
+        using Film::pixelSample;
         using Film::pixelPriority;
 
         virtual const std::vector<glm::vec3>& colorBuffer(ColorOutput colorOutput) override;
@@ -42,9 +42,9 @@ namespace prop3
 
         virtual void tileCompleted(Tile& tile) override;
 
-        virtual bool incomingTileMessagesAvailable() const override;
-        virtual std::shared_ptr<TileMessage> nextIncomingTileMessage() override;
-        void addIncomingTileMessage(const std::shared_ptr<TileMessage>& msg);
+        virtual bool incomingTileAvailable() const override;
+        virtual std::shared_ptr<TileMessage> nextIncomingTile() override;
+        void addIncomingTile(const std::shared_ptr<TileMessage>& msg);
 
 
     protected:
