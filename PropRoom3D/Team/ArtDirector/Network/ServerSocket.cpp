@@ -56,7 +56,7 @@ namespace prop3
             }
             else if(msg->uid() == _film->stateUid())
             {
-                _film->addIncomingTileMessage(msg);
+                _film->addIncomingTile(msg);
             }
         }
     }

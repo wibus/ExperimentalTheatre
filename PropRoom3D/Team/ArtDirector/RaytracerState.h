@@ -104,9 +104,9 @@ namespace prop3
         bool converged() const;
 
 
-        void setSurfaceVisibilityThreshold(int threshold);
+        void setSurfaceVisibilityThreshold(double threshold);
 
-        int surfaceVisibilityThreshold() const;
+        double surfaceVisibilityThreshold() const;
 
         bool debuggingHiddenSurfaceRemoval() const;
 
@@ -166,7 +166,7 @@ namespace prop3
         unsigned int _sampleCountThreshold;
         double _renderTimeThreshold;
         double _divergenceThreshold;
-        int _surfaceVisibilityThreshold;
+        double _surfaceVisibilityThreshold;
     };
 
 
@@ -220,14 +220,14 @@ namespace prop3
         return _divergenceThreshold >= divergence();
     }
 
-    inline int RaytracerState::surfaceVisibilityThreshold() const
+    inline double RaytracerState::surfaceVisibilityThreshold() const
     {
         return _surfaceVisibilityThreshold;
     }
 
     inline bool RaytracerState::debuggingHiddenSurfaceRemoval() const
     {
-        return _surfaceVisibilityThreshold < 0;
+        return _surfaceVisibilityThreshold < 0.0;
     }
 
     inline bool RaytracerState::hiddenSurfacesRemoved() const

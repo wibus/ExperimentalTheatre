@@ -36,7 +36,6 @@ namespace prop3
     }
 
     CpuRaytracerWorker::CpuRaytracerWorker() :
-        _isSingleShot(false),
         _runningPredicate(false),
         _terminatePredicate(false),
         _incomingTileOnly(false),
@@ -60,9 +59,9 @@ namespace prop3
     {
     }
 
-    void CpuRaytracerWorker::start(bool singleShot)
+    void CpuRaytracerWorker::start(bool incomingTileOnly)
     {
-        _isSingleShot = singleShot;
+        _incomingTileOnly = incomingTileOnly;
         if(!_runningPredicate)
         {
             _runningPredicate = true;
@@ -147,11 +146,6 @@ namespace prop3
         });
     }
 
-    void CpuRaytracerWorker::setProcessIncomingTileOnly(bool only)
-    {
-        _incomingTileOnly = only;
-    }
-
     void CpuRaytracerWorker::useStochasticTracing(bool use)
     {
         _useStochasticTracing = use;
@@ -189,23 +183,24 @@ namespace prop3
     {
         while(true)
         {
-            std::shared_ptr<Tile> tile;
             std::unique_lock<std::mutex> lk(_flowMutex);
-            _cv.wait(lk, [this, &tile]{
+            _cv.wait(lk, [this]{
                 if(_terminatePredicate)
                     return true;
 
-                if(_workingFilm->incomingTileMessagesAvailable())
+                if(_workingFilm->incomingTileAvailable())
                     return true;
 
                 if(_runningPredicate &&
-                    (!_searchStructure->isEmpty()))
+                   !_searchStructure->isEmpty() &&
+                   _workingFilm->needNewTiles())
                 {
-                    tile = _workingFilm->nextTile();
-                    return tile != _workingFilm->endTile();
+                    return true;
                 }
                 else
+                {
                     return false;
+                }
             });
 
             // Verify if we are supposed to terminate
@@ -214,23 +209,32 @@ namespace prop3
                 return;
             }
 
-            // Decode incoming tile messages
+            // Process tiles
             while(_runningPredicate)
             {
                 // Process as much incoming tiles as possible
                 while(_runningPredicate)
                 {
                     std::shared_ptr<TileMessage> msg =
-                        _workingFilm->nextIncomingTileMessage();
+                        _workingFilm->nextIncomingTile();
 
                     if(msg.get() != nullptr)
+                    {
                         msg->decode();
+                    }
                     else
+                    {
+                        if(_incomingTileOnly)
+                        {
+                            _runningPredicate = false;
+                        }
+
                         break;
+                    }
                 }
 
                 // Generate a single new tile
-                if(!_incomingTileOnly)
+                if(_runningPredicate)
                 {
                     /*// Shoot rays
                     if(_runningPredicate &&
@@ -238,25 +242,19 @@ namespace prop3
                         shootFromLights();
                     */
 
+                    std::shared_ptr<Tile> tile;
+                    tile = _workingFilm->nextTile();
                     if(tile != _workingFilm->endTile())
                     {
                         tile->lock();
                         shootFromScreen(tile);
                         tile->unlock();
-
-                        if(_runningPredicate)
-                            tile = _workingFilm->nextTile();
-                        else
-                            break;
+                    }
+                    else
+                    {
+                        _runningPredicate = false;
                     }
                 }
-
-            }
-
-            // Stop if single shot
-            if(_isSingleShot)
-            {
-                _runningPredicate = false;
             }
         }
     }

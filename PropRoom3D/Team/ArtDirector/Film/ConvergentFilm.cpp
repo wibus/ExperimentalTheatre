@@ -335,12 +335,12 @@ namespace prop3
         }
     }
 
-    bool ConvergentFilm::incomingTileMessagesAvailable() const
+    bool ConvergentFilm::incomingTileAvailable() const
     {
         return !_tileMsgs.empty();
     }
 
-    std::shared_ptr<TileMessage> ConvergentFilm::nextIncomingTileMessage()
+    std::shared_ptr<TileMessage> ConvergentFilm::nextIncomingTile()
     {
         std::shared_ptr<TileMessage> msg;
 
@@ -355,7 +355,7 @@ namespace prop3
         return msg;
     }
 
-    void ConvergentFilm::addIncomingTileMessage(const std::shared_ptr<TileMessage>& msg)
+    void ConvergentFilm::addIncomingTile(const std::shared_ptr<TileMessage>& msg)
     {
         _tileMsgMutex.lock();
         _tileMsgs.push(msg);

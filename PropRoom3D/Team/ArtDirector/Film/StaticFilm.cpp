@@ -76,6 +76,11 @@ namespace prop3
         return 1.0;
     }
 
+    bool StaticFilm::needNewTiles() const
+    {
+        return _nextTileId < _tiles.size();
+    }
+
     void StaticFilm::tileCompleted(Tile& tile)
     {
         std::lock_guard<std::mutex> lk(_tilesMutex);

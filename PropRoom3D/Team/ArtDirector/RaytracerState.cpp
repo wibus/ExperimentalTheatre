@@ -117,7 +117,7 @@ namespace prop3
         _sampleCountThreshold(std::numeric_limits<unsigned int>::max()),
         _renderTimeThreshold(std::numeric_limits<double>::infinity()),
         _divergenceThreshold(-1.0),
-        _surfaceVisibilityThreshold(64)
+        _surfaceVisibilityThreshold(0.02)
     {
 
     }
@@ -137,7 +137,7 @@ namespace prop3
         _renderTimeThreshold = renderTimeThreshold;
     }
 
-    void RaytracerState::setSurfaceVisibilityThreshold(int threshold)
+    void RaytracerState::setSurfaceVisibilityThreshold(double threshold)
     {
         _surfaceVisibilityThreshold = threshold;
     }

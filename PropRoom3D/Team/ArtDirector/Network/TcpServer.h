@@ -23,8 +23,6 @@ namespace prop3
                   QObject* parent = 0);
         virtual ~TcpServer();
 
-        void update();
-
         void dispatchUpdateMessage(
             const std::shared_ptr<UpdateMessage>& msg);
 
