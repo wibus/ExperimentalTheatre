@@ -30,6 +30,7 @@ namespace prop3
 
     ArtDirectorServer::ArtDirectorServer() :
         _tcpPort(0),
+        _tcpServer(nullptr),
         _shotIsStable(false),
         _rebuildUpdateMsg(false),
         _film(new ConvergentFilm()),
