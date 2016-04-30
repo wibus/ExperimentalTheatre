@@ -2,6 +2,7 @@
 #define PROPROOM3D_NETWORKFILM_H
 
 #include <queue>
+#include <chrono>
 
 #include "Film.h"
 
@@ -51,6 +52,12 @@ namespace prop3
         std::mutex _tileMsgMutex;
         std::queue<std::shared_ptr<TileMessage>> _tileMsgs;
         std::vector<glm::dvec4> _sampleBuffer;
+
+        int _tileCompletedCount;
+        double _avrgPixelPriority;
+        double _maxDataRateAvailable;
+        size_t _cumulatedTileByteCount;
+        std::chrono::high_resolution_clock::time_point _startTime;
     };
 }
 

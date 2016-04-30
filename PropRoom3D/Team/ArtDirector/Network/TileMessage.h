@@ -25,6 +25,7 @@ namespace prop3
 
         int uid() const;
         bool isValid() const;
+        size_t size() const;
 
         void encode();
         void decode();

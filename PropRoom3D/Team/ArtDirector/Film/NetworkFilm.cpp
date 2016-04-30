@@ -1,11 +1,16 @@
 #include "NetworkFilm.h"
 
+#include <CellarWorkbench/Misc/Log.h>
+
 #include "../Network/TileMessage.h"
+
+using namespace cellar;
 
 
 namespace prop3
 {
-    NetworkFilm::NetworkFilm()
+    NetworkFilm::NetworkFilm() :
+        _maxDataRateAvailable(2.8e6)
     {
 
     }
@@ -30,6 +35,10 @@ namespace prop3
         _nextTileId = 0;
         _framePassCount = 0;
         _priorityThreshold = 1.0;
+        _avrgPixelPriority = 1.0;
+        _tileCompletedCount = 0;
+        _cumulatedTileByteCount = 0;
+        _startTime = std::chrono::high_resolution_clock::now();
 
         while(!_tileMsgs.empty())
             _tileMsgs.pop();
@@ -88,6 +97,7 @@ namespace prop3
     void NetworkFilm::tileCompleted(Tile& tile)
     {
         _newTileCompleted = true;
+        ++_tileCompletedCount;
 
         std::shared_ptr<TileMessage> msg(
             new TileMessage(*this, tile.tileId(), stateUid()));
@@ -97,6 +107,36 @@ namespace prop3
         if(msg->isValid())
         {
             addOutgoingTile(msg);
+            _cumulatedTileByteCount += msg->size();
+        }
+
+        if(_tileCompletedCount == _tiles.size())
+        {
+            auto endTime = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> sec = endTime - _startTime;
+            double dataRate = _cumulatedTileByteCount / sec.count();
+
+            int kBPerSec = dataRate / 1000;
+
+            if(dataRate > _maxDataRateAvailable)
+            {
+                _avrgPixelPriority = _avrgPixelPriority * dataRate
+                                         / _maxDataRateAvailable;
+
+                getLog().postMessage(new Message('W', false,
+                    "NetworkFilm uses to much bandwidth (" +
+                    std::to_string(kBPerSec) + "kB/s); "\
+                    "increasing pixel priorities to " +
+                    std::to_string(_avrgPixelPriority),
+                    "NetworkFilm"));
+            }
+            else
+            {
+                getLog().postMessage(new Message('W', false,
+                    "NetworkFilm uses acceptable bandwidth (" +
+                    std::to_string(kBPerSec) + "kB/s)",
+                    "NetworkFilm"));
+            }
         }
     }
 
@@ -138,7 +178,7 @@ namespace prop3
 
     double NetworkFilm::pixelPriority(int index) const
     {
-        return 1.0;
+        return _avrgPixelPriority;
     }
 
     glm::dvec4 NetworkFilm::pixelSample(int index) const
@@ -148,7 +188,7 @@ namespace prop3
 
     void NetworkFilm::addSample(int index, const glm::dvec4& sample)
     {
-        _sampleBuffer[index] += sample;
+        _sampleBuffer[index] = sample;
 
         _colorBuffer[index] =
                 glm::dvec3(_sampleBuffer[index]) /

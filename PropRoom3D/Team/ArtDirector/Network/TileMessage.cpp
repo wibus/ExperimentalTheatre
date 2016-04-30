@@ -43,6 +43,11 @@ namespace prop3
         return _tileId != -1;
     }
 
+    size_t TileMessage::size() const
+    {
+        return _buffer.size();
+    }
+
     void TileMessage::encode()
     {
         int size = 0;
