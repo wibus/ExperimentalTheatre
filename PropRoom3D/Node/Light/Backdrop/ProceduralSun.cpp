@@ -27,7 +27,7 @@ namespace prop3
 
 
     const double MIN_DIR_HEIGHT = -0.25;
-    const double MIN_SUN_HEIGHT = -0.00;
+    const double MIN_SUN_HEIGHT = -0.05;
     const double DIFFUSE_POWER = 2.0;
     const double HALO_POWER = 32.0;
     const double DAY_POWER = 1.0;
@@ -112,8 +112,9 @@ namespace prop3
         double dayMix = 1.0 - cellar::fast_pow(1.0 - dayRatio, DAY_POWER);
 
         glm::dvec3 topColor = kelvinToRgb(100000);
-        glm::dvec3 bottomColor = kelvinToRgb(glm::mix(2000, 6600, dayMix));
-        glm::dvec3 haloColor = kelvinToRgb(glm::mix(2000, 6600, dayMix));
+        glm::dvec3 bottomColor = kelvinToRgb(glm::mix(3000, 6600, dayMix));
+        glm::dvec3 haloColor = kelvinToRgb(glm::mix(3000, 6600, dayMix));
+        glm::dvec3 sunTint = kelvinToRgb(glm::mix(2000, 6600, dayMix));
 
         double diffuseHeight (dotDirTop - MIN_DIR_HEIGHT);
         double diffuseRatio = glm::max(0.0, diffuseHeight / (1.0 - MIN_DIR_HEIGHT));
@@ -136,7 +137,7 @@ namespace prop3
         double ringWidth = (1.0 - SUN_COS_RADIUS);
         if(dotDirSun > SUN_COS_RADIUS - ringWidth)
         {
-            glm::dvec3 sunColor = haloColor * _sunColor;
+            glm::dvec3 sunColor = sunTint * _sunColor;
             double sunProb = cellar::fast_pow(SUN_SURFACE_RATIO, ray.entropy);
             if(dotDirSun > SUN_COS_RADIUS)
             {
@@ -162,7 +163,10 @@ namespace prop3
         // Fire only sun rays
         double dotSunTop = _sunDirection.z;
         double dayHeight (dotSunTop - MIN_SUN_HEIGHT);
-        double dayRatio = glm::max(0.0, dayHeight / (1.0 - MIN_SUN_HEIGHT));
+        double dayRatio = dayHeight / (1.0 - MIN_SUN_HEIGHT);
+        if(dayRatio <= MIN_SUN_HEIGHT)
+            return;
+
         double dayMix = 1.0 - cellar::fast_pow(1.0 - dayRatio, DAY_POWER);
         glm::dvec3 haloFilter = kelvinToRgb(glm::mix(2000, 6600, dayMix));
 
