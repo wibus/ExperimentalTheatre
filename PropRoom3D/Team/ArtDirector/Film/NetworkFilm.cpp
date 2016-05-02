@@ -10,7 +10,9 @@ using namespace cellar;
 namespace prop3
 {
     NetworkFilm::NetworkFilm() :
-        _maxDataRateAvailable(2.8e6)
+        _initialPixelPriority(1.5),
+        _maxDataRateAvailable(2.8e6),
+        _cumulatedByteCountThreshold(3e6)
     {
 
     }
@@ -35,10 +37,10 @@ namespace prop3
         _nextTileId = 0;
         _framePassCount = 0;
         _priorityThreshold = 1.0;
-        _avrgPixelPriority = 1.0;
-        _tileCompletedCount = 0;
-        _cumulatedTileByteCount = 0;
+        _currentPixelPriority = _initialPixelPriority;
         _startTime = std::chrono::high_resolution_clock::now();
+        _cumulatedTileByteCount = 0;
+        _bandwithOptimized = false;
 
         while(!_tileMsgs.empty())
             _tileMsgs.pop();
@@ -97,7 +99,6 @@ namespace prop3
     void NetworkFilm::tileCompleted(Tile& tile)
     {
         _newTileCompleted = true;
-        ++_tileCompletedCount;
 
         std::shared_ptr<TileMessage> msg(
             new TileMessage(*this, tile.tileId(), stateUid()));
@@ -107,36 +108,6 @@ namespace prop3
         if(msg->isValid())
         {
             addOutgoingTile(msg);
-            _cumulatedTileByteCount += msg->size();
-        }
-
-        if(_tileCompletedCount == _tiles.size())
-        {
-            auto endTime = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double> sec = endTime - _startTime;
-            double dataRate = _cumulatedTileByteCount / sec.count();
-
-            int kBPerSec = dataRate / 1000;
-
-            if(dataRate > _maxDataRateAvailable)
-            {
-                _avrgPixelPriority = _avrgPixelPriority * dataRate
-                                         / _maxDataRateAvailable;
-
-                getLog().postMessage(new Message('W', false,
-                    "NetworkFilm uses to much bandwidth (" +
-                    std::to_string(kBPerSec) + "kB/s); "\
-                    "increasing pixel priorities to " +
-                    std::to_string(_avrgPixelPriority),
-                    "NetworkFilm"));
-            }
-            else
-            {
-                getLog().postMessage(new Message('W', false,
-                    "NetworkFilm uses acceptable bandwidth (" +
-                    std::to_string(kBPerSec) + "kB/s)",
-                    "NetworkFilm"));
-            }
         }
     }
 
@@ -158,7 +129,32 @@ namespace prop3
     void NetworkFilm::addOutgoingTile(const std::shared_ptr<TileMessage>& msg)
     {
         _tileMsgMutex.lock();
+
         _tileMsgs.push(msg);
+        _cumulatedTileByteCount += msg->size();
+
+        if(!_bandwithOptimized &&
+           _cumulatedTileByteCount > _cumulatedByteCountThreshold)
+        {
+            _bandwithOptimized = true;
+            auto endTime = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> sec = endTime - _startTime;
+            double dataRate = _cumulatedTileByteCount / sec.count();
+
+            int kBPerSec = dataRate / 1000;
+
+            _currentPixelPriority = _currentPixelPriority *
+                glm::sqrt(dataRate / _maxDataRateAvailable);
+            _currentPixelPriority = glm::max(_currentPixelPriority, 1.0);
+
+            getLog().postMessage(new Message('I', false,
+                "Optimizing bandwith (" +
+                std::to_string(kBPerSec) + "kB/s); "\
+                "new pixel priority is " +
+                std::to_string(_currentPixelPriority),
+                "NetworkFilm"));
+        }
+
         _tileMsgMutex.unlock();
     }
 
@@ -178,7 +174,7 @@ namespace prop3
 
     double NetworkFilm::pixelPriority(int index) const
     {
-        return _avrgPixelPriority;
+        return _currentPixelPriority;
     }
 
     glm::dvec4 NetworkFilm::pixelSample(int index) const
