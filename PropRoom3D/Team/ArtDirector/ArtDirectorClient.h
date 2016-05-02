@@ -4,6 +4,7 @@
 #include <vector>
 #include <thread>
 
+#include <QBuffer>
 class QTcpSocket;
 
 #include "AbstractArtDirector.h"
@@ -66,6 +67,7 @@ namespace prop3
 
         bool _isConnected;
         int _serverTcpPort;
+        QBuffer _socketBuffer;
         std::string _serverIpAddress;
     };
 }

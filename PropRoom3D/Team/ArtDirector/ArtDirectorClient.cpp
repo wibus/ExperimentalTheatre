@@ -29,6 +29,8 @@ namespace prop3
 #endif
 
         _socket->setReadBufferSize(0);
+        _socket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
+        _socket->setSocketOption(QAbstractSocket::SendBufferSizeSocketOption, 8e6);
 
         connect(_socket, &QTcpSocket::connected,
                 this, &ArtDirectorClient::connected);
@@ -275,12 +277,27 @@ namespace prop3
         size_t processedTileCount = 0;
         size_t filmTileCount = _film->tileCount();
 
+        if(filmTileCount == 0)
+            return;
+
+        _socketBuffer.buffer().truncate(0);
+        _socketBuffer.open(QIODevice::ReadWrite);
+        _socketBuffer.seek(0);
+
         std::shared_ptr<TileMessage> msg;
         while((msg = _film->nextOutgoingTile()).get() != nullptr &&
               ++processedTileCount <= filmTileCount)
         {
-            msg->write(*_socket);
+            msg->write(_socketBuffer);
         }
+
+        if(_socketBuffer.size() > 0)
+        {
+            _socket->write(_socketBuffer.data());
+            _socket->flush();
+        }
+
+        _socketBuffer.close();
 
         if(processedTileCount > filmTileCount)
         {
