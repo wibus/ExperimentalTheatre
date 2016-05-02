@@ -2,6 +2,7 @@
 
 #include <QTcpSocket>
 #include <QNetworkInterface>
+#include <QCoreApplication>
 
 #include <CellarWorkbench/Misc/Log.h>
 
@@ -58,6 +59,8 @@ namespace prop3
             {
                 _film->addIncomingTile(msg);
             }
+
+            QCoreApplication::processEvents();
         }
     }
 
@@ -94,6 +97,9 @@ namespace prop3
             _isConnected = false;
             return;
         }
+
+        _socket->setReadBufferSize(0);
+        _socket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
 
         connect(_socket, SIGNAL(readyRead()), this, SLOT(readyRead()), Qt::DirectConnection);
         connect(this, &ServerSocket::sendMsgSig, this, &ServerSocket::sendMsgSlot, Qt::QueuedConnection);

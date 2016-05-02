@@ -97,7 +97,11 @@ namespace prop3
             }
             else
             {
-                _shotIsStable = true;
+                _shotIsStable = true;                
+
+                std::shared_ptr<UpdateMessage> msg(
+                    new UpdateMessage(*camera(), ""));
+                _tcpServer->dispatchUpdateMessage(msg);
             }
         }
     }

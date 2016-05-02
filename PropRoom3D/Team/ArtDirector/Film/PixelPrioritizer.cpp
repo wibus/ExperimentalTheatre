@@ -30,6 +30,7 @@ namespace prop3
         unsigned int pixelCount =
                 frameResolution.x *
                 frameResolution.y;
+        _varBuff.resize(pixelCount);
         _tmpBuff.resize(pixelCount);
 
         computeGaussLine(_gauss, blurWidth, blurVariance);
@@ -49,6 +50,13 @@ namespace prop3
         glm::ivec2 frameResolution = film.frameResolution();
         size_t pixelCount = rawSampBuff.size();
 
+        for(size_t p=0; p < pixelCount; ++p)
+        {
+            if(rawVarBuff[p].y > 0.0)
+                _varBuff[p] = rawVarBuff[p].x / rawVarBuff[p].y;
+            else
+                _varBuff[p] = 1.0;
+        }
 
         size_t kernelWidth = _gauss.size();
         size_t halfWidth = kernelWidth / 2;
@@ -65,16 +73,16 @@ namespace prop3
                 for(int k=1; k <= halfWidth; ++k)
                 {
                     if(i-k >= 0)
-                        _tmpBuff[idx] += _gauss[halfWidth-k] * (rawVarBuff[idx-k].x / rawVarBuff[idx-k].y);
+                        _tmpBuff[idx] += _gauss[halfWidth-k] * _varBuff[idx-k];
                     else
                         centerWeight += _gauss[halfWidth-k];
 
                     if(i+k < frameResolution.x)
-                        _tmpBuff[idx] += _gauss[halfWidth+k] * (rawVarBuff[idx+k].x / rawVarBuff[idx+k].y);
+                        _tmpBuff[idx] += _gauss[halfWidth+k] * _varBuff[idx+k];
                     else
                         centerWeight += _gauss[halfWidth+k];
                 }
-                _tmpBuff[idx] += centerWeight * (rawVarBuff[idx].x / rawVarBuff[idx].y);
+                _tmpBuff[idx] += centerWeight * _varBuff[idx];
             }
         }
 

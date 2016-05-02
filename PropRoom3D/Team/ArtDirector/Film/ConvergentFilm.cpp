@@ -376,7 +376,7 @@ namespace prop3
 
             double avrgPriority = _prioritizer->averagePriority();
             avrgPriority = glm::min(avrgPriority, 1.0);
-            _priorityThreshold = 0.75 * avrgPriority;
+            _priorityThreshold = avrgPriority;
         }
         else
         {

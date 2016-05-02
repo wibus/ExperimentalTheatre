@@ -31,6 +31,7 @@ namespace prop3
                 double var);
 
     private:
+        std::vector<double> _varBuff;
         std::vector<double> _tmpBuff;
         std::vector<double> _gauss;
         double _frameAvrgPriority;
