@@ -173,6 +173,8 @@ namespace prop3
                 parent.endZone = glm::max(parent.endZone, zone.endZone);
             }
         }
+
+        _isEmpty = _searchSurfaces.empty();
     }
 
     SearchStructure::~SearchStructure()

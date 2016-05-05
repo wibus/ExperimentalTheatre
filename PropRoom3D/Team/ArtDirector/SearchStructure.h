@@ -66,6 +66,7 @@ namespace prop3
         std::vector<SearchZone> _searchZones;
         std::vector<SearchSurface> _searchSurfaces;
 
+        bool _isEmpty;
         bool _isOptimized;
         std::vector<std::shared_ptr<const LightBulb>> _lights;
     };
@@ -75,7 +76,7 @@ namespace prop3
     // IMPLEMENTATION //
     inline bool SearchStructure::isEmpty() const
     {
-        return _searchSurfaces.empty();
+        return _isEmpty;
     }
 
     inline bool SearchStructure::isOptimized() const
