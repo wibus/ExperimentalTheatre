@@ -22,7 +22,7 @@ namespace prop3
         virtual double lightFreePathLength(
             const Raycast& ray) const override;
 
-        virtual glm::dvec3 lightAttenuation(
+        virtual glm::dvec4 lightAttenuation(
             const Raycast& ray) const override;
 
         virtual void scatterLight(

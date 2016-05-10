@@ -46,6 +46,8 @@ namespace prop3
         void setSunDirection(const glm::dvec3& dir);
 
 
+        virtual double distance(const Raycast& ray) const override;
+
         virtual glm::dvec4 raycast(const Raycast& ray) const override;
 
         virtual void fireOn(

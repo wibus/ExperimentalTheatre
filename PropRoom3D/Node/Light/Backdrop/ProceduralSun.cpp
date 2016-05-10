@@ -100,6 +100,11 @@ namespace prop3
         stampCurrentUpdate();
     }
 
+    double ProceduralSun::distance(const Raycast& ray) const
+    {
+        return 20.0;
+    }
+
     glm::dvec4 ProceduralSun::raycast(const Raycast& ray) const
     {
         double dotDirSun = glm::dot(ray.direction, _sunDirection);

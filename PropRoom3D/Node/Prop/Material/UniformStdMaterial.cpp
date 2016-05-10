@@ -25,9 +25,11 @@ namespace prop3
         visitor.visit(*this);
     }
 
-    void UniformStdMaterial::setOpacity(double translucency)
+    void UniformStdMaterial::setOpacity(double opacity)
     {
-        _opacity = translucency;
+        _opacity = glm::clamp(opacity, 0.0, 1.0);
+
+        stampCurrentUpdate();
     }
 
     double UniformStdMaterial::opacity(const glm::dvec3& pos) const
@@ -37,7 +39,9 @@ namespace prop3
 
     void UniformStdMaterial::setConductivity(double conductivity)
     {
-        _conductivity = conductivity;
+        _conductivity = glm::clamp(conductivity, 0.0, 1.0);
+
+        stampCurrentUpdate();
     }
 
     double UniformStdMaterial::conductivity(const glm::dvec3& pos) const
@@ -47,7 +51,9 @@ namespace prop3
 
     void UniformStdMaterial::setRefractiveIndex(double refractiveIndex)
     {
-        _refractiveIndex = refractiveIndex;
+        _refractiveIndex = glm::max(1.0, refractiveIndex);
+
+        stampCurrentUpdate();
     }
 
     double UniformStdMaterial::refractiveIndex(const glm::dvec3& pos) const
@@ -57,7 +63,9 @@ namespace prop3
 
     void UniformStdMaterial::setScattering(double scattering)
     {
-        _scattering = scattering;
+        _scattering = glm::clamp(scattering, 0.0, 1.0);
+
+        stampCurrentUpdate();
     }
 
     double UniformStdMaterial::scattering(const glm::dvec3& pos) const
@@ -67,7 +75,9 @@ namespace prop3
 
     void UniformStdMaterial::setColor(const glm::dvec3& color)
     {
-        _color = color;
+        _color = glm::clamp(color, glm::dvec3(0), glm::dvec3(1));
+
+        stampCurrentUpdate();
     }
 
     glm::dvec3 UniformStdMaterial::color(const glm::dvec3& pos) const

@@ -38,7 +38,7 @@ namespace prop3
 
     const std::shared_ptr<Coating>  Surface::NO_COATING(new UniformStdCoating());
     const std::shared_ptr<Material> Surface::DEFAULT_MATERIAL(material::createInsulator(color::white, 1.40, 1.0, 1.0));
-    const std::shared_ptr<Material> Surface::ENVIRONMENT_MATERIAL(material::createInsulator(color::white, 1.0, 0.0, 0.0));
+    const std::shared_ptr<Material> Surface::ENVIRONMENT_MATERIAL(material::createInsulator(color::white, material::AIR_REFRACTIVE_INDEX, 0.0, 0.0));
 
     Surface::Surface()
     {

@@ -18,7 +18,6 @@ namespace prop3
 {
     class Prop;
     class StageSet;
-    class Environment;
     class AbstractArtDirector;
     class AbstractChoreographer;
 

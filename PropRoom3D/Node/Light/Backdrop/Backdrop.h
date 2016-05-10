@@ -20,6 +20,8 @@ namespace prop3
     public:
         virtual ~Backdrop();
 
+        virtual double distance(const Raycast& ray) const = 0;
+
         virtual glm::dvec4 raycast(const Raycast& ray) const =0;
 
         virtual void fireOn(

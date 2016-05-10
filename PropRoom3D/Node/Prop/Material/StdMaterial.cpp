@@ -23,7 +23,7 @@ namespace prop3
 
         if(opa <= 0.0)
         {
-            return ray.limit;
+            return Raycast::BACKDROP_LIMIT;
         }
         else if(opa >= 1.0)
         {
@@ -33,31 +33,30 @@ namespace prop3
         {
             double scatterRate = 1 / (1 / (opa) - 1);
             std::exponential_distribution<> distrib(scatterRate);
-            double distance = distrib(_randomEngine);
-            return glm::min(distance, ray.limit);
+            return distrib(_randomEngine);
         }
     }
 
-    glm::dvec3 StdMaterial::lightAttenuation(const Raycast& ray) const
+    glm::dvec4 StdMaterial::lightAttenuation(const Raycast& ray) const
     {
         double opa = opacity(ray.origin);
 
         if(opa >= 1.0)
         {
             // Fully pigmented -> no propagation
-            return color::black;
+            return glm::dvec4(0.0);
         }
         else if(opa <= 0.0)
         {
             // Never hits a pigment
-            return color::white;
+            return glm::dvec4(1.0);
         }
         else
         {
             glm::dvec3 col = color(ray.origin);
             double scatterRate = 1 / (1 / opa - 1);
-            double accumulation = ray.limit * scatterRate;
-            return cellar::fast_pow(col, glm::dvec3(accumulation));
+            glm::dvec3 accumulation( ray.limit * scatterRate );
+            return glm::dvec4(cellar::fast_pow(col, accumulation), 1.0);
         }
     }
 
@@ -72,17 +71,7 @@ namespace prop3
         glm::dvec4 scatterSample(color::white, 1.0);
         glm::dvec3 scatterPoint = ray.origin + ray.direction * ray.limit;
 
-        if(scatt >= 1.0)
-        {
-            glm::dvec3 direction = _sphereRand.gen(1.0);
-
-            raycasts.push_back(Raycast(
-                    Raycast::FULLY_DIFFUSE,
-                    scatterSample,
-                    scatterPoint,
-                    direction));
-        }
-        else if(scatt <= 0.0)
+        if(scatt <= 0.0)
         {
             const glm::dvec3& direction = ray.direction;
 
@@ -92,15 +81,24 @@ namespace prop3
                     scatterPoint,
                     direction));
         }
+        else if(scatt >= 1.0)
+        {
+            glm::dvec3 direction = _sphereRand.gen(1.0);
+
+            raycasts.push_back(Raycast(
+                    Raycast::FULLY_DIFFUSE,
+                    scatterSample,
+                    scatterPoint,
+                    direction));
+        }
         else
         {
-            double entropy = Raycast::getEntropy(scatt);
-            glm::dvec3 diffuseDir = _sphereRand.gen(1.0);
-            glm::dvec3 direction = glm::mix(ray.direction, diffuseDir, scatt);
+            glm::dvec3 direction = _sphereRand.gen(1.0);
+            direction = glm::mix(ray.direction, direction, scatt);
             direction = glm::normalize(direction);
 
             raycasts.push_back(Raycast(
-                    entropy,
+                    Raycast::getEntropy(scatt),
                     scatterSample,
                     scatterPoint,
                     direction));

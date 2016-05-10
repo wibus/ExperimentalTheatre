@@ -75,14 +75,13 @@ namespace prop3
         virtual glm::dvec4 fireScreenRay(
                 const Raycast& fromEyeRay);
 
-        //virtual glm::dvec3 gatherScatteredLight(
-        //        const Material& material,
-        //        const Raycast& outRay);
+        virtual void gatherScatteredLight(
+                const Material& material,
+                const Raycast& outRay);
 
         virtual void gatherReflectedLight(
                 const Coating& coating,
                 const RayHitReport& hitReport,
-                const glm::dvec4& outSample,
                 const Raycast& outRay);
 
         //virtual void gatherLightHitsToward(
@@ -93,6 +92,7 @@ namespace prop3
         virtual glm::dvec3 draft(const RayHitReport& report);
 
         void commitSample(const glm::dvec4& sample);
+        void commitBounce(const Raycast& inRay);
 
 
     private:

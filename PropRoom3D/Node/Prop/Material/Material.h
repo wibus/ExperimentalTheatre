@@ -29,12 +29,12 @@ namespace prop3
         /// 1.0 -> Fully transparent (specular surface refraction)
         virtual double opacity(const glm::dvec3& pos) const = 0;
 
-        /// 0.0 -> Perfect insulator (no metallic reflection ar the surface)
+        /// 0.0 -> Perfect insulator (no metallic reflection at the surface)
         /// 1.0 -> Perfect conductor (give rise to mettalic reflexions)
         virtual double conductivity(const glm::dvec3& pos) const = 0;
 
         /// 1.0 -> Vacuum refractive index
-        /// x.x -> Material's mean refractive index in the viible spectrum
+        /// x.x -> Material's mean refractive index for the visible spectrum
         virtual double refractiveIndex(const glm::dvec3& pos) const = 0;
 
         /// 0.0 -> Material is perfectly homogeneous (no internal light scattering)
@@ -49,7 +49,7 @@ namespace prop3
         virtual double lightFreePathLength(
             const Raycast& ray) const = 0;
 
-        virtual glm::dvec3 lightAttenuation(
+        virtual glm::dvec4 lightAttenuation(
             const Raycast& ray) const = 0;
 
         virtual void scatterLight(

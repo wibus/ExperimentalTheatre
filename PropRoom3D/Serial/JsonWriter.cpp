@@ -385,8 +385,8 @@ namespace prop3
 
         if(node.ambientMaterial().get() != nullptr)
         {
-            node.ambientMaterial()->accept(*this);
-            obj[STAGESET_AMBIENT_MATERIAL] = subTree;
+            obj[STAGESET_AMBIENT_MATERIAL] =
+                _materialIdMap[node.ambientMaterial().get()];
         }
 
         if(node.backdrop().get() != nullptr)
