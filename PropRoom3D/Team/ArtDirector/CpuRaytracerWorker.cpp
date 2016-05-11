@@ -487,6 +487,8 @@ namespace prop3
                 currMat = _ambMaterial.get();
                 if(glm::length(ray.origin) < _backdrop->distance(ray))
                     matPathLen = currMat->lightFreePathLength(ray);
+                if(matPathLen > _backdrop->distance(ray) * 1.5)
+                    matPathLen = Raycast::BACKDROP_LIMIT;
             }
             else
             {
@@ -587,6 +589,9 @@ namespace prop3
             const Material& material,
             const Raycast& outRay)
     {
+        if(&material != _ambMaterial.get())
+            return;
+
         glm::dvec3 scattPos = outRay.origin + outRay.direction * outRay.limit;
 
         _lightRays.clear();
@@ -651,13 +656,16 @@ namespace prop3
 
             RayHitReport shadowReport = hitReport;
             shadowReport.compile(lightRay.direction);
+            const Material* currMaterial = shadowReport.currMaterial;
 
-            const Material& currMaterial = *shadowReport.currMaterial;
-            double lightPathLen = currMaterial.lightFreePathLength(lightRay);
+            if(currMaterial != _ambMaterial.get())
+                continue;
+
+            double lightPathLen = currMaterial->lightFreePathLength(lightRay);
 
             if(lightPathLen >= lightRay.limit)
             {
-                glm::dvec4 lightAtt = currMaterial.lightAttenuation(lightRay);
+                glm::dvec4 lightAtt = currMaterial->lightAttenuation(lightRay);
                 glm::dvec4 lighSamp = lightAtt * lightRay.sample;
                 glm::dvec4 pathSamp = lighSamp * outRay.sample;
 

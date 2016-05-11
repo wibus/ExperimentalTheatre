@@ -65,10 +65,7 @@ namespace prop3
             std::vector<Raycast>& raycasts,
             const Raycast& ray) const
     {
-        // Ray's shorthands
-        const glm::dvec3& orig = ray.origin;
-
-        double scatt = scattering(orig);
+        double scatt = scattering(ray.origin);
         glm::dvec4 scatterSample(color::white, 1.0);
         glm::dvec3 scatterPoint = ray.origin + ray.direction * ray.limit;
 
