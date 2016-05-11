@@ -44,6 +44,7 @@ namespace prop3
         class HardwareBuilder : public Visitor
         {
         public:
+            HardwareBuilder(const std::shared_ptr<Material>& ambientMat);
 
             // Lights
             virtual void visit(CircularLight& node) override;
@@ -78,6 +79,8 @@ namespace prop3
             std::map<Surface*,  int> surfaceIdMap;
 
         private:
+            int _ambientMatId;
+
             bool insertLight(LightBulb& node);
             bool insertMaterial(Material& node);
             bool insertCoating(Coating& node);

@@ -29,6 +29,10 @@ namespace prop3
             std::vector<Raycast>& raycasts,
             const Raycast& ray) const override;
 
+        virtual glm::dvec4 directBrdf(
+            const LightCast& lightCast,
+            const Raycast& eyeRay) const override;
+
 
     protected:
         // For exponential distribution

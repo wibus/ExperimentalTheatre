@@ -12,6 +12,7 @@
 namespace prop3
 {
     class Raycast;
+    class LightCast;
     class RayHitReport;
 
 
@@ -55,6 +56,10 @@ namespace prop3
         virtual void scatterLight(
             std::vector<Raycast>& raycasts,
             const Raycast& ray) const = 0;
+
+        virtual glm::dvec4 directBrdf(
+            const LightCast& lightCast,
+            const Raycast& eyeRay) const = 0;
     };
 
 

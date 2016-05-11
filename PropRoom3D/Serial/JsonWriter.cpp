@@ -52,7 +52,7 @@ namespace prop3
     string StageSetJsonWriter::serialize(StageSet& stageSet, bool prettyPrint)
     {
         // Build Hardware dictionnary
-        HardwareBuilder hardwareBuilder;
+        HardwareBuilder hardwareBuilder(stageSet.ambientMaterial());
         stageSet.makeTraveling(hardwareBuilder);
 
         // Build Stage set tree
@@ -148,6 +148,13 @@ namespace prop3
         }
     }
 
+    StageSetJsonWriter::HardwareBuilder::HardwareBuilder(
+            const std::shared_ptr<Material>& ambientMat)
+    {
+        ambientMat->accept(*this);
+        _ambientMatId = materialIdMap[ambientMat.get()];
+    }
+
     bool StageSetJsonWriter::HardwareBuilder::insertLight(LightBulb& node)
     {
         return lightIdMap.insert(make_pair(&node, (int)lightIdMap.size())).second;
@@ -170,9 +177,17 @@ namespace prop3
 
     void StageSetJsonWriter::HardwareBuilder::setPhysicalProperties(PhysicalSurface& node, QJsonObject& obj)
     {
-        obj[SURFACE_COATING]        = coatingIdMap[node.coating().get()];
-        obj[SURFACE_INNER_MATERIAL] = materialIdMap[node.innerMaterial().get()];
-        obj[SURFACE_OUTER_MATERIAL] = materialIdMap[node.outerMaterial().get()];
+        obj[SURFACE_COATING] = coatingIdMap[node.coating().get()];
+
+        if(node.innerMaterial().get() == Surface::ENVIRONMENT_MATERIAL.get())
+            obj[SURFACE_INNER_MATERIAL] = _ambientMatId;
+        else
+            obj[SURFACE_INNER_MATERIAL] = materialIdMap[node.innerMaterial().get()];
+
+        if(node.outerMaterial().get() == Surface::ENVIRONMENT_MATERIAL.get())
+            obj[SURFACE_OUTER_MATERIAL] = _ambientMatId;
+        else
+            obj[SURFACE_OUTER_MATERIAL] = materialIdMap[node.outerMaterial().get()];
     }
 
 

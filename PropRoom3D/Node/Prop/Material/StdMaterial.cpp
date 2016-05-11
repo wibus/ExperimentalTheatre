@@ -3,6 +3,7 @@
 #include <CellarWorkbench/Misc/FastMath.h>
 
 #include "Ray/Raycast.h"
+#include "Node/Light/LightCast.h"
 
 
 namespace prop3
@@ -102,6 +103,34 @@ namespace prop3
                     scatterSample,
                     scatterPoint,
                     direction));
+        }
+    }
+
+    glm::dvec4 StdMaterial::directBrdf(
+        const LightCast& lightCast,
+        const Raycast& eyeRay) const
+    {
+        glm::dvec3 pos = eyeRay.origin + eyeRay.direction * eyeRay.limit;
+        double scatt = scattering(pos);
+
+        if(scatt <= 0.0)
+            return glm::dvec4(0.0);
+
+        double diffuseLightSize = lightCast.diffuseSize(
+            lightCast, eyeRay, Raycast::getEntropy(scatt));
+
+        if(scatt >= 1.0)
+        {
+            return glm::dvec4(diffuseLightSize);
+        }
+        else
+        {
+            double lightDotEye = glm::dot(lightCast.raycast.direction, eyeRay.direction);
+            double directness = (1 + lightDotEye) / 2.0;
+            double lobe = 1.0 / scatt - 1.0;
+
+            double power = cellar::fast_pow(directness, lobe);
+            return glm::dvec4(power * diffuseLightSize);
         }
     }
 }

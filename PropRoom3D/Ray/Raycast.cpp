@@ -25,7 +25,7 @@ namespace prop3
 
     double Raycast::getEntropy(double roughness)
     {
-        return glm::sqrt(glm::sqrt(roughness));
+        return glm::sqrt(roughness);
     }
 
     double Raycast::mixEntropies(double e1, double e2)

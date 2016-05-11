@@ -191,6 +191,7 @@ namespace prop3
 
         // StdCoating properties
         double rough = roughness(tex);
+        double entropy = Raycast::getEntropy(rough);
         double pRIdx = paintRefractiveIndex(tex);
         glm::dvec4 paintFrag = paintColor(tex);
         double pOpa = paintFrag.a;
@@ -244,7 +245,7 @@ namespace prop3
             if(reflectProb > 0.0 && rough > 0.0)
             {
                 double reflectLightSize = lightCast.diffuseSize(
-                    lightCast, eyeRay, rough);
+                    lightCast, eyeRay, entropy);
 
                 glm::dvec3 reflection = glm::reflect(incident, wallNormal);
                 double outDotReflect = glm::max(glm::dot(outDir, reflection), 0.0);
@@ -265,7 +266,7 @@ namespace prop3
             if(insulProb > 0.0)
             {
                 double reflectLightSize = lightCast.diffuseSize(
-                    lightCast, eyeRay, rough);
+                    lightCast, eyeRay, entropy);
 
                 glm::dvec3 refraction = computeRefraction(lRIdx, eRIdx, incident, wallNormal);
                 double refractDotOut = glm::max(glm::dot(refraction, outDir), 0.0);

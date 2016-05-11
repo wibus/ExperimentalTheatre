@@ -460,17 +460,7 @@ namespace prop3
             // Find nearest ray-surface intersection
             double hitDistance = _searchStructure->
                 findNearestIntersection(ray, reportMin, _rayHitList);
-
-            if(reportMin.innerMat == Surface::ENVIRONMENT_MATERIAL.get() ||
-               reportMin.innerMat == nullptr)
-                    reportMin.innerMat = _ambMaterial.get();
-
-            if(reportMin.outerMat == Surface::ENVIRONMENT_MATERIAL.get() ||
-               reportMin.outerMat == nullptr)
-                    reportMin.outerMat = _ambMaterial.get();
-
             reportMin.compile(ray.direction);
-
 
             // If non-stochatic draft is active
             if(!_useStochasticTracing)
@@ -490,9 +480,19 @@ namespace prop3
 
 
             // Compute maximum travelled distance in current material
-            const Coating* coating = reportMin.coating;
+            double matPathLen = Raycast::BACKDROP_LIMIT;
             const Material* currMat = reportMin.currMaterial;
-            double matPathLen = currMat->lightFreePathLength(ray);
+            if(currMat == nullptr)
+            {
+                currMat = _ambMaterial.get();
+                if(glm::length(ray.origin) < _backdrop->distance(ray))
+                    matPathLen = currMat->lightFreePathLength(ray);
+            }
+            else
+            {
+                matPathLen = currMat->lightFreePathLength(ray);
+            }
+
 
             if(matPathLen == Raycast::BACKDROP_LIMIT &&
                hitDistance == Raycast::BACKDROP_LIMIT)
@@ -502,6 +502,7 @@ namespace prop3
                     Raycast backRay = ray;
                     backRay.pathLength += backRay.limit;
                     backRay.virtDist += backRay.limit * backRay.entropy;
+                    backRay.limit = _backdrop->distance(backRay);
                     glm::dvec4 matAtt = currMat->lightAttenuation(backRay);
                     commitSample(backRay.sample * matAtt * _backdrop->raycast(backRay));
                 }
@@ -515,6 +516,9 @@ namespace prop3
 
                 glm::dvec4 matAtt = currMat->lightAttenuation(brdfRay);
                 brdfRay.sample = brdfRay.sample * matAtt;
+
+                const Coating* coating = reportMin.coating;
+
 
                 // Direct lighting
                 gatherReflectedLight(
@@ -545,12 +549,10 @@ namespace prop3
                 scatterRay.sample = scatterRay.sample * matAtt;
 
 
-                /*
                 // Direct lighting
                 gatherScatteredLight(
                     *currMat,
                     scatterRay);
-                */
 
                 // Inderect lighting
                 if(bounceCount < _maxScreenBounceCount)
@@ -585,7 +587,6 @@ namespace prop3
             const Material& material,
             const Raycast& outRay)
     {
-        /*
         glm::dvec3 scattPos = outRay.origin + outRay.direction * outRay.limit;
 
         _lightRays.clear();
@@ -598,27 +599,31 @@ namespace prop3
         size_t lightCastCount = _lightRays.size();
         for(size_t c=0; c < lightCastCount; ++c)
         {
-            LightCast& lightRay = _lightRays[c];
-            Raycast& lightCast = lightRay.raycast;
+            LightCast& lightCast = _lightRays[c];
+            Raycast& lightRay = lightCast.raycast;
 
-            if(outRay.sample.w > _minScreenRayWeight)
+            lightRay.limit = glm::distance(lightRay.origin, scattPos);
+            double lightPathLen = material.lightFreePathLength(lightRay);
+
+            if(lightPathLen >= lightRay.limit)
             {
-                if(!_searchStructure->intersectsScene(
-                        lightCast, _rayHitList, outRay.entropy))
-                {
-                    lightCast.limit = glm::min(lightCast.limit, 20.0);
-                    glm::dvec4 lightAtt = material.lightAttenuation(lightCast);
-                    glm::dvec4 lighSamp = lightAtt * lightCast.sample;
-                    glm::dvec4 pathSamp = lighSamp * outRay.sample;
+                glm::dvec4 lightAtt = material.lightAttenuation(lightRay);
+                glm::dvec4 lighSamp = lightAtt * lightRay.sample;
+                glm::dvec4 pathSamp = lighSamp * outRay.sample;
 
-                    commitSample(pathSamp *
-                         material.directBrdf(
-                             lightRay,
-                             outRay));
+                if(pathSamp.w > _minScreenRayWeight)
+                {
+                    if(!_searchStructure->intersectsScene(
+                            lightRay, _rayHitList, outRay.entropy))
+                    {
+                        commitSample(pathSamp *
+                             material.directBrdf(
+                                 lightCast,
+                                 outRay));
+                    }
                 }
             }
         }
-        */
     }
 
     void CpuRaytracerWorker::gatherReflectedLight(
@@ -636,34 +641,34 @@ namespace prop3
         size_t lightCastCount = _lightRays.size();
         for(size_t c=0; c < lightCastCount; ++c)
         {
-            LightCast& lightRay = _lightRays[c];
-            Raycast& lightCast = lightRay.raycast;
+            LightCast& lightCast = _lightRays[c];
+            Raycast& lightRay = lightCast.raycast;
 
-            if(glm::dot(lightCast.direction, hitReport.normal) < 0.0)
-                lightCast.limit = glm::distance(lightCast.origin, hitReport.reflectionOrigin);
+            if(glm::dot(lightRay.direction, hitReport.normal) < 0.0)
+                lightRay.limit = glm::distance(lightRay.origin, hitReport.reflectionOrigin);
             else
-                lightCast.limit = glm::distance(lightCast.origin, hitReport.refractionOrigin);
+                lightRay.limit = glm::distance(lightRay.origin, hitReport.refractionOrigin);
 
             RayHitReport shadowReport = hitReport;
-            shadowReport.compile(lightCast.direction);
+            shadowReport.compile(lightRay.direction);
 
             const Material& currMaterial = *shadowReport.currMaterial;
-            double lightPathLen = currMaterial.lightFreePathLength(lightCast);
+            double lightPathLen = currMaterial.lightFreePathLength(lightRay);
 
-            if(lightPathLen >= lightCast.limit)
+            if(lightPathLen >= lightRay.limit)
             {
-                glm::dvec4 lightAtt = currMaterial.lightAttenuation(lightCast);
-                glm::dvec4 lighSamp = lightAtt * lightCast.sample;
+                glm::dvec4 lightAtt = currMaterial.lightAttenuation(lightRay);
+                glm::dvec4 lighSamp = lightAtt * lightRay.sample;
                 glm::dvec4 pathSamp = lighSamp * outRay.sample;
 
                 if(pathSamp.w > _minScreenRayWeight)
                 {
                     if(!_searchStructure->intersectsScene(
-                            lightCast, _rayHitList, outRay.entropy))
+                            lightRay, _rayHitList, outRay.entropy))
                     {
                         commitSample(pathSamp *
                              coating.directBrdf(
-                                 lightRay,
+                                 lightCast,
                                  shadowReport,
                                  outRay));
                     }
