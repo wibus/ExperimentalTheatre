@@ -42,6 +42,10 @@ namespace prop3
                 glm::dvec3& minComp,
                 glm::dvec3& maxComp);
 
+        virtual void getEqualizedImage(
+                double& luminosity,
+                double& contrast);
+
         static const int DEFAULT_WHITE_TEMPERATURE;
 
 

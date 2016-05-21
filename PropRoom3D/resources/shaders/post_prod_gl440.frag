@@ -133,7 +133,8 @@ void main()
     vec3 originalColor = ImageFilteringFunc();
     vec3 adjustedWhiteColor = adjustWhite(originalColor);
     vec3 adjustedIntensityColor = adjustIntensity(adjustedWhiteColor);
-    vec3 saturatedColor = clamp(adjustedIntensityColor, 0.0, 1.0);
+    vec3 saturatedColor = max(adjustedIntensityColor, 0.0);
+    vec3 finalColor = saturatedColor / (1.0 + saturatedColor * 0.4);
 
     FragColor = vec4(saturatedColor, 1);
 

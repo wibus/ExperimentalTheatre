@@ -378,6 +378,48 @@ namespace prop3
         }
     }
 
+    void GlPostProdUnit::getEqualizedImage(
+                    double& luminosity,
+                    double& contrast)
+    {
+        if(_colorBufferTexId != 0)
+        {
+            GLint width, height;
+            glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
+            glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+            glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+
+            GLfloat* buffer = new GLfloat[width*height * 3];
+            glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, buffer);
+            glBindTexture(GL_TEXTURE_2D, 0);
+
+            size_t idx = 0;
+            double avgLogLum = 0.0;
+            for(int h=0; h < height; ++h)
+            {
+                for(int w=0; w < width; ++w)
+                {
+                    glm::dvec3 pixel(buffer[idx], buffer[idx+1], buffer[idx+2]);
+                    double lum = luminance(pixel);
+                    avgLogLum += glm::log(lum);
+                    idx += 3;
+                }
+            }
+
+            avgLogLum /= width * height;
+            double avgLum = glm::exp(avgLogLum);
+            luminosity = (0.5 - avgLum) * 0.5;
+            contrast = 0.5 / (0.5 - luminosity);
+
+            delete[] buffer;
+        }
+        else
+        {
+            luminosity = 0.0;
+            contrast = 1.0;
+        }
+    }
+
     void GlPostProdUnit::updateKernel(double variance, int size)
     {
         buildLowpassKernel(_lowpassKernel, variance, size);

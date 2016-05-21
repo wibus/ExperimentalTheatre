@@ -43,4 +43,10 @@ namespace prop3
 
         return color;
     }
+
+    double luminance(const glm::dvec3& color)
+    {
+        const glm::dvec3 WEIGHTS(0.2126, 0.7152, 0.0722);
+        return glm::dot(color, WEIGHTS);
+    }
 }

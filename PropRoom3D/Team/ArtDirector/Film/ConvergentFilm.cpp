@@ -9,8 +9,8 @@
 
 namespace prop3
 {
-    const double ConvergentFilm::RawPixel::COLOR_SCALING = 1000.0;
-    const double ConvergentFilm::RawPixel::VARIANCE_SCALING = 4000.0;
+    const double ConvergentFilm::RawPixel::COLOR_SCALING = std::numeric_limits<unsigned short>::max() / 32.0;
+    const double ConvergentFilm::RawPixel::VARIANCE_SCALING = std::numeric_limits<unsigned short>::max() / 8.0;
 
     ConvergentFilm::RawPixel::RawPixel() :
         weight(0.0), v(0), r(0), g(0), b(0)
@@ -37,9 +37,9 @@ namespace prop3
         variance.x = var;
         sample.w = weight;
         variance.y = weight - vw / VARIANCE_SCALING;
-        sample.r = weight * r / COLOR_SCALING;
-        sample.g = weight * g / COLOR_SCALING;
-        sample.b = weight * b / COLOR_SCALING;
+        sample.r = weight * (r / COLOR_SCALING);
+        sample.g = weight * (g / COLOR_SCALING);
+        sample.b = weight * (b / COLOR_SCALING);
     }
 
 
@@ -433,7 +433,7 @@ namespace prop3
 
 
             double newDiv = 1.0;
-            if(newSample.w > _priorityWeightThreshold)
+            if(newSample.w >= _priorityWeightThreshold)
             {
                 newDiv = toDivergence(
                     mixedSamp, mixedVar);
