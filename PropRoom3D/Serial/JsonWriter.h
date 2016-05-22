@@ -60,7 +60,8 @@ namespace prop3
 
             // Surfaces
             virtual void visit(Box& node) override;
-            virtual void visit(BoxTexture& node) override;
+            virtual void visit(BoxSideTexture& node) override;
+            virtual void visit(BoxBandTexture& node) override;
             virtual void visit(Plane& node) override;
             virtual void visit(PlaneTexture& node) override;
             virtual void visit(Quadric& node) override;
@@ -117,7 +118,8 @@ namespace prop3
             virtual void visit(SurfaceOr& node) override;
             virtual void visit(SurfaceAnd& node) override;
             virtual void visit(Box& node) override;
-            virtual void visit(BoxTexture& node) override;
+            virtual void visit(BoxSideTexture& node) override;
+            virtual void visit(BoxBandTexture& node) override;
             virtual void visit(Plane& node) override;
             virtual void visit(PlaneTexture& node) override;
             virtual void visit(Quadric& node) override;

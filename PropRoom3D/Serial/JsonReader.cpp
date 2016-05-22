@@ -262,15 +262,23 @@ namespace prop3
                     dvec3FromJson(obj[SURFACE_MIN_CORNER]),
                     dvec3FromJson(obj[SURFACE_MAX_CORNER]));
             }
-            else if(type == SURFACE_TYPE_BOX_TEXTURE)
+            else if(type == SURFACE_TYPE_BOX_SIDE_TEXTURE)
             {
-                node = BoxTexture::boxCorners(
+                node = BoxSideTexture::boxCorners(
                     dvec3FromJson(obj[SURFACE_MIN_CORNER]),
                     dvec3FromJson(obj[SURFACE_MAX_CORNER]),
                     dvec3FromJson(obj[SURFACE_TEX_ORIGIN]),
                     dvec3FromJson(obj[SURFACE_TEX_U_DIR]),
-                    dvec3FromJson(obj[SURFACE_TEX_V_DIR]),
-                    obj[SURFACE_TEX_MAIN_SIDE_ONLY].toBool());
+                    dvec3FromJson(obj[SURFACE_TEX_V_DIR]));
+            }
+            else if(type == SURFACE_TYPE_BOX_BAND_TEXTURE)
+            {
+                node = BoxBandTexture::boxCorners(
+                    dvec3FromJson(obj[SURFACE_MIN_CORNER]),
+                    dvec3FromJson(obj[SURFACE_MAX_CORNER]),
+                    dvec3FromJson(obj[SURFACE_TEX_ORIGIN]),
+                    dvec3FromJson(obj[SURFACE_TEX_U_DIR]),
+                    dvec3FromJson(obj[SURFACE_TEX_V_DIR]));
             }
             else if(type == SURFACE_TYPE_PLANE)
             {

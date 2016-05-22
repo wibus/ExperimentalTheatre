@@ -53,7 +53,8 @@ namespace prop3
     // Surfaces
     const QString SURFACE_TYPE                      = "Type";
     const QString SURFACE_TYPE_BOX                  = "Box";
-    const QString SURFACE_TYPE_BOX_TEXTURE          = "Box Texture";
+    const QString SURFACE_TYPE_BOX_SIDE_TEXTURE     = "Box Side Texture";
+    const QString SURFACE_TYPE_BOX_BAND_TEXTURE     = "Box Band Texture";
     const QString SURFACE_TYPE_PLANE                = "Plane";
     const QString SURFACE_TYPE_PLANETEXTURE         = "Plane Texture";
     const QString SURFACE_TYPE_QUADRIC              = "Quadric";
@@ -72,7 +73,6 @@ namespace prop3
     const QString SURFACE_TEX_ORIGIN                = "Tex Origin";
     const QString SURFACE_TEX_U_DIR                 = "Tex U Dir";
     const QString SURFACE_TEX_V_DIR                 = "Tex V Dir";
-    const QString SURFACE_TEX_MAIN_SIDE_ONLY        = "Tex Main Side Only";
     const QString SURFACE_REPRESENTATION            = "Representation";
     const QString SURFACE_RADIUS                    = "Radius";
     const QString SURFACE_CENTER                    = "Center";

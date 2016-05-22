@@ -400,7 +400,7 @@ namespace prop3
                 for(int w=0; w < width; ++w)
                 {
                     glm::dvec3 pixel(buffer[idx], buffer[idx+1], buffer[idx+2]);
-                    double lum = luminance(pixel);
+                    double lum = luminance(pixel) + 1.0e-6;
                     avgLogLum += glm::log(lum);
                     idx += 3;
                 }

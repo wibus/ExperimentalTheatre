@@ -45,7 +45,6 @@ namespace prop3
         glm::dvec3 _invDim;
     };
 
-
     class PROP3D_EXPORT BoxTexture : public Box
     {
     protected:
@@ -53,8 +52,35 @@ namespace prop3
                    const glm::dvec3& maxCorner,
                    const glm::dvec3& texOrigin,
                    const glm::dvec3& texU,
-                   const glm::dvec3& texV,
-                   bool texMainSideOnly);
+                   const glm::dvec3& texV);
+
+    public:
+        glm::dvec3 texOrigin() const;
+        glm::dvec3 texU() const;
+        glm::dvec3 texV() const;
+        glm::dvec3 texW() const;
+        double texU2() const;
+        double texV2() const;
+        double texW2() const;
+
+    protected:
+        virtual void transform(const Transform& transform) override;
+
+
+    private:
+        glm::dvec3 _texOrigin;
+        glm::dvec3 _texU, _texV, _texW;
+        double _texU2, _texV2, _texW2;
+    };
+
+    class PROP3D_EXPORT BoxSideTexture : public BoxTexture
+    {
+    protected:
+        BoxSideTexture(const glm::dvec3& minCorner,
+                   const glm::dvec3& maxCorner,
+                   const glm::dvec3& texOrigin,
+                   const glm::dvec3& texU,
+                   const glm::dvec3& texV);
 
     public:
         static std::shared_ptr<Surface>
@@ -62,38 +88,50 @@ namespace prop3
                        const glm::dvec3& maxCorner,
                        const glm::dvec3& texOrigin,
                        const glm::dvec3& texU,
-                       const glm::dvec3& texV,
-                       bool texMainSideOnly);
+                       const glm::dvec3& texV);
 
         static std::shared_ptr<Surface>
             boxPosDims(const glm::dvec3& center,
                        const glm::dvec3& dimensions,
                        const glm::dvec3& texOrigin,
                        const glm::dvec3& texU,
-                       const glm::dvec3& texV,
-                       bool texMainSideOnly);
+                       const glm::dvec3& texV);
 
         // Node interface
         virtual void accept(Visitor& visitor) override;
 
         virtual void raycast(const Raycast& ray, RayHitList& reports) const override;
+    };
 
 
-        glm::dvec3 texOrigin() const;
-
-        glm::dvec3 texU() const;
-
-        glm::dvec3 texV() const;
-
-        bool texMainSideOnly() const;
-
+    class PROP3D_EXPORT BoxBandTexture : public BoxTexture
+    {
     protected:
-        virtual void transform(const Transform& transform) override;
+        BoxBandTexture(const glm::dvec3& minCorner,
+                   const glm::dvec3& maxCorner,
+                   const glm::dvec3& texOrigin,
+                   const glm::dvec3& texU,
+                   const glm::dvec3& texV);
 
-    private:
-        glm::dvec3 _texOrigin;
-        glm::dvec3 _texU, _texV;
-        bool _texMainSideOnly;
+    public:
+        static std::shared_ptr<Surface>
+            boxCorners(const glm::dvec3& minCorner,
+                       const glm::dvec3& maxCorner,
+                       const glm::dvec3& texOrigin,
+                       const glm::dvec3& texU,
+                       const glm::dvec3& texV);
+
+        static std::shared_ptr<Surface>
+            boxPosDims(const glm::dvec3& center,
+                       const glm::dvec3& dimensions,
+                       const glm::dvec3& texOrigin,
+                       const glm::dvec3& texU,
+                       const glm::dvec3& texV);
+
+        // Node interface
+        virtual void accept(Visitor& visitor) override;
+
+        virtual void raycast(const Raycast& ray, RayHitList& reports) const override;
     };
 
 
@@ -124,9 +162,24 @@ namespace prop3
         return _texV;
     }
 
-    inline bool BoxTexture::texMainSideOnly() const
+    inline glm::dvec3 BoxTexture::texW() const
     {
-        return _texMainSideOnly;
+        return _texW;
+    }
+
+    inline double BoxTexture::texU2() const
+    {
+        return _texU2;
+    }
+
+    inline double BoxTexture::texV2() const
+    {
+        return _texV2;
+    }
+
+    inline double BoxTexture::texW2() const
+    {
+        return _texW2;
     }
 }
 

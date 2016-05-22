@@ -176,61 +176,84 @@ namespace prop3
             const glm::dvec3& maxCorner,
             const glm::dvec3& texOrigin,
             const glm::dvec3& texU,
-            const glm::dvec3& texV,
-            bool texMainSideOnly) :
+            const glm::dvec3& texV) :
         Box(minCorner, maxCorner),
         _texOrigin(texOrigin),
         _texU(texU),
         _texV(texV),
-        _texMainSideOnly(texMainSideOnly)
+        _texU2(glm::dot(_texU, _texU)),
+        _texV2(glm::dot(_texV, _texV))
     {
-
+        _texW = glm::normalize(glm::cross(texU, texV)) * glm::length(_texU);
+        _texW2 = glm::dot(_texW, _texW);
     }
 
-    std::shared_ptr<Surface> BoxTexture::boxCorners(
+    void BoxTexture::transform(const Transform& transform)
+    {
+        _texOrigin = glm::dvec3(transform.mat() * glm::dvec4(_texOrigin, 1.0));
+        _texU = glm::dvec3(transform.mat() * glm::dvec4(_texU, 0.0));
+        _texV = glm::dvec3(transform.mat() * glm::dvec4(_texV, 0.0));
+        _texW = glm::dvec3(transform.mat() * glm::dvec4(_texW, 0.0));
+        _texU2 = glm::dot(_texU, _texU);
+        _texV2 = glm::dot(_texV, _texV);
+        _texW2 = glm::dot(_texW, _texW);
+
+        Box::transform(transform);
+    }
+
+
+    // Box Side Texture
+    BoxSideTexture::BoxSideTexture(
             const glm::dvec3& minCorner,
             const glm::dvec3& maxCorner,
             const glm::dvec3& texOrigin,
             const glm::dvec3& texU,
-            const glm::dvec3& texV,
-            bool texMainSideOnly)
+            const glm::dvec3& texV) :
+        BoxTexture(minCorner, maxCorner, texOrigin, texU, texV)
+    {
+
+    }
+
+    std::shared_ptr<Surface> BoxSideTexture::boxCorners(
+            const glm::dvec3& minCorner,
+            const glm::dvec3& maxCorner,
+            const glm::dvec3& texOrigin,
+            const glm::dvec3& texU,
+            const glm::dvec3& texV)
     {
         return std::shared_ptr<Surface>(
-            new BoxTexture(
+            new BoxSideTexture(
                 minCorner,
                 maxCorner,
                 texOrigin,
                 texU,
-                texV,
-                texMainSideOnly));
+                texV));
     }
 
-    std::shared_ptr<Surface> BoxTexture::boxPosDims(
+    std::shared_ptr<Surface> BoxSideTexture::boxPosDims(
             const glm::dvec3& center,
             const glm::dvec3& dimensions,
             const glm::dvec3& texOrigin,
             const glm::dvec3& texU,
-            const glm::dvec3& texV,
-            bool texMainSideOnly)
+            const glm::dvec3& texV)
     {
         glm::dvec3 minCorner = center - dimensions / 2.0;
         glm::dvec3 maxCorner = center + dimensions / 2.0;
         return std::shared_ptr<Surface>(
-            new BoxTexture(
+            new BoxSideTexture(
                 minCorner,
                 maxCorner,
                 texOrigin,
                 texU,
-                texV,
-                texMainSideOnly));
+                texV));
     }
 
-    void BoxTexture::accept(Visitor& visitor)
+    void BoxSideTexture::accept(Visitor& visitor)
     {
         visitor.visit(*this);
     }
 
-    void BoxTexture::raycast(const Raycast& ray, RayHitList& reports) const
+    void BoxSideTexture::raycast(const Raycast& ray, RayHitList& reports) const
     {
         RayHitReport* last = reports.head;
         Box::raycast(ray, reports);
@@ -240,25 +263,112 @@ namespace prop3
         {
             RayHitReport& r = *node;
 
-            if(!_texMainSideOnly ||
-               glm::dot(r.normal, glm::cross(_texU, _texV)) >
+            if(glm::dot(r.normal, texW()) >
                     RayHitReport::EPSILON_LENGTH)
             {
-                glm::dvec3 dist = r.position - _texOrigin;
-                r.texCoord.s = glm::dot(dist, _texU) / glm::dot(_texU, _texU);
-                r.texCoord.t = glm::dot(dist, _texV) / glm::dot(_texV, _texV);
+                glm::dvec3 dist = r.position - texOrigin();
+                r.texCoord.s = glm::dot(dist, texU()) / texU2();
+                r.texCoord.t = glm::dot(dist, texV()) / texV2();
             }
 
             node = node->_next;
         }
     }
 
-    void BoxTexture::transform(const Transform& transform)
-    {
-        _texOrigin = glm::dvec3(transform.mat() * glm::dvec4(_texOrigin, 1.0));
-        _texU = glm::dvec3(transform.mat() * glm::dvec4(_texU, 0.0));
-        _texV = glm::dvec3(transform.mat() * glm::dvec4(_texV, 0.0));
 
-        Box::transform(transform);
+    // Box Band Texture
+    BoxBandTexture::BoxBandTexture(
+            const glm::dvec3& minCorner,
+            const glm::dvec3& maxCorner,
+            const glm::dvec3& texOrigin,
+            const glm::dvec3& texU,
+            const glm::dvec3& texV) :
+        BoxTexture(minCorner, maxCorner, texOrigin, texU, texV)
+    {
+
+    }
+
+    std::shared_ptr<Surface> BoxBandTexture::boxCorners(
+            const glm::dvec3& minCorner,
+            const glm::dvec3& maxCorner,
+            const glm::dvec3& texOrigin,
+            const glm::dvec3& texU,
+            const glm::dvec3& texV)
+    {
+        return std::shared_ptr<Surface>(
+            new BoxBandTexture(
+                minCorner,
+                maxCorner,
+                texOrigin,
+                texU,
+                texV));
+    }
+
+    std::shared_ptr<Surface> BoxBandTexture::boxPosDims(
+            const glm::dvec3& center,
+            const glm::dvec3& dimensions,
+            const glm::dvec3& texOrigin,
+            const glm::dvec3& texU,
+            const glm::dvec3& texV)
+    {
+        glm::dvec3 minCorner = center - dimensions / 2.0;
+        glm::dvec3 maxCorner = center + dimensions / 2.0;
+        return std::shared_ptr<Surface>(
+            new BoxBandTexture(
+                minCorner,
+                maxCorner,
+                texOrigin,
+                texU,
+                texV));
+    }
+
+    void BoxBandTexture::accept(Visitor& visitor)
+    {
+        visitor.visit(*this);
+    }
+
+    void BoxBandTexture::raycast(const Raycast& ray, RayHitList& reports) const
+    {
+        RayHitReport* last = reports.head;
+        Box::raycast(ray, reports);
+        RayHitReport* node = reports.head;
+
+        while(node != last)
+        {
+            RayHitReport& r = *node;
+
+            double dotW = glm::dot(r.normal, texW());
+
+            if(dotW > RayHitReport::EPSILON_LENGTH)
+            {
+                glm::dvec3 dist = r.position - texOrigin();
+                r.texCoord.s = glm::dot(dist, texU()) / texU2();
+                r.texCoord.t = glm::dot(dist, texV()) / texV2();
+            }
+            else if(dotW < -RayHitReport::EPSILON_LENGTH)
+            {
+                glm::dvec3 dist = r.position - texOrigin();
+                r.texCoord.s = -glm::dot(dist, texU()) / texU2();
+                r.texCoord.t = glm::dot(dist, texV()) / texV2();
+            }
+            else
+            {
+                double dotU = glm::dot(r.normal, texU());
+                if(dotU > RayHitReport::EPSILON_LENGTH)
+                {
+                    glm::dvec3 dist = r.position - texOrigin();
+                    r.texCoord.s = -glm::dot(dist, texW()) / texW2();
+                    r.texCoord.t = glm::dot(dist, texV()) / texV2();
+                }
+                else if(dotU < -RayHitReport::EPSILON_LENGTH)
+                {
+                    glm::dvec3 dist = r.position - texOrigin();
+                    r.texCoord.s = glm::dot(dist, texW()) / texW2();
+                    r.texCoord.t = glm::dot(dist, texV()) / texV2();
+                }
+            }
+
+            node = node->_next;
+        }
     }
 }

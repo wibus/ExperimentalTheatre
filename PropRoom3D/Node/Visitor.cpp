@@ -68,7 +68,12 @@ namespace prop3
 
     }
 
-    void Visitor::visit(BoxTexture& node)
+    void Visitor::visit(BoxSideTexture& node)
+    {
+
+    }
+
+    void Visitor::visit(BoxBandTexture& node)
     {
 
     }
