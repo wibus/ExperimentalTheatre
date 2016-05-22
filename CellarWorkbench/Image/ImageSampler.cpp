@@ -82,10 +82,10 @@ namespace cellar
         {
             double i = image.width() * s;
             double j = image.height() * t;
-            int li = int(i);
-            int lj = int(j);
-            int hi = li+1;
-            int hj = lj+1;
+            int li = glm::floor(i);
+            int lj = glm::floor(j);
+            int hi = glm::ceil(i);
+            int hj = glm::ceil(j);
             double ai = i - li;
             double aj = j - lj;
 
