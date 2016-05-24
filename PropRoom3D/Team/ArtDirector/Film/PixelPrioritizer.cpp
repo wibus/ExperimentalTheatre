@@ -117,13 +117,7 @@ namespace prop3
                 glm::dvec4 mixedSample = rawSampBuff[idx] +
                         refSampBuff[idx] * compatibility;
 
-                double div = film.toDivergence(
-                    mixedSample, glm::dvec2(blurredVar, 1.0));
-
-                double pixWeight = mixedSample.w;
-                double weightPrio = pixWeight*pixWeight*pixWeight;
-                prioBuff[idx] = film._priorityScale *
-                    (glm::sqrt(div) + film._priorityWeightBias / weightPrio);
+                prioBuff[idx] = film.toPriority(mixedSample, blurredVar);
             }
         }
 

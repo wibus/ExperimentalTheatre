@@ -72,7 +72,11 @@ namespace prop3
 
         double toDivergence(
                 const glm::dvec4& sample,
-                const glm::dvec2& variance) const;
+                double variance) const;
+
+        double toPriority(
+                const glm::dvec4& sample,
+                double variance) const;
 
         double refShotCompatibility(unsigned int index) const;
 
@@ -90,7 +94,6 @@ namespace prop3
         // Priority stabilizes over time
         std::vector<double> _priorityBuffer;
 
-        int _prioritySpanCycleCount;
         double _perceptibleIntensity;
         double _varianceWeightThreshold;
         double _priorityWeightThreshold;

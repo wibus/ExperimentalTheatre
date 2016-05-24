@@ -51,7 +51,6 @@ namespace prop3
         _perceptibleIntensity(0.02),
         _varianceWeightThreshold(4.0),
         _priorityWeightThreshold(7.0),
-        _prioritySpanCycleCount(4),
         _maxPixelIntensity(2.0),
         _prioritizer(new PixelPrioritizer())
     {
@@ -436,7 +435,7 @@ namespace prop3
             if(newSample.w >= _priorityWeightThreshold)
             {
                 newDiv = toDivergence(
-                    mixedSamp, mixedVar);
+                    mixedSamp, mixedVar.x / mixedVar.y);
                 _divergenceBuffer[index] = newDiv;
             }
 
@@ -504,15 +503,30 @@ namespace prop3
 
     double ConvergentFilm::toDivergence(
             const glm::dvec4& sample,
-            const glm::dvec2& variance) const
+            double variance) const
     {
         const double WEIGHT_OFFSET = 1.0;
 
         glm::dvec3 color = sampleToColor(sample);
         glm::dvec3 clamped = glm::min(color, _maxPixelIntensity);
         double scale = glm::length(clamped) + WEIGHT_OFFSET;
-        double newVar = variance.x / variance.y;
-        return newVar / (sample.w * scale);
+        return variance / (sample.w * scale);
+    }
+
+    double ConvergentFilm::toPriority(
+            const glm::dvec4& sample,
+            double variance) const
+    {
+        double weight = sample.w;
+        double weight3 = weight*weight*weight;
+        const double WEIGHT_OFFSET = 1.0;
+
+        glm::dvec3 color = sampleToColor(sample);
+        glm::dvec3 clamped = glm::min(color, glm::dvec3(0.5));
+        double scale = glm::length(clamped) + WEIGHT_OFFSET;
+        double semiDiv = glm::sqrt(variance / (weight * scale));
+
+        return _priorityScale * (semiDiv + _priorityWeightBias / weight3);
     }
 
     double ConvergentFilm::refShotCompatibility(unsigned int index) const
