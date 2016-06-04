@@ -310,38 +310,49 @@ namespace prop3
             it != tile->end() && _runningPredicate;
             ++it)
         {
-            glm::dvec4 sampleSum(0.0);
-            double expextedWeightSum =
-                it.resquestedSampleWeight();
-
             int pixelCycleCount = 0;
-            int maxCycleCount = (_useStochasticTracing ? 5 : 1);
+            int maxCycleCount = (_useStochasticTracing ? 10 : 1);
+
+            double expextedWeightSum = it.sampleWeight();
+            double multipliedWeightSum = expextedWeightSum *
+                                         it.sampleMultiplicity();
+
+            glm::dvec4 totalSamples(0.0);
 
             while(_runningPredicate &&
-                  sampleSum.w < expextedWeightSum &&
-                  ++pixelCycleCount <= maxCycleCount)
+                  pixelCycleCount <= maxCycleCount &&
+                  totalSamples.w < multipliedWeightSum)
             {
-                if(_useDepthOfField && _aperture > 0.0)
+                glm::dvec4 sampleSum(0.0);
+
+                while(_runningPredicate &&
+                      sampleSum.w < expextedWeightSum &&
+                      ++pixelCycleCount <= maxCycleCount)
                 {
-                    glm::dvec2 confusionPos = _diskRand.gen(_aperture);
-                    raycast.origin = _camPos +
-                        _confusionSide * confusionPos.x +
-                        _confusionUp * confusionPos.y;
+                    if(_useDepthOfField && _aperture > 0.0)
+                    {
+                        glm::dvec2 confusionPos = _diskRand.gen(_aperture);
+                        raycast.origin = _camPos +
+                            _confusionSide * confusionPos.x +
+                            _confusionUp * confusionPos.y;
+                    }
+
+                    glm::dvec2 pixPos = glm::dvec2(it.position());
+                    glm::dvec4 screenPos((frameOrig + pixPos)*pixelSize, -1.0, 1.0);
+                    glm::dvec4 dirH = _viewProjInverse * screenPos;
+                    glm::dvec3 pixWorldPos = glm::dvec3(dirH / dirH.w);
+                    raycast.direction = glm::normalize(pixWorldPos - raycast.origin);
+                    raycast.invDir = 1.0 / raycast.direction;
+
+                    sampleSum += fireScreenRay(raycast);
                 }
 
-                glm::dvec2 pixPos = glm::dvec2(it.position());
-                glm::dvec4 screenPos((frameOrig + pixPos)*pixelSize, -1.0, 1.0);
-                glm::dvec4 dirH = _viewProjInverse * screenPos;
-                glm::dvec3 pixWorldPos = glm::dvec3(dirH / dirH.w);
-                raycast.direction = glm::normalize(pixWorldPos - raycast.origin);
-                raycast.invDir = 1.0 / raycast.direction;
-
-                sampleSum += fireScreenRay(raycast);
+                if(sampleSum.w > 0.0)
+                {
+                    it.addSample(sampleSum);
+                    totalSamples += sampleSum;
+                }
             }
-
-
-            if(sampleSum.w > 0.0)
-                it.addSample(sampleSum);
         }
     }
 

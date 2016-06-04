@@ -162,7 +162,8 @@ namespace prop3
     {
         _cvMutex.lock();
         _nextTileId = 0;
-        _newFrameCompleted = true;
+        _newFrameCompleted = true;        
+        ++_framePassCount;
         _cvMutex.unlock();
         _cv.notify_all();
     }

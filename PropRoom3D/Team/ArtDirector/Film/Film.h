@@ -65,6 +65,11 @@ namespace prop3
         double pixelPriority(int i, int j) const;
         double pixelPriority(const glm::ivec2& position) const;
 
+        double priorityThreshold() const;
+
+        double sampleMultiplicity() const;
+
+
 
         // Samples
         glm::dvec4 pixelSample(int i, int j) const;
@@ -112,6 +117,7 @@ namespace prop3
         std::condition_variable _cv;
 
         double _priorityThreshold;
+        double _sampleMultiplicity;
         std::mutex _tilesMutex;
         glm::ivec2 _tilesResolution;
 
@@ -201,6 +207,16 @@ namespace prop3
     inline double Film::pixelPriority(const glm::ivec2& position) const
     {
         return pixelPriority(position.x, position.y);
+    }
+
+    inline double Film::priorityThreshold() const
+    {
+        return _priorityThreshold;
+    }
+
+    inline double Film::sampleMultiplicity() const
+    {
+        return _sampleMultiplicity;
     }
 
     inline glm::dvec4 Film::pixelSample(int i, int j) const

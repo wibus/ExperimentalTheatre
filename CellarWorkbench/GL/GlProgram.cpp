@@ -331,7 +331,7 @@ namespace cellar
         return loc;
     }
 
-    bool GlProgram::setInt(const std::string& var, int val)
+    bool GlProgram::setInt(const std::string& var, int val) const
     {
         if( !isCurrentProgram() )
             return false;
@@ -345,7 +345,7 @@ namespace cellar
         return true;
     }
 
-    bool GlProgram::setVec2i(const std::string& var, const glm::ivec2& vec)
+    bool GlProgram::setVec2i(const std::string& var, const glm::ivec2& vec) const
     {
         if( !isCurrentProgram() )
             return false;
@@ -359,7 +359,7 @@ namespace cellar
         return true;
     }
 
-    bool GlProgram::setVec3i(const std::string& var, const glm::ivec3& vec)
+    bool GlProgram::setVec3i(const std::string& var, const glm::ivec3& vec) const
     {
         if( !isCurrentProgram() )
             return false;
@@ -373,7 +373,7 @@ namespace cellar
         return true;
     }
 
-    bool GlProgram::setVec4i(const std::string& var, const glm::ivec4& vec)
+    bool GlProgram::setVec4i(const std::string& var, const glm::ivec4& vec) const
     {
         if( !isCurrentProgram() )
             return false;
@@ -387,7 +387,7 @@ namespace cellar
         return true;
     }
 
-    bool GlProgram::setUnsigned(const std::string& var, unsigned int val)
+    bool GlProgram::setUnsigned(const std::string& var, unsigned int val) const
     {
         if( !isCurrentProgram() )
             return false;
@@ -401,7 +401,7 @@ namespace cellar
         return true;
     }
 
-    bool GlProgram::setVec2u(const std::string& var, const glm::uvec2& vec)
+    bool GlProgram::setVec2u(const std::string& var, const glm::uvec2& vec) const
     {
         if( !isCurrentProgram() )
             return false;
@@ -415,7 +415,7 @@ namespace cellar
         return true;
     }
 
-    bool GlProgram::setVec3u(const std::string& var, const glm::uvec3& vec)
+    bool GlProgram::setVec3u(const std::string& var, const glm::uvec3& vec) const
     {
         if( !isCurrentProgram() )
             return false;
@@ -429,7 +429,7 @@ namespace cellar
         return true;
     }
 
-    bool GlProgram::setVec4u(const std::string& var, const glm::uvec4& vec)
+    bool GlProgram::setVec4u(const std::string& var, const glm::uvec4& vec) const
     {
         if( !isCurrentProgram() )
             return false;
@@ -443,7 +443,7 @@ namespace cellar
         return true;
     }
 
-    bool GlProgram::setFloat(const std::string& var, float val)
+    bool GlProgram::setFloat(const std::string& var, float val) const
     {
         if( !isCurrentProgram() )
             return false;
@@ -457,7 +457,7 @@ namespace cellar
         return true;
     }
 
-    bool GlProgram::setVec2f(const std::string& var, const glm::vec2& vec)
+    bool GlProgram::setVec2f(const std::string& var, const glm::vec2& vec) const
     {
         if( !isCurrentProgram() )
             return false;
@@ -471,7 +471,7 @@ namespace cellar
         return true;
     }
 
-    bool GlProgram::setVec3f(const std::string& var, const glm::vec3& vec)
+    bool GlProgram::setVec3f(const std::string& var, const glm::vec3& vec) const
     {
         if( !isCurrentProgram() )
             return false;
@@ -485,7 +485,7 @@ namespace cellar
         return true;
     }
 
-    bool GlProgram::setVec4f(const std::string& var, const glm::vec4& vec)
+    bool GlProgram::setVec4f(const std::string& var, const glm::vec4& vec) const
     {
         if( !isCurrentProgram() )
             return false;
@@ -499,7 +499,7 @@ namespace cellar
         return true;
     }
 
-    bool GlProgram::setMat3f(const std::string& var, const glm::mat3& mat)
+    bool GlProgram::setMat3f(const std::string& var, const glm::mat3& mat) const
     {
         if( !isCurrentProgram() )
             return false;
@@ -513,7 +513,7 @@ namespace cellar
         return true;
     }
 
-    bool GlProgram::setMat4f(const std::string& var, const glm::mat4& mat)
+    bool GlProgram::setMat4f(const std::string& var, const glm::mat4& mat) const
     {
         if( !isCurrentProgram() )
             return false;

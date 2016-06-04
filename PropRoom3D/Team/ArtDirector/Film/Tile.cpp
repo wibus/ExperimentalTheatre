@@ -10,17 +10,16 @@ namespace prop3
 
     TileIterator::TileIterator(
             Tile& tile,
-            double threshold,
             const glm::ivec2& startPos) :
         _tile(tile),
-        _threshold(threshold),
         _position(startPos)
     {
     }
 
-    double TileIterator::resquestedSampleWeight() const
+    double TileIterator::sampleWeight() const
     {
-        double baseWeight = _tile.pixelPriority(_position) / _threshold;
+        double baseWeight = _tile.pixelPriority(_position)
+                                / _tile.priorityThreshold();
         return baseWeight * baseWeight;
     }
 
@@ -41,24 +40,22 @@ namespace prop3
                     }
                 }
             }
-            while(_threshold > _tile.pixelPriority(_position));
+            while(_tile.priorityThreshold() > _tile.pixelPriority(_position));
         }
 
         return *this;
     }
 
     Tile::Tile(Film& film,
-               double threshold,
                const glm::ivec2& minCorner,
                const glm::ivec2& maxCorner) :
         _film(film),
         _tileId(-1),
-        _endIterator(*this, 0.0, END_PIXEL),
+        _endIterator(*this, END_PIXEL),
         _minCorner(minCorner),
         _maxCorner(maxCorner),
         _startPix(_minCorner + glm::ivec2(-1, 0)),
         _tilePriority(1.0),
-        _priorityThreshold(threshold),
         _divergenceSum(0.0)
     {
         glm::ivec2 tileDim = _maxCorner - _minCorner;
@@ -77,7 +74,7 @@ namespace prop3
 
     TileIterator Tile::begin()
     {
-        return ++TileIterator(*this, _priorityThreshold, _startPix);
+        return ++TileIterator(*this, _startPix);
     }
 
     TileIterator Tile::end()
@@ -94,16 +91,6 @@ namespace prop3
     {
         _film.tileCompleted(*this);
         _mutex.unlock();
-    }
-
-    void Tile::setTilePriority(double priority)
-    {
-        _tilePriority = priority;
-    }
-
-    void Tile::setPriorityThreshold(double threshold)
-    {
-        _priorityThreshold = threshold;
     }
 
     glm::dvec4 Tile::pixelSample(int i, int j) const
@@ -128,6 +115,21 @@ namespace prop3
     double Tile::pixelPriority(const glm::ivec2& position) const
     {
         return _film.pixelPriority(position);
+    }
+
+    double Tile::priorityThreshold() const
+    {
+        return _film.priorityThreshold();
+    }
+
+    double Tile::sampleMultiplicity() const
+    {
+        return _film.sampleMultiplicity();
+    }
+
+    void Tile::setTilePriority(double priority)
+    {
+        _tilePriority = priority;
     }
 
     void Tile::setDivergenceSum(double sum)

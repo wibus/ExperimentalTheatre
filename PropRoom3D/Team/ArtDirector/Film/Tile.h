@@ -17,11 +17,11 @@ namespace prop3
     {
     public:
         TileIterator(Tile& tile,
-                 double threshold,
-                 const glm::ivec2& startPos);
+            const glm::ivec2& startPos);
 
         glm::ivec2 position() const;
-        double resquestedSampleWeight() const;
+        double sampleWeight() const;
+        double sampleMultiplicity() const;
 
         TileIterator& operator++();
 
@@ -32,7 +32,6 @@ namespace prop3
 
     private:
         Tile& _tile;
-        double _threshold;
         glm::ivec2 _position;
     };
 
@@ -40,7 +39,6 @@ namespace prop3
     {
     public:
         Tile(Film& film,
-             double threshold,
              const glm::ivec2& minCorner,
              const glm::ivec2& maxCorner);
         ~Tile();
@@ -64,11 +62,14 @@ namespace prop3
         void addSample(const glm::ivec2& position,
                        const glm::dvec4& sample);
 
-        void setTilePriority(double priority);
-        void setPriorityThreshold(double threshold);
-
-        double tilePriority() const;
         double pixelPriority(const glm::ivec2& position) const;
+
+        double priorityThreshold() const;
+
+        double sampleMultiplicity() const;
+
+        void setTilePriority(double priority);
+        double tilePriority() const;
 
         void setDivergenceSum(double sum);
         double divergenceSum() const;
@@ -85,7 +86,6 @@ namespace prop3
         const glm::ivec2 _startPix;
         unsigned int _pixelCount;
         double _tilePriority;
-        double _priorityThreshold;
         double _divergenceSum;
     };
 
@@ -95,6 +95,11 @@ namespace prop3
     inline glm::ivec2 TileIterator::position() const
     {
         return _position;
+    }
+
+    inline double TileIterator::sampleMultiplicity() const
+    {
+        return _tile.sampleMultiplicity();
     }
 
     inline bool TileIterator::operator==(const TileIterator& it) const

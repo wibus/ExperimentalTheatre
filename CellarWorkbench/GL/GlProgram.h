@@ -76,23 +76,23 @@ namespace cellar
         // Uniforms
         int getUniformLocation(const std::string& name) const;
 
-        bool setInt(const std::string& var, int val);
-        bool setVec2i(const std::string& var, const glm::ivec2& vec);
-        bool setVec3i(const std::string& var, const glm::ivec3& vec);
-        bool setVec4i(const std::string& var, const glm::ivec4& vec);
+        bool setInt(const std::string& var, int val) const;
+        bool setVec2i(const std::string& var, const glm::ivec2& vec) const;
+        bool setVec3i(const std::string& var, const glm::ivec3& vec) const;
+        bool setVec4i(const std::string& var, const glm::ivec4& vec) const;
 
-        bool setUnsigned(const std::string& var, unsigned int val);
-        bool setVec2u(const std::string& var, const glm::uvec2& vec);
-        bool setVec3u(const std::string& var, const glm::uvec3& vec);
-        bool setVec4u(const std::string& var, const glm::uvec4& vec);
+        bool setUnsigned(const std::string& var, unsigned int val) const;
+        bool setVec2u(const std::string& var, const glm::uvec2& vec) const;
+        bool setVec3u(const std::string& var, const glm::uvec3& vec) const;
+        bool setVec4u(const std::string& var, const glm::uvec4& vec) const;
 
-        bool setFloat(const std::string& var, float val);
-        bool setVec2f(const std::string& var, const glm::vec2& vec);
-        bool setVec3f(const std::string& var, const glm::vec3& vec);
-        bool setVec4f(const std::string& var, const glm::vec4& vec);
+        bool setFloat(const std::string& var, float val) const;
+        bool setVec2f(const std::string& var, const glm::vec2& vec) const;
+        bool setVec3f(const std::string& var, const glm::vec3& vec) const;
+        bool setVec4f(const std::string& var, const glm::vec4& vec) const;
 
-        bool setMat3f(const std::string& var, const glm::mat3& mat);
-        bool setMat4f(const std::string& var, const glm::mat4& mat);
+        bool setMat3f(const std::string& var, const glm::mat3& mat) const;
+        bool setMat4f(const std::string& var, const glm::mat4& mat) const;
 
         // Program Binary
         const GlProgramBinary& getBinary();

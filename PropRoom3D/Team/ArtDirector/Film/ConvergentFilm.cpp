@@ -52,6 +52,7 @@ namespace prop3
         _varianceWeightThreshold(4.0),
         _priorityWeightThreshold(7.0),
         _maxPixelIntensity(2.0),
+        _tileCompletedCount(0),
         _prioritizer(new PixelPrioritizer())
     {
         _priorityWeightBias =
@@ -129,10 +130,12 @@ namespace prop3
 
         _newTileCompleted = false;
         _newFrameCompleted = false;
+        _tileCompletedCount = 0;
 
         _nextTileId = 0;
         _framePassCount = 0;
         _priorityThreshold = 1.0;
+        _sampleMultiplicity = _priorityWeightThreshold;
 
 
         while(!_tileMsgs.empty())
@@ -317,7 +320,13 @@ namespace prop3
     {
         _newTileCompleted = true;
 
-        if(_framePassCount >= _priorityWeightThreshold)
+        ++_tileCompletedCount;
+        if(_tileCompletedCount == _tiles.size())
+        {
+            endTileReached();
+        }
+
+        if(_tileCompletedCount > _tiles.size())
         {
             double divergenceSum = 0.0;
             for(int j=tile.minCorner().y; j < tile.maxCorner().y; ++j)
@@ -363,23 +372,28 @@ namespace prop3
 
     void ConvergentFilm::endTileReached()
     {
+        bool initialPassFinished =
+            _tileCompletedCount >= _tiles.size();
+
         _cvMutex.lock();
-        _nextTileId = 0;
-        _newFrameCompleted = true;
+        if(initialPassFinished)
+        {
+            _nextTileId = 0;
+            ++_framePassCount;
+            _newFrameCompleted = true;
+        }
         _cvMutex.unlock();
         _cv.notify_all();
 
-        if(_framePassCount > _priorityWeightThreshold)
+        if(initialPassFinished)
         {
             _prioritizer->launchPrioritization(*this);
 
             double avrgPriority = _prioritizer->averagePriority();
             avrgPriority = glm::min(avrgPriority, 1.0);
             _priorityThreshold = avrgPriority;
-        }
-        else
-        {
-            _priorityThreshold = 1.0;
+
+            _sampleMultiplicity = 1.0;
         }
     }
 
@@ -417,7 +431,7 @@ namespace prop3
             glm::dvec3 oldColor = glm::min(_maxPixelIntensity,
                 glm::dvec3(oldSample) / oldSample.w);
             glm::dvec3 dColor = sampColor - oldColor;
-            double dMean = glm::length(dColor) * sampWeight;
+            double dMean = glm::length(dColor) * glm::sqrt(sampWeight);
 
             _varianceBuffer[index] += glm::dvec2(dMean * sampWeight, sampWeight);
             glm::dvec2 newWeightedVar = _varianceBuffer[index];

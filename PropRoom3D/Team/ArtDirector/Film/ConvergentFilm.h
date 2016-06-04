@@ -102,6 +102,8 @@ namespace prop3
 
         glm::dvec3 _maxPixelIntensity;
 
+        int _tileCompletedCount;
+
         // Random distribution
         cellar::LinearRand _linearRand;
 
