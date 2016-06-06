@@ -150,18 +150,6 @@ namespace prop3
 
             return;
         }
-        else
-        {
-            for(auto& w : _workerObjects)
-            {
-                if(!w->isRunning())
-                {
-                    w->start();
-                }
-            }
-
-            return;
-        }
     }
 
     void CpuRaytracerEngine::interrupt()

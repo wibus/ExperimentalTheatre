@@ -126,15 +126,20 @@ vec3 adjustIntensity(vec3 color)
     return contrastColor + vec3(0.5);
 }
 
+vec3 correctGamma(vec3 color)
+{
+    return pow(color, vec3(1.0 / 1.8));
+}
+
 
 // Main
 void main()
 {
     vec3 originalColor = ImageFilteringFunc();
     vec3 adjustedWhiteColor = adjustWhite(originalColor);
-    vec3 adjustedIntensityColor = adjustIntensity(adjustedWhiteColor);
-    vec3 saturatedColor = max(adjustedIntensityColor, 0.0);
-    vec3 finalColor = saturatedColor / (1.0 + saturatedColor * 0.4);
+    vec3 gammaCorrectedColor = correctGamma(adjustedWhiteColor);
+    vec3 adjustedIntensityColor = adjustIntensity(gammaCorrectedColor);
+    vec3 saturatedColor = clamp(adjustedIntensityColor, 0.0, 1.0);
 
     FragColor = vec4(saturatedColor, 1);
 

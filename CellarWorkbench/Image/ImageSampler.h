@@ -44,8 +44,12 @@ namespace cellar
         glm::dvec4 sample(const Image& image, double s, double t) const;
         glm::dvec4 sample(const Image& image, const glm::dvec2& pos) const;
 
+        static void linearize(Image& image);
 
     private:
+        static unsigned char* _gammaLut;
+
+
         ESamplerFilter _filterType;
         ESamplerWrapper _wrapperType;
         std::unique_ptr<AbstractFilter> _filter;

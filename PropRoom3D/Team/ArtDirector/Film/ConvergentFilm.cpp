@@ -135,7 +135,7 @@ namespace prop3
         _nextTileId = 0;
         _framePassCount = 0;
         _priorityThreshold = 1.0;
-        _sampleMultiplicity = _priorityWeightThreshold;
+        _sampleMultiplicity = 4.0;
 
 
         while(!_tileMsgs.empty())
@@ -320,11 +320,13 @@ namespace prop3
     {
         _newTileCompleted = true;
 
+        _tilesMutex.lock();
         ++_tileCompletedCount;
         if(_tileCompletedCount == _tiles.size())
         {
             endTileReached();
         }
+        _tilesMutex.unlock();
 
         if(_tileCompletedCount > _tiles.size())
         {
@@ -372,20 +374,19 @@ namespace prop3
 
     void ConvergentFilm::endTileReached()
     {
-        bool initialPassFinished =
-            _tileCompletedCount >= _tiles.size();
-
-        _cvMutex.lock();
-        if(initialPassFinished)
+        if(_tileCompletedCount >= _tiles.size())
         {
+            _cvMutex.lock();
+
             _nextTileId = 0;
             ++_framePassCount;
             _newFrameCompleted = true;
-        }
-        _cvMutex.unlock();
-        _cv.notify_all();
 
-        if(initialPassFinished)
+            _cvMutex.unlock();
+            _cv.notify_all();
+        }
+
+        if(_tileCompletedCount > _tiles.size())
         {
             _prioritizer->launchPrioritization(*this);
 

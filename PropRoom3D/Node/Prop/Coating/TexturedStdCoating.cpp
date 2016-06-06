@@ -81,7 +81,21 @@ namespace prop3
         if(name == NO_TEXTURE)
             _paintColorTexture.reset();
         else
-            _paintColorTexture  = cellar::getImageBank().getImagePtr(name);
+        {
+            std::string linearizedName = name + "-linearized";
+            if(cellar::getImageBank().isInBank(linearizedName))
+                _paintColorTexture = cellar::getImageBank().getImagePtr(linearizedName);
+            else
+            {
+                std::shared_ptr<cellar::Image> img =
+                    cellar::getImageBank().getImagePtr(name);
+
+                _paintColorTexture.reset(new cellar::Image(*img));
+                cellar::ImageSampler::linearize(*_paintColorTexture);
+
+                cellar::getImageBank().addImage(linearizedName, *_paintColorTexture);
+            }
+        }
     }
 
     double TexturedStdCoating::paintRefractiveIndex(const glm::dvec3& tex) const

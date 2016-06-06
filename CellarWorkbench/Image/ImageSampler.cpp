@@ -5,6 +5,8 @@
 
 namespace cellar
 {
+    unsigned char* ImageSampler::_gammaLut = nullptr;
+
     class AbstractWrapper
     {
     public:
@@ -155,5 +157,32 @@ namespace cellar
     glm::dvec4 ImageSampler::sample(const Image& image, double s, double t) const
     {
         return _filter->filter(image, *_wrapper, s, t);
+    }
+
+    void ImageSampler::linearize(Image &image)
+    {
+        if(_gammaLut == nullptr)
+        {
+            _gammaLut = new unsigned char[256];
+            for(int i=0; i < 256; ++i)
+            {
+                float x = i / 255.0;
+                x = glm::pow(x, 2.2f);
+                _gammaLut[i] = x * 255.0;
+            }
+        }
+
+        for(int j=0; j < image.height(); ++j)
+        {
+            for(int i=0; i < image.width(); ++i)
+            {
+                const unsigned char* pix = image.pixel(i, j);
+                unsigned char r = _gammaLut[pix[0]];
+                unsigned char g = _gammaLut[pix[1]];
+                unsigned char b = _gammaLut[pix[2]];
+
+                image.setColor(i, j, r, g, b);
+            }
+        }
     }
 }
