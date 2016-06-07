@@ -128,7 +128,7 @@ vec3 adjustIntensity(vec3 color)
 
 vec3 correctGamma(vec3 color)
 {
-    return pow(color, vec3(1.0 / 1.8));
+    return pow(color, vec3(1.0 / 2.0));
 }
 
 

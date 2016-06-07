@@ -31,6 +31,7 @@ SET(CELLAR_DESIGN_PATTERN_HEADERS
 # GL
 SET(CELLAR_GL_HEADERS
     ${CELLAR_SRC_DIR}/GL/GLFFmpegCamcorder.h
+    ${CELLAR_SRC_DIR}/GL/GlFullscreen.h
     ${CELLAR_SRC_DIR}/GL/GlInputsOutputs.h
     ${CELLAR_SRC_DIR}/GL/GlProgram.h
     ${CELLAR_SRC_DIR}/GL/GlShaderBank.h
@@ -107,6 +108,7 @@ SET(CELLAR_DESIGN_PATTERN_SOURCES)
 # GL
 SET(CELLAR_GL_SOURCES
     ${CELLAR_SRC_DIR}/GL/GLFFmpegCamcorder.cpp
+    ${CELLAR_SRC_DIR}/GL/GlFullscreen.cpp
     ${CELLAR_SRC_DIR}/GL/GlInputsOutputs.cpp
     ${CELLAR_SRC_DIR}/GL/GlProgram.cpp
     ${CELLAR_SRC_DIR}/GL/GlShaderBank.cpp
