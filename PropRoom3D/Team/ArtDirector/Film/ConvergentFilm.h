@@ -137,6 +137,8 @@ namespace prop3
 
             static const double COLOR_SCALING;
             static const double VARIANCE_SCALING;
+            static const double COLOR_DECOMPRESSION;
+            static const double VARIANCE_DECOMPRESSION;
         };
         mutable std::vector<RawPixel> _rawPixelPool;
     };

@@ -9,8 +9,11 @@
 
 namespace prop3
 {
-    const double ConvergentFilm::RawPixel::COLOR_SCALING = std::numeric_limits<unsigned short>::max() / 32.0;
-    const double ConvergentFilm::RawPixel::VARIANCE_SCALING = std::numeric_limits<unsigned short>::max() / 8.0;
+    const double UINT_MAX_DOUBLE = std::numeric_limits<unsigned short>::max();
+    const double ConvergentFilm::RawPixel::COLOR_SCALING = 1 / 8.0;
+    const double ConvergentFilm::RawPixel::VARIANCE_SCALING = 1 / 16.0;
+    const double ConvergentFilm::RawPixel::COLOR_DECOMPRESSION = 8.0 / UINT_MAX_DOUBLE;
+    const double ConvergentFilm::RawPixel::VARIANCE_DECOMPRESSION = 16.0 / UINT_MAX_DOUBLE;
 
     ConvergentFilm::RawPixel::RawPixel() :
         weight(0.0), v(0), r(0), g(0), b(0)
@@ -24,10 +27,11 @@ namespace prop3
     {
         var = variance.x;
         weight = sample.w;
-        vw = (weight - variance.y) * VARIANCE_SCALING;
-        r = glm::min(double(std::numeric_limits<unsigned short>::max()), sample.r / weight * COLOR_SCALING);
-        g = glm::min(double(std::numeric_limits<unsigned short>::max()), sample.g / weight * COLOR_SCALING);
-        b = glm::min(double(std::numeric_limits<unsigned short>::max()), sample.b / weight * COLOR_SCALING);
+        double weightInv = 1 / weight;
+        vw = glm::min((weight - variance.y) * VARIANCE_SCALING, 1.0) * std::numeric_limits<unsigned short>::max();
+        r = glm::min(glm::sqrt(sample.r * weightInv) * COLOR_SCALING, 1.0) * std::numeric_limits<unsigned short>::max();
+        g = glm::min(glm::sqrt(sample.g * weightInv) * COLOR_SCALING, 1.0) * std::numeric_limits<unsigned short>::max();
+        b = glm::min(glm::sqrt(sample.b * weightInv) * COLOR_SCALING, 1.0) * std::numeric_limits<unsigned short>::max();
     }
 
     void ConvergentFilm::RawPixel::toRaw(
@@ -36,10 +40,19 @@ namespace prop3
     {
         variance.x = var;
         sample.w = weight;
-        variance.y = weight - vw / VARIANCE_SCALING;
-        sample.r = weight * (r / COLOR_SCALING);
-        sample.g = weight * (g / COLOR_SCALING);
-        sample.b = weight * (b / COLOR_SCALING);
+        variance.y = weight - vw * VARIANCE_DECOMPRESSION;
+        /*
+        sample.r = weight * r * COLOR_DECOMPRESSION * 4;
+        sample.g = weight * g * COLOR_DECOMPRESSION * 4;
+        sample.b = weight * b * COLOR_DECOMPRESSION * 4;
+        /*/
+        sample.r = r * COLOR_DECOMPRESSION;
+        sample.r = weight * (sample.r * sample.r);
+        sample.g = g * COLOR_DECOMPRESSION;
+        sample.g = weight * (sample.g * sample.g);
+        sample.b = b * COLOR_DECOMPRESSION;
+        sample.b = weight * (sample.b * sample.b);
+        //*/
     }
 
 
@@ -135,7 +148,7 @@ namespace prop3
         _nextTileId = 0;
         _framePassCount = 0;
         _priorityThreshold = 1.0;
-        _sampleMultiplicity = 4.0;
+        _sampleMultiplicity = 8.0;
 
 
         while(!_tileMsgs.empty())
@@ -284,10 +297,6 @@ namespace prop3
             for(int p=0; p < pixelCount; ++p)
                 addSample(p, glm::dvec4(0.0));
 
-            // Compute tile metrics
-            for(const auto& tile : _tiles)
-                tileCompleted(*tile);
-
             // Force prioritization
             endTileReached();
         }
@@ -386,7 +395,7 @@ namespace prop3
             _cv.notify_all();
         }
 
-        if(_tileCompletedCount > _tiles.size())
+        if(_tileCompletedCount >= _tiles.size())
         {
             _prioritizer->launchPrioritization(*this);
 
