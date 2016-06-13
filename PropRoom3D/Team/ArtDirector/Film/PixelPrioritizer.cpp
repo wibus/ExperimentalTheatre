@@ -27,15 +27,18 @@ namespace prop3
             unsigned int blurWidth,
             double blurVariance)
     {
-        unsigned int pixelCount =
-                frameResolution.x *
-                frameResolution.y;
-        _varBuff.resize(pixelCount);
-        _tmpBuff.resize(pixelCount);
-
         computeGaussLine(_gauss, blurWidth, blurVariance);
 
         _frameAvrgPriority = 1.0;
+
+        unsigned int pixelCount =
+                frameResolution.x *
+                frameResolution.y;
+        if(pixelCount != _varBuff.size())
+        {
+            _varBuff.resize(pixelCount);
+            _tmpBuff.resize(pixelCount);
+        }
     }
 
     bool PixelPrioritizer::launchPrioritization(ConvergentFilm& film)

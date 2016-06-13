@@ -11,6 +11,7 @@ namespace prop3
         _frameResolution(1, 1),
         _colorBuffer(1, glm::dvec3(0.0)),
         _colorOutput(ColorOutput::ALBEDO),
+        _tileCompletedCount(0),
         _newTileCompleted(false),
         _newFrameCompleted(false),
         _priorityThreshold(0.0),
@@ -39,7 +40,7 @@ namespace prop3
             _frameResolution = resolution;
 
             buildTiles();
-            clear(glm::dvec3(0.0), true);
+            clear(glm::dvec3(0.0));
         }
     }
 
@@ -50,8 +51,20 @@ namespace prop3
             _tilesResolution = resolution;
 
             buildTiles();
-            clear(glm::dvec3(0.0), false);
+            clear(glm::dvec3(0.0));
         }
+    }
+
+    void Film::clear(const glm::dvec3 &color)
+    {
+        resetFilmState();
+        clearBuffers(color);
+    }
+
+    void Film::clear(const std::string& filmName)
+    {
+        resetFilmState();
+        loadRawFilm(filmName);
     }
 
     bool Film::newTileCompleted()

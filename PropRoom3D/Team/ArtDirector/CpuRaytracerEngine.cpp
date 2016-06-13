@@ -116,17 +116,16 @@ namespace prop3
             if(_currentFilm->incomingTileAvailable())
             {
                 for(auto& w : _workerObjects)
+                {
                     if(!w->isRunning())
+                    {
                         w->start(true);
+                    }
+                }
             }
-
-            return;
         }
-
-        if(_raytracerState->interrupted())
+        else if(_raytracerState->interrupted())
         {
-            _protectedState.setInterrupted( false );
-
             if(_raytracerState->isDrafter())
             {
                 if(_raytracerState->draftLevel() == 0 &&
@@ -140,6 +139,7 @@ namespace prop3
                 _protectedState.startTimeChrono();
             }
 
+            _protectedState.setInterrupted( false );
             for(auto& w : _workerObjects)
             {
                 if(!w->isRunning())
@@ -177,6 +177,13 @@ namespace prop3
             if(_raytracerState->sampleCount() == 1)
             {
                 optimizeSearchStructure();
+                _currentFilm->rewindTiles();
+
+                _protectedState.setInterrupted(false);
+                for(auto& w : _workerObjects)
+                {
+                    w->start();
+                }
             }
 
             if(_raytracerState->sampleCount() > 2 && (
@@ -472,17 +479,13 @@ namespace prop3
             if(_raytracerState->filmRawFilePath() !=
                RaytracerState::UNSPECIFIED_RAW_FILE)
             {
-                if(!_films.back()->loadRawFilm(
-                    _raytracerState->filmRawFilePath()))
-                {
-                    _raytracerState->setFilmRawFilePath(
-                        RaytracerState::UNSPECIFIED_RAW_FILE);
-                    _films.back()->clear();
-                }
+                _films.back()->clear(
+                    _raytracerState->filmRawFilePath());
             }
             else
             {
-                _films.back()->clear();
+                const glm::dvec3 blankColor = glm::dvec3(0);
+                _films.back()->clear( blankColor );
             }
 
 

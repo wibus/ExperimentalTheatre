@@ -27,15 +27,14 @@ namespace prop3
         return _colorBuffer;
     }
 
-    void NetworkFilm::clear(const glm::dvec3& color, bool hardReset)
+    void NetworkFilm::resetFilmState()
     {
-        size_t pixelCount = _frameResolution.x * _frameResolution.y;
-
         _newTileCompleted = false;
         _newFrameCompleted = false;
 
         _nextTileId = 0;
         _framePassCount = 0;
+        _tileCompletedCount = 0;
         _priorityThreshold = 1.0;
         _currentPixelPriority = _initialPixelPriority;
         _startTime = std::chrono::high_resolution_clock::now();
@@ -44,21 +43,17 @@ namespace prop3
 
         while(!_tileMsgs.empty())
             _tileMsgs.pop();
+    }
+
+    void NetworkFilm::clearBuffers(const glm::dvec3& color)
+    {
+        size_t pixelCount = _frameResolution.x * _frameResolution.y;
 
         _sampleBuffer.clear();
-        glm::dvec4 sample(color, 0.0);
-        _sampleBuffer.resize(pixelCount, sample);
+        _sampleBuffer.resize(pixelCount, glm::dvec4(0));
 
-        if(hardReset)
-        {
-            size_t pixelCount = _frameResolution.x * _frameResolution.y;
-
-            _colorBuffer.clear();
-            _colorBuffer.resize(pixelCount, color);
-
-            _depthBuffer.clear();
-            _depthBuffer.resize(pixelCount, INFINITY);
-        }
+        _colorBuffer.clear();
+        _colorBuffer.resize(pixelCount, color);
     }
 
     void NetworkFilm::backupAsReferenceShot()
@@ -98,7 +93,7 @@ namespace prop3
 
     void NetworkFilm::tileCompleted(Tile& tile)
     {
-        _newTileCompleted = true;
+        ++_tileCompletedCount;
 
         std::shared_ptr<TileMessage> msg(
             new TileMessage(*this, tile.tileId(), stateUid()));
@@ -109,6 +104,22 @@ namespace prop3
         {
             addOutgoingTile(msg);
         }
+
+        if((_tileCompletedCount & tileCount()) == 0)
+        {
+            _cvMutex.lock();
+            ++_framePassCount;
+            _newFrameCompleted = true;
+            _cvMutex.unlock();
+            _cv.notify_all();
+        }
+
+        _newTileCompleted = true;
+    }
+
+    void NetworkFilm::rewindTiles()
+    {
+        _nextTileId = 0;
     }
 
     std::shared_ptr<TileMessage> NetworkFilm::nextOutgoingTile()
@@ -160,12 +171,7 @@ namespace prop3
 
     void NetworkFilm::endTileReached()
     {
-        _cvMutex.lock();
         _nextTileId = 0;
-        _newFrameCompleted = true;        
-        ++_framePassCount;
-        _cvMutex.unlock();
-        _cv.notify_all();
     }
 
     double NetworkFilm::pixelDivergence(int index) const

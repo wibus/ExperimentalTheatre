@@ -3,8 +3,7 @@
 
 namespace prop3
 {
-    StaticFilm::StaticFilm() :
-        _tileCompletedCount(0)
+    StaticFilm::StaticFilm()
     {
 
     }
@@ -19,20 +18,22 @@ namespace prop3
         return _colorBuffer;
     }
 
-    void StaticFilm::clear(const glm::dvec3& color, bool hardReset)
+    void StaticFilm::resetFilmState()
     {
+        _tileCompletedCount = 0;
         _newTileCompleted = false;
         _newFrameCompleted = false;
-        _tileCompletedCount = 0;
 
         _nextTileId = 0;
         _framePassCount = 0;
         _priorityThreshold = 0.0;
+    }
 
-        if(hardReset)
+    void StaticFilm::clearBuffers(const glm::dvec3& color)
+    {
+        size_t pixelCount = _frameResolution.x * _frameResolution.y;
+        if(pixelCount != _colorBuffer.size())
         {
-            size_t pixelCount = _frameResolution.x * _frameResolution.y;
-
             _colorBuffer.clear();
             _colorBuffer.resize(pixelCount, color);
 
@@ -85,9 +86,7 @@ namespace prop3
     {
         std::lock_guard<std::mutex> lk(_tilesMutex);
 
-        _newTileCompleted = true;
         ++_tileCompletedCount;
-
         if(_tileCompletedCount >= _tiles.size())
         {
             _cvMutex.lock();
@@ -96,6 +95,14 @@ namespace prop3
             _cvMutex.unlock();
             _cv.notify_all();
         }
+
+        _newTileCompleted = true;
+
+    }
+
+    void StaticFilm::rewindTiles()
+    {
+        _nextTileId = 0;
     }
 
     void StaticFilm::endTileReached()

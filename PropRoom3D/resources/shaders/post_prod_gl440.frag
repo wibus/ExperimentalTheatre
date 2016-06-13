@@ -4,8 +4,11 @@ uniform vec2 DepthRange;
 uniform sampler2D ImageTex;
 uniform sampler2D DepthTex;
 uniform vec3 TemperatureRgb;
+uniform vec3 ExposureGain;
+uniform int AcesTonemappingActive;
+uniform float MiddleGrayValue;
 uniform float ContrastValue;
-uniform float LuminosityValue;
+uniform float GammaValue;
 uniform float AdaptationFactor;
 uniform float LowpassKernel[25];
 uniform int   LowpassSize;
@@ -121,14 +124,33 @@ vec3 adjustWhite(vec3 color)
 
 vec3 adjustIntensity(vec3 color)
 {
-    vec3 luminosityColor = color - vec3(0.5 - LuminosityValue);
+    vec3 luminosityColor = color - (MiddleGrayValue);
     vec3 contrastColor = luminosityColor * ContrastValue;
     return contrastColor + vec3(0.5);
 }
 
+vec3 tonemapAces(in vec3 x)
+{
+    if(AcesTonemappingActive == 1)
+    {
+        x = clamp(x, 1.0e-2, 1.0e1);
+
+        float a = 2.51f;
+        float b = 0.03f;
+        float c = 2.43f;
+        float d = 0.59f;
+        float e = 0.14f;
+        return min((x*(a*x+b))/(x*(c*x+d)+e), 1.0);
+    }
+    else
+    {
+        return x;
+    }
+}
+
 vec3 correctGamma(vec3 color)
 {
-    return pow(color, vec3(1.0 / 2.0));
+    return pow(color, vec3(1.0 / GammaValue));
 }
 
 
@@ -136,12 +158,14 @@ vec3 correctGamma(vec3 color)
 void main()
 {
     vec3 originalColor = ImageFilteringFunc();
-    vec3 adjustedWhiteColor = adjustWhite(originalColor);
-    vec3 gammaCorrectedColor = correctGamma(adjustedWhiteColor);
+    vec3 exposedColor = ExposureGain * originalColor;
+    vec3 adjustedWhiteColor = adjustWhite(exposedColor);
+    vec3 tonemappedColor = tonemapAces(adjustedWhiteColor);
+    vec3 saturatedColor = max(tonemappedColor, 0.0);
+    vec3 gammaCorrectedColor = correctGamma(saturatedColor);
     vec3 adjustedIntensityColor = adjustIntensity(gammaCorrectedColor);
-    vec3 saturatedColor = clamp(adjustedIntensityColor, 0.0, 1.0);
 
-    FragColor = vec4(saturatedColor, 1);
+    FragColor = vec4(adjustedIntensityColor, 1);
 
     // Depth
     float n = -DepthRange[0];

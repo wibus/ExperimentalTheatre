@@ -190,7 +190,7 @@ namespace prop3
             _film->setStateUid(-1);
 
             _localRaytracer->updateStageSet("");
-            _film->clear(glm::dvec3(0.0), true);
+            _film->clear(glm::dvec3(0.0));
 
             getLog().postMessage(new Message('I', false,
                 "Server connection closed",
@@ -230,7 +230,7 @@ namespace prop3
         _film->setStateUid(-1);
 
         _localRaytracer->updateStageSet("");
-        _film->clear(glm::dvec3(0.0), true);
+        _film->clear(glm::dvec3(0.0));
 
         getLog().postMessage(new Message('I', false,
             "Server disconnected from client",

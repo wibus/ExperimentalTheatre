@@ -34,8 +34,11 @@ namespace prop3
         virtual void setLowpassVariance(double variance);
         virtual void setAdaptativeFilteringFactor(float zeroToOne);
         virtual void setImageTemperature(int kelvin);
-        virtual void setImageContrast(float minusOneToOne);
-        virtual void setImageLuminosity(float zeroToOne);
+        virtual void setImageContrast(float contrast);
+        virtual void setImageMiddleGray(float middleGray);
+        virtual void setAcesTonemappingActive(bool isActive);
+        virtual void setExposureGain(const glm::vec3& exposure);
+        virtual void setImageGamma(float gamma);
         virtual void saveOutputImage();
 
         virtual void fetchImageMinAndMax(
@@ -43,7 +46,7 @@ namespace prop3
                 glm::dvec3& maxComp);
 
         virtual void getEqualizedImage(
-                double& luminosity,
+                double& middleGray,
                 double& contrast);
 
         static const int DEFAULT_WHITE_TEMPERATURE;
@@ -72,8 +75,11 @@ namespace prop3
         bool _adaptationActivated;
         float _adaptationFactor;
         glm::vec3 _temperatureColor;
-        float _luminosityValue;
+        glm::vec3 _exposureGain;
+        bool _isAcesTonemappingActive;
+        float _middleGrayValue;
         float _contrastValue;
+        float _gammaValue;
 
         bool _isSetup;
     };

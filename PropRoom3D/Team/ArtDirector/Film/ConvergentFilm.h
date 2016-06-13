@@ -26,9 +26,6 @@ namespace prop3
 
         virtual const std::vector<glm::vec3>& colorBuffer(ColorOutput colorOutput) override;
 
-        virtual void clear(const glm::dvec3& color = glm::dvec3(0),
-                           bool hardReset = false) override;
-
         virtual void backupAsReferenceShot() override;
 
         virtual bool saveReferenceShot(const std::string& name) const override;
@@ -41,6 +38,7 @@ namespace prop3
         virtual double compileDivergence() const override;
 
         virtual void tileCompleted(Tile& tile) override;
+        virtual void rewindTiles() override;
 
         virtual bool incomingTileAvailable() const override;
         virtual std::shared_ptr<TileMessage> nextIncomingTile() override;
@@ -48,6 +46,8 @@ namespace prop3
 
 
     protected:
+        virtual void resetFilmState() override;
+        virtual void clearBuffers(const glm::dvec3& color) override;
         virtual void endTileReached() override;
         virtual double pixelDivergence(int index) const override;
         virtual double pixelPriority(int index) const override;
@@ -101,8 +101,6 @@ namespace prop3
         double _priorityScale;
 
         glm::dvec3 _maxPixelIntensity;
-
-        int _tileCompletedCount;
 
         // Random distribution
         cellar::LinearRand _linearRand;

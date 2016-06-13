@@ -5,7 +5,7 @@ uniform sampler2D ImageTex;
 uniform sampler2D DepthTex;
 uniform vec3 TemperatureRgb;
 uniform float ContrastValue;
-uniform float LuminosityValue;
+uniform float MiddleGrayValue;
 uniform float AdaptationFactor;
 uniform float LowpassKernel[25];
 uniform int   LowpassSize;
@@ -105,7 +105,7 @@ vec3 adjustWhite(vec3 color)
 
 vec3 adjustIntensity(vec3 color)
 {
-    vec3 luminosityColor = color - vec3(0.5 - LuminosityValue);
+    vec3 luminosityColor = color - MiddleGrayValue;
     vec3 contrastColor = luminosityColor * ContrastValue;
     return contrastColor + vec3(0.5);
 }

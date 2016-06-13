@@ -33,9 +33,12 @@ namespace prop3
         _lowpassKernelSize(3),
         _adaptationActivated(false),
         _adaptationFactor(1.0f),
+        _exposureGain(1.0, 1.0, 1.0),
+        _isAcesTonemappingActive(true),
         _temperatureColor(1.0),
         _contrastValue(1.0f),
-        _luminosityValue(0.0f),
+        _gammaValue(2.0f),
+        _middleGrayValue(0.0f),
         _isSetup(false)
     {
     }
@@ -141,8 +144,11 @@ namespace prop3
         _postProdProgram.setInt("DepthTex", 1);
         _postProdProgram.setVec2f("DepthRange", glm::vec2(0, 1));
         _postProdProgram.setFloat("AdaptationFactor", _adaptationFactor);
+        _postProdProgram.setVec3f("ExposureGain", _exposureGain);
+        _postProdProgram.setInt("AcesTonemappingActive", _isAcesTonemappingActive ? 1 : 0);
+        _postProdProgram.setFloat("LuminosityValue",  _middleGrayValue);
         _postProdProgram.setFloat("ContrastValue",    _contrastValue);
-        _postProdProgram.setFloat("LuminosityValue",  _luminosityValue);
+        _postProdProgram.setFloat("GammaValue",       _gammaValue);
         _postProdProgram.setVec3f("TemperatureRgb",   glm::vec3(
             _temperatureColor.r,
             _temperatureColor.g,
@@ -299,9 +305,9 @@ namespace prop3
         }
     }
 
-    void GlPostProdUnit::setImageContrast(float minusOneToOne)
+    void GlPostProdUnit::setImageContrast(float contrast)
     {
-        _contrastValue = minusOneToOne;
+        _contrastValue = contrast;
 
         if(_isSetup)
         {
@@ -311,14 +317,50 @@ namespace prop3
         }
     }
 
-    void GlPostProdUnit::setImageLuminosity(float zeroToOne)
+    void GlPostProdUnit::setImageMiddleGray(float middleGray)
     {
-        _luminosityValue = zeroToOne;
+        _middleGrayValue = middleGray;
 
         if(_isSetup)
         {
             _postProdProgram.pushProgram();
-            _postProdProgram.setFloat("LuminosityValue", _luminosityValue);
+            _postProdProgram.setFloat("MiddleGrayValue", _middleGrayValue);
+            _postProdProgram.popProgram();
+        }
+    }
+
+    void GlPostProdUnit::setAcesTonemappingActive(bool isActive)
+    {
+        _isAcesTonemappingActive = isActive;
+
+        if(_isSetup)
+        {
+            _postProdProgram.pushProgram();
+            _postProdProgram.setInt("AcesTonemappingActive", _isAcesTonemappingActive ? 1 : 0);
+            _postProdProgram.popProgram();
+        }
+    }
+
+    void GlPostProdUnit::setExposureGain(const glm::vec3& exposure)
+    {
+        _exposureGain = exposure;
+
+        if(_isSetup)
+        {
+            _postProdProgram.pushProgram();
+            _postProdProgram.setVec3f("ExposureGain", _exposureGain);
+            _postProdProgram.popProgram();
+        }
+    }
+
+    void GlPostProdUnit::setImageGamma(float gamma)
+    {
+        _gammaValue = gamma;
+
+        if(_isSetup)
+        {
+            _postProdProgram.pushProgram();
+            _postProdProgram.setFloat("GammaValue", _gammaValue);
             _postProdProgram.popProgram();
         }
     }
@@ -379,8 +421,8 @@ namespace prop3
     }
 
     void GlPostProdUnit::getEqualizedImage(
-                    double& luminosity,
-                    double& contrast)
+            double& middleGray,
+            double& contrast)
     {
         if(_colorBufferTexId != 0)
         {
@@ -400,22 +442,35 @@ namespace prop3
                 for(int w=0; w < width; ++w)
                 {
                     glm::dvec3 pixel(buffer[idx], buffer[idx+1], buffer[idx+2]);
-                    double lum = luminance(pixel) + 1.0e-6;
+                    double lum = glm::min(luminance(pixel) + 1.0e-6, 2.0);
                     avgLogLum += glm::log(lum);
                     idx += 3;
                 }
             }
-
             avgLogLum /= width * height;
-            double avgLum = glm::exp(avgLogLum);
-            luminosity = (0.5 - avgLum) * 0.5;
-            contrast = 0.5 / (0.5 - luminosity);
+            middleGray = glm::mix(glm::exp(avgLogLum), 0.5, 0.5);
+
+
+            idx = 0;
+            contrast = 0.0;
+            for(int h=0; h < height; ++h)
+            {
+                for(int w=0; w < width; ++w)
+                {
+                    glm::dvec3 pixel(buffer[idx], buffer[idx+1], buffer[idx+2]);
+                    double lum = glm::min(luminance(pixel) + 1.0e-6, 2.0);
+                    contrast += glm::log(glm::abs(lum - middleGray));
+                    idx += 3;
+                }
+            }
+            contrast /= width * height;
+            contrast = glm::mix(1.0 / (6.0 * glm::exp(contrast)), 1.0, 0.5);
 
             delete[] buffer;
         }
         else
         {
-            luminosity = 0.0;
+            middleGray = 0.5;
             contrast = 1.0;
         }
     }

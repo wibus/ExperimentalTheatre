@@ -65,7 +65,6 @@ namespace prop3
         _varianceWeightThreshold(4.0),
         _priorityWeightThreshold(7.0),
         _maxPixelIntensity(2.0),
-        _tileCompletedCount(0),
         _prioritizer(new PixelPrioritizer())
     {
         _priorityWeightBias =
@@ -137,27 +136,40 @@ namespace prop3
         return _colorBuffer;
     }
 
-    void ConvergentFilm::clear(const glm::dvec3& color, bool hardReset)
+    void ConvergentFilm::resetFilmState()
     {
         size_t pixelCount = _frameResolution.x * _frameResolution.y;
 
+        _tileCompletedCount = 0;
         _newTileCompleted = false;
         _newFrameCompleted = false;
-        _tileCompletedCount = 0;
 
         _nextTileId = 0;
         _framePassCount = 0;
         _priorityThreshold = 1.0;
         _sampleMultiplicity = 8.0;
 
-
         while(!_tileMsgs.empty())
             _tileMsgs.pop();
 
+        _prioritizer->reset(_frameResolution, 5, 2.0);
 
-        glm::dvec4 sample(color, 0.0);
+        for(const auto& tile : _tiles)
+        {
+            glm::ivec2 tileResolution = tile->maxCorner() - tile->minCorner();
+            int tilePixCount = tileResolution.x * tileResolution.y;
+
+            tile->setTilePriority(1.0);
+            tile->setDivergenceSum(tilePixCount);
+        }
+    }
+
+    void ConvergentFilm::clearBuffers(const glm::dvec3& color)
+    {
+        size_t pixelCount = _frameResolution.x * _frameResolution.y;
+
         _sampleBuffer.clear();
-        _sampleBuffer.resize(pixelCount, sample);
+        _sampleBuffer.resize(pixelCount, glm::dvec4(0));
 
         _varianceBuffer.clear();
         _varianceBuffer.resize(pixelCount, glm::dvec2(0));
@@ -171,20 +183,8 @@ namespace prop3
         _colorBuffer.clear();
         _colorBuffer.resize(pixelCount, color);
 
-
-        for(const auto& tile : _tiles)
+        if(pixelCount != _referenceFilm.sampleBuffer.size())
         {
-            glm::ivec2 tileResolution = tile->maxCorner() - tile->minCorner();
-            int tilePixCount = tileResolution.x * tileResolution.y;
-
-            tile->setTilePriority(1.0);
-            tile->setDivergenceSum(tilePixCount);
-        }
-
-
-        if(hardReset)
-        {
-            _prioritizer->reset(_frameResolution, 5, 2.0);
             clearReferenceShot();
         }
     }
@@ -217,6 +217,12 @@ namespace prop3
 
     bool ConvergentFilm::loadReferenceShot(const std::string& name)
     {
+        size_t pixelCount = _frameResolution.x * _frameResolution.y;
+        if(pixelCount != _referenceFilm.sampleBuffer.size())
+        {
+            clearReferenceShot();
+        }
+
         return loadContent(name,
             _referenceFilm.sampleBuffer,
             _referenceFilm.varianceBuffer);
@@ -242,6 +248,7 @@ namespace prop3
 
     bool ConvergentFilm::loadRawFilm(const std::string& name)
     {
+        clearBuffers(glm::dvec3());
         return loadContent(name,
             _sampleBuffer,
             _varianceBuffer);
@@ -296,9 +303,6 @@ namespace prop3
             // output new film in specified color buffer
             for(int p=0; p < pixelCount; ++p)
                 addSample(p, glm::dvec4(0.0));
-
-            // Force prioritization
-            endTileReached();
         }
         else
         {
@@ -327,17 +331,28 @@ namespace prop3
 
     void ConvergentFilm::tileCompleted(Tile& tile)
     {
-        _newTileCompleted = true;
-
         _tilesMutex.lock();
         ++_tileCompletedCount;
-        if(_tileCompletedCount == _tiles.size())
+        if((_tileCompletedCount % tileCount()) == 0)
         {
-            endTileReached();
+            // Reprioritize frame's pixels
+            _prioritizer->launchPrioritization(*this);
+            double avrgPriority = _prioritizer->averagePriority();
+            avrgPriority = glm::min(avrgPriority, 1.0);
+            _priorityThreshold = avrgPriority;
+
+            // Remove weight multiplicity after first complet frame
+            _sampleMultiplicity = 1.0;
+
+            _cvMutex.lock();
+            ++_framePassCount;
+            _newFrameCompleted = true;
+            _cvMutex.unlock();
+            _cv.notify_all();
         }
         _tilesMutex.unlock();
 
-        if(_tileCompletedCount > _tiles.size())
+        if(_tileCompletedCount > tileCount())
         {
             double divergenceSum = 0.0;
             for(int j=tile.minCorner().y; j < tile.maxCorner().y; ++j)
@@ -352,6 +367,13 @@ namespace prop3
 
             tile.setDivergenceSum(divergenceSum);
         }
+
+        _newTileCompleted = true;
+    }
+
+    void ConvergentFilm::rewindTiles()
+    {
+        _nextTileId = 0;
     }
 
     bool ConvergentFilm::incomingTileAvailable() const
@@ -383,27 +405,9 @@ namespace prop3
 
     void ConvergentFilm::endTileReached()
     {
-        if(_tileCompletedCount >= _tiles.size())
+        if(_framePassCount > 0)
         {
-            _cvMutex.lock();
-
             _nextTileId = 0;
-            ++_framePassCount;
-            _newFrameCompleted = true;
-
-            _cvMutex.unlock();
-            _cv.notify_all();
-        }
-
-        if(_tileCompletedCount >= _tiles.size())
-        {
-            _prioritizer->launchPrioritization(*this);
-
-            double avrgPriority = _prioritizer->averagePriority();
-            avrgPriority = glm::min(avrgPriority, 1.0);
-            _priorityThreshold = avrgPriority;
-
-            _sampleMultiplicity = 1.0;
         }
     }
 

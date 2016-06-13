@@ -45,9 +45,8 @@ namespace prop3
         virtual const std::vector<glm::vec3>& colorBuffer(ColorOutput colorOutput) = 0;
 
 
-        virtual void clear(const glm::dvec3& color = glm::dvec3(0),
-                           bool hardReset = false) = 0;
-
+        virtual void clear(const glm::dvec3& color = glm::dvec3(0)) final;
+        virtual void clear(const std::string& filmName) final;
         virtual void backupAsReferenceShot() = 0;
 
         virtual bool saveReferenceShot(const std::string& name) const = 0;
@@ -90,6 +89,7 @@ namespace prop3
         void waitForFrameCompletion();
         virtual bool needNewTiles() const;
         virtual void tileCompleted(Tile& tile) = 0;
+        virtual void rewindTiles() = 0;
 
         virtual bool incomingTileAvailable() const;
         virtual std::shared_ptr<TileMessage> nextIncomingTile();
@@ -97,6 +97,8 @@ namespace prop3
 
 
     protected:
+        virtual void resetFilmState() = 0;
+        virtual void clearBuffers(const glm::dvec3& color) = 0;
         virtual void endTileReached() = 0;
         virtual double pixelDivergence(int index) const = 0;
         virtual double pixelPriority(int index) const = 0;
@@ -125,6 +127,7 @@ namespace prop3
         std::shared_ptr<Tile> _endTile;
         std::vector<std::shared_ptr<Tile>> _tiles;
 
+        int _tileCompletedCount;
         bool _newTileCompleted;
         bool _newFrameCompleted;
     };
