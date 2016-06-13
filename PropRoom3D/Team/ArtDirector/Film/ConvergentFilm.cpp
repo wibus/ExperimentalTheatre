@@ -67,7 +67,7 @@ namespace prop3
         _maxPixelIntensity(2.0),
         _prioritizer(new PixelPrioritizer())
     {
-        _priorityWeightBias =
+        _priorityWeightBias = 0.25 *
             _priorityWeightThreshold *
             _priorityWeightThreshold;
 
@@ -152,7 +152,7 @@ namespace prop3
         while(!_tileMsgs.empty())
             _tileMsgs.pop();
 
-        _prioritizer->reset(_frameResolution, 5, 2.0);
+        _prioritizer->reset(_frameResolution, 5, 1.0);
 
         for(const auto& tile : _tiles)
         {
@@ -333,14 +333,8 @@ namespace prop3
     {
         _tilesMutex.lock();
         ++_tileCompletedCount;
-        if((_tileCompletedCount % tileCount()) == 0)
+        if(_tileCompletedCount == tileCount())
         {
-            // Reprioritize frame's pixels
-            _prioritizer->launchPrioritization(*this);
-            double avrgPriority = _prioritizer->averagePriority();
-            avrgPriority = glm::min(avrgPriority, 1.0);
-            _priorityThreshold = avrgPriority;
-
             // Remove weight multiplicity after first complet frame
             _sampleMultiplicity = 1.0;
 
@@ -407,7 +401,18 @@ namespace prop3
     {
         if(_framePassCount > 0)
         {
+            // Reprioritize frame's pixels
+            _prioritizer->launchPrioritization(*this);
+            double avrgPriority = _prioritizer->averagePriority();
+            avrgPriority = glm::min(avrgPriority, 1.0);
+            _priorityThreshold = avrgPriority;
+
+            _cvMutex.lock();
             _nextTileId = 0;
+            ++_framePassCount;
+            _newFrameCompleted = true;
+            _cvMutex.unlock();
+            _cv.notify_all();
         }
     }
 
@@ -533,7 +538,7 @@ namespace prop3
             const glm::dvec4& sample,
             double variance) const
     {
-        const double WEIGHT_OFFSET = 1.0;
+        const double WEIGHT_OFFSET = 0.10;
 
         glm::dvec3 color = sampleToColor(sample);
         glm::dvec3 clamped = glm::min(color, _maxPixelIntensity);
@@ -547,12 +552,12 @@ namespace prop3
     {
         double weight = sample.w;
         double weight3 = weight*weight*weight;
-        const double WEIGHT_OFFSET = 1.0;
+        const double WEIGHT_OFFSET = 0.10;
 
         glm::dvec3 color = sampleToColor(sample);
-        glm::dvec3 clamped = glm::min(color, glm::dvec3(0.5));
+        glm::dvec3 clamped = glm::min(color, _maxPixelIntensity);
         double scale = glm::length(clamped) + WEIGHT_OFFSET;
-        double semiDiv = glm::sqrt(variance / (weight * scale));
+        double semiDiv = (variance / (weight * scale));
 
         return _priorityScale * (semiDiv + _priorityWeightBias / weight3);
     }

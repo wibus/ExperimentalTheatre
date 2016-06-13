@@ -42,8 +42,8 @@ namespace prop3
     }
 
     ProceduralSun::ProceduralSun() :
-        _sunColor(glm::dvec3(1.0/*1.00, 0.75, 0.62*/) * 5e4),
-        _skyColor(glm::dvec3(0.25, 0.60, 1.00) * 2.0),
+        _sunColor(glm::dvec3(1.0/*1.00, 0.75, 0.62*/) * 1.75e5),
+        _skyColor(glm::dvec3(0.35, 0.40, 1.00) * 1.0),
         _skylineColor(glm::dvec3(1.00, 1.00, 1.00) * 2.0),
         _groundColor(glm::dvec3(0.05, 0.05, 0.3)),
         _groundHeight(-0.2),
@@ -112,36 +112,41 @@ namespace prop3
         double dotSunTop = _sunDirection.z;
 
 
-        double dayHeight (dotSunTop - MIN_SUN_HEIGHT);
+        double dayHeight(dotSunTop - MIN_SUN_HEIGHT);
         double dayRatio = glm::max(0.0, dayHeight / (1.0 - MIN_SUN_HEIGHT));
         double dayMix = 1.0 - cellar::fast_pow(1.0 - dayRatio, DAY_POWER);
 
-        glm::dvec3 topColor = kelvinToRgb(100000);
-        glm::dvec3 bottomColor = kelvinToRgb(glm::mix(3000, 6600, dayMix));
-        glm::dvec3 haloColor = kelvinToRgb(glm::mix(3000, 6600, dayMix));
-        glm::dvec3 sunTint = kelvinToRgb(glm::mix(2000, 6600, dayMix));
+        glm::dvec3 diffuseColor;
+        if(dotDirTop >= MIN_DIR_HEIGHT)
+            diffuseColor = _skyColor;
+        else
+            diffuseColor = glm::dvec3(glm::mix(0.1, 0.5, dayMix));
 
-        double diffuseHeight (dotDirTop - MIN_DIR_HEIGHT);
-        double diffuseRatio = glm::max(0.0, diffuseHeight / (1.0 - MIN_DIR_HEIGHT));
+        glm::dvec3 skylineColor = kelvinToRgb(glm::mix(3000, 8000, dayMix));
+        glm::dvec3 haloColor = kelvinToRgb(glm::mix(3000, 6600, dayMix));
+
+        double diffuseHeight = (dotDirTop - MIN_DIR_HEIGHT);
+        double diffuseRatio = glm::abs(diffuseHeight / (1.0 - MIN_DIR_HEIGHT));
         double diffuseMix = 1.0 - cellar::fast_pow(1.0 - diffuseRatio, DIFFUSE_POWER);
-        glm::dvec3 diffuseColor = glm::mix(bottomColor, topColor, diffuseMix);
-        double diffuseIntens = glm::mix(0.05, 1.0, 1.0 - cellar::fast_pow(1.0 - dayRatio, 4.0));
+        diffuseColor = glm::mix(skylineColor, diffuseColor, diffuseMix);
 
         double haloRatio = (1.0 + dotDirSun) / 2.0;
         double haloMix = cellar::fast_pow(haloRatio, HALO_POWER);
         double halowIntensity = glm::mix(0.25, 1.0, 1.0 - cellar::fast_pow(1.0 - dayRatio, 4.0));
-
+        double diffuseIntens = glm::mix(0.05, 1.0, 1.0 - cellar::fast_pow(1.0 - dayRatio, 4.0));
 
         glm::dvec3 skyColor = glm::mix(
             diffuseColor * diffuseIntens,
             haloColor * halowIntensity,
             haloMix);
 
+
         glm::dvec4 sunSample;
 
         double ringWidth = (1.0 - SUN_COS_RADIUS);
         if(dotDirSun > SUN_COS_RADIUS - ringWidth)
         {
+            glm::dvec3 sunTint = kelvinToRgb(glm::mix(2000, 6600, dayMix));
             glm::dvec3 sunColor = sunTint * _sunColor;
             double sunProb = cellar::fast_pow(SUN_SURFACE_RATIO, ray.entropy);
             if(dotDirSun > SUN_COS_RADIUS)
