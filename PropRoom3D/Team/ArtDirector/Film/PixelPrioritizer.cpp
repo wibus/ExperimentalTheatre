@@ -24,10 +24,14 @@ namespace prop3
 
     void PixelPrioritizer::reset(
             const glm::ivec2& frameResolution,
-            unsigned int blurWidth,
             double blurVariance)
     {
-        computeGaussLine(_gauss, blurWidth, blurVariance);
+        int halfSize = KERNEL_WIDTH / 2;
+        for(int i=-halfSize; i<=halfSize; ++i)
+        {
+            int idx = i+halfSize;
+            _gauss[idx] = glm::exp(-(i*i) / (2.0*blurVariance));
+        }
 
         _frameAvrgPriority = 1.0;
 
@@ -43,8 +47,8 @@ namespace prop3
 
     bool PixelPrioritizer::launchPrioritization(ConvergentFilm& film)
     {
-//        using std::chrono::high_resolution_clock;
-//        auto tStart = high_resolution_clock::now();
+        using std::chrono::high_resolution_clock;
+        auto tStart = high_resolution_clock::now();
 
         std::vector<glm::dvec4>& refSampBuff = film._referenceFilm.sampleBuffer;
         std::vector<glm::dvec4>& rawSampBuff = film._sampleBuffer;
@@ -61,8 +65,6 @@ namespace prop3
                 _varBuff[p] = 1.0;
         }
 
-        size_t kernelWidth = _gauss.size();
-        size_t halfWidth = kernelWidth / 2;
         for(int j=0; j<frameResolution.y; ++j)
         {
             unsigned int lineBaseIdx = j*frameResolution.x;
@@ -71,21 +73,27 @@ namespace prop3
             {
                 unsigned int idx = lineBaseIdx + i;
 
-                _tmpBuff[idx] = 1.0e-9;
-                double centerWeight = _gauss[halfWidth];
-                for(int k=1; k <= halfWidth; ++k)
-                {
-                    if(i-k >= 0)
-                        _tmpBuff[idx] += _gauss[halfWidth-k] * _varBuff[idx-k];
-                    else
-                        centerWeight += _gauss[halfWidth-k];
+                _tmpBuff[idx] = _varBuff[idx];
 
-                    if(i+k < frameResolution.x)
-                        _tmpBuff[idx] += _gauss[halfWidth+k] * _varBuff[idx+k];
-                    else
-                        centerWeight += _gauss[halfWidth+k];
+                if(i - 1 >= 0)
+                {
+                    _tmpBuff[idx] = glm::max(_tmpBuff[idx], _varBuff[idx-1] * _gauss[1]);
+
+                    if(i - 2 >= 0)
+                    {
+                        _tmpBuff[idx] = glm::max(_tmpBuff[idx], _varBuff[idx-2] * _gauss[0]);
+                    }
                 }
-                _tmpBuff[idx] += centerWeight * _varBuff[idx];
+
+                if(i + 1 < frameResolution.x)
+                {
+                    _tmpBuff[idx] = glm::max(_tmpBuff[idx], _varBuff[idx+1] * _gauss[3]);
+
+                    if(i + 2 < frameResolution.x)
+                    {
+                        _tmpBuff[idx] = glm::max(_tmpBuff[idx], _varBuff[idx+2] * _gauss[4]);
+                    }
+                }
             }
         }
 
@@ -97,30 +105,34 @@ namespace prop3
             {
                 unsigned int idx = lineBaseIdx + i;
 
-                double blurredVar = 0.0;
-                double centerWeight = _gauss[halfWidth];
-                for(int k=1; k <= halfWidth; ++k)
-                {
-                    if(j-k >= 0)
-                        blurredVar += _gauss[halfWidth-k] *
-                            _tmpBuff[(j-k)*frameResolution.x + i];
-                    else
-                        centerWeight += _gauss[halfWidth-k];
+                double maxVar = _tmpBuff[idx];
 
-                    if(j+k < frameResolution.y)
-                        blurredVar += _gauss[halfWidth+k] *
-                            _tmpBuff[(j+k)*frameResolution.x + i];
-                    else
-                        centerWeight += _gauss[halfWidth+k];
+                if(j - 1 >= 0)
+                {
+                    maxVar = glm::max(maxVar, _tmpBuff[idx-frameResolution.x] * _gauss[1]);
+
+                    if(j - 2 >= 0)
+                    {
+                        maxVar = glm::max(maxVar, _tmpBuff[idx-2*frameResolution.x] * _gauss[0]);
+                    }
                 }
-                blurredVar += centerWeight * _tmpBuff[idx];
+
+                if(j + 1 < frameResolution.y)
+                {
+                    maxVar = glm::max(maxVar, _tmpBuff[idx+frameResolution.x] * _gauss[3]);
+
+                    if(j + 2 < frameResolution.y)
+                    {
+                        maxVar = glm::max(maxVar, _tmpBuff[idx+2*frameResolution.x] * _gauss[4]);
+                    }
+                }
 
 
                 double compatibility = film.refShotCompatibility(idx);
                 glm::dvec4 mixedSample = rawSampBuff[idx] +
                         refSampBuff[idx] * compatibility;
 
-                prioBuff[idx] = film.toPriority(mixedSample, blurredVar);
+                prioBuff[idx] = film.toPriority(mixedSample, maxVar);
             }
         }
 
@@ -159,36 +171,16 @@ namespace prop3
                         film._priorityBuffer[i]);
         }
 
-//        auto tEnd = high_resolution_clock::now();
-//        float us = (tEnd - tStart).count() / 1.0e3;
-//        getLog().postMessage(new Message('I', false,
-//            "Pixel Prioritization time (us) :\t " +
-//                std::to_string(us),
-//            "PixelPrioritizer"));
+        auto tEnd = high_resolution_clock::now();
+        float us = (tEnd - tStart).count() / 1.0e3;
+        getLog().postMessage(new Message('I', false,
+            "Pixel Prioritization time (us) :\t " +
+                std::to_string(us),
+            "PixelPrioritizer"));
     }
 
     double PixelPrioritizer::averagePriority() const
     {
         return _frameAvrgPriority;
     }
-
-     void PixelPrioritizer::computeGaussLine(
-            std::vector<double>& gauss,
-            unsigned int width,
-            double var)
-     {
-         float mass = 0.0;
-         int halfSize = width / 2;
-         gauss.resize(halfSize*2 + 1);
-
-         for(int i=-halfSize; i<=halfSize; ++i)
-         {
-             int idx = i+halfSize;
-             gauss[idx] = glm::exp(-(i*i) / (2.0*var));
-             mass += gauss[idx];
-         }
-
-         for(int i=0; i<width; ++i)
-            gauss[i] = gauss[i] / mass;
-     }
 }

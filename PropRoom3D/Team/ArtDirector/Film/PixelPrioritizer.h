@@ -16,7 +16,6 @@ namespace prop3
 
         virtual void reset(
                 const glm::ivec2& frameResolution,
-                unsigned int blurWidth,
                 double blurVariance);
 
         virtual bool launchPrioritization(
@@ -24,16 +23,12 @@ namespace prop3
 
         virtual double averagePriority() const;
 
-    protected:
-        virtual void computeGaussLine(
-                std::vector<double>& gauss,
-                unsigned int width,
-                double var);
+        static const int KERNEL_WIDTH = 5;
 
     private:
         std::vector<double> _varBuff;
         std::vector<double> _tmpBuff;
-        std::vector<double> _gauss;
+        double _gauss[KERNEL_WIDTH];
         double _frameAvrgPriority;
     };
 }
