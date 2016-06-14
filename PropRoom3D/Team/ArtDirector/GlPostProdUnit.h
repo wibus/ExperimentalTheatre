@@ -41,13 +41,8 @@ namespace prop3
         virtual void setImageGamma(float gamma);
         virtual void saveOutputImage();
 
-        virtual void fetchImageMinAndMax(
-                glm::dvec3& minComp,
-                glm::dvec3& maxComp);
-
-        virtual void getEqualizedImage(
-                double& middleGray,
-                double& contrast);
+        virtual double getAutoExposure(
+                double targetAverageLuminance);
 
         static const int DEFAULT_WHITE_TEMPERATURE;
 

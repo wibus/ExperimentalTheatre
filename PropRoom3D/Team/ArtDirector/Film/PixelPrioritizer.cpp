@@ -47,8 +47,8 @@ namespace prop3
 
     bool PixelPrioritizer::launchPrioritization(ConvergentFilm& film)
     {
-        using std::chrono::high_resolution_clock;
-        auto tStart = high_resolution_clock::now();
+//        using std::chrono::high_resolution_clock;
+//        auto tStart = high_resolution_clock::now();
 
         std::vector<glm::dvec4>& refSampBuff = film._referenceFilm.sampleBuffer;
         std::vector<glm::dvec4>& rawSampBuff = film._sampleBuffer;
@@ -171,12 +171,12 @@ namespace prop3
                         film._priorityBuffer[i]);
         }
 
-        auto tEnd = high_resolution_clock::now();
-        float us = (tEnd - tStart).count() / 1.0e3;
-        getLog().postMessage(new Message('I', false,
-            "Pixel Prioritization time (us) :\t " +
-                std::to_string(us),
-            "PixelPrioritizer"));
+//        auto tEnd = high_resolution_clock::now();
+//        float us = (tEnd - tStart).count() / 1.0e3;
+//        getLog().postMessage(new Message('I', false,
+//            "Pixel Prioritization time (us) :\t " +
+//                std::to_string(us),
+//            "PixelPrioritizer"));
     }
 
     double PixelPrioritizer::averagePriority() const

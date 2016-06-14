@@ -381,48 +381,7 @@ namespace prop3
         }
     }
 
-    void GlPostProdUnit::fetchImageMinAndMax(
-            glm::dvec3& minComp,
-            glm::dvec3& maxComp)
-    {
-        if(_colorBufferTexId != 0)
-        {
-            minComp = glm::dvec3(INFINITY);
-            maxComp = glm::dvec3(-INFINITY);
-
-            GLint width, height;
-            glBindTexture(GL_TEXTURE_2D, _colorBufferTexId);
-            glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
-            glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
-
-            GLfloat* buffer = new GLfloat[width*height * 3];
-            glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, buffer);
-            glBindTexture(GL_TEXTURE_2D, 0);
-
-            size_t idx = 0;
-            for(int h=0; h < height; ++h)
-            {
-                for(int w=0; w < width; ++w)
-                {
-                    glm::dvec3 pixel(buffer[idx], buffer[idx+1], buffer[idx+2]);
-                    minComp = glm::min(minComp, pixel);
-                    maxComp = glm::max(maxComp, pixel);
-                    idx += 3;
-                }
-            }
-
-            delete[] buffer;
-        }
-        else
-        {
-            minComp = glm::dvec3(0);
-            maxComp = glm::dvec3(1);
-        }
-    }
-
-    void GlPostProdUnit::getEqualizedImage(
-            double& middleGray,
-            double& contrast)
+    double GlPostProdUnit::getAutoExposure(double targetAverageLuminance)
     {
         if(_colorBufferTexId != 0)
         {
@@ -437,41 +396,28 @@ namespace prop3
 
             size_t idx = 0;
             double avgLogLum = 0.0;
-            for(int h=0; h < height; ++h)
+            double weightSum = 0.0;
+            double var = width * height / 8.0;
+            for(int h=0, dh=-height/2; h < height; ++h, ++dh)
             {
-                for(int w=0; w < width; ++w)
+                for(int w=0, dw=-width/2; w < width; ++w, ++dw)
                 {
+                    double weight = glm::exp(-(dw*dw + dh*dh) / var);
                     glm::dvec3 pixel(buffer[idx], buffer[idx+1], buffer[idx+2]);
-                    double lum = glm::min(luminance(pixel) + 1.0e-6, 2.0);
-                    avgLogLum += glm::log(lum);
+                    avgLogLum += glm::log(luminance(pixel) + 1.0e-6) * weight;
+                    weightSum += weight;
                     idx += 3;
                 }
             }
-            avgLogLum /= width * height;
-            middleGray = glm::mix(glm::exp(avgLogLum), 0.5, 0.5);
-
-
-            idx = 0;
-            contrast = 0.0;
-            for(int h=0; h < height; ++h)
-            {
-                for(int w=0; w < width; ++w)
-                {
-                    glm::dvec3 pixel(buffer[idx], buffer[idx+1], buffer[idx+2]);
-                    double lum = glm::min(luminance(pixel) + 1.0e-6, 2.0);
-                    contrast += glm::log(glm::abs(lum - middleGray));
-                    idx += 3;
-                }
-            }
-            contrast /= width * height;
-            contrast = glm::mix(1.0 / (6.0 * glm::exp(contrast)), 1.0, 0.5);
+            avgLogLum = glm::exp(avgLogLum / weightSum);
 
             delete[] buffer;
+
+            return targetAverageLuminance / glm::sqrt(avgLogLum);
         }
         else
         {
-            middleGray = 0.5;
-            contrast = 1.0;
+            return 1.0;
         }
     }
 
