@@ -56,6 +56,7 @@ namespace prop3
         double eRIdx = nextMaterial.refractiveIndex(pos);
         glm::dvec3 eColor = nextMaterial.color(pos);
 
+
         // Reflection
         glm::dvec3 reflectNormal = getMicrofacetNormal(
                 wallNormal, incident, rough);
@@ -121,7 +122,8 @@ namespace prop3
         // Refraction
         if(refractSample.w > 0.0)
         {
-            glm::dvec3 refractDir = computeRefraction(lRIdx, eRIdx, incident, reflectNormal);
+            glm::dvec3 refractDir = computeRefraction(
+                lRIdx, eRIdx, incident, reflectNormal);
             if(glm::dot(refractDir, wallNormal) < 0.0)
             {
                 raycasts.push_back(Raycast(
@@ -159,7 +161,7 @@ namespace prop3
             }
         }
 
-        // Specular
+        // Reflection
         if(reflectSample.w > 0.0)
         {
             glm::dvec3 reflectDir = glm::reflect(

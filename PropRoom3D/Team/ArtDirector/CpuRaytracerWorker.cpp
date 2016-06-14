@@ -317,40 +317,33 @@ namespace prop3
             double multipliedWeightSum = expextedWeightSum *
                                          it.sampleMultiplicity();
 
-            glm::dvec4 totalSamples(0.0);
+            double totalWeightSum = 0.0;
 
             while(_runningPredicate &&
-                  pixelCycleCount <= maxCycleCount &&
-                  totalSamples.w < multipliedWeightSum)
+                  totalWeightSum < multipliedWeightSum &&
+                  ++pixelCycleCount <= maxCycleCount)
             {
-                glm::dvec4 sampleSum(0.0);
-
-                while(_runningPredicate &&
-                      sampleSum.w < expextedWeightSum &&
-                      ++pixelCycleCount <= maxCycleCount)
+                if(_useDepthOfField && _aperture > 0.0)
                 {
-                    if(_useDepthOfField && _aperture > 0.0)
-                    {
-                        glm::dvec2 confusionPos = _diskRand.gen(_aperture);
-                        raycast.origin = _camPos +
-                            _confusionSide * confusionPos.x +
-                            _confusionUp * confusionPos.y;
-                    }
-
-                    glm::dvec2 pixPos = glm::dvec2(it.position());
-                    glm::dvec4 screenPos((frameOrig + pixPos)*pixelSize, -1.0, 1.0);
-                    glm::dvec4 dirH = _viewProjInverse * screenPos;
-                    glm::dvec3 pixWorldPos = glm::dvec3(dirH / dirH.w);
-                    raycast.direction = glm::normalize(pixWorldPos - raycast.origin);
-                    raycast.invDir = 1.0 / raycast.direction;
-
-                    sampleSum += fireScreenRay(raycast);
+                    glm::dvec2 confusionPos = _diskRand.gen(_aperture);
+                    raycast.origin = _camPos +
+                        _confusionSide * confusionPos.x +
+                        _confusionUp * confusionPos.y;
                 }
 
-                if(sampleSum.w > 0.0)
+                glm::dvec2 pixPos = glm::dvec2(it.position());
+                glm::dvec4 screenPos((frameOrig + pixPos)*pixelSize, -1.0, 1.0);
+                glm::dvec4 dirH = _viewProjInverse * screenPos;
+                glm::dvec3 pixWorldPos = glm::dvec3(dirH / dirH.w);
+                raycast.direction = glm::normalize(pixWorldPos - raycast.origin);
+                raycast.invDir = 1.0 / raycast.direction;
+
+                glm::dvec4 sample = fireScreenRay(raycast);
+
+                if(sample.w > 0.0)
                 {
-                    it.addSample(sampleSum);
-                    totalSamples += sampleSum;
+                    it.addSample(sample);
+                    totalWeightSum += sample.w;
                 }
             }
         }
@@ -588,8 +581,8 @@ namespace prop3
                    _workingSample.w >= _sufficientScreenRayWeight)
                     break;
 
-                ++bounceCount;
                 rayBatchEnd = _rayBounceArray.size();
+                ++bounceCount;
             }
         }
 

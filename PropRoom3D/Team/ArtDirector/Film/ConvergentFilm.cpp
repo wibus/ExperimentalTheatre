@@ -443,14 +443,16 @@ namespace prop3
             double sampWeight = sample.w;
             glm::dvec3 sampColor = glm::dvec3(sample);
             if(sampWeight > 0.0)
+            {
                 sampColor = glm::min(
                     _maxPixelIntensity,
                     sampColor / sampWeight);
+            }
 
             glm::dvec3 oldColor = glm::min(_maxPixelIntensity,
                 glm::dvec3(oldSample) / oldSample.w);
             glm::dvec3 dColor = sampColor - oldColor;
-            double dMean = glm::length(dColor) * glm::sqrt(sampWeight);
+            double dMean = glm::sqrt(glm::dot(dColor, dColor) * sampWeight);
 
             _varianceBuffer[index] += glm::dvec2(dMean * sampWeight, sampWeight);
             glm::dvec2 newWeightedVar = _varianceBuffer[index];
