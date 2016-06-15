@@ -311,7 +311,7 @@ namespace prop3
             ++it)
         {
             int pixelCycleCount = 0;
-            int maxCycleCount = (_useStochasticTracing ? 10 : 1);
+            int maxCycleCount = (_useStochasticTracing ? 16 : 1);
 
             double expextedWeightSum = it.sampleWeight();
             double multipliedWeightSum = expextedWeightSum *

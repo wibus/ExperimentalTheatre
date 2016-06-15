@@ -120,7 +120,7 @@ namespace prop3
         if(dotDirTop >= MIN_DIR_HEIGHT)
             diffuseColor = _skyColor;
         else
-            diffuseColor = glm::dvec3(glm::mix(0.1, 0.5, dayMix));
+            diffuseColor = glm::dvec3(glm::mix(0.01, 0.5, dayMix));
 
         glm::dvec3 skylineColor = kelvinToRgb(glm::mix(3000, 8000, dayMix));
         glm::dvec3 haloColor = kelvinToRgb(glm::mix(3000, 6600, dayMix));
@@ -132,8 +132,8 @@ namespace prop3
 
         double haloRatio = (1.0 + dotDirSun) / 2.0;
         double haloMix = cellar::fast_pow(haloRatio, HALO_POWER);
-        double halowIntensity = glm::mix(0.25, 1.0, 1.0 - cellar::fast_pow(1.0 - dayRatio, 4.0));
-        double diffuseIntens = glm::mix(0.05, 1.0, 1.0 - cellar::fast_pow(1.0 - dayRatio, 4.0));
+        double halowIntensity = glm::mix(0.10, 1.0, 1.0 - cellar::fast_pow(1.0 - dayRatio, 4.0));
+        double diffuseIntens = glm::mix(0.01, 1.0, 1.0 - cellar::fast_pow(1.0 - dayRatio, 4.0));
 
         glm::dvec3 skyColor = glm::mix(
             diffuseColor * diffuseIntens,

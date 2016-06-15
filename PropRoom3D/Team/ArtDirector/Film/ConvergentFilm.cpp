@@ -432,7 +432,6 @@ namespace prop3
     }
     void ConvergentFilm::addSample(int index, const glm::dvec4& sample)
     {
-        // Power heuristic weight optimization
         glm::dvec4 oldSample = _sampleBuffer[index];
         glm::dvec4 newSample = oldSample + sample;
         _sampleBuffer[index] = newSample;
@@ -540,7 +539,7 @@ namespace prop3
             const glm::dvec4& sample,
             double variance) const
     {
-        const double WEIGHT_OFFSET = 0.10;
+        const double WEIGHT_OFFSET = 0.04;
 
         glm::dvec3 color = sampleToColor(sample);
         glm::dvec3 clamped = glm::min(color, _maxPixelIntensity);
@@ -554,14 +553,9 @@ namespace prop3
     {
         double weight = sample.w;
         double weight3 = weight*weight*weight;
-        const double WEIGHT_OFFSET = 0.10;
+        double div = toDivergence(sample, variance);
 
-        glm::dvec3 color = sampleToColor(sample);
-        glm::dvec3 clamped = glm::min(color, _maxPixelIntensity);
-        double scale = glm::length(clamped) + WEIGHT_OFFSET;
-        double semiDiv = (variance / (weight * scale));
-
-        return _priorityScale * (semiDiv + _priorityWeightBias / weight3);
+        return _priorityScale * (div + _priorityWeightBias / weight3);
     }
 
     double ConvergentFilm::refShotCompatibility(unsigned int index) const
