@@ -505,10 +505,8 @@ namespace prop3
     {
         QJsonObject obj;
         obj[BACKDROP_TYPE]                 = BACKDROP_TYPE_PROCEDURALSUN;
-        obj[BACKDROP_SUN_COLOR]            = toJson(node.sunColor());
+        obj[BACKDROP_SUN_INTENSITY]        = node.sunIntensity();
         obj[BACKDROP_SKY_COLOR]            = toJson(node.skyColor());
-        obj[BACKDROP_SKYLINE_COLOR]        = toJson(node.skylineColor());
-        obj[BACKDROP_GROUND_COLOR]         = toJson(node.groundColor());
         obj[BACKDROP_GROUND_HEIGHT]        = node.groundHeight();
         obj[BACKDROP_SUN_DIR]              = toJson(node.sunDirection());
 

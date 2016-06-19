@@ -14,10 +14,8 @@ namespace prop3
     // Backdrops
     const QString BACKDROP_TYPE                     = "Type";
     const QString BACKDROP_TYPE_PROCEDURALSUN       = "ProceduralSun";
-    const QString BACKDROP_SUN_COLOR                = "Sun Color";
+    const QString BACKDROP_SUN_INTENSITY            = "Sun Intensity";
     const QString BACKDROP_SKY_COLOR                = "Sky Color";
-    const QString BACKDROP_SKYLINE_COLOR            = "Skyline Color";
-    const QString BACKDROP_GROUND_COLOR             = "Ground Color";
     const QString BACKDROP_GROUND_HEIGHT            = "Ground Height";
     const QString BACKDROP_SUN_DIR                  = "Sun Dir";
 

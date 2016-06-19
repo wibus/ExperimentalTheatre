@@ -377,10 +377,8 @@ namespace prop3
         if(type == BACKDROP_TYPE_PROCEDURALSUN)
         {
             ProceduralSun* proceduralSun = new ProceduralSun();
-            proceduralSun->setSunColor(dvec3FromJson(obj[BACKDROP_SUN_COLOR]));
+            proceduralSun->setSunIntensity(obj[BACKDROP_SUN_INTENSITY].toDouble());
             proceduralSun->setSkyColor(dvec3FromJson(obj[BACKDROP_SKY_COLOR]));
-            proceduralSun->setSkylineColor(dvec3FromJson(obj[BACKDROP_SKYLINE_COLOR]));
-            proceduralSun->setGroundColor(dvec3FromJson(obj[BACKDROP_GROUND_COLOR]));
             proceduralSun->setGroundHeight(obj[BACKDROP_GROUND_HEIGHT].toDouble());
             proceduralSun->setSunDirection(dvec3FromJson(obj[BACKDROP_SUN_DIR]));
             node.reset(proceduralSun);

@@ -16,10 +16,8 @@ namespace prop3
     // Backdrops
     extern const QString BACKDROP_TYPE;
     extern const QString BACKDROP_TYPE_PROCEDURALSUN;
-    extern const QString BACKDROP_SUN_COLOR;
+    extern const QString BACKDROP_SUN_INTENSITY;
     extern const QString BACKDROP_SKY_COLOR;
-    extern const QString BACKDROP_SKYLINE_COLOR;
-    extern const QString BACKDROP_GROUND_COLOR;
     extern const QString BACKDROP_GROUND_HEIGHT;
     extern const QString BACKDROP_SUN_DIR;
 

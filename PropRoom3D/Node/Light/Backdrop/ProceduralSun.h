@@ -20,21 +20,13 @@ namespace prop3
         virtual void accept(Visitor& visitor) override;
 
 
-        glm::dvec3 sunColor() const;
+        double sunIntensity() const;
 
-        void setSunColor(const glm::dvec3& color);
+        void setSunIntensity(double intensity);
 
         glm::dvec3 skyColor() const;
 
         void setSkyColor(const glm::dvec3& color);
-
-        glm::dvec3 skylineColor() const;
-
-        void setSkylineColor(const glm::dvec3& color);
-
-        glm::dvec3 groundColor() const;
-
-        void setGroundColor(const glm::dvec3& color);
 
 
         double groundHeight() const;
@@ -69,12 +61,20 @@ namespace prop3
 
 
     private:
-        glm::dvec3 _sunColor;
+        double _sunIntensity;
         glm::dvec3 _skyColor;
-        glm::dvec3 _skylineColor;
-        glm::dvec3 _groundColor;
 
         glm::dvec3 _sunDirection;
+        glm::dvec3 _sunSideward;
+        glm::dvec3 _sunUpward;
+
+        glm::dvec3 _sunColor;
+        glm::dvec3 _haloColor;
+        glm::dvec3 _skylineColor;
+        glm::dvec3 _groundColor;
+        double _halowIntensity;
+        double _diffuseIntens;
+
         double _groundHeight;
 
         std::shared_ptr<Material> _spaceMaterial;
@@ -85,24 +85,14 @@ namespace prop3
 
 
     // IMPLEMENTATION //
-    inline glm::dvec3 ProceduralSun::sunColor() const
+    inline double ProceduralSun::sunIntensity() const
     {
-        return _sunColor;
+        return _sunIntensity;
     }
 
     inline glm::dvec3 ProceduralSun::skyColor() const
     {
         return _skyColor;
-    }
-
-    inline glm::dvec3 ProceduralSun::skylineColor() const
-    {
-        return _skylineColor;
-    }
-
-    inline glm::dvec3 ProceduralSun::groundColor() const
-    {
-        return _groundColor;
     }
 
     inline double ProceduralSun::groundHeight() const
