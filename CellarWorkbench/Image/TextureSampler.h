@@ -1,5 +1,5 @@
-#ifndef CELLARWORKBENCH_IMAGESAMPLER_H
-#define CELLARWORKBENCH_IMAGESAMPLER_H
+#ifndef CELLARWORKBENCH_TEXTURESAMPLER_H
+#define CELLARWORKBENCH_TEXTURESAMPLER_H
 
 #include <memory>
 
@@ -10,7 +10,7 @@
 
 namespace cellar
 {
-    class Image;
+    class Texture;
     class AbstractFilter;
     class AbstractWrapper;
 
@@ -28,12 +28,12 @@ namespace cellar
     };
 
 
-    class CELLAR_EXPORT ImageSampler
+    class CELLAR_EXPORT TextureSampler
     {
     public:
-        ImageSampler(const ESamplerFilter& filter = ESamplerFilter::NEAREST,
+        TextureSampler(const ESamplerFilter& filter = ESamplerFilter::NEAREST,
                      const ESamplerWrapper& wrapper = ESamplerWrapper::CLAMP);
-        ~ImageSampler();
+        ~TextureSampler();
 
         void setFilter(const ESamplerFilter& filter);
         void setWrapper(const ESamplerWrapper& wrapper);
@@ -41,15 +41,11 @@ namespace cellar
         cellar::ESamplerFilter filter() const;
         cellar::ESamplerWrapper wrapper() const;
 
-        glm::dvec4 sample(const Image& image, double s, double t) const;
-        glm::dvec4 sample(const Image& image, const glm::dvec2& pos) const;
+        glm::dvec4 sample(const Texture& image, double s, double t) const;
+        glm::dvec4 sample(const Texture& image, const glm::dvec2& pos) const;
 
-        static void linearize(Image& image);
 
     private:
-        static unsigned char* _gammaLut;
-
-
         ESamplerFilter _filterType;
         ESamplerWrapper _wrapperType;
         std::unique_ptr<AbstractFilter> _filter;
@@ -59,22 +55,22 @@ namespace cellar
 
 
     // IMPLEMENTATION //
-    inline cellar::ESamplerFilter ImageSampler::filter() const
+    inline cellar::ESamplerFilter TextureSampler::filter() const
     {
         return _filterType;
     }
 
-    inline cellar::ESamplerWrapper ImageSampler::wrapper() const
+    inline cellar::ESamplerWrapper TextureSampler::wrapper() const
     {
         return _wrapperType;
     }
 
-    inline glm::dvec4 ImageSampler::sample(
-            const Image& image,
+    inline glm::dvec4 TextureSampler::sample(
+            const Texture& image,
             const glm::dvec2& pos) const
     {
         return sample(image, pos.s, pos.t);
     }
 }
 
-#endif // CELLARWORKBENCH_IMAGESAMPLER_H
+#endif // CELLARWORKBENCH_TEXTURESAMPLER_H

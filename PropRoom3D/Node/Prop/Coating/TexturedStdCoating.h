@@ -1,7 +1,7 @@
 #ifndef PROPROOM3D_TEXTUREDSTDCOATING_H
 #define PROPROOM3D_TEXTUREDSTDCOATING_H
 
-#include <CellarWorkbench/Image/ImageSampler.h>
+#include <CellarWorkbench/Image/TextureSampler.h>
 
 #include "StdCoating.h"
 
@@ -53,9 +53,9 @@ namespace prop3
         std::string _paintColorTexName;
         double _paintRefractiveIndex;
 
-        cellar::ImageSampler _sampler;
-        std::shared_ptr<cellar::Image> _roughnessTexture;
-        std::shared_ptr<cellar::Image> _paintColorTexture;
+        cellar::TextureSampler _sampler;
+        std::shared_ptr<cellar::Texture> _roughnessTexture;
+        std::shared_ptr<cellar::Texture> _paintColorTexture;
     };
 
 

@@ -11,7 +11,7 @@
 
 #include <GLM/glm.hpp>
 
-#include <CellarWorkbench/Image/ImageSampler.h>
+#include <CellarWorkbench/Image/TextureSampler.h>
 
 #include "Node/Visitor.h"
 

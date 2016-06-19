@@ -9,7 +9,7 @@
 
 #include <GLM/glm.hpp>
 
-#include <CellarWorkbench/Image/ImageSampler.h>
+#include <CellarWorkbench/Image/TextureSampler.h>
 
 #include "PropRoom3D/libPropRoom3D_global.h"
 

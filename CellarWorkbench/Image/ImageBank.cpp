@@ -52,12 +52,7 @@ namespace cellar
         bool isAdded = _images.insert(
             make_pair(imgName, make_shared<Image>(image)) ).second;
 
-        if(isAdded)
-        {
-            getLog().postMessage(new Message('I', false,
-                "'" + imgName + "' successfully added to image bank", "ImageBank"));
-        }
-        else
+        if(!isAdded)
         {
             getLog().postMessage(new Message('W', false,
                 "An image named '" + imgName + "' is already in the bank", "ImageBank"));
@@ -71,12 +66,7 @@ namespace cellar
     {        
         size_t nbRemoved = _images.erase(imgName);
 
-        if(0 < nbRemoved)
-        {
-            getLog().postMessage(new Message('I', false,
-                "Image deleted : " + imgName, "ImageBank"));
-        }
-        else
+        if(nbRemoved == 0)
         {
             getLog().postMessage(new Message('W', false,
                 "Image not found so not deleted : " + imgName, "ImageBank"));

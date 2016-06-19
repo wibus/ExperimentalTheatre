@@ -44,7 +44,9 @@ SET(CELLAR_GL_HEADERS
 SET(CELLAR_IMAGE_HEADERS
     ${CELLAR_SRC_DIR}/Image/Image.h
     ${CELLAR_SRC_DIR}/Image/ImageBank.h
-    ${CELLAR_SRC_DIR}/Image/ImageSampler.h)
+    ${CELLAR_SRC_DIR}/Image/Texture.h
+    ${CELLAR_SRC_DIR}/Image/TextureBank.h
+    ${CELLAR_SRC_DIR}/Image/TextureSampler.h)
 
     
 # Misc
@@ -121,7 +123,9 @@ SET(CELLAR_GL_SOURCES
 SET(CELLAR_IMAGE_SOURCES
     ${CELLAR_SRC_DIR}/Image/Image.cpp
     ${CELLAR_SRC_DIR}/Image/ImageBank.cpp
-    ${CELLAR_SRC_DIR}/Image/ImageSampler.cpp)
+    ${CELLAR_SRC_DIR}/Image/Texture.cpp
+    ${CELLAR_SRC_DIR}/Image/TextureBank.cpp
+    ${CELLAR_SRC_DIR}/Image/TextureSampler.cpp)
 
     
 # Misc

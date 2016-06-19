@@ -1,7 +1,6 @@
 #include "TexturedStdCoating.h"
 
-#include <CellarWorkbench/Image/Image.h>
-#include <CellarWorkbench/Image/ImageBank.h>
+#include <CellarWorkbench/Image/TextureBank.h>
 
 #include "Ray/RayHitReport.h"
 #include "Node/Visitor.h"
@@ -56,7 +55,7 @@ namespace prop3
         if(name == NO_TEXTURE)
             _roughnessTexture.reset();
         else
-            _roughnessTexture = cellar::getImageBank().getImagePtr(name);
+            _roughnessTexture = cellar::getTextureBank().getTexturePtr(name, false);
     }
 
     glm::dvec4 TexturedStdCoating::paintColor(const glm::dvec3& tex) const
@@ -81,21 +80,7 @@ namespace prop3
         if(name == NO_TEXTURE)
             _paintColorTexture.reset();
         else
-        {
-            std::string linearizedName = name + "-linearized";
-            if(cellar::getImageBank().isInBank(linearizedName))
-                _paintColorTexture = cellar::getImageBank().getImagePtr(linearizedName);
-            else
-            {
-                std::shared_ptr<cellar::Image> img =
-                    cellar::getImageBank().getImagePtr(name);
-
-                _paintColorTexture.reset(new cellar::Image(*img));
-                cellar::ImageSampler::linearize(*_paintColorTexture);
-
-                cellar::getImageBank().addImage(linearizedName, *_paintColorTexture);
-            }
-        }
+            _paintColorTexture = cellar::getTextureBank().getTexturePtr(name, true);
     }
 
     double TexturedStdCoating::paintRefractiveIndex(const glm::dvec3& tex) const
