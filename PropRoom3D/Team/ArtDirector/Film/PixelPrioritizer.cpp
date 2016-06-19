@@ -22,17 +22,8 @@ namespace prop3
 
     }
 
-    void PixelPrioritizer::reset(
-            const glm::ivec2& frameResolution,
-            double blurVariance)
+    void PixelPrioritizer::reset(const glm::ivec2& frameResolution)
     {
-        int halfSize = KERNEL_WIDTH / 2;
-        for(int i=-halfSize; i<=halfSize; ++i)
-        {
-            int idx = i+halfSize;
-            _gauss[idx] = glm::exp(-(i*i) / (2.0*blurVariance));
-        }
-
         _frameAvrgPriority = 1.0;
 
         unsigned int pixelCount =
@@ -77,21 +68,21 @@ namespace prop3
 
                 if(i - 1 >= 0)
                 {
-                    _tmpBuff[idx] = glm::max(_tmpBuff[idx], _varBuff[idx-1] * _gauss[1]);
+                    _tmpBuff[idx] += _varBuff[idx-1];
 
                     if(i - 2 >= 0)
                     {
-                        _tmpBuff[idx] = glm::max(_tmpBuff[idx], _varBuff[idx-2] * _gauss[0]);
+                        _tmpBuff[idx] += _varBuff[idx-2];
                     }
                 }
 
                 if(i + 1 < frameResolution.x)
                 {
-                    _tmpBuff[idx] = glm::max(_tmpBuff[idx], _varBuff[idx+1] * _gauss[3]);
+                    _tmpBuff[idx] += _varBuff[idx+1];
 
                     if(i + 2 < frameResolution.x)
                     {
-                        _tmpBuff[idx] = glm::max(_tmpBuff[idx], _varBuff[idx+2] * _gauss[4]);
+                        _tmpBuff[idx] += _varBuff[idx+2];
                     }
                 }
             }
@@ -105,34 +96,34 @@ namespace prop3
             {
                 unsigned int idx = lineBaseIdx + i;
 
-                double maxVar = _tmpBuff[idx];
+                double meanVar = _tmpBuff[idx];
 
                 if(j - 1 >= 0)
                 {
-                    maxVar = glm::max(maxVar, _tmpBuff[idx-frameResolution.x] * _gauss[1]);
+                    meanVar += _tmpBuff[idx-frameResolution.x];
 
                     if(j - 2 >= 0)
                     {
-                        maxVar = glm::max(maxVar, _tmpBuff[idx-2*frameResolution.x] * _gauss[0]);
+                        meanVar += _tmpBuff[idx-2*frameResolution.x];
                     }
                 }
 
                 if(j + 1 < frameResolution.y)
                 {
-                    maxVar = glm::max(maxVar, _tmpBuff[idx+frameResolution.x] * _gauss[3]);
+                    meanVar += _tmpBuff[idx+frameResolution.x];
 
                     if(j + 2 < frameResolution.y)
                     {
-                        maxVar = glm::max(maxVar, _tmpBuff[idx+2*frameResolution.x] * _gauss[4]);
+                        meanVar += _tmpBuff[idx+2*frameResolution.x];
                     }
                 }
 
-
+                double var = glm::max(meanVar / 25.0, _varBuff[idx]);
                 double compatibility = film.refShotCompatibility(idx);
                 glm::dvec4 mixedSample = rawSampBuff[idx] +
                         refSampBuff[idx] * compatibility;
 
-                prioBuff[idx] = film.toPriority(mixedSample, maxVar);
+                prioBuff[idx] = film.toPriority(mixedSample, var);
             }
         }
 

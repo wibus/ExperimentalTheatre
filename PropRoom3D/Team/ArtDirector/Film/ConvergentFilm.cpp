@@ -152,7 +152,7 @@ namespace prop3
         while(!_tileMsgs.empty())
             _tileMsgs.pop();
 
-        _prioritizer->reset(_frameResolution, 0.75);
+        _prioritizer->reset(_frameResolution);
 
         for(const auto& tile : _tiles)
         {

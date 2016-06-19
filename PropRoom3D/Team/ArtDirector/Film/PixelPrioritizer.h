@@ -14,9 +14,7 @@ namespace prop3
         PixelPrioritizer();
         virtual ~PixelPrioritizer();
 
-        virtual void reset(
-                const glm::ivec2& frameResolution,
-                double blurVariance);
+        virtual void reset(const glm::ivec2& frameResolution);
 
         virtual bool launchPrioritization(
                 ConvergentFilm& film);
@@ -28,7 +26,6 @@ namespace prop3
     private:
         std::vector<double> _varBuff;
         std::vector<double> _tmpBuff;
-        double _gauss[KERNEL_WIDTH];
         double _frameAvrgPriority;
     };
 }
