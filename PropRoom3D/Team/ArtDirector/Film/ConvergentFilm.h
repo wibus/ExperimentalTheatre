@@ -78,7 +78,8 @@ namespace prop3
                 const glm::dvec4& sample,
                 double variance) const;
 
-        double refShotCompatibility(unsigned int index) const;
+        double refCompatibility(
+                unsigned int index) const;
 
 
 
@@ -88,13 +89,17 @@ namespace prop3
         // Variance stabilzes over time
         std::vector<glm::dvec2> _varianceBuffer;
 
+        // Aiming at reference per pixel reference film compitbility
+        std::vector<glm::dvec2> _refMeanDistBuffer;
+        std::vector<double> _compatibilityBuffer;
+
         // Divergence decreases over time
         std::vector<double> _divergenceBuffer;
 
         // Priority stabilizes over time
         std::vector<double> _priorityBuffer;
 
-        double _perceptibleIntensity;
+        double _condifdenceRange;
         double _varianceWeightThreshold;
         double _priorityWeightThreshold;
         double _priorityWeightBias;

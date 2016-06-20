@@ -119,7 +119,7 @@ namespace prop3
                 }
 
                 double var = glm::max(meanVar / 25.0, _varBuff[idx]);
-                double compatibility = film.refShotCompatibility(idx);
+                double compatibility = film._compatibilityBuffer[idx];
                 glm::dvec4 mixedSample = rawSampBuff[idx] +
                         refSampBuff[idx] * compatibility;
 
