@@ -56,7 +56,7 @@ namespace prop3
         _maxCorner(maxCorner),
         _startPix(_minCorner + glm::ivec2(-1, 0)),
         _tilePriority(1.0),
-        _divergenceSum(0.0)
+        _divergence(0.0)
     {
         glm::ivec2 tileDim = _maxCorner - _minCorner;
         _pixelCount = tileDim.x * + tileDim.y;
@@ -132,8 +132,8 @@ namespace prop3
         _tilePriority = priority;
     }
 
-    void Tile::setDivergenceSum(double sum)
+    void Tile::setDivergence(double div)
     {
-        _divergenceSum = sum;
+        _divergence = div;
     }
 }

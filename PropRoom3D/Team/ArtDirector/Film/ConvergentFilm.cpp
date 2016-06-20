@@ -156,11 +156,8 @@ namespace prop3
 
         for(const auto& tile : _tiles)
         {
-            glm::ivec2 tileResolution = tile->maxCorner() - tile->minCorner();
-            int tilePixCount = tileResolution.x * tileResolution.y;
-
             tile->setTilePriority(1.0);
-            tile->setDivergenceSum(tilePixCount);
+            tile->setDivergence(1.0);
         }
     }
 
@@ -315,8 +312,7 @@ namespace prop3
         double tileCount = _tiles.size();
         std::vector<double> tileVal(tileCount);
         for(size_t i=0; i < tileCount; ++i)
-            tileVal[i] = _tiles[i]->divergenceSum()
-                           / _tiles[i]->pixelCount();
+            tileVal[i] = _tiles[i]->divergence();
 
         const int MEAN_TILE_COUNT = 16;
         std::nth_element(tileVal.begin(), tileVal.begin() + MEAN_TILE_COUNT,
@@ -346,21 +342,19 @@ namespace prop3
         }
         _tilesMutex.unlock();
 
-        if(_tileCompletedCount > tileCount())
-        {
-            double divergenceSum = 0.0;
-            for(int j=tile.minCorner().y; j < tile.maxCorner().y; ++j)
-            {
-                int index = j * _frameResolution.x + tile.minCorner().x;
-                for(int i=tile.minCorner().x; i < tile.maxCorner().x; ++i, ++index)
-                {
-                    double div = _divergenceBuffer[index];
-                    divergenceSum += div;
-                }
-            }
 
-            tile.setDivergenceSum(divergenceSum);
+        double divergenceSum = 0.0;
+        for(int j=tile.minCorner().y; j < tile.maxCorner().y; ++j)
+        {
+            int index = j * _frameResolution.x + tile.minCorner().x;
+
+            for(int i=tile.minCorner().x; i < tile.maxCorner().x; ++i, ++index)
+            {
+                divergenceSum += _divergenceBuffer[index];
+            }
         }
+
+        tile.setDivergence(divergenceSum / tile.pixelCount());
 
         _newTileCompleted = true;
     }

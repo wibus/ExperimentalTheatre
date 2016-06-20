@@ -71,8 +71,8 @@ namespace prop3
         void setTilePriority(double priority);
         double tilePriority() const;
 
-        void setDivergenceSum(double sum);
-        double divergenceSum() const;
+        void setDivergence(double div);
+        double divergence() const;
 
         static const glm::ivec2 END_PIXEL;
 
@@ -86,7 +86,7 @@ namespace prop3
         const glm::ivec2 _startPix;
         unsigned int _pixelCount;
         double _tilePriority;
-        double _divergenceSum;
+        double _divergence;
     };
 
 
@@ -142,9 +142,9 @@ namespace prop3
         return _tilePriority;
     }
 
-    inline double Tile::divergenceSum() const
+    inline double Tile::divergence() const
     {
-        return _divergenceSum;
+        return _divergence;
     }
 }
 
