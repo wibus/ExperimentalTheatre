@@ -28,11 +28,6 @@ namespace cellar
         _logMessages()
     {
         _out = &std::cout;
-        /*
-        ofstream* log = new ofstream;
-        log->open("Log.txt");
-        _out = log;
-        */
     }
 
     Log::~Log()
@@ -52,26 +47,28 @@ namespace cellar
         showAllMessages();
     }
 
-    // Log Messages
-
     void Log::postMessage(Message* message)
     {
-        (*_out) << message->type() << " -> " <<
-                   message->addresser()+'\t'+message->text()
-                << endl;
+        outputMessage(*_out, message);
         _logMessages.push_back(message);
     }
 
     void Log::showAllMessages()
     {
         for(unsigned int m=0; m < _logMessages.size(); m++)
-            (*_out) << _logMessages[m]->type()
-                    << " : "
-                    << _logMessages[m]->addresser() << '\t'
-                    << _logMessages[m]->text() << endl;
+            outputMessage(*_out, _logMessages[m]);
     }
 
-    const Message *Log::getLastMessage() const
+    void Log::outputMessage(
+            std::ostream& os,
+            const Message* msg)
+    {
+        os << msg->type() << " -> "
+           << msg->addresser() << " \t"
+           << msg->text() << endl;
+    }
+
+    const Message* Log::getLastMessage() const
     {
         return _logMessages.back();
     }

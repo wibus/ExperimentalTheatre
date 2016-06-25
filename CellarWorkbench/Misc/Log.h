@@ -45,6 +45,8 @@ namespace cellar
         Log();
         ~Log();
         void showAllMessages();
+        void outputMessage(std::ostream& os,
+                           const Message* msg);
 
         std::string _appPath;
         std::ostream* _out;
