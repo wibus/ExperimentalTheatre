@@ -60,7 +60,7 @@ namespace prop3
         _condifdenceRange(0.75),
         _varianceWeightThreshold(4.0),
         _priorityWeightThreshold(7.0),
-        _maxPixelIntensity(2.0),
+        _maxPixelIntensity(1.5),
         _prioritizer(new PixelPrioritizer())
     {
         _priorityWeightBias = 0.25 *
@@ -551,7 +551,7 @@ namespace prop3
         glm::dvec3 color = sampleToColor(sample);
         glm::dvec3 clamped = glm::min(color, _maxPixelIntensity);
         double scale = glm::length(clamped) + WEIGHT_OFFSET;
-        return glm::sqrt(variance) / (sample.w * scale);
+        return glm::sqrt(variance) * (scale + 1.0) / (scale * sample.w);
     }
 
     double ConvergentFilm::toPriority(
