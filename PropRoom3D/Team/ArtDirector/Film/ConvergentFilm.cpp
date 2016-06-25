@@ -117,8 +117,7 @@ namespace prop3
                 break;
 
             case ColorOutput::PRIORITY :
-                for(int i=0; i < pixelCount; ++i)
-                    _colorBuffer[i] = priorityToColor(_priorityBuffer[i]);
+                _prioritizer->displayPrioritization(*this);
                 break;
 
             case ColorOutput::REFERENCE :
@@ -221,9 +220,20 @@ namespace prop3
             clearReferenceShot();
         }
 
-        return loadContent(name,
+        if(loadContent(name,
             _referenceFilm.sampleBuffer,
-            _referenceFilm.varianceBuffer);
+            _referenceFilm.varianceBuffer))
+        {
+            if(_colorOutput == ColorOutput::REFERENCE)
+            {
+                for(int i=0; i < pixelCount; ++i)
+                    _colorBuffer[i] = sampleToColor(_referenceFilm.sampleBuffer[i]);
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     bool ConvergentFilm::clearReferenceShot()
@@ -235,6 +245,12 @@ namespace prop3
 
         _referenceFilm.varianceBuffer.clear();
         _referenceFilm.varianceBuffer.resize(pixelCount, glm::dvec2(0));
+
+        if(_colorOutput == ColorOutput::REFERENCE)
+        {
+            for(int i=0; i < pixelCount; ++i)
+                _colorBuffer[i] = sampleToColor(_referenceFilm.sampleBuffer[i]);
+        }
     }
 
     bool ConvergentFilm::saveRawFilm(const std::string& name) const
@@ -400,6 +416,11 @@ namespace prop3
             _prioritizer->launchPrioritization(*this);
             _priorityThreshold = _prioritizer->priorityThreshold();
 
+            if(_colorOutput == Film::ColorOutput::PRIORITY)
+            {
+                _prioritizer->displayPrioritization(*this);
+            }
+
             _cvMutex.lock();
             _nextTileId = 0;
             ++_framePassCount;
@@ -521,7 +542,7 @@ namespace prop3
 
     glm::vec3 ConvergentFilm::divergenceToColor(double divergence) const
     {
-        return glm::vec3(divergence * 10.0);
+        return glm::vec3(divergence * 7.5);
     }
 
     glm::vec3 ConvergentFilm::varianceToColor(const glm::dvec2& variance) const

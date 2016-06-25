@@ -148,37 +148,8 @@ namespace prop3
 
             tile->setTilePriority(tileMaxPriority);
         }
+
         _frameAvrgPriority = glm::sqrt(_frameAvrgPriority / pixelCount);
-
-        if(film._colorOutput == Film::ColorOutput::PRIORITY)
-        {
-            unsigned int pixelCount =
-                    frameResolution.x *
-                    frameResolution.y;
-
-            for(int i=0; i < pixelCount; ++i)
-            {
-                double prio = film._priorityBuffer[i];
-                if(prio < _frameAvrgPriority)
-                {
-                    film._colorBuffer[i] = film.priorityToColor(prio);
-                }
-                else
-                {
-                    // These pixels will be raytraced
-                    double d = (prio - _frameAvrgPriority);
-                    double q = d / (d + 0.5);
-                    film._colorBuffer[i] = glm::dvec3(
-                        // Red
-                        glm::smoothstep(0.5, 0.75,  q),
-                        // Green
-                        glm::smoothstep(0.0, 0.25, q) - glm::smoothstep(0.75, 1.0, q),
-                        // Blue
-                        1.0 - glm::smoothstep(0.25, 0.5, q));
-                }
-
-            }
-        }
 
 //        auto tEnd = high_resolution_clock::now();
 //        float us = (tEnd - tStart).count() / 1.0e3;
@@ -186,6 +157,36 @@ namespace prop3
 //            "Pixel Prioritization time (us) :\t " +
 //                std::to_string(us),
 //            "PixelPrioritizer"));
+    }
+
+    bool PixelPrioritizer::displayPrioritization(
+            ConvergentFilm& film)
+    {
+        unsigned int pixelCount =
+                film._frameResolution.x *
+                film._frameResolution.y;
+
+        for(int i=0; i < pixelCount; ++i)
+        {
+            double prio = film._priorityBuffer[i];
+            if(prio < _frameAvrgPriority)
+            {
+                film._colorBuffer[i] = film.priorityToColor(prio);
+            }
+            else
+            {
+                // These pixels will be raytraced
+                double d = (prio - _frameAvrgPriority);
+                double q = d / (d + 0.5);
+                film._colorBuffer[i] = glm::dvec3(
+                    // Red
+                    glm::smoothstep(0.5, 0.75,  q),
+                    // Green
+                    glm::smoothstep(0.0, 0.25, q) - glm::smoothstep(0.75, 1.0, q),
+                    // Blue
+                    1.0 - glm::smoothstep(0.25, 0.5, q));
+            }
+        }
     }
 
     double PixelPrioritizer::averagePriority() const

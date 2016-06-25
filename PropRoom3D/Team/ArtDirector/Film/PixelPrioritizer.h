@@ -19,6 +19,9 @@ namespace prop3
         virtual bool launchPrioritization(
                 ConvergentFilm& film);
 
+        virtual bool displayPrioritization(
+                ConvergentFilm& film);
+
         virtual double averagePriority() const;
         virtual double priorityThreshold() const;
 
