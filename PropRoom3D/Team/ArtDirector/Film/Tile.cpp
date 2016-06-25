@@ -18,9 +18,8 @@ namespace prop3
 
     double TileIterator::sampleWeight() const
     {
-        double baseWeight = _tile.pixelPriority(_position)
-                                / _tile.priorityThreshold();
-        return baseWeight * baseWeight;
+        return _tile.pixelPriority(_position)
+                / _tile.priorityThreshold();
     }
 
     TileIterator& TileIterator::operator++()

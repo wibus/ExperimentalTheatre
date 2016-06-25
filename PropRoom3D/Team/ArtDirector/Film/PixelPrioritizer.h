@@ -20,6 +20,7 @@ namespace prop3
                 ConvergentFilm& film);
 
         virtual double averagePriority() const;
+        virtual double priorityThreshold() const;
 
         static const int KERNEL_WIDTH = 5;
 

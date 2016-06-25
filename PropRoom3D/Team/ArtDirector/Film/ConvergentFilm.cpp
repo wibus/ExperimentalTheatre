@@ -398,9 +398,7 @@ namespace prop3
         {
             // Reprioritize frame's pixels
             _prioritizer->launchPrioritization(*this);
-            double avrgPriority = _prioritizer->averagePriority();
-            avrgPriority = glm::min(avrgPriority, 1.0);
-            _priorityThreshold = avrgPriority;
+            _priorityThreshold = _prioritizer->priorityThreshold();
 
             _cvMutex.lock();
             _nextTileId = 0;

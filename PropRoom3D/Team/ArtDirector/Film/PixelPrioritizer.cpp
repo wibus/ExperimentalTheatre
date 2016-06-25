@@ -157,9 +157,27 @@ namespace prop3
                     frameResolution.y;
 
             for(int i=0; i < pixelCount; ++i)
-                film._colorBuffer[i] =
-                    film.priorityToColor(
-                        film._priorityBuffer[i]);
+            {
+                double prio = film._priorityBuffer[i];
+                if(prio < _frameAvrgPriority)
+                {
+                    film._colorBuffer[i] = film.priorityToColor(prio);
+                }
+                else
+                {
+                    // These pixels will be raytraced
+                    double d = (prio - _frameAvrgPriority);
+                    double q = d / (d + 0.5);
+                    film._colorBuffer[i] = glm::dvec3(
+                        // Red
+                        glm::smoothstep(0.5, 0.75,  q),
+                        // Green
+                        glm::smoothstep(0.0, 0.25, q) - glm::smoothstep(0.75, 1.0, q),
+                        // Blue
+                        1.0 - glm::smoothstep(0.25, 0.5, q));
+                }
+
+            }
         }
 
 //        auto tEnd = high_resolution_clock::now();
@@ -173,5 +191,10 @@ namespace prop3
     double PixelPrioritizer::averagePriority() const
     {
         return _frameAvrgPriority;
+    }
+
+    double PixelPrioritizer::priorityThreshold() const
+    {
+        return glm::min(_frameAvrgPriority, 1.0);
     }
 }
