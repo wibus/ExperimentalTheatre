@@ -168,24 +168,9 @@ namespace prop3
 
         for(int i=0; i < pixelCount; ++i)
         {
-            double prio = film._priorityBuffer[i];
-            if(prio < _frameAvrgPriority)
-            {
-                film._colorBuffer[i] = film.priorityToColor(prio);
-            }
-            else
-            {
-                // These pixels will be raytraced
-                double d = (prio - _frameAvrgPriority);
-                double q = d / (d + 0.5);
-                film._colorBuffer[i] = glm::dvec3(
-                    // Red
-                    glm::smoothstep(0.5, 0.75,  q),
-                    // Green
-                    glm::smoothstep(0.0, 0.25, q) - glm::smoothstep(0.75, 1.0, q),
-                    // Blue
-                    1.0 - glm::smoothstep(0.25, 0.5, q));
-            }
+            film._colorBuffer[i] =
+                film.priorityToColor(
+                    film._priorityBuffer[i]);
         }
     }
 

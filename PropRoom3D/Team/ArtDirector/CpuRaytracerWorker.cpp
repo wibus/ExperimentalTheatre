@@ -46,7 +46,7 @@ namespace prop3
         _screenRayIntensityThreshold(1.0 / 16.0),
         _maxScreenBounceCount(24),
         _sufficientScreenRayBounce(4),
-        _sufficientScreenRayWeight(0.80),
+        _sufficientScreenRayWeight(0.50),
         _minScreenRayWeight(0.04),
         _aperture(0.0),
         _confusionRadius(0.1)

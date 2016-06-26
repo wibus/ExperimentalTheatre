@@ -555,7 +555,23 @@ namespace prop3
 
     glm::vec3 ConvergentFilm::priorityToColor(double priority) const
     {
-        return glm::vec3(priority);
+        if(priority < _priorityThreshold)
+        {
+            return glm::vec3(priority / (3.0 * _priorityThreshold));
+        }
+        else
+        {
+            // These pixels will be raytraced
+            double d = (priority - _priorityThreshold);
+            double q = d / (d + 0.5);
+            return glm::dvec3(
+                // Red
+                glm::smoothstep(0.5, 0.75,  q),
+                // Green
+                glm::smoothstep(0.0, 0.25, q) - glm::smoothstep(0.75, 1.0, q),
+                // Blue
+                1.0 - glm::smoothstep(0.25, 0.5, q));
+        }
     }
 
     glm::vec3 ConvergentFilm::compatibilityToColor(double compatibility) const
