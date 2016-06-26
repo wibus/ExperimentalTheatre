@@ -66,27 +66,17 @@ namespace prop3
         virtual void skipAndExecute(const std::function<void()>& func);
 
         virtual void execute();
-        //virtual void shootFromLights();
-        virtual void shootFromScreen(std::shared_ptr<Tile>& tile);
 
-        //virtual void fireLightRay(
-        //        const Raycast& fromLightRay);
+        virtual void shootFromScreen(
+                std::shared_ptr<Tile>& tile);
 
         virtual glm::dvec4 fireScreenRay(
                 const Raycast& fromEyeRay);
-
-        virtual void gatherScatteredLight(
-                const Material& material,
-                const Raycast& outRay);
 
         virtual void gatherReflectedLight(
                 const Coating& coating,
                 const RayHitReport& hitReport,
                 const Raycast& outRay);
-
-        //virtual void gatherLightHitsToward(
-        //        std::vector<Raycast>& outRaycasts,
-        //       const glm::dvec3& targetPos);
 
 
         virtual glm::dvec3 draft(const RayHitReport& report);
@@ -106,9 +96,7 @@ namespace prop3
         std::atomic<bool> _usePixelJittering;
         std::atomic<bool> _useDepthOfField;
 
-        double _lightRayIntensityThreshold;
         unsigned int _lightDirectRayCount;
-        unsigned int _lightFireRayCount;
         unsigned int _maxScreenBounceCount;
         double _screenRayIntensityThreshold;
         unsigned int _sufficientScreenRayBounce;

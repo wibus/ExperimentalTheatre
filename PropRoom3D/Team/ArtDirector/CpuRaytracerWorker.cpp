@@ -42,9 +42,7 @@ namespace prop3
         _useStochasticTracing(true),
         _usePixelJittering(true),
         _useDepthOfField(true),
-        _lightRayIntensityThreshold(1.0 / 32.0),
         _lightDirectRayCount(1),
-        _lightFireRayCount(20),
         _screenRayIntensityThreshold(1.0 / 16.0),
         _maxScreenBounceCount(24),
         _sufficientScreenRayBounce(4),
@@ -236,12 +234,6 @@ namespace prop3
                 // Generate a single new tile
                 if(_runningPredicate)
                 {
-                    /*// Shoot rays
-                    if(_runningPredicate &&
-                       _lightRayIntensityThreshold != INFINITY)
-                        shootFromLights();
-                    */
-
                     std::shared_ptr<Tile> tile;
                     tile = _workingFilm->nextTile();
                     if(tile != _workingFilm->endTile())
@@ -258,36 +250,7 @@ namespace prop3
             }
         }
     }
-/*
-    void CpuRaytracerWorker::shootFromLights()
-    {
-        // !!!! RETURNING !!!!
-        return;
 
-
-
-        _lightHitReports.clear();
-
-        // If non-stochatic draft is active
-        if(!_useStochasticTracing)
-            return;
-
-        std::vector<Raycast> raycasts =
-                _backdrop->fireRays(_lightFireRayCount);
-
-        size_t raycastCount = raycasts.size();
-        for(size_t i=0; i < raycastCount; ++i)
-        {
-            Raycast& ray = raycasts[i];
-
-            fireLightRay(ray);
-
-            // Verify if this frame must be skipped
-            if(!_runningPredicate)
-                return;
-        }
-    }
-*/
     void CpuRaytracerWorker::shootFromScreen(std::shared_ptr<Tile>& tile)
     {
         double pixelWidth = 2.0 / _workingFilm->frameWidth();
@@ -349,97 +312,6 @@ namespace prop3
         }
     }
 
-    /*
-    void CpuRaytracerWorker::fireLightRay(
-            const Raycast& fromLightRay)
-    {
-        // Check if step contribution is too small
-        const glm::dvec3& currAtt = fromLightRay.color;
-        double currIntensity = glm::max(glm::max(currAtt.x, currAtt.y), currAtt.z);
-        if(currIntensity < _lightRayIntensityThreshold)
-        {
-            // Generate no more light hit point
-            return;
-        }
-
-
-        Raycast ray = fromLightRay;
-        ray.limit = Raycast::BACKDROP_DISTANCE;
-
-
-        // Find nearest ray-surface intersection
-        const Coating* dummyCoat = nullptr;
-        const Material* dummyMat = nullptr;
-        const glm::dvec3 dummyVec = glm::dvec3();
-        RayHitReport reportMin(Raycast::BACKDROP_DISTANCE,
-                               ray, dummyVec, dummyVec, dummyVec,
-                               dummyCoat, dummyMat, dummyMat);
-        ray.limit = findNearestProp(ray, reportMin);
-
-
-        if(ray.limit != Raycast::BACKDROP_DISTANCE)
-        {
-            reportMin.compile();
-
-            // Compute maximum travelled distance in current material
-            const Material* currMat = reportMin.currMaterial;
-            double matPathLen = currMat->lightFreePathLength(ray);
-            ray.limit = glm::min(matPathLen, ray.limit);
-
-            glm::dvec3 matAtt = currMat->lightAttenuation(ray);
-
-            std::vector<Raycast> outRaycasts;
-            unsigned int outRayCountHint = glm::ceil(
-                    _diffuseRayCount * currIntensity);
-
-            if(reportMin.distance >= matPathLen)
-            {
-                ray.limit = matPathLen;
-
-                // Inderect lighting
-                currMat->scatterLight(
-                        outRaycasts,
-                        ray,
-                        outRayCountHint);
-
-                // Adding RayHitReport to lights' hit list
-                // Coating == nullptr means ray scattering.
-                //  i.e. It did not touch a surface, but have been scattered
-                //  somewhere int the current ray's material.
-                reportMin.incidentRay = ray;
-                _lightHitReports.push_back(reportMin);
-            }
-            else
-            {
-                const Coating* coating = reportMin.coating;
-                const Material* nextMat = reportMin.nextMaterial;
-
-                // Inderect lighting
-                coating->indirectBrdf(
-                        outRaycasts,
-                        reportMin,
-                        *currMat,
-                        *nextMat,
-                        outRayCountHint);
-
-                // Adding RayHitReport to lights' hit list
-                _lightHitReports.push_back(reportMin);
-            }
-
-            for(Raycast& brdf : outRaycasts)
-            {
-                glm::dvec3 stepAtt = brdf.color * matAtt;
-                glm::dvec3 nextAtt = currAtt * stepAtt;
-                double nextEntropy = Raycast::mixEntropies(
-                        brdf.entropy, fromLightRay.entropy);
-
-                brdf.color = nextAtt;
-                brdf.entropy = nextEntropy;
-                fireLightRay(brdf);
-            }
-        }
-    }
-*/
     glm::dvec4 CpuRaytracerWorker::fireScreenRay(
             const Raycast& fromEyeRay)
     {
@@ -554,12 +426,6 @@ namespace prop3
                 glm::dvec4 matAtt = currMat->lightAttenuation(scatterRay);
                 scatterRay.sample = scatterRay.sample * matAtt;
 
-
-                // Direct lighting
-                gatherScatteredLight(
-                    *currMat,
-                    scatterRay);
-
                 // Inderect lighting
                 if(bounceCount < _maxScreenBounceCount)
                 {
@@ -589,52 +455,6 @@ namespace prop3
         return _workingSample;
     }
 
-    void CpuRaytracerWorker::gatherScatteredLight(
-            const Material& material,
-            const Raycast& outRay)
-    {
-        if(&material != _ambMaterial.get())
-            return;
-
-        glm::dvec3 scattPos = outRay.origin + outRay.direction * outRay.limit;
-
-        _lightRays.clear();
-        _backdrop->fireOn(_lightRays, scattPos, _lightDirectRayCount);
-        for(const auto& light : _searchStructure->lights())
-            light->fireOn(_lightRays, scattPos, _lightDirectRayCount);
-
-        //gatherLightHitsToward(lightCasts, hitReport.position);
-
-        size_t lightCastCount = _lightRays.size();
-        for(size_t c=0; c < lightCastCount; ++c)
-        {
-            LightCast& lightCast = _lightRays[c];
-            Raycast& lightRay = lightCast.raycast;
-
-            lightRay.limit = glm::distance(lightRay.origin, scattPos);
-            double lightPathLen = material.lightFreePathLength(lightRay);
-
-            if(lightPathLen >= lightRay.limit)
-            {
-                glm::dvec4 lightAtt = material.lightAttenuation(lightRay);
-                glm::dvec4 lighSamp = lightAtt * lightRay.sample;
-                glm::dvec4 pathSamp = lighSamp * outRay.sample;
-
-                if(pathSamp.w > _minScreenRayWeight)
-                {
-                    if(!_searchStructure->intersectsScene(
-                            lightRay, _rayHitList, outRay.entropy))
-                    {
-                        commitSample(pathSamp *
-                             material.directBrdf(
-                                 lightCast,
-                                 outRay));
-                    }
-                }
-            }
-        }
-    }
-
     void CpuRaytracerWorker::gatherReflectedLight(
             const Coating& coating,
             const RayHitReport& hitReport,
@@ -644,8 +464,6 @@ namespace prop3
         _backdrop->fireOn(_lightRays, hitReport.position, _lightDirectRayCount);
         for(const auto& light : _searchStructure->lights())
             light->fireOn(_lightRays, hitReport.position, _lightDirectRayCount);
-
-        //gatherLightHitsToward(lightCasts, hitReport.position);
 
         size_t lightCastCount = _lightRays.size();
         for(size_t c=0; c < lightCastCount; ++c)
@@ -688,54 +506,7 @@ namespace prop3
             }
         }
     }
-/*
-    void CpuRaytracerWorker::gatherLightHitsToward(
-            std::vector<Raycast>& outRaycasts,
-            const glm::dvec3& targetPos)
-    {
-        size_t lightHitCount = _lightHitReports.size();
-        for(size_t i=0; i < lightHitCount; ++i)
-        {
-            RayHitReport& lightReport = _lightHitReports[i];
 
-            const Raycast& lightRay = lightReport.incidentRay;
-
-            glm::dvec3 outDir = glm::normalize(
-                targetPos - lightReport.position);
-            glm::dvec3 outOrig = lightReport.position +
-                                 outDir * RayHitReport::EPSILON_LENGTH;
-
-            glm::dvec3 outColor;
-
-            // Light hit is a scatter point
-            if(lightReport.coating == nullptr)
-            {
-                outColor = lightReport.currMaterial->gatherLight(
-                                lightRay, outDir);
-            }
-            // Light hit is a surface reflection
-            else
-            {
-                outColor = lightReport.coating->directBrdf(
-                                lightReport,
-                                outDir,
-                                *lightReport.currMaterial,
-                                *lightReport.nextMaterial);
-            }
-
-            if(outColor != glm::dvec3(0.0))
-            {
-                outRaycasts.push_back(
-                    Raycast(
-                        Raycast::BACKDROP_DISTANCE,
-                        Raycast::FULLY_DIFFUSIVE_ENTROPY,
-                        outColor,
-                        outOrig,
-                        outDir));
-            }
-        }
-    }
-*/
     glm::dvec3 CpuRaytracerWorker::draft(
         const RayHitReport& report)
     {
