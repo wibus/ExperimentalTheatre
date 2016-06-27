@@ -42,11 +42,11 @@ namespace prop3
         sample.w = weight;
         variance.y = weight - vw * VARIANCE_DECOMPRESSION;
         sample.r = r * COLOR_DECOMPRESSION;
-        sample.r = weight * (sample.r * sample.r);
+        sample.r = weight * (sample.r * sample.r);//4.0);
         sample.g = g * COLOR_DECOMPRESSION;
-        sample.g = weight * (sample.g * sample.g);
+        sample.g = weight * (sample.g * sample.g);// 4.0);
         sample.b = b * COLOR_DECOMPRESSION;
-        sample.b = weight * (sample.b * sample.b);
+        sample.b = weight * (sample.b * sample.b);// 4.0);
     }
 
 
