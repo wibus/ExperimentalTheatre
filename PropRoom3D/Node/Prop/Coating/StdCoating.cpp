@@ -188,7 +188,6 @@ namespace prop3
         // Report's shorthands
         const glm::dvec3& pos = report.position;
         const glm::dvec3& tex = report.texCoord;
-        const glm::dvec3& wallNormal = report.normal;
         const glm::dvec3& incident = lightCast.raycast.direction;
 
         // StdCoating properties
@@ -205,10 +204,15 @@ namespace prop3
         double eOpa = report.nextMaterial->opacity(pos);
 
         // Geometry
+        glm::dvec3 wallNormal = report.normal;
         glm::dvec3 outDir = -eyeRay.direction;
         double inDotNorm = -glm::dot(incident, wallNormal);
         double outDotNorm = glm::dot(outDir, wallNormal);
         bool isTransmission = outDotNorm < 0.0;
+
+        // Microfacet
+        glm::dvec3 halfVec = glm::normalize(outDir - incident);
+        wallNormal = glm::normalize(glm::mix(wallNormal, halfVec, rough));
 
         // Fresnel reflection
         double paintReflectRatio = computeReflexionRatio(
