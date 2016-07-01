@@ -53,12 +53,8 @@ namespace prop3
         std::queue<std::shared_ptr<TileMessage>> _tileMsgs;
         std::vector<glm::dvec4> _sampleBuffer;
 
-        bool _bandwithOptimized;
-        double _initialPixelPriority;
-        double _currentPixelPriority;
         double _maxDataRateAvailable;
         size_t _cumulatedTileByteCount;
-        size_t _cumulatedByteCountThreshold;
         std::chrono::high_resolution_clock::time_point _startTime;
     };
 }

@@ -38,7 +38,7 @@ namespace prop3
         _temperatureColor(1.0),
         _contrastValue(1.0f),
         _gammaValue(2.0f),
-        _middleGrayValue(0.0f),
+        _middleGrayValue(0.5f),
         _isSetup(false)
     {
     }
@@ -146,7 +146,7 @@ namespace prop3
         _postProdProgram.setFloat("AdaptationFactor", _adaptationFactor);
         _postProdProgram.setVec3f("ExposureGain", _exposureGain);
         _postProdProgram.setInt("AcesTonemappingActive", _isAcesTonemappingActive ? 1 : 0);
-        _postProdProgram.setFloat("LuminosityValue",  _middleGrayValue);
+        _postProdProgram.setFloat("MiddleGrayValue",  _middleGrayValue);
         _postProdProgram.setFloat("ContrastValue",    _contrastValue);
         _postProdProgram.setFloat("GammaValue",       _gammaValue);
         _postProdProgram.setVec3f("TemperatureRgb",   glm::vec3(

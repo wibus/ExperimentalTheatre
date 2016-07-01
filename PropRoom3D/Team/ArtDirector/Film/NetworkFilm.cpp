@@ -10,11 +10,9 @@ using namespace cellar;
 namespace prop3
 {
     NetworkFilm::NetworkFilm() :
-        _initialPixelPriority(1.5),
-        _maxDataRateAvailable(2.8e6),
-        _cumulatedByteCountThreshold(3e6)
+        _maxDataRateAvailable(10e6)
     {
-
+        _sampleMultiplicity = 2.0;
     }
 
     NetworkFilm::~NetworkFilm()
@@ -36,10 +34,8 @@ namespace prop3
         _framePassCount = 0;
         _tileCompletedCount = 0;
         _priorityThreshold = 1.0;
-        _currentPixelPriority = _initialPixelPriority;
         _startTime = std::chrono::high_resolution_clock::now();
         _cumulatedTileByteCount = 0;
-        _bandwithOptimized = false;
 
         while(!_tileMsgs.empty())
             _tileMsgs.pop();
@@ -144,25 +140,25 @@ namespace prop3
         _tileMsgs.push(msg);
         _cumulatedTileByteCount += msg->size();
 
-        if(!_bandwithOptimized &&
-           _cumulatedTileByteCount > _cumulatedByteCountThreshold)
+        if(_tileCompletedCount % _tiles.size() == 0)
         {
-            _bandwithOptimized = true;
             auto endTime = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> sec = endTime - _startTime;
             double dataRate = _cumulatedTileByteCount / sec.count();
+            _cumulatedTileByteCount = 0.0;
+            _startTime = endTime;
 
             int kBPerSec = dataRate / 1000;
 
-            _currentPixelPriority = _currentPixelPriority *
+            _sampleMultiplicity = _sampleMultiplicity *
                 glm::sqrt(dataRate / _maxDataRateAvailable);
-            _currentPixelPriority = glm::max(_currentPixelPriority, 1.0);
+            _sampleMultiplicity = glm::max(_sampleMultiplicity, 1.0);
 
             getLog().postMessage(new Message('I', false,
                 "Optimizing bandwith (" +
                 std::to_string(kBPerSec) + "kB/s); "\
-                "new pixel priority is " +
-                std::to_string(_currentPixelPriority),
+                "new pixel multiplicity is " +
+                std::to_string(_sampleMultiplicity),
                 "NetworkFilm"));
         }
 
@@ -181,7 +177,7 @@ namespace prop3
 
     double NetworkFilm::pixelPriority(int index) const
     {
-        return _currentPixelPriority;
+        return 1.0;
     }
 
     glm::dvec4 NetworkFilm::pixelSample(int index) const

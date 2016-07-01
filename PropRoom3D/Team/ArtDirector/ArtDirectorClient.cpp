@@ -30,7 +30,7 @@ namespace prop3
 
         _socket->setReadBufferSize(0);
         _socket->setSocketOption(QAbstractSocket::LowDelayOption, 1);
-        _socket->setSocketOption(QAbstractSocket::SendBufferSizeSocketOption, 8e6);
+        _socket->setSocketOption(QAbstractSocket::SendBufferSizeSocketOption, 1e9);
 
         connect(_socket, &QTcpSocket::connected,
                 this, &ArtDirectorClient::connected);
@@ -295,6 +295,10 @@ namespace prop3
         {
             _socket->write(_socketBuffer.data());
             _socket->flush();
+
+//            getLog().postMessage(new Message('D', false, "Sending "
+//                 + std::to_string(_socketBuffer.size() / 1000) + " KBs of data over network",
+//                 "ArtDirectorClient"));
         }
 
         _socketBuffer.close();
