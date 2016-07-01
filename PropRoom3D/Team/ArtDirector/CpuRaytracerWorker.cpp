@@ -310,6 +310,8 @@ namespace prop3
                 }
             }
         }
+
+        _workingFilm->tileCompleted(*tile);
     }
 
     glm::dvec4 CpuRaytracerWorker::fireScreenRay(

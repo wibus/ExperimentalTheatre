@@ -111,6 +111,8 @@ namespace prop3
         tile->lock();
         for(int y = tileMin.y; y < tileMax.y; ++y)
         {
+            bool brk = false;
+
             for(int x = tileMin.x; x < tileMax.x; ++x)
             {
                 glm::vec4 sample;
@@ -122,7 +124,8 @@ namespace prop3
                         "TileMessage"));
 
                     _tileId = -1;
-                    tile->unlock();
+                    brk = true;
+                    break;
                 }
                 else
                 {
@@ -130,10 +133,12 @@ namespace prop3
                         tile->addSample(x, y, sample);
                 }
             }
+
+            if(brk) break;
         }
 
         tile->unlock();
-        _film.tileCompleted(*tile);
+        //_film.tileCompleted(*tile);
 
         _buffer.close();
     }

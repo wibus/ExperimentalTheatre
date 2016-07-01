@@ -105,7 +105,7 @@ namespace prop3
             addOutgoingTile(msg);
         }
 
-        if((_tileCompletedCount & tileCount()) == 0)
+        if((_tileCompletedCount % tileCount()) == 0)
         {
             _cvMutex.lock();
             ++_framePassCount;

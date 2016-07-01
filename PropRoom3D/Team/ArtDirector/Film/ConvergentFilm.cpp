@@ -58,7 +58,7 @@ namespace prop3
         _divergenceBuffer(1, 1.0),
         _priorityBuffer(1, 1.0),
         _condifdenceRange(0.75),
-        _varianceWeightThreshold(4.0),
+        _varianceWeightThreshold(3.5),
         _priorityWeightThreshold(7.0),
         _maxPixelIntensity(1.5),
         _prioritizer(new PixelPrioritizer())
@@ -141,7 +141,7 @@ namespace prop3
         _nextTileId = 0;
         _framePassCount = 0;
         _priorityThreshold = 1.0;
-        _sampleMultiplicity = 8.0;
+        _sampleMultiplicity = 5.0;
 
         while(!_tileMsgs.empty())
             _tileMsgs.pop();
