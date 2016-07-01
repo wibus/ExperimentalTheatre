@@ -57,7 +57,7 @@ namespace prop3
         _compatibilityBuffer(1.0, 0.0),
         _divergenceBuffer(1, 1.0),
         _priorityBuffer(1, 1.0),
-        _condifdenceRange(0.75),
+        _condifdenceRange(1.0),
         _varianceWeightThreshold(3.5),
         _priorityWeightThreshold(7.0),
         _maxPixelIntensity(1.5),
@@ -622,9 +622,9 @@ namespace prop3
                 _refMeanDistBuffer[index].y;
         double noise2 = var - refVar;
 
-        double signalToNoise = glm::sqrt(noise2 / signal2);
+        double noiseOnSignal = glm::sqrt(noise2 / signal2);
 
         double weightRatio = glm::min(2.0 * curSamp.w / (curSamp.w + refSamp.w), 1.0);
-        return glm::clamp(((weightRatio + 1.0) / (1.0 + signalToNoise * _condifdenceRange) - 1.0), 0.0, 1.0);
+        return glm::clamp(((weightRatio + 1.0) / (1.0 + noiseOnSignal * _condifdenceRange) - 1.0), 0.0, 1.0);
     }
 }
