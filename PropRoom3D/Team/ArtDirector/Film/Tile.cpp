@@ -88,7 +88,6 @@ namespace prop3
 
     void Tile::unlock()
     {
-        _film.tileCompleted(*this);
         _mutex.unlock();
     }
 
