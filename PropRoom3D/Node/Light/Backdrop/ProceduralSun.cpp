@@ -41,7 +41,7 @@ namespace prop3
 
     ProceduralSun::ProceduralSun() :
         _sunIntensity(1.75e5),
-        _skyColor(glm::dvec3(0.23, 0.32, 1.00) * 1.0),
+        _skyColor(glm::dvec3(0.03, 0.15, 1.00) * 1.0),
         _groundHeight(-0.2),
         _sunDirection(glm::normalize(glm::dvec3(0.8017, 0.2673, 0.5345))),
         _spaceMaterial(material::AIR)
@@ -114,7 +114,8 @@ namespace prop3
         double diffuseHeight = (dotDirTop - MIN_DIR_HEIGHT);
         double diffuseRatio = glm::abs(diffuseHeight / (1.0 - MIN_DIR_HEIGHT));
         double diffuseDist = (1.0 - diffuseRatio);
-        double diffuseMix = 1.0 - diffuseDist * diffuseDist * diffuseDist;
+        double diffuseDist2 = diffuseDist * diffuseDist;
+        double diffuseMix = 1.0 - diffuseDist2 * diffuseDist2;
         diffuseColor = glm::mix(_skylineColor, diffuseColor, diffuseMix);
 
         double haloRatio = (1.0 + dotDirSun) / 2.0;

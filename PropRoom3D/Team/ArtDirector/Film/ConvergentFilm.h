@@ -101,7 +101,7 @@ namespace prop3
 
         double _condifdenceRange;
         double _varianceWeightThreshold;
-        double _priorityWeightThreshold;
+        double _divergenceWeightThreshold;
         double _priorityWeightBias;
         double _priorityScale;
 

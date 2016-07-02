@@ -58,19 +58,19 @@ namespace prop3
         _divergenceBuffer(1, 1.0),
         _priorityBuffer(1, 1.0),
         _condifdenceRange(1.0),
-        _varianceWeightThreshold(3.5),
-        _priorityWeightThreshold(7.0),
+        _varianceWeightThreshold(4.0),
+        _divergenceWeightThreshold(8.0),
         _maxPixelIntensity(1.5),
         _prioritizer(new PixelPrioritizer())
     {
         _priorityWeightBias = 0.25 *
-            _priorityWeightThreshold *
-            _priorityWeightThreshold;
+            _divergenceWeightThreshold *
+            _divergenceWeightThreshold;
 
         _priorityScale =
-            (_priorityWeightThreshold *
-             _priorityWeightThreshold *
-             _priorityWeightThreshold ) /
+            (_divergenceWeightThreshold *
+             _divergenceWeightThreshold *
+             _divergenceWeightThreshold ) /
                 _priorityWeightBias;
     }
 
@@ -141,7 +141,7 @@ namespace prop3
         _nextTileId = 0;
         _framePassCount = 0;
         _priorityThreshold = 1.0;
-        _sampleMultiplicity = 5.0;
+        _sampleMultiplicity = _divergenceWeightThreshold / 2.0;
 
         while(!_tileMsgs.empty())
             _tileMsgs.pop();
@@ -348,9 +348,6 @@ namespace prop3
         ++_tileCompletedCount;
         if(_tileCompletedCount == tileCount())
         {
-            // Remove weight multiplicity after first complet frame
-            _sampleMultiplicity = 1.0;
-
             _cvMutex.lock();
             ++_framePassCount;
             _newFrameCompleted = true;
@@ -412,6 +409,9 @@ namespace prop3
     {
         if(_framePassCount > 0)
         {
+            // Remove weight multiplicity after two complet frames
+            _sampleMultiplicity = 1.0;
+
             // Reprioritize frame's pixels
             _prioritizer->launchPrioritization(*this);
             _priorityThreshold = _prioritizer->priorityThreshold();
@@ -494,7 +494,7 @@ namespace prop3
 
 
             double newDiv = 1.0;
-            if(newSample.w >= _priorityWeightThreshold)
+            if(newSample.w >= _divergenceWeightThreshold)
             {
                 newDiv = toDivergence(
                     mixedSamp, mixedVar.x / mixedVar.y);
@@ -605,11 +605,11 @@ namespace prop3
     double ConvergentFilm::refCompatibility(unsigned int index) const
     {
         const glm::dvec4& refSamp = _referenceFilm.sampleBuffer[index];
+        const glm::dvec4& curSamp = _sampleBuffer[index];
 
-        if(refSamp.w == 0)
+        if(refSamp.w == 0 || curSamp.w <= _divergenceWeightThreshold)
             return 0.0;
 
-        const glm::dvec4& curSamp = _sampleBuffer[index];
         const glm::dvec2& curVar= _varianceBuffer[index];
         double var = curVar.x / curVar.y;
 
