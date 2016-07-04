@@ -114,8 +114,7 @@ namespace prop3
         double diffuseHeight = (dotDirTop - MIN_DIR_HEIGHT);
         double diffuseRatio = glm::abs(diffuseHeight / (1.0 - MIN_DIR_HEIGHT));
         double diffuseDist = (1.0 - diffuseRatio);
-        double diffuseDist2 = diffuseDist * diffuseDist;
-        double diffuseMix = 1.0 - diffuseDist2 * diffuseDist2;
+        double diffuseMix = 1.0 - diffuseDist * diffuseDist * diffuseDist;
         diffuseColor = glm::mix(_skylineColor, diffuseColor, diffuseMix);
 
         double haloRatio = (1.0 + dotDirSun) / 2.0;
