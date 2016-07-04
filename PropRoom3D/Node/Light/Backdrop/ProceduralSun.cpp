@@ -41,7 +41,7 @@ namespace prop3
 
     ProceduralSun::ProceduralSun() :
         _sunIntensity(1.75e5),
-        _skyColor(glm::dvec3(0.03, 0.15, 1.00) * 1.0),
+        _skyColor(glm::dvec3(0.06, 0.22, 1.00) * 1.0),
         _groundHeight(-0.2),
         _sunDirection(glm::normalize(glm::dvec3(0.8017, 0.2673, 0.5345))),
         _spaceMaterial(material::AIR)
