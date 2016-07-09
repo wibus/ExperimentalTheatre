@@ -53,7 +53,6 @@ namespace prop3
     ConvergentFilm::ConvergentFilm() :
         _sampleBuffer(1, glm::dvec4(0)),
         _varianceBuffer(1, glm::dvec2(0)),
-        _refMeanDistBuffer(1, glm::dvec2(0)),
         _compatibilityBuffer(1.0, 0.0),
         _divergenceBuffer(1, 1.0),
         _priorityBuffer(1, 1.0),
@@ -164,9 +163,6 @@ namespace prop3
 
         _varianceBuffer.clear();
         _varianceBuffer.resize(pixelCount, glm::dvec2(0));
-
-        _refMeanDistBuffer.clear();
-        _refMeanDistBuffer.resize(pixelCount, glm::dvec2(0));
 
         _compatibilityBuffer.clear();
         _compatibilityBuffer.resize(pixelCount, 0.0);
@@ -474,13 +470,6 @@ namespace prop3
             double compatibility = 0.0;
             if(_referenceFilm.sampleBuffer[index].w > 0.0)
             {
-                glm::dvec3 refCol = glm::dvec3(
-                        _referenceFilm.sampleBuffer[index]) /
-                            _referenceFilm.sampleBuffer[index].w;
-                glm::dvec3 dRefCol = sampColor - refCol;
-                double dRef = glm::dot(dRefCol, dRefCol) * sampWeight;
-
-                _refMeanDistBuffer[index] += glm::dvec2(dRef * sampWeight, sampWeight);
                 _compatibilityBuffer[index] = refCompatibility(index);
                 compatibility = _compatibilityBuffer[index];
             }
@@ -618,9 +607,8 @@ namespace prop3
         glm::dvec3 minCol = glm::min(refCol, curCol);
         double signal2 = glm::dot(minCol, minCol);
 
-        double refVar = _refMeanDistBuffer[index].x /
-                _refMeanDistBuffer[index].y;
-        double noise2 = var - refVar;
+        glm::dvec3 h = curCol - refCol;
+        double noise2 = glm::dot(h, h);
 
         double noiseOnSignal = glm::sqrt(noise2 / signal2);
 

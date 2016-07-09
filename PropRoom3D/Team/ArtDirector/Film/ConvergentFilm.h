@@ -90,7 +90,6 @@ namespace prop3
         std::vector<glm::dvec2> _varianceBuffer;
 
         // Aiming at reference per pixel reference film compitbility
-        std::vector<glm::dvec2> _refMeanDistBuffer;
         std::vector<double> _compatibilityBuffer;
 
         // Divergence decreases over time
