@@ -56,7 +56,7 @@ namespace prop3
         _compatibilityBuffer(1.0, 0.0),
         _divergenceBuffer(1, 1.0),
         _priorityBuffer(1, 1.0),
-        _condifdenceRange(1.0),
+        _condifdenceRange(0.5),
         _varianceWeightThreshold(4.0),
         _divergenceWeightThreshold(8.0),
         _maxPixelIntensity(1.5),
@@ -599,9 +599,6 @@ namespace prop3
         if(refSamp.w == 0 || curSamp.w <= _divergenceWeightThreshold)
             return 0.0;
 
-        const glm::dvec2& curVar= _varianceBuffer[index];
-        double var = curVar.x / curVar.y;
-
         glm::dvec3 refCol = sampleToColor(refSamp);
         glm::dvec3 curCol = sampleToColor(curSamp);
         glm::dvec3 minCol = glm::min(refCol, curCol);
@@ -613,6 +610,6 @@ namespace prop3
         double noiseOnSignal = glm::sqrt(noise2 / signal2);
 
         double weightRatio = glm::min(2.0 * curSamp.w / (curSamp.w + refSamp.w), 1.0);
-        return glm::clamp(((weightRatio + 1.0) / (1.0 + noiseOnSignal * _condifdenceRange) - 1.0), 0.0, 1.0);
+        return glm::clamp(((weightRatio + 1.0) / (1.0 + noiseOnSignal / _condifdenceRange) - 1.0), 0.0, 1.0);
     }
 }
