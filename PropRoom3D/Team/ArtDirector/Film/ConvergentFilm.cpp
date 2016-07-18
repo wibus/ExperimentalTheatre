@@ -56,7 +56,7 @@ namespace prop3
         _compatibilityBuffer(1.0, 0.0),
         _divergenceBuffer(1, 1.0),
         _priorityBuffer(1, 1.0),
-        _condifdenceRange(0.5),
+        _condifdenceRange(0.25),
         _varianceWeightThreshold(4.0),
         _divergenceWeightThreshold(8.0),
         _maxPixelIntensity(1.5),
