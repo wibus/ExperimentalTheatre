@@ -20,9 +20,12 @@ namespace cellar
 
     void RandomArray::allocate()
     {
-        size_t arraySize = 1 << (sizeof(decltype(_sharedIdx)) * 8);
-        _array = new double[arraySize];
-        refill();
+        if(_array == nullptr)
+        {
+            size_t arraySize = 1 << (sizeof(decltype(_sharedIdx)) * 8);
+            _array = new double[arraySize];
+            refill();
+        }
     }
 
     void RandomArray::refill()
