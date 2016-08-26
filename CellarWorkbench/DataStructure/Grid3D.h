@@ -162,7 +162,7 @@ Grid3D<T>::Grid3D(int width, int height, int depth) :
 }
 
 template<typename T>
-Grid3D<T>::Grid3D(int width, int depth, int height, const T& defaulVal) :
+Grid3D<T>::Grid3D(int width, int height, int depth, const T& defaulVal) :
     _grids(new Grid2D<T>[depth]),
     _width(width),
     _height(height),
@@ -281,7 +281,7 @@ inline void Grid3D<T>::set(int x, int y, int z, const T& value)
 template<typename T>
 inline void Grid3D<T>::set(const glm::ivec3& pos, const T& value)
 {
-    set(pos.x, pos.y, pos.z(), value);
+    set(pos.x, pos.y, pos.z, value);
 }
 
 }
