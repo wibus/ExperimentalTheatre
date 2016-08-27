@@ -37,10 +37,6 @@ namespace prop2
     }
 
     GlArtDirector::GlArtDirector() :
-        _circles(),
-        _polygons(),
-        _texts(),
-        _images(),
         _fonts(),
         _shadersInitialized(false),
         _circleShader(),
@@ -407,74 +403,6 @@ namespace prop2
 
         _imageHudVao.unbind();
         _imageHudShader.popProgram();
-    }
-
-    void GlArtDirector::manageCircle(const std::shared_ptr<Circle>& circle)
-    {
-        _circles.push_back(circle);
-    }
-
-    void GlArtDirector::managePolygon(const std::shared_ptr<Polygon>& polygon)
-    {
-        _polygons.push_back(polygon);
-    }
-
-    void GlArtDirector::manageTextHud(const std::shared_ptr<TextHud>& text)
-    {
-        _texts.push_back(text);
-    }
-
-    void GlArtDirector::manageImageHud(const std::shared_ptr<ImageHud>& image)
-    {
-        _images.push_back(image);
-    }
-
-    void GlArtDirector::unmanageCircle(const std::shared_ptr<Circle>& circle)
-    {
-        for(auto it = _circles.begin(); it != _circles.end(); ++it)
-        {
-            if((*it)->id() == circle->id())
-            {
-                _circles.erase(it);
-                return;
-            }
-        }
-    }
-
-    void GlArtDirector::unmanagePolygon(const std::shared_ptr<Polygon>& polygon)
-    {
-        for(auto it = _polygons.begin(); it != _polygons.end(); ++it)
-        {
-            if((*it)->id() == polygon->id())
-            {
-                _polygons.erase(it);
-                return;
-            }
-        }
-    }
-
-    void GlArtDirector::unmanageTextHud(const std::shared_ptr<TextHud>& text)
-    {
-        for(auto it = _texts.begin(); it != _texts.end(); ++it)
-        {
-            if((*it)->id() == text->id())
-            {
-                _texts.erase(it);
-                return;
-            }
-        }
-    }
-
-    void GlArtDirector::unmanageImageHud(const std::shared_ptr<ImageHud>& image)
-    {
-        for(auto it = _images.begin(); it != _images.end(); ++it)
-        {
-            if((*it)->id() == image->id())
-            {
-                _images.erase(it);
-                return;
-            }
-        }
     }
 
     void GlArtDirector::setupCircleShader(const GlInputsOutputs& loc)

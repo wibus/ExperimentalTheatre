@@ -13,8 +13,6 @@
 
 namespace prop2
 {
-class AbstractShape;
-
     class PROP2D_EXPORT GlFont
     {
     public:
@@ -51,16 +49,6 @@ class AbstractShape;
         virtual void draw(double dt);
         virtual void update(double dt);
 
-        virtual void manageCircle(const std::shared_ptr<Circle>& circle);
-        virtual void managePolygon(const std::shared_ptr<Polygon>& polygon);
-        virtual void manageTextHud(const std::shared_ptr<TextHud>& text);
-        virtual void manageImageHud(const std::shared_ptr<ImageHud>& image);
-
-        virtual void unmanageCircle(const std::shared_ptr<Circle>& circle);
-        virtual void unmanagePolygon(const std::shared_ptr<Polygon>& polygon);
-        virtual void unmanageTextHud(const std::shared_ptr<TextHud>& text);
-        virtual void unmanageImageHud(const std::shared_ptr<ImageHud>& image);
-
     protected:
         virtual void drawCircle(const std::shared_ptr<Circle>& circle);
         virtual void drawPolygon(const std::shared_ptr<Polygon>& polygon);
@@ -75,10 +63,6 @@ class AbstractShape;
         virtual glm::dvec2 getAnchor(const EHorizontalAnchor& h,
                                      const EVerticalAnchor&   v);
 
-        std::vector< std::shared_ptr<Circle> >  _circles;
-        std::vector< std::shared_ptr<Polygon> > _polygons;
-        std::vector< std::shared_ptr<TextHud> >  _texts;
-        std::vector< std::shared_ptr<ImageHud> > _images;
         std::map<std::string, GlFont> _fonts;
 
         bool _shadersInitialized;

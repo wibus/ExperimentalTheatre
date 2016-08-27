@@ -29,7 +29,8 @@ SET(PROP2_PROP_HEADERS
 # Art Director
 SET(PROP2_ART_DIRECTOR_HEADERS
     ${PROP2_SRC_DIR}/Team/ArtDirector/AbstractArtDirector.h
-    ${PROP2_SRC_DIR}/Team/ArtDirector/GlArtDirector.h)
+    ${PROP2_SRC_DIR}/Team/ArtDirector/GlArtDirector.h
+    ${PROP2_SRC_DIR}/Team/ArtDirector/RayArtDirector.h)
 
 # Choreographer
 SET(PROP2_CHOREOGRAPHER_HEADERS
@@ -90,7 +91,9 @@ SET(PROP2_PROP_SOURCES
 
 # Art Director
 SET(PROP2_ART_DIRECTOR_SOURCES
-    ${PROP2_SRC_DIR}/Team/ArtDirector/GlArtDirector.cpp)
+    ${PROP2_SRC_DIR}/Team/ArtDirector/AbstractArtDirector.cpp
+    ${PROP2_SRC_DIR}/Team/ArtDirector/GlArtDirector.cpp
+    ${PROP2_SRC_DIR}/Team/ArtDirector/RayArtDirector.cpp)
 
 # Choreographer
 SET(PROP2_CHOREOGRAPHER_SOURCES
