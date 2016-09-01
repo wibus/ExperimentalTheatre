@@ -70,12 +70,6 @@ SET(CELLAR_PATH_HEADERS
     ${CELLAR_SRC_DIR}/Path/PathVisitor.h)
 
 
-# Triangle (Jonathan Shewchuk's)
-SET(CELLAR_TRIANGLE_HEADERS
-    ${CELLAR_SRC_DIR}/Triangle/README
-    ${CELLAR_SRC_DIR}/Triangle/triangle.h)
-
-
 # All the header files #
 SET(CELLAR_HEADERS
     ${CELLAR_CAMERA_HEADERS}
@@ -86,7 +80,6 @@ SET(CELLAR_HEADERS
     ${CELLAR_IMAGE_HEADERS}
     ${CELLAR_MISC_HEADERS}
     ${CELLAR_PATH_HEADERS}
-    ${CELLAR_TRIANGLE_HEADERS}
     ${CELLAR_SRC_DIR}/libCellarWorkbench_global.h)
 
 
@@ -148,11 +141,6 @@ SET(CELLAR_MISC_SOURCES
 SET(CELLAR_PATH_SOURCES)
 
 
-# Triangle (Jonathan Shewchuk's)
-SET(CELLAR_TRIANGLE_SOURCES
-    ${CELLAR_SRC_DIR}/Triangle/triangle.c)
-
-
 # All the source files #
 SET(CELLAR_SOURCES
     ${CELLAR_CAMERA_SOURCES}
@@ -162,8 +150,7 @@ SET(CELLAR_SOURCES
     ${CELLAR_GL_SOURCES}
     ${CELLAR_IMAGE_SOURCES}
     ${CELLAR_MISC_SOURCES}
-    ${CELLAR_PATH_SOURCES}
-    ${CELLAR_TRIANGLE_SOURCES})
+    ${CELLAR_PATH_SOURCES})
     
     
 
