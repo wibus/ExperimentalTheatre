@@ -39,7 +39,7 @@ namespace prop2
 
     protected:
         AbstractTeam(AbstractDesigner*  propDesigner,
-                         AbstractChoreographer* choreographer);
+                     AbstractChoreographer* choreographer);
 
 
     public:

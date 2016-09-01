@@ -27,10 +27,18 @@ namespace prop2
         virtual void update(double dt);
 
     protected:
+        static const int OUT_BOUND_ID;
+        static const int FIRST_IN_BOUND_ID;
+        static const glm::vec2 SCENE_BOUNDS_EPSILON;
+
         cellar::GlProgram _fullScreenProgram;
         cellar::GlVao _fullScreenVao;
         GLuint _frameBuffer;
         GLuint _colorBuffer;
+
+        GLuint _triangulationVao;
+        GLuint _triangulationVbo;
+        GLuint _triangulationEbo;
     };
 
 

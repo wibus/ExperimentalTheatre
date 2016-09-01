@@ -32,8 +32,10 @@ namespace scaena
 
     class SCAENA_EXPORT View
     {
-    public:
+    protected:
         View(const std::string& id);
+
+    public:
         virtual ~View();
 
         const std::string& id() const;
