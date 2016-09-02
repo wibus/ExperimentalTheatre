@@ -26,11 +26,27 @@ SET(PROP2_SHAPE_HEADERS
 SET(PROP2_PROP_HEADERS
     ${PROP2_SRC_DIR}/Prop/AbstractProp.h)
 
-# Art Director
+# Mesh
+SET(PROP2_MESH_HEADERS
+    ${PROP2_SRC_DIR}/Team/ArtDirector/RadianceTracing/Mesh/Mesh.h
+    ${PROP2_SRC_DIR}/Team/ArtDirector/RadianceTracing/Mesh/Vert.h
+    ${PROP2_SRC_DIR}/Team/ArtDirector/RadianceTracing/Mesh/Edge.h
+    ${PROP2_SRC_DIR}/Team/ArtDirector/RadianceTracing/Mesh/Tri.h
+    ${PROP2_SRC_DIR}/Team/ArtDirector/RadianceTracing/Mesh/Bound.h
+    ${PROP2_SRC_DIR}/Team/ArtDirector/RadianceTracing/Mesh/Interface.h)
+
+# Radiance Tracing
+SET(PROP2_ART_RADIANCE_HEADERS
+    ${PROP2_MESH_HEADERS}
+    ${PROP2_SRC_DIR}/Team/ArtDirector/RadianceTracing/RadianceArtDirector.h
+    ${PROP2_SRC_DIR}/Team/ArtDirector/RadianceTracing/RadianceMachine.h
+    ${PROP2_SRC_DIR}/Team/ArtDirector/RadianceTracing/RenderMachine.h
+    ${PROP2_SRC_DIR}/Team/ArtDirector/RadianceTracing/LightPath.h)
+
 SET(PROP2_ART_DIRECTOR_HEADERS
+    ${PROP2_ART_RADIANCE_HEADERS}
     ${PROP2_SRC_DIR}/Team/ArtDirector/AbstractArtDirector.h
-    ${PROP2_SRC_DIR}/Team/ArtDirector/GlArtDirector.h
-    ${PROP2_SRC_DIR}/Team/ArtDirector/RayArtDirector.h)
+    ${PROP2_SRC_DIR}/Team/ArtDirector/GlArtDirector.h)
 
 # Choreographer
 SET(PROP2_CHOREOGRAPHER_HEADERS
@@ -89,11 +105,28 @@ SET(PROP2_SHAPE_SOURCES
 SET(PROP2_PROP_SOURCES
     ${PROP2_SRC_DIR}/Prop/AbstractProp.cpp)
 
+# Mesh
+SET(PROP2_MESH_SOURCES
+    ${PROP2_SRC_DIR}/Team/ArtDirector/RadianceTracing/Mesh/Mesh.cpp
+    ${PROP2_SRC_DIR}/Team/ArtDirector/RadianceTracing/Mesh/Vert.cpp
+    ${PROP2_SRC_DIR}/Team/ArtDirector/RadianceTracing/Mesh/Edge.cpp
+    ${PROP2_SRC_DIR}/Team/ArtDirector/RadianceTracing/Mesh/Tri.cpp
+    ${PROP2_SRC_DIR}/Team/ArtDirector/RadianceTracing/Mesh/Bound.cpp
+    ${PROP2_SRC_DIR}/Team/ArtDirector/RadianceTracing/Mesh/Interface.cpp)
+
+# Radiance Tracing
+SET(PROP2_ART_RADIANCE_SOURCES
+    ${PROP2_MESH_SOURCES}
+    ${PROP2_SRC_DIR}/Team/ArtDirector/RadianceTracing/RadianceArtDirector.cpp
+    ${PROP2_SRC_DIR}/Team/ArtDirector/RadianceTracing/RadianceMachine.cpp
+    ${PROP2_SRC_DIR}/Team/ArtDirector/RadianceTracing/RenderMachine.cpp
+    ${PROP2_SRC_DIR}/Team/ArtDirector/RadianceTracing/LightPath.cpp)
+
 # Art Director
 SET(PROP2_ART_DIRECTOR_SOURCES
+    ${PROP2_ART_RADIANCE_SOURCES}
     ${PROP2_SRC_DIR}/Team/ArtDirector/AbstractArtDirector.cpp
-    ${PROP2_SRC_DIR}/Team/ArtDirector/GlArtDirector.cpp
-    ${PROP2_SRC_DIR}/Team/ArtDirector/RayArtDirector.cpp)
+    ${PROP2_SRC_DIR}/Team/ArtDirector/GlArtDirector.cpp)
 
 # Choreographer
 SET(PROP2_CHOREOGRAPHER_SOURCES
@@ -151,7 +184,8 @@ SET(PROP2_SRC_FILES
     ${PROP2_SOURCES}
     ${PROP2_CONFIG_FILES}
     ${PROP2_RESOURCE_FILES}
-    ${PROP2_RCC_SRCS})
+    ${PROP2_RCC_SRCS}
+    ${PROP2_MESH_SOURCES})
 
 
 
