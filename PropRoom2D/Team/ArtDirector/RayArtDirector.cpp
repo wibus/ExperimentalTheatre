@@ -42,29 +42,38 @@ namespace prop2
 
     void RayArtDirector::update(double dt)
     {
+        // Planar Straight Line Graph generation strategy :
+        // 1. Get world -> raster space transform from camera
+        // 2. Segment polygons and circles in raster space
+        // 3. Compute scene bounds including viewport
+        // 4. Transform graph from raster to clip space
+        //      This makes a nice [-1,1] coord range
+
+
         // Get camera transforms
-        glm::mat4 projView = camera()->projectionMatrix() * camera()->viewMatrix();
-        glm::mat4 invProjView = glm::inverse(projView);
+        glm::dmat4 proj = camera()->projectionMatrix();
+        glm::dmat4 invProjMat = glm::inverse(proj);
+        glm::dmat4 view = camera()->viewMatrix();
 
         // Get minimum triangulation bounds
-        glm::vec4 viewMin = invProjView * glm::vec4(-1, -1, 0, 1);
-        glm::vec4 viewMax = invProjView * glm::vec4(+1, +1, 0, 1);
+        glm::dvec4 viewMin = invProjMat * glm::dvec4(-1, -1, 0, 1);
+        glm::dvec4 viewMax = invProjMat * glm::dvec4(+1, +1, 0, 1);
 
         // Compute scene bounding box (including viewport)
-        glm::vec2 sceneMin = glm::vec2(viewMin) / viewMin.w;
-        glm::vec2 sceneMax = glm::vec2(viewMax) / viewMax.w;
+        glm::dvec2 sceneMin = glm::dvec2(viewMin) / viewMin.w;
+        glm::dvec2 sceneMax = glm::dvec2(viewMax) / viewMax.w;
 
 
         std::vector<glm::ivec3> edges;
-        std::vector<glm::vec2> vertices;
+        std::vector<glm::dvec2> vertices;
         std::vector<std::shared_ptr<AbstractProp>> props;
 
         for(std::shared_ptr<Circle> circle : _circles)
         {
             double radius = circle->radius();
-            int vertCount = glm::min(6, int(radius * 3.0));
+            double viewRadius = (view * glm::dvec4(radius)).x;
+            int vertCount = glm::min(6, int(viewRadius * 3.0));
             int boundId = props.size() + FIRST_IN_BOUND_ID;
-
 
             // Add circle loop to edges
             int lastIdx = vertCount-1;
@@ -82,20 +91,23 @@ namespace prop2
                 vertices.size() + 0,
                 boundId));
 
+
             // Add vertices
+            glm::dvec2 viewCenter = glm::dvec2(
+                view * glm::vec4(circle->center(), 0, 1.0));
             for(int i=0; i < vertCount; ++i)
             {
                 double angle = i*2.0*glm::pi<double>() / vertCount;
 
-                glm::vec2 pos =
-                    circle->center() +
-                    radius * glm::dvec2(
+                glm::dvec2 viewPos =
+                    viewCenter +
+                    viewRadius * glm::dvec2(
                         glm::cos(angle),
                         glm::sin(angle));
 
-                sceneMin = glm::min(sceneMin, pos);
-                sceneMax = glm::min(sceneMax, pos);
-                vertices.push_back(pos);
+                sceneMin = glm::min(sceneMin, viewPos);
+                sceneMax = glm::min(sceneMax, viewPos);
+                vertices.push_back(viewPos);
             }
 
             props.push_back(circle);
@@ -126,10 +138,11 @@ namespace prop2
             glm::dmat3 transform = polygon->transformMatrix();
             for(glm::dvec2 v : polygon->relVertices())
             {
-                glm::vec2 pos(transform * glm::dvec3(v, 1.0));
-                sceneMin = glm::min(sceneMin, pos);
-                sceneMax = glm::min(sceneMax, pos);
-                vertices.push_back(pos);
+                glm::dvec2 pos(transform * glm::dvec3(v, 1.0));
+                glm::dvec2 viewPos(view * glm::dvec4(pos, 0, 1));
+                sceneMin = glm::min(sceneMin, viewPos);
+                sceneMax = glm::min(sceneMax, viewPos);
+                vertices.push_back(viewPos);
             }
 
             props.push_back(polygon);
@@ -139,14 +152,21 @@ namespace prop2
         sceneMin -= SCENE_BOUNDS_EPSILON;
         sceneMax += SCENE_BOUNDS_EPSILON;
         int prevBoundsEdgeCount = vertices.size();
-        vertices.push_back(glm::vec2(sceneMin.x, sceneMin.y));
-        vertices.push_back(glm::vec2(sceneMax.x, sceneMin.y));
-        vertices.push_back(glm::vec2(sceneMax.x, sceneMax.y));
-        vertices.push_back(glm::vec2(sceneMin.x, sceneMax.y));
+        vertices.push_back(glm::dvec2(sceneMin.x, sceneMin.y));
+        vertices.push_back(glm::dvec2(sceneMax.x, sceneMin.y));
+        vertices.push_back(glm::dvec2(sceneMax.x, sceneMax.y));
+        vertices.push_back(glm::dvec2(sceneMin.x, sceneMax.y));
         edges.push_back(glm::ivec3(prevBoundsEdgeCount, prevBoundsEdgeCount+1, OUT_BOUND_ID));
         edges.push_back(glm::ivec3(prevBoundsEdgeCount+1, prevBoundsEdgeCount+2, OUT_BOUND_ID));
         edges.push_back(glm::ivec3(prevBoundsEdgeCount+2, prevBoundsEdgeCount+3, OUT_BOUND_ID));
         edges.push_back(glm::ivec3(prevBoundsEdgeCount+3, prevBoundsEdgeCount, OUT_BOUND_ID));
+
+        // Transform every vertex in clip space to get nice [-1,1] coord range
+        for(glm::dvec2& v : vertices)
+        {
+            glm::dvec4 vw = proj * glm::dvec4(v, 0, 1);
+            v = glm::dvec2(vw) / vw.w;
+        }
 
 
         // Invoke Triangle to produce a quality triangulation of the scene

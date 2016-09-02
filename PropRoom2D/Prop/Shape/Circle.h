@@ -27,7 +27,7 @@ class CircleCostume;
         virtual double radius() const;
         virtual void setRadius(const double& radius);
 
-        // Center (centroid
+        // Center (centroid)
         virtual glm::dvec2 center() const;
         virtual void setCenter(const glm::dvec2& position);
 
