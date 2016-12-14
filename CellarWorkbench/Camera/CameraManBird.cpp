@@ -16,6 +16,11 @@ namespace cellar
         updateProjection();
     }
 
+    CameraManBird::~CameraManBird()
+    {
+        _camera->unregisterObserver(*this);
+    }
+
     void CameraManBird::setZoom(const glm::vec2& unitsPerPixel)
     {
         _unitsPerPixelZoom = unitsPerPixel;

@@ -19,6 +19,7 @@ namespace cellar
     {
     public:
         CameraManBird(const std::shared_ptr<Camera>& camera);
+        virtual ~CameraManBird();
 
         void setZoom(const glm::vec2& unitsPerPixel);
         void moveTo(const glm::vec2& destination);
