@@ -91,9 +91,17 @@ namespace cellar
 
         _inAndOutLocations = GlInputsOutputs();
 
-        glDeleteProgram(_id);
-        _linked = false;
-        _id = 0;
+        if(_id != 0)
+        {
+            glDeleteProgram(_id);
+
+            getLog().postMessage(new Message('I', false,
+                "OpenGL program (id=" + toString(_id) + ") deleted", "GlProgram"));
+
+            _linked = false;
+
+            _id = 0;
+        }
     }
 
     bool GlProgram::link()
@@ -103,6 +111,10 @@ namespace cellar
             _binary.reset();
             _linked = false;
             glDeleteProgram(_id);
+
+            getLog().postMessage(new Message('I', false,
+                "OpenGL program (id=" + toString(_id) + ") deleted", "GlProgram"));
+
             _id = 0;
         }
 

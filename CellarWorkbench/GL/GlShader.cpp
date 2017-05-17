@@ -95,7 +95,11 @@ namespace cellar
 
         if(_id != 0)
         {
-            glDeleteShader(_id);
+            glDeleteShader(_id);            
+
+            getLog().postMessage(new Message('I', false,
+                "OpenGL shader (id=" + toString(_id) + ") deleted", "GlShader"));
+
             _id = 0;
         }
 
