@@ -90,6 +90,7 @@ namespace cellar
         _subroutines.clear();
 
         _inAndOutLocations = GlInputsOutputs();
+        _cachedLocations.clear();
 
         if(_id != 0)
         {
@@ -109,8 +110,10 @@ namespace cellar
         if(_id != 0)
         {
             _binary.reset();
-            _linked = false;
+            _cachedLocations.clear();
+
             glDeleteProgram(_id);
+            _linked = false;
 
             getLog().postMessage(new Message('I', false,
                 "OpenGL program (id=" + toString(_id) + ") deleted", "GlProgram"));
@@ -150,7 +153,12 @@ namespace cellar
 
         int infologLength = 0;
         glGetProgramiv(_id, GL_INFO_LOG_LENGTH, &infologLength );
-        if( infologLength > 1 )
+        if( infologLength == 0 )
+        {
+            getLog().postMessage(new Message('I', false,
+                "Shader program succefully linked" + logSupInfo, "GlProgram"));
+        }
+        else
         {
             char* infoLog = new char[infologLength+1];
             int charsWritten  = 0;
@@ -160,12 +168,7 @@ namespace cellar
             log.append( toString(_id) + "\n" + infoLog );
             getLog().postMessage(new Message('E', false, log, "GlProgram"));
             delete[] infoLog;
-
-            return _linked;
         }
-
-        getLog().postMessage(new Message('I', false,
-            "Shader program succefully linked" + logSupInfo, "GlProgram"));
 
         return _linked;
     }
