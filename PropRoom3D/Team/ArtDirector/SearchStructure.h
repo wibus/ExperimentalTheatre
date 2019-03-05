@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <memory>
+#include <atomic>
 
 #include <PropRoom3D/libPropRoom3D_global.h>
 
@@ -12,15 +13,45 @@ namespace prop3
     class Surface;
     class LightBulb;
 
-    struct SearchZone;
-    struct SearchSurface;
-
     class Raycast;
     class RayHitList;
     class RayHitReport;
 
     class AbstractTeam;
 
+
+	struct SearchZone
+	{
+		size_t parent;
+		size_t endZone;
+		size_t begSurf;
+		size_t endSurf;
+		Surface* bounds;
+	};
+
+	struct SearchSurface
+	{
+		SearchSurface(const std::shared_ptr<Surface>& surface) :
+			surface(surface), hitCount(0) {}
+
+		SearchSurface(const SearchSurface& search) :
+			surface(search.surface), hitCount(search.hitCount.load()) {}
+
+		SearchSurface(SearchSurface&& search) :
+			surface(search.surface), hitCount(search.hitCount.load()) {}
+
+		inline Surface* operator -> () const { return surface.get(); }
+
+		inline SearchSurface& operator=(const SearchSurface& ss)
+		{
+			surface = ss.surface;
+			hitCount.store(ss.hitCount.load());
+			return *this;
+		}
+
+		std::shared_ptr<Surface> surface;
+		mutable std::atomic_long hitCount;
+	};
 
     class PROP3D_EXPORT SearchStructure
     {

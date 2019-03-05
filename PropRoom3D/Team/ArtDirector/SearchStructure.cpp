@@ -1,7 +1,5 @@
 #include "SearchStructure.h"
 
-#include <atomic>
-
 #include <CellarWorkbench/Misc/Log.h>
 
 #include "Team/DummyTeam.h"
@@ -20,33 +18,6 @@ using namespace cellar;
 
 namespace prop3
 {
-    struct SearchZone
-    {
-        size_t parent;
-        size_t endZone;
-        size_t begSurf;
-        size_t endSurf;
-        Surface* bounds;
-    };
-
-    struct SearchSurface
-    {
-        SearchSurface(const std::shared_ptr<Surface>& surface) :
-            surface(surface), hitCount(0) {}
-
-        SearchSurface(const SearchSurface& search) :
-            surface(search.surface), hitCount(search.hitCount.load()) {}
-
-        SearchSurface(SearchSurface&& search) :
-            surface(search.surface), hitCount(search.hitCount.load()) {}
-
-        inline Surface* operator -> () const {return surface.get();}
-
-        std::shared_ptr<Surface> surface;
-        mutable std::atomic_long hitCount;
-    };
-
-
     SearchStructure::SearchStructure(const std::string &stageStream) :
         _team(new DummyTeam()),
         _isOptimized(false)

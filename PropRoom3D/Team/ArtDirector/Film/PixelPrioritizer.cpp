@@ -36,7 +36,7 @@ namespace prop3
         }
     }
 
-    bool PixelPrioritizer::launchPrioritization(ConvergentFilm& film)
+    void PixelPrioritizer::launchPrioritization(ConvergentFilm& film)
     {
 //        using std::chrono::high_resolution_clock;
 //        auto tStart = high_resolution_clock::now();
@@ -159,7 +159,7 @@ namespace prop3
 //            "PixelPrioritizer"));
     }
 
-    bool PixelPrioritizer::displayPrioritization(
+    void PixelPrioritizer::displayPrioritization(
             ConvergentFilm& film)
     {
         unsigned int pixelCount =

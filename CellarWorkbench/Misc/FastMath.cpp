@@ -2,6 +2,7 @@
 
 #include <cinttypes>
 #include <xmmintrin.h>
+#include <emmintrin.h>
 
 using namespace std;
 

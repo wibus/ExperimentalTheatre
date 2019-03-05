@@ -16,10 +16,10 @@ namespace prop3
 
         virtual void reset(const glm::ivec2& frameResolution);
 
-        virtual bool launchPrioritization(
+        virtual void launchPrioritization(
                 ConvergentFilm& film);
 
-        virtual bool displayPrioritization(
+        virtual void displayPrioritization(
                 ConvergentFilm& film);
 
         virtual double averagePriority() const;

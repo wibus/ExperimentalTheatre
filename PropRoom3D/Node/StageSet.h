@@ -7,11 +7,12 @@
 
 #include "StageZone.h"
 
+#include "Node/Debug/DebugLineStrip.h"
+#include "Node/Debug/DebugPointCloud.h"
+
 
 namespace prop3
 {
-    class DebugLineStrip;
-    class DebugPointCloud;
     class Backdrop;
     class Material;
     class Visitor;

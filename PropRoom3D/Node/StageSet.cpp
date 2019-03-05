@@ -3,8 +3,6 @@
 #include <algorithm>
 
 #include "Node/Visitor.h"
-#include "Node/Debug/DebugLineStrip.h"
-#include "Node/Debug/DebugPointCloud.h"
 #include "Node/Prop/Material/Material.h"
 #include "Node/Light/Backdrop/ProceduralSun.h"
 
@@ -90,8 +88,10 @@ namespace prop3
 
     bool StageSet::stageSetChanged(const TimeStamp &reference)
     {
-        if(reference < timeStamp())
-            return true;
+		if(reference < timeStamp())
+			return true;
+		else
+			return false;
     }
 
     void StageSet::addDebugLine(const DebugLineStrip& line)

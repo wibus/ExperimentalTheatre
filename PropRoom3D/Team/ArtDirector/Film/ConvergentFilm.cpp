@@ -247,6 +247,8 @@ namespace prop3
             for(int i=0; i < pixelCount; ++i)
                 _colorBuffer[i] = sampleToColor(_referenceFilm.sampleBuffer[i]);
         }
+
+		return true;
     }
 
     bool ConvergentFilm::saveRawFilm(const std::string& name) const
